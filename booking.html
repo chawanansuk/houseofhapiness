@@ -219,7 +219,9 @@
 <script>
 /* ═══════════ ตั้งค่าโรงแรม — แก้ไขตรงนี้ได้เลย ═══════════ */
 const CONFIG = {
-  lineId: "@houseofhappiness",        // TODO: เปลี่ยนเป็น LINE Official Account ID จริงของโรงแรม
+  // ใส่ LINE Official Account ID จริง เช่น "@abc1234" แล้วปุ่ม LINE จะแสดงอัตโนมัติ
+  // ปล่อยว่าง "" = ซ่อนปุ่ม LINE (ลูกค้าจะเห็นเฉพาะปุ่มอีเมล)
+  lineId: "",
   email: "chawanan.suk@gmail.com",    // อีเมลรับคำขอจอง
   rooms: [
     {
@@ -328,6 +330,7 @@ function update() {
 • ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}`;
 
   const btnLine = $("btnLine"), btnMail = $("btnMail");
+  btnLine.style.display = CONFIG.lineId ? "" : "none";
   btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
   btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
   if (ready) {
