@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House of Happiness — Bangkok</title>
+<meta name="description" content="House of Happiness — a cozy aparthotel in Khlong San, Bangkok, near the Chao Phraya River. Book your stay on Booking.com.">
+<style>
+  :root {
+    --gold: #c9a227;
+    --dark: #1f2430;
+    --cream: #faf6ef;
+    --text: #3a3f4a;
+    --booking-blue: #003580;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, "Noto Sans Thai", sans-serif;
+    color: var(--text);
+    background: var(--cream);
+    line-height: 1.6;
+  }
+  header {
+    background: linear-gradient(135deg, #1f2430 0%, #3d3222 60%, #6b5518 100%);
+    color: #fff;
+    text-align: center;
+    padding: 6rem 1.5rem 5rem;
+  }
+  header h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  header .thai { color: var(--gold); font-size: 1.2rem; margin-bottom: 1rem; }
+  header p.tagline {
+    max-width: 38rem;
+    margin: 0 auto 2.2rem;
+    font-size: 1.1rem;
+    color: #e8e2d4;
+  }
+  .btn-book {
+    display: inline-block;
+    background: var(--booking-blue);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.15rem;
+    font-weight: 600;
+    padding: 0.9rem 2.4rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 53, 128, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-book:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 53, 128, 0.5);
+  }
+  .rating {
+    margin-top: 1.2rem;
+    font-size: 0.95rem;
+    color: #cfc8b8;
+  }
+  .rating strong { color: var(--gold); font-size: 1.1rem; }
+  main { max-width: 60rem; margin: 0 auto; padding: 3rem 1.5rem; }
+  section { margin-bottom: 3rem; }
+  h2 {
+    color: var(--dark);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--gold);
+    display: inline-block;
+    padding-bottom: 0.25rem;
+  }
+  .amenities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.75rem;
+    list-style: none;
+    margin-top: 0.5rem;
+  }
+  .amenities li {
+    background: #fff;
+    border: 1px solid #eee4cf;
+    border-radius: 0.6rem;
+    padding: 0.7rem 1rem;
+  }
+  .amenities li::before { content: "✓ "; color: var(--gold); font-weight: 700; }
+  address { font-style: normal; }
+  .cta-strip {
+    background: var(--dark);
+    color: #fff;
+    text-align: center;
+    padding: 3rem 1.5rem;
+  }
+  .cta-strip h2 { color: #fff; border-color: var(--gold); }
+  .cta-strip p { margin: 0.8rem 0 1.6rem; color: #cfc8b8; }
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.85rem;
+    color: #8a8272;
+  }
+  footer a { color: var(--booking-blue); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>House of Happiness</h1>
+  <p class="thai">เฮาส์ ออฟ แฮปปิเนส · กรุงเทพฯ</p>
+  <p class="tagline">A cozy aparthotel in the heart of Khlong San, Bangkok — minutes from the Chao Phraya River, Sampeng Market, and Wat Pho.</p>
+  <a class="btn-book" href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">Book Now on Booking.com</a>
+  <p class="rating">Rated <strong>8.8 / 10</strong> from 770+ verified guest reviews on Booking.com</p>
+</header>
+
+<main>
+  <section>
+    <h2>About</h2>
+    <p>House of Happiness offers comfortable serviced-apartment rooms with city views, each featuring a balcony, air conditioning, a kitchenette with refrigerator, and a flat-screen TV with satellite channels. Free Wi-Fi and complimentary bottled water are provided for every stay.</p>
+  </section>
+
+  <section>
+    <h2>Amenities</h2>
+    <ul class="amenities">
+      <li>Free in-room Wi-Fi</li>
+      <li>Air conditioning</li>
+      <li>Balcony with city view</li>
+      <li>Kitchenette &amp; refrigerator</li>
+      <li>Flat-screen satellite TV</li>
+      <li>Washing machine &amp; laundry</li>
+      <li>Iron &amp; ironing board</li>
+      <li>Free bottled water</li>
+      <li>Terrace</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Location</h2>
+    <address>
+      558/1 Mung Me Tawee Suk, Soi 16, Tha Din Daeng Road,<br>
+      Khlong San, Bangkok, Thailand
+    </address>
+    <p style="margin-top:0.8rem;">About 900 m from Sampeng Market, 1.8 km from Wat Pho, and a short drive from River City Bangkok and ICONSIAM.</p>
+  </section>
+</main>
+
+<div class="cta-strip">
+  <h2>Ready for your stay?</h2>
+  <p>Check availability and today's best rates on Booking.com.</p>
+  <a class="btn-book" href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">Check Availability</a>
+</div>
+
+<footer>
+  House of Happiness, Bangkok ·
+  <a href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">View on Booking.com</a>
+</footer>
+
+</body>
+</html>
