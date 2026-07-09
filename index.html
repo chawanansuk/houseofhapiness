@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House of Happiness — Aparthotel in Khlong San, Bangkok | จองตรง</title>
+<meta name="description" content="House of Happiness — เซอร์วิสอพาร์ตเมนต์ 1 ห้องนอนใจกลางคลองสาน กรุงเทพฯ ใกล้แม่น้ำเจ้าพระยาและ ICONSIAM จองตรงราคาดีที่สุด | One-bedroom serviced apartments in Khlong San, Bangkok. Book direct for the best rate.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<meta property="og:title" content="House of Happiness — Aparthotel in Khlong San, Bangkok">
+<meta property="og:description" content="One-bedroom serviced apartments near the Chao Phraya River. Book direct for the best rate. จองตรงราคาดีที่สุด">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Hotel",
+  "name": "House of Happiness",
+  "description": "One-bedroom serviced apartments in Khlong San, Bangkok, near the Chao Phraya River, Sampeng Market, Wat Pho and ICONSIAM.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "558/1 Mung Me Tawee Suk, Soi 16, Tha Din Daeng Road",
+    "addressLocality": "Khlong San, Bangkok",
+    "postalCode": "10600",
+    "addressCountry": "TH"
+  },
+  "checkinTime": "14:00",
+  "checkoutTime": "12:00",
+  "numberOfRooms": 15,
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "8.8", "bestRating": "10", "reviewCount": "774" },
+  "priceRange": "฿800 - ฿1,200"
+}
+</script>
+<style>
+  :root {
+    --gold: #c9a227;
+    --dark: #1f2430;
+    --cream: #faf6ef;
+    --text: #3a3f4a;
+    --booking-blue: #003580;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Segoe UI", Tahoma, "Noto Sans Thai", sans-serif;
+    color: var(--text);
+    background: var(--cream);
+    line-height: 1.65;
+  }
+  .lang-toggle {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    display: flex;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    overflow: hidden;
+    z-index: 5;
+  }
+  .lang-toggle button {
+    background: transparent;
+    color: #fff;
+    border: none;
+    padding: 0.35rem 0.9rem;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--gold); font-weight: 700; }
+  header {
+    position: relative;
+    background: linear-gradient(135deg, #1f2430 0%, #3d3222 60%, #6b5518 100%);
+    color: #fff;
+    text-align: center;
+    padding: 5.5rem 1.5rem 4.5rem;
+  }
+  header h1 { font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+  header .thai { color: var(--gold); font-size: 1.15rem; margin-bottom: 1rem; }
+  header p.tagline { max-width: 40rem; margin: 0 auto 2.2rem; font-size: 1.1rem; color: #e8e2d4; }
+  .btn-book {
+    display: inline-block;
+    margin: 0.4rem 0.3rem;
+    background: var(--booking-blue);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.9rem 2.2rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 53, 128, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-book:hover { transform: translateY(-2px); }
+  .btn-gold { background: var(--gold); box-shadow: 0 4px 14px rgba(201,162,39,0.45); }
+  .rating { margin-top: 1.2rem; font-size: 0.95rem; color: #cfc8b8; }
+  .rating strong { color: var(--gold); font-size: 1.1rem; }
+  main { max-width: 62rem; margin: 0 auto; padding: 3rem 1.5rem; }
+  section { margin-bottom: 3.5rem; }
+  h2 {
+    color: var(--dark);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--gold);
+    display: inline-block;
+    padding-bottom: 0.25rem;
+  }
+  .room-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    background: #fff;
+    border: 1px solid #eee4cf;
+    border-radius: 1rem;
+    padding: 1.6rem;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(31,36,48,0.05);
+  }
+  .room-card .info { flex: 1 1 20rem; }
+  .room-card .info h3 { color: var(--dark); font-size: 1.25rem; margin-bottom: 0.4rem; }
+  .room-card .info p { font-size: 0.95rem; color: #6c7280; }
+  .room-card .price-box { text-align: center; padding: 0 1rem; }
+  .room-card .price-box .from { font-size: 0.85rem; color: #8a8272; }
+  .room-card .price-box .amount { font-size: 2rem; font-weight: 800; color: var(--dark); }
+  .room-card .price-box .unit { font-size: 0.85rem; color: #8a8272; margin-bottom: 0.8rem; }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+  }
+  .gallery figure {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.8rem;
+    overflow: hidden;
+    background: linear-gradient(145deg, #e8dfc8, #d4c393);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gallery figure::before { content: "📷"; font-size: 2.2rem; opacity: 0.5; }
+  .gallery img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gallery figcaption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: linear-gradient(transparent, rgba(31,36,48,0.75));
+    color: #fff;
+    font-size: 0.85rem;
+    padding: 1.4rem 0.8rem 0.5rem;
+  }
+  .amenities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.75rem;
+    list-style: none;
+    margin-top: 0.5rem;
+  }
+  .amenities li { background: #fff; border: 1px solid #eee4cf; border-radius: 0.6rem; padding: 0.7rem 1rem; }
+  .amenities li::before { content: "✓ "; color: var(--gold); font-weight: 700; }
+  address { font-style: normal; }
+  .map-embed {
+    margin-top: 1.2rem;
+    border-radius: 0.8rem;
+    overflow: hidden;
+    border: 1px solid #eee4cf;
+  }
+  .map-embed iframe { display: block; width: 100%; height: 20rem; border: 0; }
+  details {
+    background: #fff;
+    border: 1px solid #eee4cf;
+    border-radius: 0.7rem;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 0.7rem;
+  }
+  details summary { cursor: pointer; font-weight: 700; color: var(--dark); }
+  details p { margin-top: 0.6rem; font-size: 0.95rem; }
+  .cta-strip { background: var(--dark); color: #fff; text-align: center; padding: 3rem 1.5rem; }
+  .cta-strip h2 { color: #fff; border-color: var(--gold); }
+  .cta-strip p { margin: 0.8rem 0 1.6rem; color: #cfc8b8; }
+  footer { text-align: center; padding: 1.8rem 1.5rem; font-size: 0.88rem; color: #8a8272; }
+  footer a { color: var(--booking-blue); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lang-toggle">
+    <button data-lang="th" onclick="setLang('th')">ไทย</button>
+    <button data-lang="en" onclick="setLang('en')">EN</button>
+  </div>
+  <h1>House of Happiness</h1>
+  <p class="thai" data-i18n="brand.sub">เฮาส์ ออฟ แฮปปิเนส · คลองสาน กรุงเทพฯ</p>
+  <p class="tagline" data-i18n="hero.tagline">อพาร์ตโฮเทลอบอุ่นใจกลางคลองสาน ใกล้แม่น้ำเจ้าพระยา สำเพ็ง วัดโพธิ์ และ ICONSIAM</p>
+  <a class="btn-book btn-gold" href="booking.html" data-i18n="hero.direct">จองตรงกับเรา — ราคาดีที่สุด</a>
+  <a class="btn-book" href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener" data-i18n="hero.booking">จองผ่าน Booking.com</a>
+  <p class="rating" data-i18n="hero.rating">คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com</p>
+</header>
+
+<main>
+  <section id="about">
+    <h2 data-i18n="about.title">เกี่ยวกับเรา</h2>
+    <p data-i18n="about.body"></p>
+  </section>
+
+  <section id="rooms">
+    <h2 data-i18n="rooms.title">ห้องพักและราคา</h2>
+    <div class="room-card">
+      <div class="info">
+        <h3 data-i18n="rooms.apt.name">อพาร์ตเมนต์ 1 ห้องนอน</h3>
+        <p data-i18n="rooms.apt.desc"></p>
+      </div>
+      <div class="price-box">
+        <div class="from" data-i18n="rooms.from">เริ่มต้น</div>
+        <div class="amount">฿800</div>
+        <div class="unit" data-i18n="rooms.night">/ คืน</div>
+        <a class="btn-book btn-gold" style="font-size:0.95rem; padding:0.7rem 1.6rem;" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <h2 data-i18n="gallery.title">รูปห้องพัก</h2>
+    <div class="gallery">
+      <figure><img src="images/bedroom.jpg" alt="Bedroom" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.bedroom">ห้องนอน</figcaption></figure>
+      <figure><img src="images/living.jpg" alt="Living room" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.living">ห้องนั่งเล่น</figcaption></figure>
+      <figure><img src="images/bathroom.jpg" alt="Bathroom" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.bath">ห้องน้ำ</figcaption></figure>
+      <figure><img src="images/balcony.jpg" alt="Balcony view" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.balcony">ระเบียงวิวเมือง</figcaption></figure>
+      <figure><img src="images/kitchen.jpg" alt="Kitchenette" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.kitchen">ครัวเล็ก</figcaption></figure>
+      <figure><img src="images/building.jpg" alt="Building exterior" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.building">ตัวอาคาร</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="amenities">
+    <h2 data-i18n="amen.title">สิ่งอำนวยความสะดวก</h2>
+    <ul class="amenities">
+      <li data-i18n="amen.1"></li>
+      <li data-i18n="amen.2"></li>
+      <li data-i18n="amen.3"></li>
+      <li data-i18n="amen.4"></li>
+      <li data-i18n="amen.5"></li>
+      <li data-i18n="amen.6"></li>
+      <li data-i18n="amen.7"></li>
+      <li data-i18n="amen.8"></li>
+      <li data-i18n="amen.9"></li>
+    </ul>
+  </section>
+
+  <section id="location">
+    <h2 data-i18n="loc.title">ที่ตั้งและการเดินทาง</h2>
+    <address data-i18n="footer.addr"></address>
+    <p style="margin-top:0.8rem;" data-i18n="loc.near"></p>
+    <div class="map-embed">
+      <iframe loading="lazy" title="House of Happiness map"
+        src="https://maps.google.com/maps?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok&z=16&output=embed"></iframe>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2 data-i18n="faq.title">คำถามที่พบบ่อย</h2>
+    <details><summary data-i18n="faq.q1"></summary><p data-i18n="faq.a1"></p></details>
+    <details><summary data-i18n="faq.q2"></summary><p data-i18n="faq.a2"></p></details>
+    <details><summary data-i18n="faq.q3"></summary><p data-i18n="faq.a3"></p></details>
+    <details><summary data-i18n="faq.q4"></summary><p data-i18n="faq.a4"></p></details>
+  </section>
+</main>
+
+<div class="cta-strip">
+  <h2 data-i18n="cta.title">พร้อมเข้าพักหรือยัง?</h2>
+  <p data-i18n="cta.body"></p>
+  <a class="btn-book btn-gold" href="booking.html" data-i18n="cta.direct">จองตรงกับเรา</a>
+  <a class="btn-book" href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener" data-i18n="cta.booking">ดูบน Booking.com</a>
+</div>
+
+<footer>
+  House of Happiness · <span data-i18n="footer.addr"></span><br>
+  <span data-i18n="footer.or">หรือจองผ่าน</span>
+  <a href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">Booking.com</a>
+</footer>
+
+<script src="assets/i18n.js"></script>
+</body>
+</html>

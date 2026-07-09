@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จองตรง | Book Direct — House of Happiness Bangkok</title>
+<meta name="description" content="จองห้องพักโดยตรงกับ House of Happiness คลองสาน กรุงเทพฯ ราคาดีกว่า ไม่ผ่านคนกลาง | Book directly with House of Happiness, Khlong San, Bangkok.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<style>
+  :root {
+    --gold: #c9a227;
+    --dark: #1f2430;
+    --cream: #faf6ef;
+    --text: #3a3f4a;
+    --green: #06c755; /* LINE */
+    --booking-blue: #003580;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, "Noto Sans Thai", sans-serif;
+    color: var(--text);
+    background: var(--cream);
+    line-height: 1.65;
+  }
+  .lang-toggle {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    display: flex;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    overflow: hidden;
+    z-index: 5;
+  }
+  .lang-toggle button {
+    background: transparent;
+    color: #fff;
+    border: none;
+    padding: 0.35rem 0.9rem;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--gold); font-weight: 700; }
+  header {
+    position: relative;
+    background: linear-gradient(135deg, #1f2430 0%, #3d3222 60%, #6b5518 100%);
+    color: #fff;
+    text-align: center;
+    padding: 3.2rem 1.5rem 2.5rem;
+  }
+  header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: 0.03em; }
+  header p { color: #e8e2d4; margin-top: 0.4rem; }
+  header a.back { color: var(--gold); font-size: 0.9rem; text-decoration: none; }
+  main { max-width: 44rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .card {
+    background: #fff;
+    border: 1px solid #eee4cf;
+    border-radius: 0.8rem;
+    padding: 1.4rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(31, 36, 48, 0.05);
+  }
+  h2 { color: var(--dark); font-size: 1.2rem; margin-bottom: 0.9rem; }
+  h2 .step {
+    display: inline-block;
+    background: var(--gold);
+    color: #fff;
+    width: 1.7rem; height: 1.7rem;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 1.7rem;
+    font-size: 0.95rem;
+    margin-right: 0.5rem;
+  }
+  .room {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    border: 2px solid #eee4cf;
+    border-radius: 0.7rem;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .room:hover { border-color: var(--gold); }
+  .room.selected { border-color: var(--gold); background: #fdf9ee; }
+  .room input { margin-top: 0.35rem; accent-color: var(--gold); }
+  .room .name { font-weight: 700; color: var(--dark); }
+  .room .desc { font-size: 0.9rem; color: #6c7280; }
+  .room .price { margin-left: auto; text-align: right; white-space: nowrap; font-weight: 700; color: var(--dark); }
+  .room .price small { display: block; font-weight: 400; color: #6c7280; }
+  label { display: block; font-weight: 600; color: var(--dark); margin: 0.8rem 0 0.25rem; font-size: 0.95rem; }
+  input[type="date"], input[type="text"], input[type="tel"], select, textarea {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid #d9d2c0;
+    border-radius: 0.5rem;
+    font: inherit;
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 4.5rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+  .summary {
+    background: #fdf9ee;
+    border: 1px dashed var(--gold);
+    border-radius: 0.7rem;
+    padding: 1rem 1.2rem;
+    margin-top: 1rem;
+    font-size: 0.98rem;
+  }
+  .summary .total { font-size: 1.25rem; font-weight: 700; color: var(--dark); }
+  .summary .note { font-size: 0.85rem; color: #8a8272; }
+  .actions { display: grid; gap: 0.7rem; margin-top: 1.2rem; }
+  .btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.85rem 1rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-line { background: var(--green); }
+  .btn-mail { background: var(--dark); }
+  .btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+  .policy { font-size: 0.85rem; color: #8a8272; margin-top: 1rem; }
+  footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #8a8272; }
+  footer a { color: var(--booking-blue); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lang-toggle">
+    <button data-lang="th" onclick="setLang('th')">ไทย</button>
+    <button data-lang="en" onclick="setLang('en')">EN</button>
+  </div>
+  <h1 data-i18n="bk.title">จองตรงกับ House of Happiness</h1>
+  <p data-i18n="bk.sub">ราคาดีกว่าจองผ่านเว็บตัวกลาง · ยืนยันไวทาง LINE</p>
+  <p style="margin-top:0.6rem;"><a class="back" href="index.html" data-i18n="bk.back">← กลับหน้าหลัก</a></p>
+</header>
+
+<main>
+  <form id="bookingForm" onsubmit="return false;">
+
+    <div class="card">
+      <h2><span class="step">1</span><span data-i18n="bk.step1">เลือกประเภทห้องพัก</span></h2>
+      <div id="roomList"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">2</span><span data-i18n="bk.step2">เลือกวันเข้าพัก</span></h2>
+      <div class="row">
+        <div>
+          <label for="checkin" data-i18n="bk.checkin">วันเช็คอิน</label>
+          <input type="date" id="checkin" required>
+        </div>
+        <div>
+          <label for="checkout" data-i18n="bk.checkout">วันเช็คเอาท์</label>
+          <input type="date" id="checkout" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="guests" data-i18n="bk.guests">จำนวนผู้เข้าพัก</label>
+          <select id="guests">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        <div>
+          <label for="rooms" data-i18n="bk.rooms">จำนวนห้อง</label>
+          <select id="rooms">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">3</span><span data-i18n="bk.step3">ข้อมูลผู้จอง</span></h2>
+      <label for="name" data-i18n="bk.name">ชื่อ-นามสกุล</label>
+      <input type="text" id="name" data-i18n="bk.name.ph" data-i18n-attr="placeholder" required>
+      <label for="phone" data-i18n="bk.phone">เบอร์โทรศัพท์</label>
+      <input type="tel" id="phone" placeholder="08x-xxx-xxxx" required>
+      <label for="note" data-i18n="bk.note">ความต้องการเพิ่มเติม (ถ้ามี)</label>
+      <textarea id="note" data-i18n="bk.note.ph" data-i18n-attr="placeholder"></textarea>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">4</span><span data-i18n="bk.step4">สรุปการจอง</span></h2>
+      <div class="summary" id="summary"></div>
+      <div class="actions">
+        <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">ส่งคำขอจองทาง LINE</a>
+        <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
+      </div>
+      <p class="policy" data-i18n="bk.policy"></p>
+    </div>
+
+  </form>
+</main>
+
+<footer>
+  House of Happiness · <span data-i18n="footer.addr"></span><br>
+  <span data-i18n="footer.or">หรือจองผ่าน</span>
+  <a href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">Booking.com</a>
+</footer>
+
+<script src="assets/i18n.js"></script>
+<script>
+/* ═══════════ ตั้งค่าโรงแรม — แก้ไขตรงนี้ได้เลย ═══════════ */
+const CONFIG = {
+  // ใส่ LINE Official Account ID จริง เช่น "@abc1234" แล้วปุ่ม LINE จะแสดงอัตโนมัติ
+  // ปล่อยว่าง "" = ซ่อนปุ่ม LINE (ลูกค้าจะเห็นเฉพาะปุ่มอีเมล)
+  lineId: "",
+  email: "chawanan.suk@gmail.com",    // อีเมลรับคำขอจอง
+  rooms: [
+    {
+      id: "apt",
+      name: { th: "อพาร์ตเมนต์ 1 ห้องนอน", en: "One-Bedroom Apartment" },
+      desc: {
+        th: "ห้องนอนแยก + ห้องนั่งเล่น · ระเบียงวิวเมือง · ครัวเล็ก · เครื่องซักผ้า · พัก 2 ท่าน (สูงสุด 3)",
+        en: "Separate bedroom + living room · city-view balcony · kitchenette · washer · sleeps 2 (max 3)",
+      },
+      price: 800, // บาท/คืน — แก้ให้ตรงราคาปัจจุบันได้ที่นี่
+    },
+    // เพิ่มห้องประเภทอื่นได้โดย copy บล็อกด้านบนแล้วแก้ id/ชื่อ/ราคา
+  ],
+};
+/* ═══════════════════════════════════════════════════════════ */
+
+const $ = (id) => document.getElementById(id);
+const lang = () => getLang();
+
+function renderRooms() {
+  const selected = document.querySelector('input[name="room"]:checked')?.value;
+  const roomList = $("roomList");
+  roomList.innerHTML = "";
+  CONFIG.rooms.forEach((r) => {
+    const div = document.createElement("label");
+    div.className = "room";
+    div.innerHTML = `
+      <input type="radio" name="room" value="${r.id}">
+      <span><span class="name">${r.name[lang()]}</span><br><span class="desc">${r.desc[lang()]}</span></span>
+      <span class="price">฿${r.price.toLocaleString()}<small>${t("bk.night.per")}</small></span>`;
+    roomList.appendChild(div);
+  });
+  const keep = selected || (CONFIG.rooms.length === 1 ? CONFIG.rooms[0].id : null);
+  if (keep) {
+    const input = document.querySelector(`input[name="room"][value="${keep}"]`);
+    if (input) input.checked = true;
+  }
+}
+
+// วันที่ตามเขตเวลาเครื่องผู้ใช้ (ไม่ใช่ UTC) เพื่อไม่ให้เลือกวันย้อนหลังได้ช่วงหลังเที่ยงคืน
+const toYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const today = toYMD(new Date());
+$("checkin").min = today;
+$("checkout").min = today;
+
+$("checkin").addEventListener("change", () => {
+  const ci = $("checkin").value;
+  if (!ci) return;
+  const next = new Date(ci);
+  next.setDate(next.getDate() + 1);
+  $("checkout").min = toYMD(next);
+  if ($("checkout").value && $("checkout").value < $("checkout").min) {
+    $("checkout").value = $("checkout").min;
+  }
+});
+
+function getState() {
+  const roomId = document.querySelector('input[name="room"]:checked')?.value;
+  const room = CONFIG.rooms.find((r) => r.id === roomId);
+  const ci = $("checkin").value, co = $("checkout").value;
+  const nights = ci && co ? Math.round((new Date(co) - new Date(ci)) / 86400000) : 0;
+  const numRooms = +$("rooms").value;
+  return {
+    room, ci, co, nights, numRooms,
+    guests: +$("guests").value,
+    name: $("name").value.trim(),
+    phone: $("phone").value.trim(),
+    note: $("note").value.trim(),
+    total: room && nights > 0 ? room.price * nights * numRooms : 0,
+  };
+}
+
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString(lang() === "th" ? "th-TH" : "en-GB",
+    { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+
+function update() {
+  const s = getState();
+  document.querySelectorAll(".room").forEach((el) =>
+    el.classList.toggle("selected", el.querySelector("input").checked));
+
+  const summary = $("summary");
+  if (s.room && s.nights > 0) {
+    summary.innerHTML = `
+      <strong>${s.room.name[lang()]}</strong> × ${s.numRooms} ${t("bk.rooms.n")}<br>
+      ${fmtDate(s.ci)} → ${fmtDate(s.co)} (${s.nights} ${t("bk.nights")}) · ${s.guests} ${t("bk.guests.n")}<br>
+      <span class="total">${t("bk.total")} ฿${s.total.toLocaleString()}</span><br>
+      <span class="note">${t("bk.approx")}</span>`;
+  } else if (s.room && s.ci && s.co) {
+    summary.textContent = t("bk.baddates");
+  } else {
+    summary.textContent = t("bk.empty");
+  }
+
+  const ready = s.room && s.nights > 0 && s.name && s.phone;
+  const L = lang() === "th";
+  const msg = (L
+    ? `สวัสดีครับ/ค่ะ ขอจองห้องพัก House of Happiness`
+    : `Hello! I would like to book a room at House of Happiness`) + `
+• ${L ? "ห้อง" : "Room"}: ${s.room ? s.room.name[lang()] : "-"} × ${s.numRooms}
+• ${L ? "เช็คอิน" : "Check-in"}: ${s.ci || "-"}
+• ${L ? "เช็คเอาท์" : "Check-out"}: ${s.co || "-"} (${s.nights} ${t("bk.nights")})
+• ${L ? "ผู้เข้าพัก" : "Guests"}: ${s.guests}
+• ${L ? "ราคารวมโดยประมาณ" : "Estimated total"}: ฿${s.total.toLocaleString()}
+• ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
+• ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}`;
+
+  const btnLine = $("btnLine"), btnMail = $("btnMail");
+  btnLine.style.display = CONFIG.lineId ? "" : "none";
+  btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
+  btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
+  if (ready) {
+    btnLine.href = `https://line.me/R/oaMessage/${encodeURIComponent(CONFIG.lineId)}/?${encodeURIComponent(msg)}`;
+    btnMail.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent((L ? "คำขอจองห้องพัก - " : "Booking request - ") + s.name)}&body=${encodeURIComponent(msg)}`;
+  }
+}
+
+document.addEventListener("input", update);
+document.addEventListener("change", update);
+document.addEventListener("langchange", () => { renderRooms(); update(); });
+document.addEventListener("DOMContentLoaded", () => { renderRooms(); update(); });
+</script>
+
+</body>
+</html>
