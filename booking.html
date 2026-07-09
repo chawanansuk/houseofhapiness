@@ -108,7 +108,6 @@
   .btn-line { background: var(--green); }
   .btn-mail { background: var(--dark); }
   .btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
-  .error { color: #b3261e; font-size: 0.9rem; margin-top: 0.6rem; display: none; }
   .policy { font-size: 0.85rem; color: #8a8272; margin-top: 1rem; }
   footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #8a8272; }
   footer a { color: var(--booking-blue); }
@@ -176,7 +175,6 @@
     <div class="card">
       <h2><span class="step">4</span>สรุปการจอง</h2>
       <div class="summary" id="summary">กรุณาเลือกห้องและวันเข้าพักก่อน ระบบจะคำนวณราคาให้อัตโนมัติ</div>
-      <p class="error" id="errorMsg"></p>
       <div class="actions">
         <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener">ส่งคำขอจองทาง LINE</a>
         <a class="btn btn-mail" id="btnMail" aria-disabled="true">ส่งคำขอจองทางอีเมล</a>
@@ -214,16 +212,29 @@ CONFIG.rooms.forEach((r, i) => {
   const div = document.createElement("label");
   div.className = "room";
   div.innerHTML = `
-    <input type="radio" name="room" value="${r.id}" ${i === 0 ? "" : ""}>
+    <input type="radio" name="room" value="${r.id}">
     <span><span class="name">${r.name}</span><br><span class="desc">${r.desc}</span></span>
     <span class="price">฿${r.price.toLocaleString()}<small>ต่อคืน</small></span>`;
   roomList.appendChild(div);
 });
 
 const $ = (id) => document.getElementById(id);
-const today = new Date().toISOString().slice(0, 10);
+// วันที่ตามเขตเวลาเครื่องผู้ใช้ (ไม่ใช่ UTC) เพื่อไม่ให้เลือกวันย้อนหลังได้ช่วงหลังเที่ยงคืน
+const toYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const today = toYMD(new Date());
 $("checkin").min = today;
 $("checkout").min = today;
+
+$("checkin").addEventListener("change", () => {
+  const ci = $("checkin").value;
+  if (!ci) return;
+  const next = new Date(ci);
+  next.setDate(next.getDate() + 1);
+  $("checkout").min = toYMD(next);
+  if ($("checkout").value && $("checkout").value < $("checkout").min) {
+    $("checkout").value = $("checkout").min;
+  }
+});
 
 function getState() {
   const roomId = document.querySelector('input[name="room"]:checked')?.value;
