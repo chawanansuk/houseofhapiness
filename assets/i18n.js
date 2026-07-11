@@ -9,6 +9,7 @@ const I18N = {
   "nav.gallery":     { th: "รูปภาพ", en: "Gallery" },
   "nav.location":    { th: "ที่ตั้ง", en: "Location" },
   "nav.faq":         { th: "คำถาม", en: "FAQ" },
+  "nav.reviews":     { th: "รีวิว", en: "Reviews" },
   "bk.viewsummary":  { th: "ดูสรุปการจอง", en: "View summary" },
   "brand.sub":       { th: "เฮาส์ ออฟ แฮปปิเนส · คลองสาน กรุงเทพฯ", en: "Aparthotel · Khlong San, Bangkok" },
   "footer.addr":     { th: "558/1 หมู่บ้านมั่งมีทวีสุข ซอย 16 ถ.ท่าดินแดง คลองสาน กรุงเทพฯ 10600",
@@ -71,6 +72,39 @@ const I18N = {
   "cta.direct":      { th: "จองตรงกับเรา", en: "Book Direct" },
   "cta.booking":     { th: "ดูบน Booking.com", en: "Check on Booking.com" },
 
+  /* ── แถบจุดเด่นใต้ hero ── */
+  "hl.1":            { th: "คะแนนรีวิว 8.8/10", en: "Rated 8.8/10" },
+  "hl.2":            { th: "จองตรงถูกกว่า", en: "Cheaper booked direct" },
+  "hl.3":            { th: "ใกล้แม่น้ำเจ้าพระยา", en: "Near the Chao Phraya" },
+  "hl.4":            { th: "ยืนยันภายใน 24 ชม.", en: "Confirmed within 24 h" },
+
+  /* ── รีวิว ── */
+  "rev.title":       { th: "เสียงจากผู้เข้าพัก", en: "What Guests Say" },
+  "rev.outof":       { th: "จากคะแนนเต็ม 10", en: "out of 10" },
+  "rev.count":       { th: "จากผู้เข้าพักจริงกว่า 770 รีวิว", en: "from 770+ verified guest reviews" },
+  "rev.grade":       { th: "ระดับ “ยอดเยี่ยม”", en: "Rated “Fabulous”" },
+  "rev.chips.title": { th: "สิ่งที่ผู้เข้าพักพูดถึงบ่อย", en: "Guests often mention" },
+  "rev.chip1":       { th: "📍 ทำเลดี เดินทางสะดวก", en: "📍 Great location" },
+  "rev.chip2":       { th: "🧹 ห้องกว้าง สะอาด", en: "🧹 Spacious & clean rooms" },
+  "rev.chip3":       { th: "💛 เจ้าของเป็นกันเอง", en: "💛 Friendly hosts" },
+  "rev.chip4":       { th: "💰 คุ้มค่าเกินราคา", en: "💰 Excellent value" },
+  "rev.link":        { th: "อ่านรีวิวทั้งหมดบน Booking.com →", en: "Read all reviews on Booking.com →" },
+
+  /* ── สถานที่ใกล้เคียง ── */
+  "near.title":      { th: "สถานที่ใกล้เคียง", en: "Nearby Attractions" },
+  "near.1":          { th: "ตลาดสำเพ็ง", en: "Sampeng Market" },
+  "near.1.d":        { th: "~900 ม.", en: "~900 m" },
+  "near.2":          { th: "ล้ง 1919 ริมแม่น้ำ", en: "Lhong 1919 Riverside" },
+  "near.2.d":        { th: "~1 กม.", en: "~1 km" },
+  "near.3":          { th: "วัดโพธิ์", en: "Wat Pho" },
+  "near.3.d":        { th: "~1.8 กม.", en: "~1.8 km" },
+  "near.4":          { th: "เยาวราช (ไชน่าทาวน์)", en: "Yaowarat (Chinatown)" },
+  "near.4.d":        { th: "~2 กม.", en: "~2 km" },
+  "near.5":          { th: "ICONSIAM", en: "ICONSIAM" },
+  "near.5.d":        { th: "รถ ~5 นาที", en: "~5 min drive" },
+  "near.6":          { th: "River City Bangkok", en: "River City Bangkok" },
+  "near.6.d":        { th: "รถ ~5 นาที", en: "~5 min drive" },
+
   /* ── หน้าจอง ── */
   "bk.title":        { th: "จองตรงกับ House of Happiness", en: "Book Direct with House of Happiness" },
   "bk.sub":          { th: "ราคาดีกว่าจองผ่านเว็บตัวกลาง · ยืนยันไวทาง LINE", en: "Better rates than OTA sites · fast confirmation via LINE" },
@@ -101,6 +135,16 @@ const I18N = {
   "bk.sendmail":     { th: "ส่งคำขอจองทางอีเมล", en: "Send booking request via email" },
   "bk.policy":       { th: "นี่คือ “คำขอจอง” — ทางโรงแรมจะตรวจสอบห้องว่างและยืนยันกลับภายใน 24 ชั่วโมง การจองสมบูรณ์เมื่อได้รับการยืนยันจากโรงแรม · เช็คอิน 14:00–18:00 น. เช็คเอาท์ 12:00 น. · มัดจำ ฿1,000 คืนตอนเช็คเอาท์ · ชำระเงินสดหรือโอน",
                        en: "This is a booking request — we check availability and confirm within 24 hours. Your booking is complete once confirmed by the hotel. Check-in 14:00–18:00, check-out by 12:00. ฿1,000 refundable deposit at check-in. Pay by cash or bank transfer." },
+  "bk.quick":        { th: "เลือกไว:", en: "Quick pick:" },
+  "bk.quick.n":      { th: "คืน", en: "night(s)" },
+  "bk.hint.prefix":  { th: "อีกนิดเดียว! กรุณา", en: "Almost there! Please" },
+  "bk.hint.room":    { th: "เลือกห้อง", en: "choose a room" },
+  "bk.hint.dates":   { th: "เลือกวันเข้าพัก", en: "pick your dates" },
+  "bk.hint.name":    { th: "กรอกชื่อ", en: "enter your name" },
+  "bk.hint.phone":   { th: "กรอกเบอร์โทร", en: "enter your phone number" },
+  "bk.trust.1":      { th: "ไม่ต้องชำระเงินออนไลน์ — จ่ายที่โรงแรม", en: "No online payment — pay at the hotel" },
+  "bk.trust.2":      { th: "ยืนยันการจองภายใน 24 ชั่วโมง", en: "Booking confirmed within 24 hours" },
+  "bk.trust.3":      { th: "สอบถาม/แก้ไขการจองได้ทางอีเมลหรือ LINE", en: "Questions or changes welcome via email or LINE" },
 };
 
 /* ─── ตัวจัดการภาษา ─── */

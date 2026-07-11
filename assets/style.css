@@ -536,6 +536,163 @@ textarea { resize: vertical; min-height: 4.5rem; }
 .bk-sticky .lbl b { display: block; font-family: var(--font-head); font-size: 1.2rem; color: var(--gold); }
 @media (max-width: 899px) { .bk-sticky { display: flex; } }
 
+/* ── Hero highlights strip ── */
+.highlights {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 1.6rem;
+  list-style: none;
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(255,255,255,0.14);
+  font-size: 0.9rem;
+  color: #d8d3c6;
+}
+.highlights li { display: inline-flex; align-items: center; gap: 0.45rem; }
+.highlights .ico { font-size: 1rem; }
+
+/* ── Reviews ── */
+.review-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1.3rem, 3vw, 2rem);
+  box-shadow: var(--shadow-sm);
+}
+.score-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  background: linear-gradient(150deg, #1c212b, #2e3341);
+  border-radius: calc(var(--radius) - 4px);
+  color: #fff;
+}
+.score-badge .num {
+  font-family: var(--font-head);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.score-badge .meta { font-size: 0.88rem; color: #c9c3b4; line-height: 1.5; }
+.score-badge .meta b { display: block; color: #fff; font-family: var(--font-head); font-size: 1rem; }
+.review-chips { flex: 1 1 18rem; }
+.review-chips p { font-weight: 600; color: var(--dark); margin-bottom: 0.6rem; font-size: 0.95rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip {
+  display: inline-block;
+  padding: 0.4rem 0.95rem;
+  background: var(--gold-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: var(--dark);
+}
+.review-link {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gold-dark);
+  text-decoration: none;
+}
+.review-link:hover { text-decoration: underline; }
+
+/* ── Nearby attractions ── */
+.near-head { color: var(--dark); font-size: 1.15rem; font-weight: 600; margin: 1.8rem 0 0.9rem; }
+.nearby {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: 0.7rem;
+  list-style: none;
+}
+.nearby li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.nearby .ico {
+  flex: 0 0 auto;
+  width: 2rem; height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-soft);
+  border-radius: 10px;
+  font-size: 1rem;
+}
+.nearby .nm { font-weight: 500; color: var(--dark); }
+.nearby .dist { margin-left: auto; font-size: 0.84rem; color: var(--muted); white-space: nowrap; }
+
+/* ── Booking: quick picks & nights badge ── */
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.chip-btn {
+  padding: 0.35rem 0.9rem;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.86rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.chip-btn:hover { border-color: var(--gold); }
+.chip-btn.active { border-color: var(--gold); background: var(--gold-soft); font-weight: 700; color: var(--dark); }
+.nights-badge {
+  margin-left: auto;
+  padding: 0.3rem 0.85rem;
+  background: #e8f7ec;
+  border: 1px solid #bfe5c8;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e7e3a;
+}
+
+/* ── Booking: hint & trust ── */
+.hint {
+  font-size: 0.86rem;
+  color: #a8842b;
+  background: #fdf6e2;
+  border: 1px dashed var(--gold);
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  text-align: center;
+}
+.trust {
+  list-style: none;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+::selection { background: var(--gold); color: var(--dark); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
 /* ── Reveal animation ── */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .reveal.visible { opacity: 1; transform: none; }

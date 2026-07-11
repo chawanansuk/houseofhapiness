@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="canonical" href="https://houseofhapiness.vercel.app/booking.html">
+<meta name="robots" content="index, follow">
 </head>
 <body>
 
@@ -49,6 +51,13 @@
           <input type="date" id="checkout" required>
         </div>
       </div>
+      <div class="quick-row" id="quickRow">
+        <span data-i18n="bk.quick">เลือกไว:</span>
+        <button type="button" class="chip-btn" data-nights="1">1</button>
+        <button type="button" class="chip-btn" data-nights="2">2</button>
+        <button type="button" class="chip-btn" data-nights="3">3</button>
+        <span class="nights-badge" id="nightsBadge" hidden></span>
+      </div>
       <div class="row">
         <div>
           <label for="guests" data-i18n="bk.guests">จำนวนผู้เข้าพัก</label>
@@ -87,7 +96,13 @@
       <div class="actions">
         <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">ส่งคำขอจองทาง LINE</a>
         <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
+        <p class="hint" id="readyHint" hidden></p>
       </div>
+      <ul class="trust">
+        <li>✅ <span data-i18n="bk.trust.1">ไม่ต้องชำระเงินออนไลน์ — จ่ายที่โรงแรม</span></li>
+        <li>⚡ <span data-i18n="bk.trust.2">ยืนยันการจองภายใน 24 ชั่วโมง</span></li>
+        <li>💬 <span data-i18n="bk.trust.3">สอบถาม/แก้ไขการจองได้ทางอีเมลหรือ LINE</span></li>
+      </ul>
       <p class="policy" data-i18n="bk.policy"></p>
     </div>
   </div>
@@ -170,6 +185,25 @@ $("checkin").addEventListener("change", () => {
   }
 });
 
+// ปุ่ม "เลือกไว" — ตั้งเช็คเอาท์เป็น N คืนนับจากวันเช็คอิน (ถ้ายังไม่เลือกเช็คอิน ใช้วันนี้)
+document.querySelectorAll(".chip-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const n = +btn.dataset.nights;
+    if (!$("checkin").value) $("checkin").value = today;
+    const d = new Date($("checkin").value);
+    d.setDate(d.getDate() + 1);
+    $("checkout").min = toYMD(d);
+    d.setDate(d.getDate() + (n - 1));
+    $("checkout").value = toYMD(d);
+    update();
+  });
+});
+
+function applyChipLabels() {
+  document.querySelectorAll(".chip-btn").forEach((b) =>
+    b.textContent = `${b.dataset.nights} ${t("bk.quick.n")}`);
+}
+
 function getState() {
   const roomId = document.querySelector('input[name="room"]:checked')?.value;
   const room = CONFIG.rooms.find((r) => r.id === roomId);
@@ -210,6 +244,12 @@ function update() {
   }
   $("stickyTotal").textContent = `฿${s.total.toLocaleString()}`;
 
+  const badge = $("nightsBadge");
+  badge.hidden = !(s.nights > 0);
+  if (s.nights > 0) badge.textContent = `✓ ${s.nights} ${t("bk.nights")}`;
+  document.querySelectorAll(".chip-btn").forEach((b) =>
+    b.classList.toggle("active", +b.dataset.nights === s.nights));
+
   const ready = s.room && s.nights > 0 && s.name && s.phone;
   const L = lang() === "th";
   const msg = (L
@@ -231,12 +271,25 @@ function update() {
     btnLine.href = `https://line.me/R/oaMessage/${encodeURIComponent(CONFIG.lineId)}/?${encodeURIComponent(msg)}`;
     btnMail.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent((L ? "คำขอจองห้องพัก - " : "Booking request - ") + s.name)}&body=${encodeURIComponent(msg)}`;
   }
+
+  const hint = $("readyHint");
+  if (ready) {
+    hint.hidden = true;
+  } else {
+    const missing = [];
+    if (!s.room) missing.push(t("bk.hint.room"));
+    if (!(s.nights > 0)) missing.push(t("bk.hint.dates"));
+    if (!s.name) missing.push(t("bk.hint.name"));
+    if (!s.phone) missing.push(t("bk.hint.phone"));
+    hint.hidden = false;
+    hint.textContent = `${t("bk.hint.prefix")} ${missing.join(" · ")}`;
+  }
 }
 
 document.addEventListener("input", update);
 document.addEventListener("change", update);
-document.addEventListener("langchange", () => { renderRooms(); update(); });
-document.addEventListener("DOMContentLoaded", () => { renderRooms(); update(); });
+document.addEventListener("langchange", () => { renderRooms(); applyChipLabels(); update(); });
+document.addEventListener("DOMContentLoaded", () => { renderRooms(); applyChipLabels(); update(); });
 </script>
 
 </body>
