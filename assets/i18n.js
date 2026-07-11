@@ -4,7 +4,12 @@
 const I18N = {
   /* ── ส่วนกลาง ── */
   "nav.home":        { th: "หน้าหลัก", en: "Home" },
-  "nav.book":        { th: "จองห้องพัก", en: "Book Now" },
+  "nav.book":        { th: "จองเลย", en: "Book Now" },
+  "nav.rooms":       { th: "ห้องพัก", en: "Rooms" },
+  "nav.gallery":     { th: "รูปภาพ", en: "Gallery" },
+  "nav.location":    { th: "ที่ตั้ง", en: "Location" },
+  "nav.faq":         { th: "คำถาม", en: "FAQ" },
+  "bk.viewsummary":  { th: "ดูสรุปการจอง", en: "View summary" },
   "brand.sub":       { th: "เฮาส์ ออฟ แฮปปิเนส · คลองสาน กรุงเทพฯ", en: "Aparthotel · Khlong San, Bangkok" },
   "footer.addr":     { th: "558/1 หมู่บ้านมั่งมีทวีสุข ซอย 16 ถ.ท่าดินแดง คลองสาน กรุงเทพฯ 10600",
                        en: "558/1 Mung Me Tawee Suk, Soi 16, Tha Din Daeng Rd, Khlong San, Bangkok 10600" },
