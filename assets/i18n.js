@@ -15,6 +15,8 @@ const I18N = {
   "footer.addr":     { th: "558/1 หมู่บ้านมั่งมีทวีสุข ซอย 16 ถ.ท่าดินแดง คลองสาน กรุงเทพฯ 10600",
                        en: "558/1 Mung Me Tawee Suk, Soi 16, Tha Din Daeng Rd, Khlong San, Bangkok 10600" },
   "footer.or":       { th: "หรือจองผ่าน", en: "Or book via" },
+  "skip":            { th: "ข้ามไปยังเนื้อหา", en: "Skip to content" },
+  "loc.open":        { th: "เปิดใน Google Maps →", en: "Open in Google Maps →" },
 
   /* ── หน้าหลัก ── */
   "hero.tagline":    { th: "อพาร์ตโฮเทลอบอุ่นใจกลางคลองสาน ใกล้แม่น้ำเจ้าพระยา สำเพ็ง วัดโพธิ์ และ ICONSIAM",
@@ -133,6 +135,8 @@ const I18N = {
   "bk.approx":       { th: "ราคาโดยประมาณ ยืนยันราคาสุดท้ายเมื่อโรงแรมตอบกลับ", en: "Estimated price — final rate confirmed by the hotel." },
   "bk.sendline":     { th: "ส่งคำขอจองทาง LINE", en: "Send booking request via LINE" },
   "bk.sendmail":     { th: "ส่งคำขอจองทางอีเมล", en: "Send booking request via email" },
+  "bk.copy":         { th: "คัดลอกข้อความจอง", en: "Copy booking message" },
+  "bk.copied":       { th: "คัดลอกแล้ว ✓", en: "Copied ✓" },
   "bk.policy":       { th: "นี่คือ “คำขอจอง” — ทางโรงแรมจะตรวจสอบห้องว่างและยืนยันกลับภายใน 24 ชั่วโมง การจองสมบูรณ์เมื่อได้รับการยืนยันจากโรงแรม · เช็คอิน 14:00–18:00 น. เช็คเอาท์ 12:00 น. · มัดจำ ฿1,000 คืนตอนเช็คเอาท์ · ชำระเงินสดหรือโอน",
                        en: "This is a booking request — we check availability and confirm within 24 hours. Your booking is complete once confirmed by the hotel. Check-in 14:00–18:00, check-out by 12:00. ฿1,000 refundable deposit at check-in. Pay by cash or bank transfer." },
   "bk.quick":        { th: "เลือกไว:", en: "Quick pick:" },
@@ -168,8 +172,10 @@ function applyLang() {
     if (el.dataset.i18nAttr) el.setAttribute(el.dataset.i18nAttr, item[lang]);
     else el.innerHTML = item[lang];
   });
-  document.querySelectorAll(".lang-toggle button").forEach((b) =>
-    b.classList.toggle("active", b.dataset.lang === lang));
+  document.querySelectorAll(".lang-toggle button").forEach((b) => {
+    b.classList.toggle("active", b.dataset.lang === lang);
+    b.setAttribute("aria-pressed", b.dataset.lang === lang ? "true" : "false");
+  });
   document.dispatchEvent(new CustomEvent("langchange", { detail: lang }));
 }
 

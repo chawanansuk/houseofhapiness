@@ -690,6 +690,43 @@ textarea { resize: vertical; min-height: 4.5rem; }
   color: var(--text);
 }
 
+/* ── Copy button & map link ── */
+.btn-copy {
+  background: #fff;
+  border: 1.5px solid var(--gold);
+  color: var(--gold-dark);
+}
+.btn-copy:hover { background: var(--gold-soft); }
+.map-link {
+  display: inline-block;
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gold-dark);
+  text-decoration: none;
+}
+.map-link:hover { text-decoration: underline; }
+
+/* ── Skip link (a11y) ── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.6rem 1.2rem;
+  background: var(--gold);
+  color: var(--dark);
+  font-weight: 700;
+  border-radius: 0 0 10px 10px;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* ── 404 page ── */
+.nf-wrap { text-align: center; padding: clamp(4rem, 12vw, 8rem) 1.5rem; }
+.nf-wrap .code { font-family: var(--font-head); font-size: clamp(4rem, 14vw, 7rem); font-weight: 700; color: var(--gold); line-height: 1; }
+.nf-wrap p { margin: 1rem auto 2rem; max-width: 30rem; color: var(--muted); }
+
 ::selection { background: var(--gold); color: var(--dark); }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 

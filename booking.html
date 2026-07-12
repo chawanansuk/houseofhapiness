@@ -12,11 +12,15 @@
 <link rel="stylesheet" href="assets/style.css">
 <link rel="canonical" href="https://houseofhapiness.vercel.app/booking.html">
 <meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1c212b">
 </head>
 <body>
 
 <nav class="topnav">
   <a class="brand" href="index.html"><span class="logo">🏠</span> House of Happiness</a>
+  <div class="navlinks">
+    <a href="index.html" data-i18n="bk.back">← กลับหน้าหลัก</a>
+  </div>
   <div class="nav-right">
     <div class="lang-toggle">
       <button data-lang="th" onclick="setLang('th')">ไทย</button>
@@ -96,6 +100,7 @@
       <div class="actions">
         <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">ส่งคำขอจองทาง LINE</a>
         <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
+        <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
       </div>
       <ul class="trust">
@@ -147,6 +152,7 @@ const CONFIG = {
 
 const $ = (id) => document.getElementById(id);
 const lang = () => getLang();
+let lastMsg = "";
 
 function renderRooms() {
   const selected = document.querySelector('input[name="room"]:checked')?.value;
@@ -262,11 +268,13 @@ function update() {
 • ${L ? "ราคารวมโดยประมาณ" : "Estimated total"}: ฿${s.total.toLocaleString()}
 • ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
 • ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}`;
+  lastMsg = msg;
 
   const btnLine = $("btnLine"), btnMail = $("btnMail");
   btnLine.style.display = CONFIG.lineId ? "" : "none";
   btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
   btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
+  $("btnCopy").setAttribute("aria-disabled", ready ? "false" : "true");
   if (ready) {
     btnLine.href = `https://line.me/R/oaMessage/${encodeURIComponent(CONFIG.lineId)}/?${encodeURIComponent(msg)}`;
     btnMail.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent((L ? "คำขอจองห้องพัก - " : "Booking request - ") + s.name)}&body=${encodeURIComponent(msg)}`;
@@ -285,6 +293,23 @@ function update() {
     hint.textContent = `${t("bk.hint.prefix")} ${missing.join(" · ")}`;
   }
 }
+
+// คัดลอกข้อความจอง — สำรองไว้กรณีเครื่องลูกค้าไม่มีแอปอีเมล จะได้เอาไปวางใน LINE/แชทเองได้
+$("btnCopy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(lastMsg);
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = lastMsg;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  }
+  const btn = $("btnCopy");
+  btn.textContent = t("bk.copied");
+  setTimeout(() => { btn.textContent = t("bk.copy"); }, 2000);
+});
 
 document.addEventListener("input", update);
 document.addEventListener("change", update);
