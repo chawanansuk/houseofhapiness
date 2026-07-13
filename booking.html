@@ -317,6 +317,28 @@ function update() {
   }
 }
 
+// บันทึกคำขอจองเข้าระบบหลังบ้าน (Google Sheets) แบบเงียบ ๆ — ล้มเหลวก็ไม่กระทบลูกค้า
+let loggedSig = "";
+function logBooking() {
+  const s = getState();
+  if (!(s.room && s.nights > 0 && s.name && s.phone)) return;
+  const sig = [s.name, s.phone, s.ci, s.co].join("|");
+  if (sig === loggedSig) return; // กดหลายปุ่มติดกัน = การจองเดียวกัน ไม่ส่งซ้ำ
+  loggedSig = sig;
+  try {
+    fetch("/api/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        name: s.name, phone: s.phone, checkin: s.ci, checkout: s.co,
+        guests: s.guests, rooms: s.numRooms, total: s.total, note: s.note,
+      }),
+    }).catch(() => {});
+  } catch {}
+}
+["btnLine", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
+
 // คัดลอกข้อความจอง — สำรองไว้กรณีเครื่องลูกค้าไม่มีแอปอีเมล จะได้เอาไปวางใน LINE/แชทเองได้
 $("btnCopy").addEventListener("click", async () => {
   try {

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หลังบ้าน — House of Happiness</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗝️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#8a5a34; --gold-dark:#6b4226; --gold-soft:#f3e8da;
+  --dark:#3e2f23; --cream:#f7f1e6; --card:#fffcf6; --line:#e3d5c2;
+  --text:#4a3f35; --muted:#8d7f70; --radius:16px;
+  --ok:#3e7d4f; --warn:#a8742a; --bad:#a8483e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Sarabun","Noto Sans Thai",sans-serif; color:var(--text);
+  background:var(--cream);
+  background-image:radial-gradient(rgba(138,90,52,0.045) 1px, transparent 1px);
+  background-size:22px 22px;
+  min-height:100vh;
+}
+h1,h2,h3{font-family:"Prompt","Noto Sans Thai",sans-serif; color:var(--dark)}
+button{font-family:inherit; cursor:pointer}
+input,select{font-family:inherit}
+.wrap{max-width:1080px; margin:0 auto; padding:1rem 1.2rem 4rem}
+
+/* ── topbar ── */
+.topbar{
+  display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;
+  padding:0.9rem 1.2rem; background:rgba(255,252,246,0.9);
+  border-bottom:1px solid var(--line); backdrop-filter:blur(8px);
+  position:sticky; top:0; z-index:10;
+}
+.topbar .brand{font-family:"Prompt",sans-serif; font-weight:700; color:var(--dark); font-size:1.05rem}
+.topbar .brand small{display:block; font-size:0.72rem; color:var(--gold); font-weight:600; letter-spacing:0.12em; text-transform:uppercase}
+.topbar .sp{flex:1}
+.tbtn{
+  border:1px solid var(--line); background:var(--card); color:var(--text);
+  border-radius:999px; padding:0.45rem 1rem; font-size:0.85rem; font-weight:600;
+}
+.tbtn:hover{border-color:var(--gold); color:var(--gold-dark)}
+
+/* ── login ── */
+.login-wrap{min-height:calc(100vh - 70px); display:flex; align-items:center; justify-content:center; padding:2rem 1rem}
+.login-card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:2.2rem 2rem; width:100%; max-width:400px; text-align:center;
+  box-shadow:0 18px 45px rgba(62,47,35,0.08);
+}
+.login-card .logo{font-size:2.2rem}
+.login-card h1{font-size:1.3rem; margin:0.6rem 0 0.2rem}
+.login-card p{color:var(--muted); font-size:0.88rem; margin-bottom:1.2rem}
+.login-card input{
+  width:100%; padding:0.75rem 1rem; border:1px solid var(--line); border-radius:12px;
+  font-size:1rem; background:#fff; margin-bottom:0.8rem;
+}
+.login-card input:focus{outline:none; border-color:var(--gold)}
+.btn-gold{
+  width:100%; border:none; border-radius:12px; padding:0.8rem 1rem; font-size:1rem; font-weight:700;
+  background:linear-gradient(135deg, var(--gold), var(--gold-dark)); color:#fff;
+}
+.btn-gold:hover{filter:brightness(1.08)}
+.login-err{color:var(--bad); font-size:0.85rem; margin-top:0.7rem; min-height:1.2em}
+.demo-hint{
+  margin-top:1rem; font-size:0.8rem; color:var(--muted); background:var(--gold-soft);
+  border:1px dashed var(--gold); border-radius:10px; padding:0.6rem 0.8rem; display:none;
+}
+
+/* ── banner / stats ── */
+.banner{
+  background:var(--gold-soft); border:1px dashed var(--gold); color:var(--gold-dark);
+  border-radius:12px; padding:0.7rem 1rem; font-size:0.85rem; margin:1rem 0; display:none;
+}
+.src-warn{background:#fbeeea; border:1px dashed var(--bad); color:var(--bad)}
+.stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:0.8rem; margin:1rem 0 1.4rem}
+.stat{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1rem 1.1rem;
+}
+.stat .num{font-family:"Prompt",sans-serif; font-size:1.7rem; font-weight:700; color:var(--gold-dark)}
+.stat .lbl{font-size:0.8rem; color:var(--muted); margin-top:0.1rem}
+
+/* ── sections ── */
+.panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:1.2rem 1.3rem; margin-bottom:1.4rem}
+.panel h2{font-size:1.05rem; margin-bottom:0.9rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap}
+.panel h2 .sub{font-size:0.78rem; color:var(--muted); font-weight:400; font-family:"Sarabun",sans-serif}
+
+/* ── calendar ── */
+.cal-head{display:flex; align-items:center; justify-content:center; gap:0.8rem; margin-bottom:0.8rem}
+.cal-head b{font-family:"Prompt",sans-serif; font-size:1rem; color:var(--dark); min-width:10.5em; text-align:center}
+.cal-nav{border:1px solid var(--line); background:#fff; border-radius:999px; width:34px; height:34px; font-size:1rem; color:var(--gold-dark)}
+.cal-nav:hover{border-color:var(--gold)}
+.cal{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
+.cal .dow{text-align:center; font-size:0.72rem; color:var(--muted); font-weight:700; padding:0.3rem 0}
+.cal .day{
+  min-height:64px; border:1px solid var(--line); border-radius:10px; background:#fff;
+  padding:0.3rem 0.4rem; font-size:0.78rem; position:relative; cursor:pointer;
+}
+.cal .day:hover{border-color:var(--gold)}
+.cal .day.out{opacity:0.35; cursor:default}
+.cal .day.today{border:2px solid var(--gold); background:var(--gold-soft)}
+.cal .day.sel{outline:2px solid var(--gold-dark)}
+.cal .day .n{color:var(--muted); font-weight:600}
+.cal .day .cnt{
+  display:inline-block; margin-top:0.35rem; background:var(--gold); color:#fff;
+  border-radius:999px; padding:0.05rem 0.5rem; font-size:0.72rem; font-weight:700;
+}
+.cal .day .ci{position:absolute; top:0.3rem; right:0.4rem; font-size:0.7rem}
+.cal-legend{display:flex; gap:1rem; flex-wrap:wrap; font-size:0.75rem; color:var(--muted); margin-top:0.7rem}
+.day-detail{margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; display:none}
+.day-detail h3{font-size:0.92rem; margin-bottom:0.5rem}
+
+/* ── table ── */
+.tools{display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.8rem}
+.tools input{flex:1; min-width:180px; padding:0.55rem 0.9rem; border:1px solid var(--line); border-radius:10px; background:#fff; font-size:0.88rem}
+.tools input:focus{outline:none; border-color:var(--gold)}
+.tools select{padding:0.55rem 0.7rem; border:1px solid var(--line); border-radius:10px; background:#fff; font-size:0.85rem}
+.tbl-wrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-size:0.85rem; min-width:640px}
+th{
+  text-align:left; font-family:"Prompt",sans-serif; font-size:0.75rem; color:var(--muted);
+  border-bottom:2px solid var(--line); padding:0.5rem 0.6rem; white-space:nowrap;
+}
+td{border-bottom:1px solid var(--line); padding:0.55rem 0.6rem; vertical-align:top}
+tr:hover td{background:var(--gold-soft)}
+td .src{font-size:0.72rem; color:var(--muted)}
+.badge{display:inline-block; border-radius:999px; padding:0.1rem 0.6rem; font-size:0.72rem; font-weight:700; white-space:nowrap}
+.b-ok{background:#e7f2ea; color:var(--ok)}
+.b-warn{background:#f7ecd9; color:var(--warn)}
+.b-bad{background:#fbeeea; color:var(--bad)}
+.b-gray{background:#eee7dc; color:var(--muted)}
+.row-cancel td{opacity:0.55; text-decoration:line-through}
+.empty{color:var(--muted); font-size:0.85rem; padding:0.8rem 0.2rem}
+
+@media (max-width:600px){
+  .cal .day{min-height:52px; font-size:0.7rem}
+  .cal .day .ci{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">🏠 House of Happiness<small>ระบบหลังบ้าน · Back Office</small></div>
+  <div class="sp"></div>
+  <button class="tbtn" id="btnRefresh" style="display:none">↻ รีเฟรช</button>
+  <button class="tbtn" id="btnLogout" style="display:none">ออกจากระบบ</button>
+</div>
+
+<!-- ═══ หน้าเข้าสู่ระบบ ═══ -->
+<div class="login-wrap" id="loginView">
+  <div class="login-card">
+    <div class="logo">🗝️</div>
+    <h1>เข้าสู่ระบบหลังบ้าน</h1>
+    <p>ดูการจอง เช็คอิน-เช็คเอาต์ ของ House of Happiness</p>
+    <form id="loginForm">
+      <input type="password" id="passInput" placeholder="รหัสผ่าน" autocomplete="current-password" autofocus>
+      <button class="btn-gold" type="submit">เข้าสู่ระบบ</button>
+    </form>
+    <div class="login-err" id="loginErr"></div>
+    <div class="demo-hint" id="demoHint">
+      🔧 <b>โหมดตัวอย่าง</b> — ยังไม่ได้ตั้งรหัสผ่านจริง (ADMIN_PASSWORD) บน Vercel<br>
+      เข้าดูด้วยรหัส <b>demo1234</b> ได้เลย
+    </div>
+  </div>
+</div>
+
+<!-- ═══ แดชบอร์ด ═══ -->
+<div class="wrap" id="dashView" style="display:none">
+  <div class="banner" id="demoBanner">
+    🔧 <b>โหมดตัวอย่าง</b> — ข้อมูลด้านล่างเป็นข้อมูลสมมติ ตั้งค่า ADMIN_PASSWORD + เชื่อม Google Sheets ตามคู่มือ <code>backoffice/SETUP.md</code> แล้วข้อมูลจริงจะแสดงที่นี่
+  </div>
+  <div class="banner src-warn" id="srcWarn"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="stCheckin">0</div><div class="lbl">เช็คอินวันนี้</div></div>
+    <div class="stat"><div class="num" id="stCheckout">0</div><div class="lbl">เช็คเอาต์วันนี้</div></div>
+    <div class="stat"><div class="num" id="stStaying">0</div><div class="lbl">กำลังเข้าพักคืนนี้</div></div>
+    <div class="stat"><div class="num" id="stPending">0</div><div class="lbl">รอยืนยัน (จองตรง)</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>📅 ปฏิทินการเข้าพัก <span class="sub">ตัวเลข = จำนวนการจองที่พักคืนนั้น · แตะวันเพื่อดูรายชื่อ</span></h2>
+    <div class="cal-head">
+      <button class="cal-nav" id="calPrev" aria-label="เดือนก่อนหน้า">‹</button>
+      <b id="calTitle"></b>
+      <button class="cal-nav" id="calNext" aria-label="เดือนถัดไป">›</button>
+    </div>
+    <div class="cal" id="calGrid"></div>
+    <div class="cal-legend">
+      <span>🟫 กรอบทอง = วันนี้</span><span>🛬 = มีเช็คอิน</span><span>🛫 = มีเช็คเอาต์</span>
+    </div>
+    <div class="day-detail" id="dayDetail">
+      <h3 id="ddTitle"></h3>
+      <div id="ddBody"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>🧾 รายการจอง <span class="sub" id="tblCount"></span></h2>
+    <div class="tools">
+      <input type="search" id="q" placeholder="ค้นหาชื่อ / เบอร์โทร / หมายเลขการจอง…">
+      <select id="fRange">
+        <option value="upcoming" selected>กำลังพัก + จะเข้าพัก</option>
+        <option value="all">ทั้งหมด</option>
+        <option value="past">ที่ผ่านมาแล้ว</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>เช็คอิน</th><th>เช็คเอาต์</th><th>คืน</th><th>ผู้เข้าพัก</th><th>ช่องทาง</th><th>ยอด (฿)</th><th>สถานะ</th>
+        </tr></thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+      <div class="empty" id="tblEmpty" style="display:none">ไม่พบรายการ</div>
+    </div>
+  </div>
+
+  <div class="panel" id="icalPanel" style="display:none">
+    <h2>🗓️ ปฏิทิน Booking.com (iCal) <span class="sub">ช่วงวันที่ห้องถูกจอง/ปิดขาย ตามที่ Booking.com ส่งมา</span></h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ห้อง</th><th>ตั้งแต่</th><th>ถึง</th><th>รายละเอียด</th></tr></thead>
+        <tbody id="icalBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const KEY_STORE = "hoh-admin-key";
+let DATA = null;           // ผลจาก /api/data
+let calYM = null;          // [ปี, เดือน(0-11)] ที่ปฏิทินแสดงอยู่
+let selDay = null;         // วันที่เลือกในปฏิทิน (YYYY-MM-DD)
+
+const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const THAI_MONTHS_AB = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const DOW = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+
+/* ───────── helpers ───────── */
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isYMD = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+function nightsOf(b){
+  if (!isYMD(b.checkin) || !isYMD(b.checkout)) return "";
+  return Math.round((Date.parse(b.checkout) - Date.parse(b.checkin)) / 86400000);
+}
+function fmtD(ymd){
+  if (!isYMD(ymd)) return esc(ymd || "-");
+  const [y,m,d] = ymd.split("-").map(Number);
+  return `${d} ${THAI_MONTHS_AB[m-1]} ${String((y+543)%100).padStart(2,"0")}`; // เช่น 13 ก.ค. 69
+}
+function statusBadge(st){
+  const s = String(st || "").trim();
+  if (/ยกเลิก|cancel/i.test(s)) return `<span class="badge b-bad">${esc(s || "ยกเลิก")}</span>`;
+  if (/รอ|pending/i.test(s)) return `<span class="badge b-warn">${esc(s)}</span>`;
+  if (/เช็คเอาต์|checked.?out/i.test(s)) return `<span class="badge b-gray">${esc(s)}</span>`;
+  if (!s) return `<span class="badge b-gray">-</span>`;
+  return `<span class="badge b-ok">${esc(s)}</span>`;
+}
+const isCancelled = (b) => /ยกเลิก|cancel/i.test(String(b.status || ""));
+const activeBookings = () => (DATA.bookings || []).filter((b) => !isCancelled(b) && isYMD(b.checkin) && isYMD(b.checkout));
+// พักคืนวันที่ d หรือไม่ (นับคืน: checkin <= d < checkout)
+const staysOn = (b, d) => b.checkin <= d && d < b.checkout;
+
+/* ───────── auth ───────── */
+async function tryLogin(key, silent){
+  try {
+    const r = await fetch("/api/data", { headers: { "x-admin-key": key }, cache: "no-store" });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) {
+      sessionStorage.setItem(KEY_STORE, key);
+      DATA = j;
+      showDash();
+      return true;
+    }
+    if (j && j.demo) $("demoHint").style.display = "block";
+    if (!silent) $("loginErr").textContent = r.status === 401 ? "รหัสผ่านไม่ถูกต้อง" : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง";
+  } catch {
+    if (!silent) $("loginErr").textContent = "เชื่อมต่อไม่ได้ — ลองรีเฟรชหน้า";
+  }
+  return false;
+}
+
+async function probeDemoHint(){
+  // เช็คแบบเงียบว่าระบบอยู่โหมดตัวอย่างหรือยัง เพื่อโชว์คำใบ้รหัส demo
+  try {
+    const r = await fetch("/api/data", { cache: "no-store" });
+    const j = await r.json().catch(() => ({}));
+    if (j && j.demo) $("demoHint").style.display = "block";
+  } catch {}
+}
+
+function logout(){
+  sessionStorage.removeItem(KEY_STORE);
+  location.href = location.pathname;
+}
+
+/* ───────── dashboard ───────── */
+function showDash(){
+  $("loginView").style.display = "none";
+  $("dashView").style.display = "";
+  $("btnRefresh").style.display = "";
+  $("btnLogout").style.display = "";
+  const t = DATA.today;
+  calYM = [Number(t.slice(0,4)), Number(t.slice(5,7)) - 1];
+  selDay = null;
+  renderAll();
+}
+
+function renderAll(){
+  $("demoBanner").style.display = DATA.demo ? "" : "none";
+
+  // เตือนเมื่อแหล่งข้อมูลจริงยังเชื่อมไม่สำเร็จ
+  const w = [];
+  if (!DATA.demo && DATA.sources) {
+    if (!DATA.sources.sheet) w.push("Google Sheets: " + (DATA.sources.sheetError || "เชื่อมไม่สำเร็จ"));
+    if (DATA.sources.icalError && DATA.sources.icalError.indexOf("ยังไม่ได้ตั้ง") !== 0) w.push("iCal: " + DATA.sources.icalError);
+  }
+  $("srcWarn").style.display = w.length ? "" : "none";
+  $("srcWarn").innerHTML = "⚠️ " + esc(w.join(" · "));
+
+  const t = DATA.today;
+  const act = activeBookings();
+  $("stCheckin").textContent = act.filter((b) => b.checkin === t).length;
+  $("stCheckout").textContent = act.filter((b) => b.checkout === t).length;
+  $("stStaying").textContent = act.filter((b) => staysOn(b, t)).length;
+  $("stPending").textContent = (DATA.bookings || []).filter((b) => /รอ|pending/i.test(String(b.status || ""))).length;
+
+  renderCal();
+  renderTable();
+  renderIcal();
+}
+
+/* ── ปฏิทิน ── */
+function renderCal(){
+  const [y, m] = calYM;
+  $("calTitle").textContent = `${THAI_MONTHS[m]} ${y + 543}`;
+  const grid = $("calGrid");
+  grid.innerHTML = DOW.map((d) => `<div class="dow">${d}</div>`).join("");
+
+  const first = new Date(Date.UTC(y, m, 1));
+  const startDow = first.getUTCDay();
+  const dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const act = activeBookings();
+  const pad = (n) => String(n).padStart(2, "0");
+
+  for (let i = 0; i < startDow; i++) grid.insertAdjacentHTML("beforeend", `<div class="day out"></div>`);
+  for (let d = 1; d <= dim; d++) {
+    const ymd = `${y}-${pad(m + 1)}-${pad(d)}`;
+    const staying = act.filter((b) => staysOn(b, ymd)).length;
+    const hasCI = act.some((b) => b.checkin === ymd);
+    const hasCO = act.some((b) => b.checkout === ymd);
+    const cls = ["day"];
+    if (ymd === DATA.today) cls.push("today");
+    if (ymd === selDay) cls.push("sel");
+    grid.insertAdjacentHTML("beforeend",
+      `<div class="${cls.join(" ")}" data-d="${ymd}">
+         <span class="n">${d}</span>
+         <span class="ci">${hasCI ? "🛬" : ""}${hasCO ? "🛫" : ""}</span>
+         ${staying ? `<br><span class="cnt">${staying}</span>` : ""}
+       </div>`);
+  }
+  grid.querySelectorAll(".day[data-d]").forEach((el) =>
+    el.addEventListener("click", () => { selDay = el.dataset.d; renderCal(); renderDayDetail(); }));
+  renderDayDetail();
+}
+
+function renderDayDetail(){
+  const box = $("dayDetail");
+  if (!selDay) { box.style.display = "none"; return; }
+  const act = activeBookings();
+  const ci = act.filter((b) => b.checkin === selDay);
+  const co = act.filter((b) => b.checkout === selDay);
+  const stay = act.filter((b) => staysOn(b, selDay) && b.checkin !== selDay);
+  const ical = (DATA.ical || []).filter((e) => e.start <= selDay && selDay < e.end);
+  const line = (b, tag) => `<div>• <b>${esc(b.name || "-")}</b> ${tag} <span class="src">${esc(b.source || "")}${b.phone ? " · " + esc(b.phone) : ""}</span></div>`;
+  let html = "";
+  if (ci.length) html += ci.map((b) => line(b, `<span class="badge b-ok">เช็คอิน</span>`)).join("");
+  if (stay.length) html += stay.map((b) => line(b, `<span class="badge b-gray">พักต่อเนื่อง</span>`)).join("");
+  if (co.length) html += co.map((b) => line(b, `<span class="badge b-warn">เช็คเอาต์</span>`)).join("");
+  if (ical.length) html += `<div style="margin-top:0.4rem" class="src">ปฏิทิน Booking.com: ${ical.map((e) => esc(e.room || e.summary || "จองแล้ว")).join(", ")}</div>`;
+  if (!html) html = `<div class="empty">ไม่มีการจองในวันนี้</div>`;
+  $("ddTitle").textContent = `รายละเอียดวันที่ ${fmtD(selDay)}`;
+  $("ddBody").innerHTML = html;
+  box.style.display = "";
+}
+
+/* ── ตาราง ── */
+function renderTable(){
+  const q = $("q").value.trim().toLowerCase();
+  const range = $("fRange").value;
+  const t = DATA.today;
+  let rows = (DATA.bookings || []).slice();
+
+  rows = rows.filter((b) => {
+    if (range === "upcoming") return !isYMD(b.checkout) || b.checkout >= t;
+    if (range === "past") return isYMD(b.checkout) && b.checkout < t;
+    return true;
+  });
+  if (q) rows = rows.filter((b) =>
+    [b.name, b.phone, b.id, b.source, b.note].some((v) => String(v || "").toLowerCase().includes(q)));
+
+  rows.sort((a, b) => String(a.checkin || "").localeCompare(String(b.checkin || "")));
+  if (range === "past") rows.reverse();
+
+  $("tblCount").textContent = `${rows.length} รายการ`;
+  $("tblEmpty").style.display = rows.length ? "none" : "";
+  $("tblBody").innerHTML = rows.map((b) => `
+    <tr class="${isCancelled(b) ? "row-cancel" : ""}">
+      <td>${fmtD(b.checkin)}${b.checkin === t ? " <b>← วันนี้</b>" : ""}</td>
+      <td>${fmtD(b.checkout)}</td>
+      <td>${nightsOf(b)}</td>
+      <td><b>${esc(b.name || "-")}</b>${b.phone ? `<br><span class="src">${esc(b.phone)}</span>` : ""}${b.note ? `<br><span class="src">📝 ${esc(b.note)}</span>` : ""}</td>
+      <td><span class="src">${esc(b.source || "-")}</span>${b.id ? `<br><span class="src">#${esc(b.id)}</span>` : ""}</td>
+      <td>${esc(b.amount || "-")}</td>
+      <td>${statusBadge(b.status)} </td>
+    </tr>`).join("");
+}
+
+/* ── iCal ── */
+function renderIcal(){
+  const evs = DATA.ical || [];
+  $("icalPanel").style.display = evs.length ? "" : "none";
+  $("icalBody").innerHTML = evs.map((e) => `
+    <tr><td>${esc(e.room || "-")}</td><td>${fmtD(e.start)}</td><td>${fmtD(e.end)}</td><td><span class="src">${esc(e.summary || "")}</span></td></tr>`).join("");
+}
+
+/* ───────── events ───────── */
+$("loginForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  $("loginErr").textContent = "";
+  const key = $("passInput").value.trim();
+  if (key) await tryLogin(key, false);
+});
+$("btnLogout").addEventListener("click", logout);
+$("btnRefresh").addEventListener("click", async () => {
+  $("btnRefresh").textContent = "⏳ กำลังโหลด…";
+  await tryLogin(sessionStorage.getItem(KEY_STORE) || "", true);
+  $("btnRefresh").textContent = "↻ รีเฟรช";
+});
+$("calPrev").addEventListener("click", () => { calYM[1]--; if (calYM[1] < 0) { calYM[1] = 11; calYM[0]--; } renderCal(); });
+$("calNext").addEventListener("click", () => { calYM[1]++; if (calYM[1] > 11) { calYM[1] = 0; calYM[0]++; } renderCal(); });
+$("q").addEventListener("input", renderTable);
+$("fRange").addEventListener("change", renderTable);
+
+/* ───────── init ───────── */
+(async () => {
+  const urlKey = new URLSearchParams(location.search).get("key");
+  const saved = urlKey || sessionStorage.getItem(KEY_STORE);
+  if (urlKey) history.replaceState(null, "", location.pathname); // ไม่ทิ้งรหัสไว้ใน URL
+  if (saved && await tryLogin(saved, true)) return;
+  probeDemoHint();
+})();
+</script>
+
+</body>
+</html>
