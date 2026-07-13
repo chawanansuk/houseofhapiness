@@ -37,6 +37,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       ok: true, demo: true, today,
       bookings: demoBookings(today),
+      rooms: demoRooms(),
       ical: demoIcal(today),
       sources: { sheet: false, ical: false },
     });
@@ -46,6 +47,7 @@ module.exports = async (req, res) => {
   return res.status(200).json({
     ok: true, demo: false, today,
     bookings: sheet.rows,
+    rooms: sheet.rooms,
     ical: ical.events,
     sources: { sheet: sheet.ok, ical: ical.ok, sheetError: sheet.error, icalError: ical.error },
   });
@@ -62,18 +64,22 @@ function bangkokToday() {
 async function fetchSheet() {
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url) return { ok: false, rows: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
+  if (!url) return { ok: false, rows: [], rooms: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
   try {
     const sep = url.includes("?") ? "&" : "?";
     const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, {
       redirect: "follow",
     });
-    if (!r.ok) return { ok: false, rows: [], error: `ชีตตอบ HTTP ${r.status}` };
+    if (!r.ok) return { ok: false, rows: [], rooms: [], error: `ชีตตอบ HTTP ${r.status}` };
     const j = await r.json();
-    if (j && j.error) return { ok: false, rows: [], error: String(j.error) };
-    return { ok: true, rows: Array.isArray(j && j.bookings) ? j.bookings : [] };
+    if (j && j.error) return { ok: false, rows: [], rooms: [], error: String(j.error) };
+    return {
+      ok: true,
+      rows: Array.isArray(j && j.bookings) ? j.bookings : [],
+      rooms: Array.isArray(j && j.rooms) ? j.rooms : [],
+    };
   } catch (e) {
-    return { ok: false, rows: [], error: String((e && e.message) || e) };
+    return { ok: false, rows: [], rooms: [], error: String((e && e.message) || e) };
   }
 }
 
@@ -143,26 +149,35 @@ function shiftDate(ymd, days) {
 }
 
 function demoBookings(today) {
-  const mk = (name, inOff, outOff, source, status, guests, phone, amount) => ({
+  const mk = (name, inOff, outOff, source, status, guests, phone, amount, room_no) => ({
     id: "DEMO-" + name.replace(/\s+/g, ""),
     source, name,
     checkin: shiftDate(today, inOff),
     checkout: shiftDate(today, outOff),
     guests, rooms: 1, phone, amount,
-    status, note: "ข้อมูลตัวอย่าง", created: "",
+    status, note: "ข้อมูลตัวอย่าง", created: "", room_no: room_no || "",
   });
   return [
-    mk("คุณสมชาย ใจดี", -2, 1, "Booking.com", "ยืนยันแล้ว", 2, "081-111-2233", "2,400"),
-    mk("Ms. Emma Wilson", -1, 3, "Booking.com", "ยืนยันแล้ว", 2, "", "3,200"),
-    mk("คุณวราภรณ์ ศรีสุข", 0, 2, "Booking.com", "ยืนยันแล้ว", 1, "089-555-6677", "1,600"),
+    mk("คุณสมชาย ใจดี", -2, 1, "Booking.com", "ยืนยันแล้ว", 2, "081-111-2233", "2,400", "101"),
+    mk("Ms. Emma Wilson", -1, 3, "Booking.com", "ยืนยันแล้ว", 2, "", "3,200", "103"),
+    mk("คุณวราภรณ์ ศรีสุข", 0, 2, "Booking.com", "ยืนยันแล้ว", 1, "089-555-6677", "1,600", "105"),
     mk("Mr. Kenji Tanaka", 0, 4, "Booking.com", "ยืนยันแล้ว", 2, "", "3,200"),
     mk("คุณอนันต์ พูนสุข", 1, 2, "เว็บไซต์ (จองตรง)", "รอยืนยัน", 2, "086-999-0011", "800"),
     mk("Mr. Liam O'Connor", 2, 5, "Booking.com", "ยืนยันแล้ว", 3, "", "2,400"),
     mk("คุณพิมพ์ชนก แก้วใส", 3, 6, "เว็บไซต์ (จองตรง)", "รอยืนยัน", 2, "092-333-4455", "2,400"),
-    mk("Ms. Sofia Rossi", 5, 8, "Booking.com", "ยืนยันแล้ว", 2, "", "2,400"),
-    mk("คุณธนา รุ่งเรือง", -6, -4, "Booking.com", "เช็คเอาต์แล้ว", 2, "084-777-8899", "1,600"),
+    mk("Ms. Sofia Rossi", 5, 8, "Booking.com", "ยืนยันแล้ว", 2, "", "2,400", "110"),
+    mk("คุณธนา รุ่งเรือง", -6, -4, "Booking.com", "เช็คเอาต์แล้ว", 2, "084-777-8899", "1,600", "102"),
     mk("Mr. David Chen", 7, 9, "Booking.com", "ยกเลิก", 2, "", "1,600"),
   ];
+}
+
+function demoRooms() {
+  const rooms = [];
+  for (let i = 1; i <= 15; i++) {
+    const no = "1" + String(i).padStart(2, "0");
+    rooms.push({ room: no, clean: (no === "102" || no === "108") ? "รอทำความสะอาด" : "สะอาด", note: "" });
+  }
+  return rooms;
 }
 
 function demoIcal(today) {

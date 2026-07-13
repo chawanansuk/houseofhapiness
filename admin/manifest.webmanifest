@@ -1,0 +1,24 @@
+{
+  "name": "HOH หลังบ้าน — House of Happiness",
+  "short_name": "HOH หลังบ้าน",
+  "description": "ระบบหลังบ้าน House of Happiness: ผังห้อง เช็คอิน-เช็คเอาต์ การจอง",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#f7f1e6",
+  "theme_color": "#f7f1e6",
+  "icons": [
+    {
+      "src": "/images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -15,8 +15,12 @@
 var TOKEN = "เปลี่ยนรหัสลับตรงนี้";
 
 var SHEET_NAME = "Bookings";
+var ROOMS_SHEET = "Rooms";
 var LABEL_DONE = "HOH-บันทึกแล้ว";
-var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created"];
+var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no"];
+var ROOM_HEADERS = ["room", "clean", "note"];
+// คอลัมน์ที่หน้า /admin แก้ไขได้ผ่าน action=update
+var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests"];
 
 /* ═══════════════ ชีต ═══════════════ */
 
@@ -63,7 +67,48 @@ function appendBooking_(b) {
     nights, b.guests || "", b.rooms || "", b.phone || "", b.amount || "",
     b.status || "", b.note || "",
     Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd HH:mm"),
+    b.room_no || "",
   ]);
+}
+
+/* ── ชีต Rooms: รายชื่อห้อง + สถานะความสะอาด (แก้ชื่อห้องในชีตได้เลย) ── */
+
+function getRoomsSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(ROOMS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(ROOMS_SHEET);
+    sh.appendRow(ROOM_HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, ROOM_HEADERS.length).setFontWeight("bold");
+    // สร้างห้องตั้งต้น 101-115 (แก้ชื่อ/เพิ่ม/ลบ ได้เองในชีต)
+    for (var i = 1; i <= 15; i++) sh.appendRow(["1" + (i < 10 ? "0" + i : i), "สะอาด", ""]);
+  }
+  return sh;
+}
+
+function readRooms_() {
+  var sh = getRoomsSheet_();
+  var values = sh.getDataRange().getValues();
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    if (!asText_(values[i][0])) continue;
+    rows.push({ room: asText_(values[i][0]), clean: asText_(values[i][1]) || "สะอาด", note: asText_(values[i][2]), _rowIndex: i + 1 });
+  }
+  return rows;
+}
+
+function setRoomClean_(room, clean, note) {
+  var sh = getRoomsSheet_();
+  var rows = readRooms_();
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].room === String(room)) {
+      sh.getRange(rows[i]._rowIndex, 2).setValue(clean);
+      if (note !== undefined) sh.getRange(rows[i]._rowIndex, 3).setValue(note);
+      return true;
+    }
+  }
+  return false;
 }
 
 function findById_(id) {
@@ -92,7 +137,8 @@ function doGet(e) {
   if (p.token !== TOKEN) return json_({ error: "unauthorized" });
   if (p.action === "list") {
     var rows = readAll_().map(function (r) { delete r._rowIndex; return r; });
-    return json_({ bookings: rows });
+    var rooms = readRooms_().map(function (r) { delete r._rowIndex; return r; });
+    return json_({ bookings: rows, rooms: rooms });
   }
   return json_({ error: "unknown-action" });
 }
@@ -106,14 +152,33 @@ function doPost(e) {
   }
   if (b.token !== TOKEN) return json_({ error: "unauthorized" });
   if (b.action === "add") {
+    var id = "WEB-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyMMddHHmmss");
     appendBooking_({
-      id: "WEB-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyMMddHHmmss"),
+      id: id,
       source: b.source || "เว็บไซต์ (จองตรง)",
       name: b.name, checkin: b.checkin, checkout: b.checkout,
       guests: b.guests, rooms: b.rooms, phone: b.phone,
       amount: b.amount, status: b.status || "รอยืนยัน", note: b.note,
+      room_no: b.room_no,
     });
+    return json_({ ok: true, id: id });
+  }
+  // แก้ไขการจองเดิมจากหน้า /admin เช่น เช็คอิน/เช็คเอาต์/ย้ายห้อง/เปลี่ยนสถานะ
+  if (b.action === "update") {
+    var row = findById_(b.id);
+    if (!row) return json_({ error: "not-found" });
+    var sh = getSheet_();
+    var fields = b.fields || {};
+    for (var k in fields) {
+      if (EDITABLE.indexOf(k) < 0) continue;
+      sh.getRange(row._rowIndex, HEADERS.indexOf(k) + 1).setValue(String(fields[k]));
+    }
     return json_({ ok: true });
+  }
+  // อัปเดตสถานะความสะอาดของห้อง
+  if (b.action === "roomclean") {
+    var done = setRoomClean_(b.room, b.clean || "สะอาด", b.note);
+    return json_(done ? { ok: true } : { error: "room-not-found" });
   }
   return json_({ error: "unknown-action" });
 }
