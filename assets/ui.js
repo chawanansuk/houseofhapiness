@@ -38,3 +38,36 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.addEventListener("click", close);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 });
+
+// ปุ่มกลับขึ้นบนสุด — โผล่หลังเลื่อนลงมาระยะหนึ่ง
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.createElement("button");
+  btn.className = "to-top";
+  btn.type = "button";
+  btn.setAttribute("aria-label", "Back to top");
+  btn.textContent = "↑";
+  btn.hidden = true;
+  document.body.appendChild(btn);
+  btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  window.addEventListener("scroll", () => { btn.hidden = window.scrollY < 600; }, { passive: true });
+});
+
+// Scrollspy: ไฮไลต์เมนูบน nav ตาม section ที่กำลังดูอยู่
+document.addEventListener("DOMContentLoaded", () => {
+  const links = [...document.querySelectorAll(".navlinks a[href^='#']")];
+  if (!links.length || !("IntersectionObserver" in window)) return;
+  const map = new Map();
+  links.forEach((a) => {
+    const sec = document.querySelector(a.getAttribute("href"));
+    if (sec) map.set(sec, a);
+  });
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        links.forEach((a) => a.classList.remove("active"));
+        map.get(e.target)?.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  map.forEach((_, sec) => spy.observe(sec));
+});

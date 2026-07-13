@@ -16,6 +16,10 @@ const I18N = {
                        en: "558/1 Mung Me Tawee Suk, Soi 16, Tha Din Daeng Rd, Khlong San, Bangkok 10600" },
   "footer.or":       { th: "หรือจองผ่าน", en: "Or book via" },
   "skip":            { th: "ข้ามไปยังเนื้อหา", en: "Skip to content" },
+  "foot.desc":       { th: "เซอร์วิสอพาร์ตเมนต์ 1 ห้องนอน 15 ยูนิต ใจกลางคลองสาน ใกล้แม่น้ำเจ้าพระยาและ ICONSIAM",
+                       en: "15 serviced one-bedroom apartments in the heart of Khlong San, near the Chao Phraya River and ICONSIAM." },
+  "foot.menu":       { th: "เมนู", en: "Menu" },
+  "foot.booking":    { th: "การจอง", en: "Booking" },
   "loc.open":        { th: "เปิดใน Google Maps →", en: "Open in Google Maps →" },
 
   /* ── หน้าหลัก ── */

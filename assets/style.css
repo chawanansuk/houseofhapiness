@@ -405,14 +405,71 @@ details p { margin-top: 0.7rem; font-size: 0.96rem; color: var(--text); }
 /* ── Footer ── */
 footer.site {
   background: #33271d;
-  text-align: center;
-  padding: 2rem 1.5rem 5.5rem;
-  font-size: 0.88rem;
+  padding: clamp(2.2rem, 5vw, 3.2rem) 1.5rem 5.5rem;
+  font-size: 0.9rem;
   color: #b8a58f;
 }
-footer.site a { color: #f5d9b8; text-decoration: none; }
-footer.site a:hover { text-decoration: underline; }
+footer.site a { color: #e8d8c4; text-decoration: none; transition: color 0.15s ease; }
+footer.site a:hover { color: #f5d9b8; text-decoration: underline; }
+.foot-grid {
+  max-width: 64rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 700px) { .foot-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
+.foot-brand .fb-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f5d9b8;
+  margin-bottom: 0.5rem;
+}
+.foot-brand p { line-height: 1.6; margin-bottom: 0.6rem; }
+.foot-brand address { font-style: normal; font-size: 0.84rem; color: #9b8a76; }
+.foot-col h4 {
+  font-family: var(--font-head);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a7761;
+  margin-bottom: 0.7rem;
+}
+.foot-col a { display: block; padding: 0.18rem 0; }
+.foot-bottom {
+  max-width: 64rem;
+  margin: 2rem auto 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(245,217,184,0.15);
+  text-align: center;
+  font-size: 0.8rem;
+  color: #8a7761;
+}
 @media (min-width: 641px) { footer.site { padding-bottom: 2rem; } }
+
+/* ── Back to top ── */
+.to-top {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 5.2rem;
+  z-index: 70;
+  width: 2.8rem; height: 2.8rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(62,47,35,0.3);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.to-top:hover { background: var(--gold-dark); transform: translateY(-2px); }
+@media (min-width: 641px) { .to-top { bottom: 1.5rem; } }
+
+/* ── Nav active state (scrollspy) ── */
+.navlinks a.active { color: var(--gold); font-weight: 600; }
 
 /* ── Sticky mobile booking bar (index) ── */
 .sticky-cta {

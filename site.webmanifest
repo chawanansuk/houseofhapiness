@@ -1,0 +1,23 @@
+{
+  "name": "House of Happiness — Aparthotel Bangkok",
+  "short_name": "House of Happiness",
+  "description": "จองตรงกับ House of Happiness เซอร์วิสอพาร์ตเมนต์ คลองสาน กรุงเทพฯ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f1e6",
+  "theme_color": "#f7f1e6",
+  "icons": [
+    {
+      "src": "/images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

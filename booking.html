@@ -7,6 +7,7 @@
 <meta name="description" content="จองห้องพักโดยตรงกับ House of Happiness คลองสาน กรุงเทพฯ ราคาดีกว่า ไม่ผ่านคนกลาง | Book directly with House of Happiness, Khlong San, Bangkok.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <meta property="og:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
 <meta property="og:image" content="https://houseofhapiness.vercel.app/images/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -119,9 +120,28 @@
 </form>
 
 <footer class="site">
-  House of Happiness · <span data-i18n="footer.addr"></span><br>
-  <span data-i18n="footer.or">หรือจองผ่าน</span>
-  <a href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">Booking.com</a>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="fb-name">🏠 House of Happiness</div>
+      <p data-i18n="foot.desc"></p>
+      <address data-i18n="footer.addr"></address>
+    </div>
+    <div class="foot-col">
+      <h4 data-i18n="foot.menu">เมนู</h4>
+      <a href="index.html#rooms" data-i18n="nav.rooms">ห้องพัก</a>
+      <a href="index.html#reviews" data-i18n="nav.reviews">รีวิว</a>
+      <a href="index.html#gallery" data-i18n="nav.gallery">รูปภาพ</a>
+      <a href="index.html#location" data-i18n="nav.location">ที่ตั้ง</a>
+      <a href="index.html#faq" data-i18n="nav.faq">คำถาม</a>
+    </div>
+    <div class="foot-col">
+      <h4 data-i18n="foot.booking">การจอง</h4>
+      <a href="booking.html" data-i18n="cta.direct">จองตรงกับเรา</a>
+      <a href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener">Booking.com</a>
+      <a href="https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok" target="_blank" rel="noopener">Google Maps</a>
+    </div>
+  </div>
+  <div class="foot-bottom">© House of Happiness · Khlong San, Bangkok</div>
 </footer>
 
 <div class="bk-sticky">
