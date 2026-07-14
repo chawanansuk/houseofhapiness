@@ -13,8 +13,10 @@
 
 ## ขั้นที่ 1 — สร้าง Google Sheets + วางสคริปต์ (ประมาณ 10 นาที)
 
-1. เข้า [sheets.new](https://sheets.new) ด้วยบัญชี Gmail ที่**รับอีเมลจาก Booking.com**
-   (บัญชี chawanan.suk@gmail.com) แล้วตั้งชื่อไฟล์ เช่น `HOH Bookings`
+1. เข้า [sheets.new](https://sheets.new) ด้วยบัญชี **houseofhapinessbangkok@gmail.com**
+   (บัญชีที่รับอีเมลจาก Booking.com) แล้วตั้งชื่อไฟล์ เช่น `HOH Bookings`
+   > สำคัญ: อีเมลยืนยันการจองจาก Booking.com ต้องเข้ากล่องนี้ — ตั้งใน Extranet
+   > (เมนู Account → Contacts) หรือตั้ง Outlook เดิมให้ส่งต่ออัตโนมัติมาที่อีเมลนี้
 2. เมนู **Extensions → Apps Script** จะเปิดหน้าเขียนสคริปต์
 3. ลบโค้ดเดิมทั้งหมด แล้ววางโค้ดจากไฟล์ **`backoffice/apps-script.gs`** ในรีโปนี้
 4. บรรทัดบนสุด แก้ `var TOKEN = "เปลี่ยนรหัสลับตรงนี้";`
