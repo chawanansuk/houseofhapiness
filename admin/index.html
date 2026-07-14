@@ -18,10 +18,11 @@
 <style>
 :root{
   --gold:#8a5a34; --gold-dark:#6b4226; --gold-soft:#f3e8da;
-  --dark:#3e2f23; --cream:#f7f1e6; --card:#fffcf6; --line:#e3d5c2;
-  --text:#4a3f35; --muted:#8d7f70; --radius:16px;
-  --ok:#3e7d4f; --ok-soft:#e7f2ea; --warn:#a8742a; --warn-soft:#f7ecd9;
-  --bad:#a8483e; --bad-soft:#fbeeea;
+  --dark:#3e2f23; --cream:#ece2d0; --card:#fffdf8; --line:#d6c4ac;
+  --text:#3f352b; --muted:#8a7c6c; --radius:16px;
+  --ok:#1f8a4c; --ok-soft:#e2f4e9; --warn:#d4841a; --warn-soft:#fdeed3;
+  --bad:#d1483b; --bad-soft:#fbe4e1;
+  --occ:#2c6f92; --occ-soft:#e4eff5;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -39,12 +40,12 @@ input,select{font-family:inherit}
 /* ── topbar ── */
 .topbar{
   display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;
-  padding:0.9rem 1.2rem; background:rgba(255,252,246,0.9);
-  border-bottom:1px solid var(--line); backdrop-filter:blur(8px);
+  padding:0.9rem 1.2rem; background:linear-gradient(135deg,#3a2c20,#281d14);
+  border-bottom:3px solid var(--gold);
   position:sticky; top:0; z-index:10;
 }
-.topbar .brand{font-family:"Prompt",sans-serif; font-weight:700; color:var(--dark); font-size:1.05rem}
-.topbar .brand small{display:block; font-size:0.72rem; color:var(--gold); font-weight:600; letter-spacing:0.12em; text-transform:uppercase}
+.topbar .brand{font-family:"Prompt",sans-serif; font-weight:700; color:#f7f1e6; font-size:1.05rem}
+.topbar .brand small{display:block; font-size:0.72rem; color:#e2b06a; font-weight:600; letter-spacing:0.12em; text-transform:uppercase}
 .topbar .sp{flex:1}
 .tbtn{
   border:1px solid var(--line); background:var(--card); color:var(--text);
@@ -87,13 +88,18 @@ input,select{font-family:inherit}
 .stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:0.8rem; margin:1rem 0 1.4rem}
 .stat{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-  padding:1rem 1.1rem;
+  padding:1rem 1.1rem; box-shadow:0 2px 10px rgba(62,47,35,0.05);
 }
+.stats .stat{border-top:3px solid var(--line)}
+.stats .stat:nth-child(1){border-top-color:var(--warn)}
+.stats .stat:nth-child(2){border-top-color:var(--occ)}
+.stats .stat:nth-child(3){border-top-color:var(--gold)}
+.stats .stat:nth-child(4){border-top-color:var(--ok)}
 .stat .num{font-family:"Prompt",sans-serif; font-size:1.7rem; font-weight:700; color:var(--gold-dark)}
 .stat .lbl{font-size:0.8rem; color:var(--muted); margin-top:0.1rem}
 
 /* ── sections ── */
-.panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:1.2rem 1.3rem; margin-bottom:1.4rem}
+.panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:1.2rem 1.3rem; margin-bottom:1.4rem; box-shadow:0 2px 12px rgba(62,47,35,0.06)}
 .panel h2{font-size:1.05rem; margin-bottom:0.9rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap}
 .panel h2 .sub{font-size:0.78rem; color:var(--muted); font-weight:400; font-family:"Sarabun",sans-serif}
 
@@ -109,14 +115,20 @@ input,select{font-family:inherit}
 .rm .st{font-size:0.72rem; font-weight:700; margin-top:0.15rem}
 .rm .who{font-size:0.74rem; color:var(--muted); margin-top:0.2rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .rm .tag{position:absolute; top:0.5rem; right:0.55rem; font-size:0.85rem}
-.rm-free{background:#fff}
+.rm-free{background:#fff; border-color:var(--line)}
+.rm-free .no{color:var(--muted)}
 .rm-free .st{color:var(--ok)}
-.rm-occ{background:var(--gold-soft); border-color:var(--gold)}
-.rm-occ .st{color:var(--gold-dark)}
-.rm-arrive{background:var(--warn-soft); border-color:var(--warn)}
-.rm-arrive .st{color:var(--warn)}
-.rm-dirty{background:var(--bad-soft); border-color:var(--bad)}
-.rm-dirty .st{color:var(--bad)}
+.rm-occ{background:var(--occ); border-color:#22587a; box-shadow:0 3px 10px rgba(44,111,146,0.28)}
+.rm-occ .no, .rm-occ .st{color:#fff}
+.rm-occ .who{color:rgba(255,255,255,0.85)}
+.rm-arrive{background:var(--warn); border-color:#b06f14; box-shadow:0 3px 10px rgba(212,132,26,0.3)}
+.rm-arrive .no{color:#462c06}
+.rm-arrive .st{color:#5a3908}
+.rm-arrive .who{color:#5f4212}
+.rm-dirty{background:var(--bad); border-color:#b23a2f; box-shadow:0 3px 10px rgba(209,72,59,0.28)}
+.rm-dirty .no, .rm-dirty .st{color:#fff}
+.rm-dirty .who{color:rgba(255,255,255,0.85)}
+.rm-occ:hover, .rm-arrive:hover, .rm-dirty:hover{border-color:#fff; filter:brightness(1.05)}
 .legend{display:flex; gap:0.9rem; flex-wrap:wrap; font-size:0.75rem; color:var(--muted); margin-top:0.8rem}
 .legend i{display:inline-block; width:0.9em; height:0.9em; border-radius:3px; margin-right:0.3em; vertical-align:-0.1em; border:1px solid var(--line)}
 .unassigned{margin-top:0.9rem; border-top:1px dashed var(--line); padding-top:0.8rem; font-size:0.85rem}
@@ -266,10 +278,10 @@ td .src{font-size:0.72rem; color:var(--muted)}
     <h2>🚪 ผังห้อง <span class="sub">แตะห้องเพื่อเช็คอิน / เช็คเอาต์ / แจ้งทำความสะอาด</span></h2>
     <div class="roomgrid" id="roomGrid"></div>
     <div class="legend">
-      <span><i style="background:#fff"></i>ว่าง</span>
-      <span><i style="background:var(--gold-soft); border-color:var(--gold)"></i>มีผู้พัก</span>
-      <span><i style="background:var(--warn-soft); border-color:var(--warn)"></i>เช็คอินวันนี้</span>
-      <span><i style="background:var(--bad-soft); border-color:var(--bad)"></i>รอทำความสะอาด</span>
+      <span><i style="background:#fff; border-color:var(--line)"></i>ว่าง</span>
+      <span><i style="background:var(--occ); border-color:#22587a"></i>มีผู้พัก</span>
+      <span><i style="background:var(--warn); border-color:#b06f14"></i>เช็คอินวันนี้</span>
+      <span><i style="background:var(--bad); border-color:#b23a2f"></i>รอทำความสะอาด</span>
     </div>
     <div class="unassigned" id="unassignedBox" style="display:none">
       <b>⏳ รอจัดห้อง:</b> <span id="unassignedList"></span>
