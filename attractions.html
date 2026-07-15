@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เที่ยวอะไรใกล้ที่พัก | Things to Do Nearby — House of Happiness Bangkok</title>
+<meta name="description" content="แหล่งท่องเที่ยวใกล้ House of Happiness คลองสาน: ICONSIAM, สวนลอยฟ้าเจ้าพระยา, วัดอรุณ, เยาวราช พร้อมวิธีเดินทาง | Attractions near our Khlong San hotel: ICONSIAM, Wat Arun, Chinatown and more.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:title" content="เที่ยวอะไรใกล้ที่พัก — House of Happiness Bangkok">
+<meta property="og:description" content="ICONSIAM · สวนลอยฟ้าเจ้าพระยา · วัดอรุณ · เยาวราช — เดินทางง่ายจากที่พักย่านคลองสาน">
+<meta property="og:image" content="https://houseofhapiness.vercel.app/images/og.png">
+<link rel="canonical" href="https://houseofhapiness.vercel.app/attractions.html">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#f7f1e6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ── สไตล์เฉพาะหน้านี้ ── */
+.atr-hero{padding:4.2rem 1.2rem 2.6rem; text-align:center}
+.atr-hero h1{font-family:var(--font-display); font-size:clamp(1.7rem,4.5vw,2.6rem); color:var(--dark); margin-bottom:0.6rem}
+.atr-hero p{color:var(--muted); max-width:44em; margin:0 auto; line-height:1.7}
+.atr-wrap{max-width:1080px; margin:0 auto; padding:0 1.2rem 3.5rem}
+.atr-group{margin:2.2rem 0 1rem; display:flex; align-items:center; gap:0.7rem}
+.atr-group h2{font-family:"Prompt",sans-serif; font-size:1.05rem; color:var(--gold-dark); white-space:nowrap}
+.atr-group::after{content:""; flex:1; height:1px; background:var(--line)}
+.atr-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.1rem}
+.atr-card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:0 4px 16px rgba(62,47,35,0.06); transition:transform .18s ease, box-shadow .18s ease;
+}
+.atr-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(62,47,35,0.12)}
+.atr-img{aspect-ratio:16/10; background:linear-gradient(135deg,var(--gold-soft),#e8d9c3); position:relative; overflow:hidden}
+.atr-img img{width:100%; height:100%; object-fit:cover; display:block}
+.atr-img .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--gold); opacity:.55}
+.atr-body{padding:0.95rem 1.05rem 1.1rem; display:flex; flex-direction:column; gap:0.4rem; flex:1}
+.atr-body h3{font-family:"Prompt",sans-serif; font-size:1rem; color:var(--dark)}
+.atr-body .desc{font-size:0.86rem; color:var(--text); line-height:1.6; flex:1}
+.atr-body .go{font-size:0.8rem; color:var(--muted)}
+.atr-body .go b{color:var(--gold-dark)}
+.atr-link{
+  margin-top:0.5rem; align-self:flex-start; font-size:0.82rem; font-weight:700;
+  color:var(--gold-dark); text-decoration:none; border-bottom:1.5px solid var(--gold);
+  padding-bottom:1px;
+}
+.atr-link:hover{color:var(--gold)}
+.atr-note{font-size:0.78rem; color:var(--muted); margin-top:1.6rem}
+.atr-credits{margin-top:2.4rem; border-top:1px dashed var(--line); padding-top:1.1rem}
+.atr-credits h4{font-family:"Prompt",sans-serif; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem}
+.atr-credits ul{list-style:none; padding:0; font-size:0.72rem; color:var(--muted); line-height:1.8}
+.atr-credits a{color:var(--muted)}
+.atr-cta{text-align:center; margin-top:2.6rem}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="brand" href="index.html"><span class="logo">🏠</span> House of Happiness</a>
+  <div class="navlinks">
+    <a href="index.html" data-i18n="bk.back">← กลับหน้าหลัก</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button data-lang="th" onclick="setLang('th')">ไทย</button>
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</nav>
+
+<header class="atr-hero">
+  <h1 data-i18n="atr.title">เที่ยวอะไรใกล้ House of Happiness</h1>
+  <p data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p>
+</header>
+
+<div class="atr-wrap">
+
+  <div class="atr-group"><h2 data-i18n="atr.g1">ใกล้ที่พัก · เดินถึง / BTS สายสีทอง</h2></div>
+  <div class="atr-grid" id="gridNear"></div>
+
+  <div class="atr-group"><h2 data-i18n="atr.g2">ข้ามฝั่งเที่ยวเมืองเก่า · แท็กซี่ ~10-15 นาที</h2></div>
+  <div class="atr-grid" id="gridOld"></div>
+
+  <p class="atr-note" data-i18n="atr.note">* ระยะทางและเวลาเป็นค่าโดยประมาณจากที่พัก</p>
+
+  <div class="atr-cta">
+    <a class="btn btn-gold" href="booking.html" data-i18n="atr.book">จองห้องพักกับเรา</a>
+  </div>
+
+  <div class="atr-credits" id="creditsBox" hidden>
+    <h4 data-i18n="atr.credits">เครดิตรูปภาพ (Wikimedia Commons)</h4>
+    <ul id="creditsList"></ul>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="foot-bottom">© House of Happiness · Khlong San, Bangkok · <a href="index.html" style="color:inherit">houseofhapiness.vercel.app</a></div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Things to do near House of Happiness Bangkok",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"item":{"@type":"TouristAttraction","name":"Chao Phraya Sky Park"}},
+    {"@type":"ListItem","position":2,"item":{"@type":"TouristAttraction","name":"ICONSIAM"}},
+    {"@type":"ListItem","position":3,"item":{"@type":"TouristAttraction","name":"Chao Phraya Express Boat"}},
+    {"@type":"ListItem","position":4,"item":{"@type":"TouristAttraction","name":"Kudi Chin & Santa Cruz Church"}},
+    {"@type":"ListItem","position":5,"item":{"@type":"TouristAttraction","name":"Yaowarat Chinatown"}},
+    {"@type":"ListItem","position":6,"item":{"@type":"TouristAttraction","name":"Wat Pho"}},
+    {"@type":"ListItem","position":7,"item":{"@type":"TouristAttraction","name":"Wat Arun"}},
+    {"@type":"ListItem","position":8,"item":{"@type":"TouristAttraction","name":"Grand Palace"}},
+    {"@type":"ListItem","position":9,"item":{"@type":"TouristAttraction","name":"Pak Khlong Talat"}}
+  ]
+}
+</script>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+"use strict";
+// รายการสถานที่ — รูปถูกดึงมาไว้ที่ images/attractions/<slug>.jpg ตอน build
+// dest = จุดหมายสำหรับปุ่มนำทาง Google Maps (เริ่มจากที่พักเสมอ)
+const ORIGIN = "House of Happiness 558/1 Tha Din Daeng Rd Khlong San Bangkok";
+const NEAR = [
+  { slug: "skypark",   dest: "Chao Phraya Sky Park" },
+  { slug: "iconsiam",  dest: "ICONSIAM" },
+  { slug: "riverboat", dest: "Khlong San Pier Bangkok" },
+  { slug: "kudichin",  dest: "Santa Cruz Church Kudi Chin Bangkok" },
+];
+const OLDTOWN = [
+  { slug: "yaowarat",    dest: "Yaowarat Road Chinatown Bangkok" },
+  { slug: "watpho",      dest: "Wat Pho Bangkok" },
+  { slug: "watarun",     dest: "Wat Arun Bangkok" },
+  { slug: "grandpalace", dest: "Grand Palace Bangkok" },
+  { slug: "pakkhlong",   dest: "Pak Khlong Talat Flower Market Bangkok" },
+];
+
+function mapsUrl(dest){
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(ORIGIN)}&destination=${encodeURIComponent(dest)}`;
+}
+
+function card(a){
+  return `<article class="atr-card">
+    <div class="atr-img">
+      <span class="ph">✦</span>
+      <img src="images/attractions/${a.slug}.jpg" alt="" loading="lazy"
+           onerror="this.remove()">
+    </div>
+    <div class="atr-body">
+      <h3 data-i18n="atr.${a.slug}.n"></h3>
+      <p class="desc" data-i18n="atr.${a.slug}.d"></p>
+      <p class="go"><b>🚶</b> <span data-i18n="atr.${a.slug}.go"></span></p>
+      <a class="atr-link" target="_blank" rel="noopener" href="${mapsUrl(a.dest)}"><span data-i18n="atr.dir">เส้นทางจากที่พัก</span> →</a>
+    </div>
+  </article>`;
+}
+
+document.getElementById("gridNear").innerHTML = NEAR.map(card).join("");
+document.getElementById("gridOld").innerHTML = OLDTOWN.map(card).join("");
+applyLang(getLang());
+
+// เครดิตรูปตามสัญญา CC — สร้างจาก credits.json ที่ระบบ build เขียนไว้
+fetch("images/attractions/credits.json")
+  .then((r) => r.ok ? r.json() : [])
+  .then((list) => {
+    if (!Array.isArray(list) || !list.length) return;
+    document.getElementById("creditsBox").hidden = false;
+    document.getElementById("creditsList").innerHTML = list.map((c) =>
+      `<li><a href="${c.filePage}" target="_blank" rel="noopener">${c.file}</a>` +
+      `${c.artist ? " — " + c.artist.replace(/</g, "&lt;") : ""} · ${String(c.license).replace(/</g, "&lt;")}</li>`
+    ).join("");
+  })
+  .catch(() => {});
+</script>
+
+</body>
+</html>
