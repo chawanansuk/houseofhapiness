@@ -65,7 +65,8 @@ async function run() {
         if (!orig) continue;
 
         // ชื่อไฟล์บน Commons = ส่วนท้ายของ URL ต้นฉบับ
-        const fname = decodeURIComponent(orig.split("/").pop());
+        // (REST API บางทีส่ง URL แบบ thumb "3840px-ชื่อไฟล์" มา ต้องตัด prefix ออกให้เหลือชื่อจริง)
+        const fname = decodeURIComponent(orig.split("/").pop()).replace(/^\d+px-/, "");
 
         // ขอรูปย่อกว้าง 900px ผ่าน Special:FilePath (redirect ไป thumb ที่ถูกต้องเอง)
         const thumbUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fname)}?width=900`;
