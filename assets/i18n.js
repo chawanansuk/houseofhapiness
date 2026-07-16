@@ -112,6 +112,42 @@ const I18N = {
   "near.6.d":        { th: "รถ ~5 นาที", en: "~5 min drive" },
   "near.more":       { th: "ดูแหล่งท่องเที่ยวใกล้ที่พักทั้งหมด →", en: "Explore all nearby attractions →" },
 
+  /* ── กล่องเช็คห้องว่างใน hero ── */
+  "hb.cta":          { th: "เช็คห้องว่าง →", en: "Check availability →" },
+
+  /* ── ทำไมต้องจองตรง ── */
+  "wbd.title":       { th: "ทำไมต้องจองตรงกับเรา", en: "Why Book Direct" },
+  "wbd.direct":      { th: "จองตรงกับเรา", en: "Book direct" },
+  "wbd.ota":         { th: "จองผ่านเว็บตัวกลาง", en: "Via OTA sites" },
+  "wbd.r1":          { th: "ราคา", en: "Price" },
+  "wbd.r1.a":        { th: "ไม่มีค่าคอมมิชชั่นคนกลาง — ได้ราคาดีที่สุด", en: "No middleman commission — best rate" },
+  "wbd.r1.b":        { th: "รวมค่าคอมมิชชั่น ~15-18%", en: "Includes ~15-18% commission" },
+  "wbd.r2":          { th: "การติดต่อ", en: "Communication" },
+  "wbd.r2.a":        { th: "คุยกับเราตรง ตอบไว แก้ไขการจองง่าย", en: "Talk to us directly — fast replies, easy changes" },
+  "wbd.r2.b":        { th: "ผ่านระบบกลาง ตอบช้ากว่า", en: "Through a middle platform" },
+  "wbd.r3":          { th: "เวลาเช็คอิน", en: "Check-in time" },
+  "wbd.r3.a":        { th: "ยืดหยุ่นได้ตามห้องว่าง แจ้งล่วงหน้าได้เลย", en: "Flexible when rooms allow — just ask" },
+  "wbd.r3.b":        { th: "ตามเงื่อนไขมาตรฐาน", en: "Standard policy only" },
+  "wbd.r4":          { th: "คำขอพิเศษ", en: "Special requests" },
+  "wbd.r4.a":        { th: "แจ้งกับเราโดยตรง ไม่ตกหล่น", en: "Sent straight to us — never lost" },
+  "wbd.r4.b":        { th: "ส่งผ่านระบบ อาจตกหล่น", en: "Relayed via system, can get lost" },
+  "wbd.cta":         { th: "จองตรงเลย — ดีกว่าแน่นอน", en: "Book direct now" },
+
+  /* ── การเดินทางมาที่พัก ── */
+  "gh.title":        { th: "การเดินทางมาที่พัก", en: "Getting Here" },
+  "gh.1.t":          { th: "จากสนามบินสุวรรณภูมิ", en: "From Suvarnabhumi Airport" },
+  "gh.1.d":          { th: "แท็กซี่ ~45-60 นาที (~350-450 บาท รวมทางด่วน) หรือ Airport Rail Link → BTS มาลงสถานีคลองสาน", en: "Taxi ~45-60 min (~350-450 THB incl. tolls), or Airport Rail Link → BTS to Khlong San station" },
+  "gh.2.t":          { th: "จากสนามบินดอนเมือง", en: "From Don Mueang Airport" },
+  "gh.2.d":          { th: "แท็กซี่ ~40-60 นาที (~250-350 บาท) แนะนำใช้ทางด่วนช่วงเย็น", en: "Taxi ~40-60 min (~250-350 THB); take the expressway at rush hour" },
+  "gh.3.t":          { th: "โดยรถไฟฟ้า BTS", en: "By BTS Skytrain" },
+  "gh.3.d":          { th: "สายสีลม ลงสถานีกรุงธนบุรี → ต่อสายสีทอง ลงสถานีคลองสาน → เดิน/วินมอเตอร์ไซค์ถึงที่พัก", en: "Silom Line to Krung Thonburi → Gold Line to Khlong San station → short walk or motorbike taxi" },
+  "gh.note":         { th: "* เวลาและค่าใช้จ่ายโดยประมาณ ขึ้นกับสภาพจราจร — ต้องการให้ช่วยเรียกรถ แจ้งเราได้เลย", en: "* Times and fares are approximate. Need help arranging a pickup? Just ask us" },
+
+  /* ── ปุ่มติดต่อลอย ── */
+  "fab.contact":     { th: "ติดต่อเรา", en: "Contact us" },
+  "fab.email":       { th: "อีเมลหาเรา", en: "Email us" },
+  "fab.map":         { th: "เปิดแผนที่", en: "Open map" },
+
   /* ── หน้าแหล่งท่องเที่ยว ── */
   "atr.title":       { th: "เที่ยวอะไรใกล้ House of Happiness", en: "Things to Do near House of Happiness" },
   "atr.sub":         { th: "ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์", en: "Khlong San location — on the Chao Phraya riverside near the BTS Gold Line, easy access to both Thonburi and the Old Town" },

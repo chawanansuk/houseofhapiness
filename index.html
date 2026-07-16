@@ -111,6 +111,21 @@
     <a class="btn btn-gold" href="booking.html" data-i18n="hero.direct">จองตรงกับเรา — ราคาดีที่สุด</a>
     <a class="btn btn-outline" href="https://www.booking.com/hotel/th/house-of-happiness-bangkok.html" target="_blank" rel="noopener" data-i18n="hero.booking">จองผ่าน Booking.com</a>
   </div>
+  <form class="hero-book" action="booking.html" method="get">
+    <div class="hb-field">
+      <label for="hbIn" data-i18n="bk.checkin">วันเช็คอิน</label>
+      <input type="date" id="hbIn" name="checkin">
+    </div>
+    <div class="hb-field">
+      <label for="hbOut" data-i18n="bk.checkout">วันเช็คเอาท์</label>
+      <input type="date" id="hbOut" name="checkout">
+    </div>
+    <div class="hb-field" style="flex:0.6; min-width:86px">
+      <label for="hbG" data-i18n="bk.guests">ผู้เข้าพัก</label>
+      <select id="hbG" name="guests"><option>1</option><option selected>2</option><option>3</option></select>
+    </div>
+    <button class="btn btn-gold" type="submit" data-i18n="hb.cta">เช็คห้องว่าง →</button>
+  </form>
   <div class="rating-pill">
     <span class="stars">★★★★★</span>
     <span data-i18n="hero.rating">คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com</span>
@@ -142,6 +157,40 @@
         <div class="unit" data-i18n="rooms.night">/ คืน</div>
         <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
       </div>
+    </div>
+  </section>
+
+  <section id="whydirect" class="reveal">
+    <div class="sec-head"><h2 data-i18n="wbd.title">ทำไมต้องจองตรงกับเรา</h2></div>
+    <div class="wbd-table">
+      <div class="wbd-row wbd-head">
+        <div class="lbl"></div>
+        <div class="good" data-i18n="wbd.direct">จองตรงกับเรา</div>
+        <div class="meh" data-i18n="wbd.ota">จองผ่านเว็บตัวกลาง</div>
+      </div>
+      <div class="wbd-row">
+        <div class="lbl" data-i18n="wbd.r1">ราคา</div>
+        <div class="good" data-i18n="wbd.r1.a">ไม่มีค่าคอมมิชชั่นคนกลาง — ได้ราคาดีที่สุด</div>
+        <div class="meh" data-i18n="wbd.r1.b">รวมค่าคอมมิชชั่น ~15-18%</div>
+      </div>
+      <div class="wbd-row">
+        <div class="lbl" data-i18n="wbd.r2">การติดต่อ</div>
+        <div class="good" data-i18n="wbd.r2.a">คุยกับเราตรง ตอบไว แก้ไขการจองง่าย</div>
+        <div class="meh" data-i18n="wbd.r2.b">ผ่านระบบกลาง ตอบช้ากว่า</div>
+      </div>
+      <div class="wbd-row">
+        <div class="lbl" data-i18n="wbd.r3">เวลาเช็คอิน</div>
+        <div class="good" data-i18n="wbd.r3.a">ยืดหยุ่นได้ตามห้องว่าง แจ้งล่วงหน้าได้เลย</div>
+        <div class="meh" data-i18n="wbd.r3.b">ตามเงื่อนไขมาตรฐาน</div>
+      </div>
+      <div class="wbd-row">
+        <div class="lbl" data-i18n="wbd.r4">คำขอพิเศษ</div>
+        <div class="good" data-i18n="wbd.r4.a">แจ้งกับเราโดยตรง ไม่ตกหล่น</div>
+        <div class="meh" data-i18n="wbd.r4.b">ส่งผ่านระบบ อาจตกหล่น</div>
+      </div>
+    </div>
+    <div class="wbd-cta">
+      <a class="btn btn-gold" href="booking.html" data-i18n="wbd.cta">จองตรงเลย — ดีกว่าแน่นอน</a>
     </div>
   </section>
 
@@ -218,6 +267,28 @@
     </p>
   </section>
 
+  <section id="gettinghere" class="reveal">
+    <div class="sec-head"><h2 data-i18n="gh.title">การเดินทางมาที่พัก</h2></div>
+    <div class="gh-grid">
+      <div class="gh-card">
+        <span class="ico">✈️</span>
+        <h3 data-i18n="gh.1.t">จากสนามบินสุวรรณภูมิ</h3>
+        <p data-i18n="gh.1.d">แท็กซี่ ~45-60 นาที (~350-450 บาท รวมทางด่วน) หรือ Airport Rail Link → BTS มาลงสถานีคลองสาน</p>
+      </div>
+      <div class="gh-card">
+        <span class="ico">🛬</span>
+        <h3 data-i18n="gh.2.t">จากสนามบินดอนเมือง</h3>
+        <p data-i18n="gh.2.d">แท็กซี่ ~40-60 นาที (~250-350 บาท) แนะนำใช้ทางด่วนช่วงเย็น</p>
+      </div>
+      <div class="gh-card">
+        <span class="ico">🚆</span>
+        <h3 data-i18n="gh.3.t">โดยรถไฟฟ้า BTS</h3>
+        <p data-i18n="gh.3.d">สายสีลม ลงสถานีกรุงธนบุรี → ต่อสายสีทอง ลงสถานีคลองสาน → เดิน/วินมอเตอร์ไซค์ถึงที่พัก</p>
+      </div>
+    </div>
+    <p class="gh-note" data-i18n="gh.note">* เวลาและค่าใช้จ่ายโดยประมาณ ขึ้นกับสภาพจราจร — ต้องการให้ช่วยเรียกรถ แจ้งเราได้เลย</p>
+  </section>
+
   <section id="faq" class="reveal">
     <div class="sec-head"><h2 data-i18n="faq.title">คำถามที่พบบ่อย</h2></div>
     <details><summary data-i18n="faq.q1"></summary><p data-i18n="faq.a1"></p></details>
@@ -267,7 +338,42 @@
   <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="cta.direct">จองตรงกับเรา</a>
 </div>
 
+<div class="fab-wrap" id="fabWrap">
+  <a class="fab-item" href="mailto:houseofhapinessbangkok@gmail.com">✉️ <span data-i18n="fab.email">อีเมลหาเรา</span></a>
+  <a class="fab-item" href="https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok" target="_blank" rel="noopener">📍 <span data-i18n="fab.map">เปิดแผนที่</span></a>
+  <button class="fab-main" id="fabBtn" aria-label="ติดต่อเรา" aria-expanded="false">💬</button>
+</div>
+
 <script src="assets/i18n.js"></script>
 <script src="assets/ui.js"></script>
+<script>
+// กล่องเช็คห้องว่างใน hero — กันเลือกวันย้อนหลัง + เช็คเอาท์ต้องหลังเช็คอิน
+(function () {
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+  var d = new Date();
+  var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  var hbIn = document.getElementById("hbIn"), hbOut = document.getElementById("hbOut");
+  hbIn.min = today; hbOut.min = today;
+  hbIn.addEventListener("change", function () {
+    if (!hbIn.value) return;
+    var n = new Date(hbIn.value); n.setDate(n.getDate() + 1);
+    hbOut.min = n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate());
+    if (hbOut.value && hbOut.value < hbOut.min) hbOut.value = hbOut.min;
+  });
+})();
+
+// ปุ่มติดต่อลอย
+(function () {
+  var wrap = document.getElementById("fabWrap"), btn = document.getElementById("fabBtn");
+  btn.addEventListener("click", function () {
+    var open = wrap.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    btn.textContent = open ? "✕" : "💬";
+  });
+  document.addEventListener("click", function (e) {
+    if (!wrap.contains(e.target) && wrap.classList.contains("open")) btn.click();
+  });
+})();
+</script>
 </body>
 </html>
