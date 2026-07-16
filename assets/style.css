@@ -929,3 +929,135 @@ textarea { resize: vertical; min-height: 4.5rem; }
   opacity: 0; transform: translateY(8px); pointer-events: none; transition: all 0.18s ease;
 }
 .fab-wrap.open .fab-item { opacity: 1; transform: none; pointer-events: auto; }
+
+/* ═══════════ World-class polish layer ═══════════ */
+
+/* เกรนละเอียดทั้งหน้า — ให้ผิวงานดู "แพง" แบบกระดาษอาร์ต */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 2000;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Hero: สูงโปร่งขึ้น + ซุ้มโค้งจาง ๆ สองข้าง + จังหวะโผล่ทีละชั้น ── */
+.hero { padding: clamp(5rem, 12vw, 8.5rem) 1.5rem clamp(4rem, 9vw, 6.5rem); }
+.hero::before, .hero::after {
+  content: "";
+  position: absolute;
+  width: clamp(180px, 24vw, 340px);
+  aspect-ratio: 1 / 1.9;
+  border: 1.5px solid rgba(138, 90, 52, 0.16);
+  border-radius: 999px 999px 0 0;
+  bottom: -12%;
+  pointer-events: none;
+}
+.hero::before { left: max(-60px, -6vw); transform: rotate(-4deg); }
+.hero::after { right: max(-60px, -6vw); transform: rotate(4deg); border-color: rgba(138, 90, 52, 0.10); bottom: -22%; }
+.hero .kicker {
+  display: inline-flex; align-items: center; gap: 1rem;
+}
+.hero .kicker::before, .hero .kicker::after {
+  content: ""; width: 2.6rem; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.hero .kicker::after { background: linear-gradient(90deg, var(--gold), transparent); }
+.hero h1 { font-size: clamp(2.8rem, 8vw, 5rem); letter-spacing: 0; }
+@keyframes heroUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.hero > * { animation: heroUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero > *:nth-child(2) { animation-delay: 0.08s; }
+.hero > *:nth-child(3) { animation-delay: 0.16s; }
+.hero > *:nth-child(4) { animation-delay: 0.22s; }
+.hero > *:nth-child(5) { animation-delay: 0.28s; }
+.hero > *:nth-child(6) { animation-delay: 0.34s; }
+.hero > *:nth-child(7) { animation-delay: 0.42s; }
+.hero > *:nth-child(8) { animation-delay: 0.5s; }
+.hero > *:nth-child(9) { animation-delay: 0.58s; }
+
+/* ── จังหวะพื้นที่ว่างแบบ editorial ── */
+main.site { max-width: 66rem; padding: clamp(3.5rem, 8vw, 6rem) 1.5rem; }
+section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
+.sec-head { margin-bottom: 2.6rem; }
+.sec-head h2 { font-size: clamp(1.8rem, 4.5vw, 2.5rem); }
+
+/* ── Nav: ตัวเล็ก อักษรห่าง แบบแบรนด์หรู ── */
+.navlinks a {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── ปุ่ม: สัดส่วนหรูขึ้น ── */
+.btn { font-weight: 600; letter-spacing: 0.03em; }
+.btn-gold:hover { filter: brightness(1.05); }
+
+/* ── Amenities: ตารางเส้นบางแบบ editorial แทนกล่องลอย ── */
+.amenities { gap: 0 2.2rem; }
+.amenities li {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 1rem 0.2rem;
+}
+.amenities li .ico {
+  background: transparent;
+  border: 1.5px solid var(--line);
+  width: 2.5rem; height: 2.5rem;
+}
+
+/* ── FAQ: เส้นบางโปร่ง ๆ ── */
+#faq details {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 1.1rem 0.2rem;
+  margin-bottom: 0;
+}
+#faq details:first-of-type { border-top: 1px solid var(--line); }
+#faq details[open] summary { color: var(--gold-dark); }
+#faq details summary::after { background: transparent; border: 1.5px solid var(--line); }
+
+/* ── Gallery: การ์ดว่างโชว์ไอคอนกลางซุ้ม (ก่อนมีรูปจริง) ── */
+.gallery figure { position: relative; }
+.gallery figure::after {
+  content: attr(data-icon);
+  position: absolute;
+  inset: 0 0 2.4rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  opacity: 0.45;
+  z-index: 0;
+}
+.gallery img { position: relative; z-index: 1; }
+
+/* ── CTA strip: โปร่งขึ้น + ซุ้มโค้งจาง ── */
+.cta-strip {
+  position: relative; overflow: hidden;
+  padding: clamp(3.6rem, 9vw, 5.5rem) 1.5rem;
+  border-top: 3px solid var(--gold);
+}
+.cta-strip::before {
+  content: "";
+  position: absolute;
+  width: clamp(200px, 26vw, 380px);
+  aspect-ratio: 1 / 1.8;
+  border: 1.5px solid rgba(245, 217, 184, 0.14);
+  border-radius: 999px 999px 0 0;
+  right: -4vw; bottom: -30%;
+  pointer-events: none;
+}
+
+/* ── รายละเอียดเล็ก ๆ ── */
+.rating-pill { margin-top: 1.9rem; }
+.hero-book { margin-top: 1.9rem; }
+.map-embed iframe { filter: sepia(0.14) saturate(0.92); }
+@media (prefers-reduced-motion: reduce) {
+  .hero > * { animation: none; }
+}
