@@ -245,19 +245,64 @@ function processMessage_(msg) {
 
   if (existing) return; // เคยบันทึกแล้ว ไม่เพิ่มซ้ำ
 
+  // อีเมลยุคใหม่ของ Booking.com มักไม่บอกชื่อแขก (ให้ไปดูใน Pulse)
+  // → บันทึกเท่าที่มี แล้วติดสถานะ "รอเติมชื่อจาก Pulse" ไม่ปล่อยให้การจองหายเงียบ ๆ
   var dates = extractDates_(text);
+  var guest = extractGuestName_(text);
+  var incomplete = !guest || !dates.checkin;
   appendBooking_({
     id: id,
     source: "Booking.com",
-    name: extractGuestName_(text),
+    name: guest,
     checkin: dates.checkin,
     checkout: dates.checkout,
     guests: extractGuests_(text),
     rooms: extractRooms_(text),
     amount: extractAmount_(text),
-    status: "ยืนยันแล้ว",
-    note: dates.checkin ? "" : "อ่านวันที่จากอีเมลไม่ได้ — เปิดอีเมล/Extranet ตรวจอีกครั้ง (" + subject + ")",
+    status: incomplete ? "รอเติมชื่อจาก Pulse" : "ยืนยันแล้ว",
+    note: incomplete ? "อีเมลไม่ระบุรายละเอียดครบ — เปิดแอป Pulse แล้วเติมชื่อ/วันที่ในชีต (" + subject + ")" : "",
   });
+}
+
+/* ═══════════════ สรุปงานส่งอีเมลทุกเช้า ═══════════════ */
+
+/** ส่งสรุปงานวันนี้เข้าอีเมลเจ้าของ (Trigger เรียกทุกเช้า ~08:00) */
+function dailyDigest() {
+  var tz = "Asia/Bangkok";
+  var today = Utilities.formatDate(new Date(), tz, "yyyy-MM-dd");
+  var rows = readAll_();
+  var act = rows.filter(function (r) {
+    return !/ยกเลิก/.test(r.status) && /^\d{4}-\d{2}-\d{2}$/.test(r.checkin) && /^\d{4}-\d{2}-\d{2}$/.test(r.checkout);
+  });
+  var notOut = function (r) { return !/เช็คเอาต์แล้ว/.test(r.status); };
+  var ci = act.filter(function (r) { return r.checkin === today && notOut(r); });
+  var co = act.filter(function (r) { return r.checkout === today && notOut(r); });
+  var stay = act.filter(function (r) { return r.checkin <= today && today < r.checkout && notOut(r); });
+  var dirty = readRooms_().filter(function (r) { return r.clean === "รอทำความสะอาด"; });
+  var pulse = rows.filter(function (r) { return /รอเติมชื่อ/.test(r.status); });
+
+  var L = [];
+  L.push("สรุปงาน House of Happiness — " + Utilities.formatDate(new Date(), tz, "d MMM yyyy"));
+  L.push("");
+  L.push("เช็คอินวันนี้: " + ci.length + " รายการ");
+  ci.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : " | ยังไม่จัดห้อง") + " | " + r.source); });
+  L.push("เช็คเอาต์วันนี้: " + co.length + " รายการ");
+  co.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : "")); });
+  L.push("กำลังเข้าพักคืนนี้: " + stay.length + " ห้อง");
+  L.push("ห้องรอทำความสะอาด: " + (dirty.length ? dirty.map(function (r) { return r.room; }).join(", ") : "ไม่มี"));
+  if (pulse.length) {
+    L.push("");
+    L.push("!! มีการจอง " + pulse.length + " รายการรอเติมชื่อจาก Pulse:");
+    pulse.forEach(function (r) { L.push("  - #" + r.id + (r.checkin ? " เข้า " + r.checkin : " (ไม่ทราบวัน)")); });
+  }
+  L.push("");
+  L.push("เปิดหลังบ้าน: https://houseofhapiness.vercel.app/admin/");
+
+  MailApp.sendEmail(
+    Session.getEffectiveUser().getEmail(),
+    "[HOH] สรุปงานวันนี้ — เช็คอิน " + ci.length + " · เช็คเอาต์ " + co.length + " · ทำความสะอาด " + dirty.length,
+    L.join("\n")
+  );
 }
 
 /* ── ตัวช่วยสกัดข้อมูลจากเนื้ออีเมล (รองรับไทย/อังกฤษหลายรูปแบบ) ── */
@@ -337,12 +382,18 @@ function fmtDate_(d) { return Utilities.formatDate(d, "Asia/Bangkok", "yyyy-MM-d
 
 /* ═══════════════ ติดตั้ง Trigger (รันครั้งเดียว) ═══════════════ */
 
-/** รันฟังก์ชันนี้ 1 ครั้งจากเมนู Run เพื่อให้สแกนอีเมลอัตโนมัติทุก 30 นาที */
+/** รันฟังก์ชันนี้ 1 ครั้งจากเมนู Run:
+ *  - สแกนอีเมล Booking.com ทุก 30 นาที
+ *  - ส่งสรุปงานเข้าอีเมลทุกเช้า ~08:00 (ตั้ง timezone โปรเจกต์เป็น Bangkok ก่อน:
+ *    Project Settings ⚙️ → Time zone → (GMT+07:00) Bangkok)
+ */
 function setupTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === "scanBookingEmails") ScriptApp.deleteTrigger(t);
+    var h = t.getHandlerFunction();
+    if (h === "scanBookingEmails" || h === "dailyDigest") ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger("scanBookingEmails").timeBased().everyMinutes(30).create();
+  ScriptApp.newTrigger("dailyDigest").timeBased().everyDays(1).atHour(8).create();
 }
 
 /** ทดสอบด้วยมือ: รัน scanBookingEmails ทันที แล้วเปิดชีตดูผล */

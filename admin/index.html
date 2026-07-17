@@ -110,6 +110,16 @@ input,select{font-family:inherit}
 /* ── cards ── */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem 1.35rem}
 
+/* ── กราฟรายได้ 6 เดือน ── */
+.chart{display:flex;gap:.7rem;align-items:flex-end;height:190px;padding-top:1.4rem}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.bar-v{font-size:.68rem;font-weight:700;color:var(--brand);margin-bottom:.25rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{width:100%;max-width:52px;background:linear-gradient(180deg,#a06a3f,var(--brand));border-radius:7px 7px 3px 3px;min-height:3px;transition:height .4s ease}
+.bar-col.now .bar{background:linear-gradient(180deg,#2c6f92,#1f567a)}
+.bar-l{font-size:.72rem;color:var(--muted);margin-top:.4rem;white-space:nowrap}
+.bar-n{font-size:.66rem;color:var(--muted-2);white-space:nowrap}
+.chart-note{font-size:.74rem;color:var(--muted-2);margin-top:.8rem}
+
 /* ── rooms + today ── */
 .rooms-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.2rem;align-items:start}
 .roomgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.7rem}
@@ -329,6 +339,11 @@ tbody tr:hover td{background:#faf7f2}
           <div class="stat" data-accent="occ"><span class="stat-ico"><span class="ic" data-icon="bed"></span></span><div><div class="num" id="mNights">0</div><div class="lbl">คืนที่ขายได้</div></div></div>
           <div class="stat" data-accent="free"><span class="stat-ico"><span class="ic" data-icon="percent"></span></span><div><div class="num" id="mOcc">0%</div><div class="lbl">อัตราเข้าพัก</div></div></div>
           <div class="stat" data-accent="arr"><span class="stat-ico"><span class="ic" data-icon="list"></span></span><div><div class="num" id="mCount">0</div><div class="lbl">จำนวนการจอง</div></div></div>
+        </div>
+        <div class="sec-title sub"><span class="ic" data-icon="chart"></span> รายได้ย้อนหลัง 6 เดือน <small>ตามยอดจอง (นับเดือนที่เช็คอิน ไม่รวมยกเลิก)</small></div>
+        <div class="card">
+          <div class="chart" id="revChart"></div>
+          <div class="chart-note" id="revNote"></div>
         </div>
       </section>
 
@@ -614,6 +629,7 @@ function renderAll(){
   renderRoomBoard();
   renderToday();
   renderMonthStats();
+  renderRevChart();
   renderCal();
   renderTable();
   renderIcal();
@@ -857,6 +873,35 @@ function renderMonthStats(){
   $("mNights").textContent = nights.toLocaleString();
   $("mOcc").textContent = (roomCount ? Math.min(100, occ) : 0) + "%";
   $("mCount").textContent = inMonth.length;
+}
+
+/* ── กราฟรายได้ 6 เดือน ── */
+function renderRevChart(){
+  const t = DATA.today;
+  const act = activeBookings();
+  const months = [];
+  let y = Number(t.slice(0,4)), m = Number(t.slice(5,7)); // 1-12
+  for (let i = 5; i >= 0; i--) {
+    let mm = m - i, yy = y;
+    while (mm < 1) { mm += 12; yy--; }
+    months.push({ key: `${yy}-${String(mm).padStart(2,"0")}`, label: THAI_MONTHS_AB[mm-1], now: i === 0 });
+  }
+  const data = months.map((mo) => {
+    const rows = act.filter((b) => String(b.checkin || "").slice(0,7) === mo.key);
+    return { ...mo, revenue: rows.reduce((s,b) => s + bahtNum(b.amount), 0), count: rows.length };
+  });
+  const max = Math.max(1, ...data.map((d) => d.revenue));
+  $("revChart").innerHTML = data.map((d) => `
+    <div class="bar-col${d.now ? " now" : ""}">
+      <span class="bar-v">${d.revenue ? "฿" + (d.revenue >= 1000 ? (d.revenue/1000).toFixed(d.revenue >= 10000 ? 0 : 1) + "k" : d.revenue.toLocaleString()) : "–"}</span>
+      <div class="bar" style="height:${Math.max(2, Math.round((d.revenue / max) * 100))}%"></div>
+      <span class="bar-l">${d.label}</span>
+      <span class="bar-n">${d.count ? d.count + " จอง" : ""}</span>
+    </div>`).join("");
+  const total = data.reduce((s,d) => s + d.revenue, 0);
+  $("revNote").textContent = total
+    ? `รวม 6 เดือน ฿${total.toLocaleString()} · เดือนสีน้ำเงิน = เดือนปัจจุบัน`
+    : "ยังไม่มีข้อมูลรายได้ — ตัวเลขจะขึ้นเมื่อการจองมียอดเงินในคอลัมน์ amount";
 }
 
 /* ── ปฏิทิน ── */
