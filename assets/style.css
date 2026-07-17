@@ -1197,3 +1197,18 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
     linear-gradient(160deg, #fbf7ef 0%, var(--cream) 60%, #f1e6d4 100%);
   border-bottom: 1.5px solid var(--line);
 }
+
+/* ── ป้ายเช็คห้องว่างเรียลไทม์ (หน้าจอง) ── */
+.avail-badge {
+  margin-top: 0.9rem;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.avail-badge small { display: block; font-weight: 400; font-size: 0.76rem; opacity: 0.75; }
+.avail-badge.checking { background: var(--gold-soft); color: var(--muted); border: 1px dashed var(--line); }
+.avail-badge.ok { background: #e8f7ec; color: #1e7e3a; border: 1px solid #bfe5c8; }
+.avail-badge.low { background: #fdf3dc; color: #9a6b12; border: 1px solid #f0dcae; }
+.avail-badge.full { background: #fdeceb; color: #b3362a; border: 1px solid #f3cdc8; }

@@ -1,0 +1,126 @@
+/**
+ * GET /api/availability?checkin=YYYY-MM-DD&checkout=YYYY-MM-DD
+ *
+ * เอนด์พอยต์สาธารณะสำหรับหน้าจอง — ตอบแค่ "เหลือกี่ห้อง" (ตัวเลขรวม)
+ * ไม่มีข้อมูลแขกหลุดออกไปเด็ดขาด
+ *
+ * วิธีนับ: ต่อคืน occupied = จองตรง(ชีต) + max(จอง Booking.com ในชีต, ปฏิทิน iCal)
+ * (กันนับซ้ำกรณีการจองเดียวกันโผล่ทั้งในชีตและ iCal)
+ * available = ค่าต่ำสุดของ (ห้องทั้งหมด - occupied) ตลอดช่วงที่เลือก
+ */
+
+module.exports = async (req, res) => {
+  // แคชที่ edge 2 นาที กันยิงถี่ใส่ Google Apps Script
+  res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
+  if (req.method !== "GET") {
+    return res.status(405).json({ ok: false, error: "method-not-allowed" });
+  }
+
+  const isYMD = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+  const ci = String((req.query && req.query.checkin) || "");
+  const co = String((req.query && req.query.checkout) || "");
+  if (!isYMD(ci) || !isYMD(co) || co <= ci) {
+    return res.status(400).json({ ok: false, error: "invalid-dates" });
+  }
+  const nights = Math.round((Date.parse(co) - Date.parse(ci)) / 86400000);
+  if (nights > 30) return res.status(400).json({ ok: false, error: "range-too-long" });
+
+  const demoMode = !(process.env.ADMIN_PASSWORD || "").trim();
+  let bookings = [], rooms = [], ical = [];
+
+  if (demoMode) {
+    const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+    bookings = demoBookings(today);
+    rooms = Array.from({ length: 15 }, (_, i) => ({ room: String(101 + i) }));
+  } else {
+    const [sheet, ic] = await Promise.all([fetchSheet(), fetchIcal()]);
+    bookings = sheet.rows;
+    rooms = sheet.rooms;
+    ical = ic;
+  }
+
+  const total = rooms.length || 15;
+  const active = bookings.filter((b) =>
+    !/ยกเลิก|cancel/i.test(String(b.status || "")) && isYMD(b.checkin) && isYMD(b.checkout));
+  const isBdc = (b) => /booking\.com/i.test(String(b.source || ""));
+
+  let minAvail = total;
+  for (let d = ci; d < co; d = shiftDate(d, 1)) {
+    const stay = active.filter((b) => b.checkin <= d && d < b.checkout);
+    const direct = stay.filter((b) => !isBdc(b)).length;
+    const bdcSheet = stay.length - direct;
+    const bdcIcal = ical.filter((e) => e.start <= d && d < e.end).length;
+    const occupied = direct + Math.max(bdcSheet, bdcIcal);
+    minAvail = Math.min(minAvail, Math.max(0, total - occupied));
+  }
+
+  return res.status(200).json({
+    ok: true, demo: demoMode, total, nights,
+    available: minAvail,
+    full: minAvail <= 0,
+  });
+};
+
+/* ── helpers (สำเนาย่อจาก data.js — แต่ละ function ต้อง standalone) ── */
+
+function shiftDate(ymd, days) {
+  const d = new Date(ymd + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+async function fetchSheet() {
+  const url = (process.env.SHEET_WEBAPP_URL || "").trim();
+  const token = (process.env.SHEET_TOKEN || "").trim();
+  if (!url) return { rows: [], rooms: [] };
+  try {
+    const sep = url.includes("?") ? "&" : "?";
+    const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, { redirect: "follow" });
+    if (!r.ok) return { rows: [], rooms: [] };
+    const j = await r.json();
+    return {
+      rows: Array.isArray(j && j.bookings) ? j.bookings : [],
+      rooms: Array.isArray(j && j.rooms) ? j.rooms : [],
+    };
+  } catch { return { rows: [], rooms: [] }; }
+}
+
+async function fetchIcal() {
+  const raw = (process.env.BOOKING_ICAL_URLS || "").trim();
+  if (!raw) return [];
+  const entries = raw.split(",").map((s) => s.trim()).filter(Boolean)
+    .map((s) => { const i = s.indexOf("|"); return i > 0 ? s.slice(i + 1).trim() : s; });
+  const events = [];
+  await Promise.all(entries.map(async (url) => {
+    try {
+      const r = await fetch(url, { redirect: "follow" });
+      if (!r.ok) return;
+      const lines = String(await r.text()).replace(/\r\n[ \t]/g, "").split(/\r?\n/);
+      let cur = null;
+      for (const line of lines) {
+        if (line === "BEGIN:VEVENT") { cur = {}; continue; }
+        if (line === "END:VEVENT") { if (cur && cur.start && cur.end) events.push(cur); cur = null; continue; }
+        if (!cur) continue;
+        const idx = line.indexOf(":");
+        if (idx < 0) continue;
+        const key = line.slice(0, idx).split(";")[0].toUpperCase();
+        const m = line.slice(idx + 1).trim().match(/^(\d{4})(\d{2})(\d{2})/);
+        if (key === "DTSTART" && m) cur.start = `${m[1]}-${m[2]}-${m[3]}`;
+        else if (key === "DTEND" && m) cur.end = `${m[1]}-${m[2]}-${m[3]}`;
+      }
+    } catch {}
+  }));
+  return events;
+}
+
+function demoBookings(today) {
+  const mk = (inOff, outOff, source) => ({
+    source, status: "ยืนยันแล้ว",
+    checkin: shiftDate(today, inOff), checkout: shiftDate(today, outOff),
+  });
+  return [
+    mk(-2, 1, "Booking.com"), mk(-1, 3, "Booking.com"), mk(0, 2, "Booking.com"),
+    mk(0, 4, "Booking.com"), mk(1, 2, "เว็บไซต์ (จองตรง)"), mk(2, 5, "Booking.com"),
+    mk(3, 6, "เว็บไซต์ (จองตรง)"), mk(5, 8, "Booking.com"),
+  ];
+}

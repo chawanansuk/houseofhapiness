@@ -130,6 +130,15 @@ const I18N = {
   /* ── เครดิตรูป footer ── */
   "foot.credit":     { th: "รูปสถานที่ท่องเที่ยวจาก Wikimedia Commons — ดูเครดิต", en: "Attraction photos from Wikimedia Commons — see credits" },
 
+  /* ── เช็คห้องว่างเรียลไทม์ ── */
+  "av.checking":     { th: "กำลังเช็คห้องว่าง…", en: "Checking availability…" },
+  "av.left.pre":     { th: "✓ วันที่เลือกว่าง — เหลือ ", en: "✓ Available — " },
+  "av.left.post":    { th: " ห้อง", en: " room(s) left" },
+  "av.low.pre":      { th: "⚡ ใกล้เต็ม! เหลือเพียง ", en: "⚡ Almost full! Only " },
+  "av.low.post":     { th: " ห้องสุดท้าย", en: " room(s) left" },
+  "av.full":         { th: "ขออภัย วันที่เลือกห้องเต็ม — ลองเลื่อนวันดูนะครับ", en: "Sorry, we're fully booked on those dates — try different dates" },
+  "av.note":         { th: "ตามข้อมูลระบบ ยืนยันแน่นอนอีกครั้งเมื่อเราตอบกลับ", en: "Based on live data — final confirmation in our reply" },
+
   /* ── ขั้นตอนการจอง 3 สเต็ป ── */
   "bs.t":            { th: "จองง่าย ๆ ใน 3 ขั้นตอน", en: "How booking works" },
   "bs.1":            { th: "ส่งคำขอจอง", en: "Send your request" },

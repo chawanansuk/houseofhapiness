@@ -69,6 +69,7 @@
           <input type="date" id="checkout" required>
         </div>
       </div>
+      <p class="avail-badge" id="availBadge" hidden></p>
       <div class="quick-row" id="quickRow">
         <span data-i18n="bk.quick">เลือกไว:</span>
         <button type="button" class="chip-btn" data-nights="1">1</button>
@@ -327,6 +328,46 @@ function update() {
     hint.textContent = `${t("bk.hint.prefix")} ${missing.join(" · ")}`;
   }
 }
+
+// เช็คห้องว่างเรียลไทม์จากระบบหลังบ้าน — เรียกเมื่อช่วงวันเปลี่ยนเท่านั้น (กันยิงถี่ตอนพิมพ์ชื่อ)
+let availSig = "", availTimer = null, availCtrl = null;
+function checkAvailability() {
+  const s = getState();
+  const badge = $("availBadge");
+  if (!(s.ci && s.co && s.nights > 0)) { badge.hidden = true; availSig = ""; return; }
+  const sig = s.ci + "|" + s.co;
+  if (sig === availSig) return;
+  availSig = sig;
+
+  badge.hidden = false;
+  badge.className = "avail-badge checking";
+  badge.textContent = t("av.checking");
+
+  clearTimeout(availTimer);
+  availTimer = setTimeout(async () => {
+    try {
+      if (availCtrl) availCtrl.abort();
+      availCtrl = new AbortController();
+      const r = await fetch(`/api/availability?checkin=${s.ci}&checkout=${s.co}`, { signal: availCtrl.signal });
+      const j = await r.json();
+      if (!j.ok || sig !== availSig) return;
+      if (j.full) {
+        badge.className = "avail-badge full";
+        badge.textContent = t("av.full");
+      } else if (j.available <= 2) {
+        badge.className = "avail-badge low";
+        badge.innerHTML = `${t("av.low.pre")}${j.available}${t("av.low.post")} <small>· ${t("av.note")}</small>`;
+      } else {
+        badge.className = "avail-badge ok";
+        badge.innerHTML = `${t("av.left.pre")}${j.available}${t("av.left.post")} <small>· ${t("av.note")}</small>`;
+      }
+    } catch { badge.hidden = true; }
+  }, 350);
+}
+// เรียกจาก update() ทุกครั้ง — sig guard ทำให้ยิง API เฉพาะตอน "ช่วงวัน" เปลี่ยนจริง
+document.addEventListener("langchange", () => { availSig = ""; checkAvailability(); });
+const _update = update;
+update = function () { _update(); checkAvailability(); };
 
 // บันทึกคำขอจองเข้าระบบหลังบ้าน (Google Sheets) แบบเงียบ ๆ — ล้มเหลวก็ไม่กระทบลูกค้า
 let loggedSig = "";
