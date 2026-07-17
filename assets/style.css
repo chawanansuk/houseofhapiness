@@ -1147,3 +1147,53 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 }
 .foot-credit { font-size: 0.74rem; margin-top: 0.6rem; }
 .foot-credit a { color: inherit; }
+
+/* ═══════════ Booking trust pass ═══════════ */
+
+/* หน้าจอง: hero มีภาพเดียวกับหน้าแรก (แคชซ้ำ โหลดฟรี) */
+.bk-hero {
+  background:
+    linear-gradient(160deg, rgba(251,247,239,0.92) 0%, rgba(247,241,230,0.89) 55%, rgba(241,230,212,0.92) 100%),
+    url("../images/attractions/riverboat.jpg") center 65% / cover no-repeat,
+    linear-gradient(160deg, #fbf7ef 0%, var(--cream) 60%, #f1e6d4 100%);
+}
+
+/* ขั้นตอนการจอง 3 สเต็ป */
+.bk-steps {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: 1.6rem 1.25rem 0;
+}
+.bk-steps h2 {
+  text-align: center;
+  font-family: var(--font-head);
+  font-size: 1.02rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 1.1rem;
+}
+.bk-steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.9rem; }
+.bk-step-card {
+  display: flex; gap: 0.8rem; align-items: flex-start;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 0.95rem 1.05rem; box-shadow: var(--shadow-sm);
+}
+.bk-step-card .num {
+  flex: 0 0 auto;
+  width: 2rem; height: 2rem;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--gold-soft); border: 1.5px solid var(--gold);
+  color: var(--gold-dark); font-family: var(--font-head); font-weight: 700; font-size: 0.95rem;
+}
+.bk-step-card b { display: block; font-family: var(--font-head); font-size: 0.93rem; color: var(--dark); }
+.bk-step-card span { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
+
+/* หน้าเที่ยว: hero มีภาพสวนลอยฟ้า */
+.atr-hero {
+  background:
+    linear-gradient(160deg, rgba(251,247,239,0.92) 0%, rgba(247,241,230,0.88) 55%, rgba(241,230,212,0.92) 100%),
+    url("../images/attractions/skypark.jpg") center 40% / cover no-repeat,
+    linear-gradient(160deg, #fbf7ef 0%, var(--cream) 60%, #f1e6d4 100%);
+  border-bottom: 1.5px solid var(--line);
+}

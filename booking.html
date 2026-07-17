@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="preload" as="image" href="images/attractions/riverboat.jpg">
 <link rel="canonical" href="https://houseofhapiness.vercel.app/booking.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
@@ -37,6 +38,15 @@
   <h1 data-i18n="bk.title">จองตรงกับ House of Happiness</h1>
   <p class="sub" data-i18n="bk.sub">ราคาดีกว่าจองผ่านเว็บตัวกลาง · ยืนยันไวทาง LINE</p>
 </header>
+
+<div class="bk-steps">
+  <h2 data-i18n="bs.t">จองง่าย ๆ ใน 3 ขั้นตอน</h2>
+  <div class="bk-steps-grid">
+    <div class="bk-step-card"><span class="num">1</span><div><b data-i18n="bs.1">ส่งคำขอจอง</b><span data-i18n="bs.1.d">เลือกวัน กรอกชื่อ แล้วส่ง — ฟรี ไม่ผูกมัด</span></div></div>
+    <div class="bk-step-card"><span class="num">2</span><div><b data-i18n="bs.2">เรายืนยันภายใน 24 ชม.</b><span data-i18n="bs.2.d">เช็คห้องว่างแล้วตอบกลับทางอีเมล/LINE</span></div></div>
+    <div class="bk-step-card"><span class="num">3</span><div><b data-i18n="bs.3">จ่ายที่โรงแรม</b><span data-i18n="bs.3.d">ไม่ต้องจ่ายออนไลน์ — เงินสด โอน หรือพร้อมเพย์</span></div></div>
+  </div>
+</div>
 
 <form id="bookingForm" onsubmit="return false;">
 <div class="bk-grid">

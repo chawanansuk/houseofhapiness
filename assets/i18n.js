@@ -130,6 +130,15 @@ const I18N = {
   /* ── เครดิตรูป footer ── */
   "foot.credit":     { th: "รูปสถานที่ท่องเที่ยวจาก Wikimedia Commons — ดูเครดิต", en: "Attraction photos from Wikimedia Commons — see credits" },
 
+  /* ── ขั้นตอนการจอง 3 สเต็ป ── */
+  "bs.t":            { th: "จองง่าย ๆ ใน 3 ขั้นตอน", en: "How booking works" },
+  "bs.1":            { th: "ส่งคำขอจอง", en: "Send your request" },
+  "bs.1.d":          { th: "เลือกวัน กรอกชื่อ แล้วส่ง — ฟรี ไม่ผูกมัด", en: "Pick your dates and send — free, no commitment" },
+  "bs.2":            { th: "เรายืนยันภายใน 24 ชม.", en: "We confirm within 24 h" },
+  "bs.2.d":          { th: "เช็คห้องว่างแล้วตอบกลับทางอีเมล/LINE", en: "We check availability and reply by email/LINE" },
+  "bs.3":            { th: "จ่ายที่โรงแรม", en: "Pay at the hotel" },
+  "bs.3.d":          { th: "ไม่ต้องจ่ายออนไลน์ — เงินสด โอน หรือพร้อมเพย์", en: "No online payment — cash, transfer or PromptPay" },
+
   /* ── ทำไมต้องจองตรง ── */
   "wbd.title":       { th: "ทำไมต้องจองตรงกับเรา", en: "Why Book Direct" },
   "wbd.direct":      { th: "จองตรงกับเรา", en: "Book direct" },
