@@ -1061,3 +1061,89 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 @media (prefers-reduced-motion: reduce) {
   .hero > * { animation: none; }
 }
+
+/* ═══════════ Density pass — เติมชีวิตหน้าแรก ═══════════ */
+
+/* hero มีภาพบรรยากาศริมเจ้าพระยาใต้ overlay ครีม (รูปจาก build, ไม่มีรูปก็ยังสวยด้วย gradient เดิม) */
+.hero {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgba(138,90,52,0.10), transparent 60%),
+    linear-gradient(160deg, rgba(251,247,239,0.90) 0%, rgba(247,241,230,0.86) 55%, rgba(241,230,212,0.90) 100%),
+    url("../images/attractions/riverboat.jpg") center 65% / cover no-repeat,
+    linear-gradient(160deg, #fbf7ef 0%, var(--cream) 60%, #f1e6d4 100%);
+}
+
+/* แถบตัวเลขแบรนด์ */
+.numband {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.2rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 1.9rem 0.5rem;
+  text-align: center;
+}
+.numband .n {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  font-weight: 700;
+  color: var(--gold-dark);
+  line-height: 1.1;
+}
+.numband .l { font-size: 0.84rem; color: var(--muted); margin-top: 0.25rem; }
+
+/* ลิสต์จุดเด่นใน about */
+.about-feats {
+  list-style: none;
+  margin-top: 1.4rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 0.55rem 2rem;
+  text-align: left;
+  max-width: 42rem;
+  margin-left: auto; margin-right: auto;
+}
+.about-feats li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.95rem; }
+.about-feats li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+#about { text-align: center; }
+#about > p { max-width: 42rem; margin-left: auto; margin-right: auto; }
+
+/* แถวการ์ดรูปสถานที่เด่น (หน้าแรก → ลิงก์ไปหน้าเที่ยว) */
+.near-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+  margin: 1.4rem 0 1.8rem;
+}
+.near-photos a {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: linear-gradient(150deg, #efe2cc, #dcc49e);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.near-photos a:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.near-photos img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.near-photos a:hover img { transform: scale(1.06); }
+.near-photos .np-label {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+  padding: 1.5rem 0.75rem 0.5rem;
+  background: linear-gradient(transparent, rgba(46,35,26,0.82));
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-head);
+}
+.foot-credit { font-size: 0.74rem; margin-top: 0.6rem; }
+.foot-credit a { color: inherit; }

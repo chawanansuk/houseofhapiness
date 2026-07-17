@@ -115,6 +115,21 @@ const I18N = {
   /* ── กล่องเช็คห้องว่างใน hero ── */
   "hb.cta":          { th: "เช็คห้องว่าง →", en: "Check availability →" },
 
+  /* ── แถบตัวเลข ── */
+  "nb.l1":           { th: "ยูนิตทั้งหมด", en: "apartment units" },
+  "nb.l2":           { th: "คะแนนจากผู้เข้าพักจริง", en: "verified guest score" },
+  "nb.l3":           { th: "รีวิวบน Booking.com", en: "reviews on Booking.com" },
+  "nb.l4":           { th: "ถึง ICONSIAM", en: "to ICONSIAM" },
+
+  /* ── จุดเด่นห้องพัก (about) ── */
+  "ab.f1":           { th: "ห้องนอนแยกเป็นสัดส่วน + ห้องนั่งเล่น", en: "Separate bedroom + living room" },
+  "ab.f2":           { th: "ครัวเล็กและเครื่องซักผ้าในห้อง", en: "Kitchenette & in-room washer" },
+  "ab.f3":           { th: "ระเบียงส่วนตัววิวเมือง", en: "Private city-view balcony" },
+  "ab.f4":           { th: "เช็คอินยืดหยุ่น แจ้งล่วงหน้าได้", en: "Flexible check-in on request" },
+
+  /* ── เครดิตรูป footer ── */
+  "foot.credit":     { th: "รูปสถานที่ท่องเที่ยวจาก Wikimedia Commons — ดูเครดิต", en: "Attraction photos from Wikimedia Commons — see credits" },
+
   /* ── ทำไมต้องจองตรง ── */
   "wbd.title":       { th: "ทำไมต้องจองตรงกับเรา", en: "Why Book Direct" },
   "wbd.direct":      { th: "จองตรงกับเรา", en: "Book direct" },
