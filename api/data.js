@@ -7,14 +7,17 @@
  *
  * Environment variables (ตั้งใน Vercel → Project → Settings → Environment Variables):
  *   ADMIN_PASSWORD     รหัสผ่านเข้าหน้า /admin  (ยังไม่ตั้ง = โหมดตัวอย่าง ใช้รหัส demo1234)
+ *   STAFF_PASSWORD     รหัสสำหรับพนักงาน (ไม่บังคับ) — เข้าได้เหมือนกันแต่มองไม่เห็นตัวเลขเงิน
  *   SHEET_WEBAPP_URL   URL ของ Apps Script Web App (ลงท้าย /exec)
  *   SHEET_TOKEN        รหัสลับ ต้องตรงกับค่า TOKEN ในสคริปต์
  *   BOOKING_ICAL_URLS  ลิงก์ iCal จาก Booking.com Extranet คั่นด้วยจุลภาค (ใส่ชื่อห้องได้: "ห้อง A|https://...")
  *
- * การยืนยันตัวตน: header "x-admin-key" หรือ query "?key=" ต้องตรงกับ ADMIN_PASSWORD
+ * การยืนยันตัวตน: header "x-admin-key" หรือ query "?key=" ต้องตรงกับรหัสข้างบน
+ * รหัสเจ้าของ → role "admin" / รหัสพนักงาน → role "staff" (ยอดเงินถูกตัดออกฝั่งเซิร์ฟเวอร์)
  */
 
 const DEMO_KEY = "demo1234";
+const DEMO_STAFF_KEY = "staff1234";
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -23,20 +26,27 @@ module.exports = async (req, res) => {
   }
 
   const adminPass = (process.env.ADMIN_PASSWORD || "").trim();
+  const staffPass = (process.env.STAFF_PASSWORD || "").trim();
   const demoMode = !adminPass;
   const key = String(req.headers["x-admin-key"] || (req.query && req.query.key) || "");
 
-  if (key !== (demoMode ? DEMO_KEY : adminPass)) {
+  const role = demoMode
+    ? (key === DEMO_KEY ? "admin" : key === DEMO_STAFF_KEY ? "staff" : null)
+    : (key === adminPass ? "admin" : staffPass && key === staffPass ? "staff" : null);
+
+  if (!role) {
     // demo: true บอกหน้า login ว่ายังไม่ได้ตั้งรหัสจริง จะได้แสดงคำใบ้โหมดตัวอย่าง
     return res.status(401).json({ ok: false, error: "unauthorized", demo: demoMode });
   }
 
   const today = bangkokToday();
+  // พนักงานไม่เห็นยอดเงิน — ตัดออกตั้งแต่ฝั่งเซิร์ฟเวอร์ ไม่ใช่แค่ซ่อนใน UI
+  const forRole = (rows) => role === "staff" ? rows.map((b) => ({ ...b, amount: "" })) : rows;
 
   if (demoMode) {
     return res.status(200).json({
-      ok: true, demo: true, today,
-      bookings: demoBookings(today),
+      ok: true, demo: true, today, role,
+      bookings: forRole(demoBookings(today)),
       rooms: demoRooms(),
       ical: demoIcal(today),
       sources: { sheet: false, ical: false },
@@ -45,8 +55,8 @@ module.exports = async (req, res) => {
 
   const [sheet, ical] = await Promise.all([fetchSheet(), fetchIcal()]);
   return res.status(200).json({
-    ok: true, demo: false, today,
-    bookings: sheet.rows,
+    ok: true, demo: false, today, role,
+    bookings: forRole(sheet.rows),
     rooms: sheet.rooms,
     ical: ical.events,
     sources: { sheet: sheet.ok, ical: ical.ok, sheetError: sheet.error, icalError: ical.error },

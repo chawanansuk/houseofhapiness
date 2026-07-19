@@ -1,8 +1,9 @@
 /**
  * POST /api/update — สั่งงานจากหน้า /admin: เช็คอิน/เช็คเอาต์/ย้ายห้อง/เปลี่ยนสถานะ/ทำความสะอาด
  *
- * ต้องส่ง header "x-admin-key" ตรงกับ ADMIN_PASSWORD (โหมดตัวอย่างใช้ demo1234
- * และจะไม่บันทึกจริง — ตอบ ok เพื่อให้ UI ทดลองใช้งานได้)
+ * ต้องส่ง header "x-admin-key" ตรงกับ ADMIN_PASSWORD หรือ STAFF_PASSWORD
+ * (โหมดตัวอย่างใช้ demo1234 / staff1234 และจะไม่บันทึกจริง — ตอบ ok ให้ UI ทดลองได้)
+ * รหัสพนักงานสั่งงานได้ทุกอย่าง ยกเว้นแก้ยอดเงิน (ฟิลด์ amount ถูกตัดทิ้ง)
  *
  * body รูปแบบใดรูปแบบหนึ่ง:
  *   { action: "update", id, fields: { status?, room_no?, note?, checkin?, checkout?, amount?, name?, phone?, guests? } }
@@ -11,6 +12,7 @@
  */
 
 const DEMO_KEY = "demo1234";
+const DEMO_STAFF_KEY = "staff1234";
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -19,9 +21,13 @@ module.exports = async (req, res) => {
   }
 
   const adminPass = (process.env.ADMIN_PASSWORD || "").trim();
+  const staffPass = (process.env.STAFF_PASSWORD || "").trim();
   const demoMode = !adminPass;
   const key = String(req.headers["x-admin-key"] || "");
-  if (key !== (demoMode ? DEMO_KEY : adminPass)) {
+  const role = demoMode
+    ? (key === DEMO_KEY ? "admin" : key === DEMO_STAFF_KEY ? "staff" : null)
+    : (key === adminPass ? "admin" : staffPass && key === staffPass ? "staff" : null);
+  if (!role) {
     return res.status(401).json({ ok: false, error: "unauthorized", demo: demoMode });
   }
 
@@ -29,6 +35,11 @@ module.exports = async (req, res) => {
   const action = String(b.action || "");
   if (!["update", "roomclean", "add"].includes(action)) {
     return res.status(400).json({ ok: false, error: "unknown-action" });
+  }
+
+  if (role === "staff") {
+    delete b.amount;
+    if (b.fields && typeof b.fields === "object") delete b.fields.amount;
   }
 
   if (demoMode) {

@@ -57,6 +57,8 @@ input,select{font-family:inherit}
 .btn-primary:hover{filter:brightness(1.07)}
 .btn-primary:disabled{opacity:.7;cursor:default}
 .login-err{color:var(--dirty);font-size:.85rem;margin-top:.7rem;min-height:1.2em}
+/* โหมดพนักงาน — ส่วนที่เป็นตัวเลขเงินถูกซ่อน (ข้อมูลถูกตัดจากเซิร์ฟเวอร์อยู่แล้วชั้นหนึ่ง) */
+.staff-mode .admin-only{display:none !important}
 .demo-hint{margin-top:1.1rem;font-size:.8rem;color:#8a6412;background:var(--arr-bg);border:1px solid #f0e2c8;border-radius:10px;padding:.7rem .9rem;display:none;line-height:1.6}
 .demo-hint b{color:#6d4e0e}
 
@@ -282,7 +284,7 @@ tbody tr:hover td{background:#faf7f2}
     <div class="login-err" id="loginErr"></div>
     <div class="demo-hint" id="demoHint">
       <b>โหมดตัวอย่าง</b> — ยังไม่ได้ตั้งรหัสผ่านจริง (ADMIN_PASSWORD) บน Vercel<br>
-      เข้าดูด้วยรหัส <b>demo1234</b> ได้เลย
+      เข้าดูด้วยรหัส <b>demo1234</b> (เจ้าของ) หรือ <b>staff1234</b> (พนักงาน) ได้เลย
     </div>
   </div>
 </div>
@@ -293,7 +295,7 @@ tbody tr:hover td{background:#faf7f2}
   <aside class="sidebar">
     <div class="side-brand">
       <span class="side-logo"><span class="ic" data-icon="home"></span></span>
-      <span>House of Happiness<small>Back Office</small></span>
+      <span>House of Happiness<small id="roleTag">Back Office</small></span>
     </div>
     <nav class="side-nav">
       <a data-nav="secOverview"><span class="ic" data-icon="chart"></span> ภาพรวม</a>
@@ -335,13 +337,13 @@ tbody tr:hover td{background:#faf7f2}
         </div>
         <div class="sec-title sub"><span class="ic" data-icon="chart"></span> สถิติเดือนนี้ <small id="statMonthLbl"></small></div>
         <div class="stat-row">
-          <div class="stat" data-accent="brand"><span class="stat-ico"><span class="ic" data-icon="wallet"></span></span><div><div class="num" id="mRevenue">฿0</div><div class="lbl">รายได้ (ตามยอดจอง)</div></div></div>
+          <div class="stat admin-only" data-accent="brand"><span class="stat-ico"><span class="ic" data-icon="wallet"></span></span><div><div class="num" id="mRevenue">฿0</div><div class="lbl">รายได้ (ตามยอดจอง)</div></div></div>
           <div class="stat" data-accent="occ"><span class="stat-ico"><span class="ic" data-icon="bed"></span></span><div><div class="num" id="mNights">0</div><div class="lbl">คืนที่ขายได้</div></div></div>
           <div class="stat" data-accent="free"><span class="stat-ico"><span class="ic" data-icon="percent"></span></span><div><div class="num" id="mOcc">0%</div><div class="lbl">อัตราเข้าพัก</div></div></div>
           <div class="stat" data-accent="arr"><span class="stat-ico"><span class="ic" data-icon="list"></span></span><div><div class="num" id="mCount">0</div><div class="lbl">จำนวนการจอง</div></div></div>
         </div>
-        <div class="sec-title sub"><span class="ic" data-icon="chart"></span> รายได้ย้อนหลัง 6 เดือน <small>ตามยอดจอง (นับเดือนที่เช็คอิน ไม่รวมยกเลิก)</small></div>
-        <div class="card">
+        <div class="sec-title sub admin-only"><span class="ic" data-icon="chart"></span> รายได้ย้อนหลัง 6 เดือน <small>ตามยอดจอง (นับเดือนที่เช็คอิน ไม่รวมยกเลิก)</small></div>
+        <div class="card admin-only">
           <div class="chart" id="revChart"></div>
           <div class="chart-note" id="revNote"></div>
         </div>
@@ -608,6 +610,9 @@ function showDash(){
 }
 
 function renderAll(){
+  const staff = DATA.role === "staff";
+  document.body.classList.toggle("staff-mode", staff);
+  $("roleTag").textContent = staff ? "โหมดพนักงาน" : "Back Office";
   $("demoBanner").style.display = DATA.demo ? "" : "none";
   const w = [];
   if (!DATA.demo && DATA.sources) {
@@ -744,7 +749,7 @@ function openRoomModal(roomNo){
       <div class="minfo">
         <b>${esc(b.name)}</b><br>
         ${fmtD(b.checkin)} → ${fmtD(b.checkout)} (${nightsOf(b)} คืน) · ${esc(b.guests || "-")} ท่าน<br>
-        ${b.phone ? "โทร " + esc(b.phone) + "<br>" : ""}ช่องทาง: ${esc(b.source || "-")} · ยอด: ${esc(b.amount || "-")}
+        ${b.phone ? "โทร " + esc(b.phone) + "<br>" : ""}ช่องทาง: ${esc(b.source || "-")}${DATA.role === "staff" ? "" : " · ยอด: " + esc(b.amount || "-")}
         ${b.note ? "<br>หมายเหตุ: " + esc(b.note) : ""}
       </div>
       <div class="mact">
