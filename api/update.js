@@ -9,6 +9,8 @@
  *   { action: "update", id, fields: { status?, room_no?, note?, checkin?, checkout?, amount?, name?, phone?, guests? } }
  *   { action: "roomclean", room, clean, note? }
  *   { action: "add", name, checkin, checkout, room_no?, phone?, guests?, amount?, source?, status?, note? }
+ *   { action: "expadd", date, category, amount, vendor?, method?, note? }   (เฉพาะเจ้าของ)
+ *   { action: "expdel", id }                                               (เฉพาะเจ้าของ)
  */
 
 const DEMO_KEY = "demo1234";
@@ -33,11 +35,15 @@ module.exports = async (req, res) => {
 
   const b = (req.body && typeof req.body === "object") ? req.body : {};
   const action = String(b.action || "");
-  if (!["update", "roomclean", "add"].includes(action)) {
+  if (!["update", "roomclean", "add", "expadd", "expdel"].includes(action)) {
     return res.status(400).json({ ok: false, error: "unknown-action" });
   }
 
   if (role === "staff") {
+    // รายจ่ายเป็นเรื่องเงิน — เฉพาะเจ้าของเท่านั้น
+    if (action === "expadd" || action === "expdel") {
+      return res.status(403).json({ ok: false, error: "staff-not-allowed" });
+    }
     delete b.amount;
     if (b.fields && typeof b.fields === "object") delete b.fields.amount;
   }

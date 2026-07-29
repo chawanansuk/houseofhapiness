@@ -49,6 +49,7 @@ module.exports = async (req, res) => {
       bookings: forRole(demoBookings(today)),
       rooms: demoRooms(),
       ical: demoIcal(today),
+      expenses: role === "staff" ? [] : demoExpenses(today),
       sources: { sheet: false, ical: false },
     });
   }
@@ -59,6 +60,8 @@ module.exports = async (req, res) => {
     bookings: forRole(sheet.rows),
     rooms: sheet.rooms,
     ical: ical.events,
+    // รายจ่ายเป็นเรื่องเงินล้วน ๆ — พนักงานไม่ได้รับข้อมูลเลย
+    expenses: role === "staff" ? [] : sheet.expenses,
     sources: { sheet: sheet.ok, ical: ical.ok, sheetError: sheet.error, icalError: ical.error },
   });
 };
@@ -74,22 +77,23 @@ function bangkokToday() {
 async function fetchSheet() {
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url) return { ok: false, rows: [], rooms: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
+  if (!url) return { ok: false, rows: [], rooms: [], expenses: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
   try {
     const sep = url.includes("?") ? "&" : "?";
     const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, {
       redirect: "follow",
     });
-    if (!r.ok) return { ok: false, rows: [], rooms: [], error: `ชีตตอบ HTTP ${r.status}` };
+    if (!r.ok) return { ok: false, rows: [], rooms: [], expenses: [], error: `ชีตตอบ HTTP ${r.status}` };
     const j = await r.json();
-    if (j && j.error) return { ok: false, rows: [], rooms: [], error: String(j.error) };
+    if (j && j.error) return { ok: false, rows: [], rooms: [], expenses: [], error: String(j.error) };
     return {
       ok: true,
       rows: Array.isArray(j && j.bookings) ? j.bookings : [],
       rooms: Array.isArray(j && j.rooms) ? j.rooms : [],
+      expenses: Array.isArray(j && j.expenses) ? j.expenses : [],
     };
   } catch (e) {
-    return { ok: false, rows: [], rooms: [], error: String((e && e.message) || e) };
+    return { ok: false, rows: [], rooms: [], expenses: [], error: String((e && e.message) || e) };
   }
 }
 
@@ -188,6 +192,17 @@ function demoRooms() {
     rooms.push({ room: no, clean: (no === "102" || no === "108") ? "รอทำความสะอาด" : "สะอาด", note: "" });
   }
   return rooms;
+}
+
+function demoExpenses(today) {
+  const ym = today.slice(0, 7);
+  return [
+    { id: "EXP-D1", date: ym + "-02", category: "ค่าไฟ", amount: "4,850", vendor: "การไฟฟ้านครหลวง", method: "โอน", note: "" },
+    { id: "EXP-D2", date: ym + "-02", category: "ค่าน้ำ", amount: "980", vendor: "การประปานครหลวง", method: "โอน", note: "" },
+    { id: "EXP-D3", date: ym + "-05", category: "แม่บ้าน/ของใช้", amount: "1,200", vendor: "แม็คโคร", method: "เงินสด", note: "น้ำยา+ผ้าปู" },
+    { id: "EXP-D4", date: ym + "-10", category: "ซ่อมบำรุง", amount: "650", vendor: "ช่างแอร์", method: "เงินสด", note: "ล้างแอร์ 108" },
+    { id: "EXP-D5", date: ym + "-15", category: "เน็ต/เคเบิล", amount: "1,070", vendor: "AIS Fibre", method: "โอน", note: "" },
+  ];
 }
 
 function demoIcal(today) {

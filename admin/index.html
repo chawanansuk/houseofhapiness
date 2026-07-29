@@ -94,6 +94,20 @@ input,select{font-family:inherit}
 .banner.fix:hover{filter:brightness(.98)}
 .row-fix td{background:#fdf6e3}
 .btn-edit{background:var(--brand)}
+/* ── รายรับ-รายจ่าย ── */
+.exp-form{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-top:.5rem}
+.exp-form label{display:block;font-size:.78rem;font-weight:700;margin-bottom:.25rem}
+.exp-form input,.exp-form select{width:100%;padding:.6rem .8rem;border:1px solid var(--line-2);border-radius:10px;background:#fff;font-size:.92rem}
+.exp-form input:focus,.exp-form select:focus{outline:none;border-color:var(--brand)}
+.exp-form .full{grid-column:1/-1}
+.exp-cat{display:flex;align-items:center;gap:.6rem;font-size:.85rem;margin:.35rem 0}
+.exp-cat .nm{width:8.5rem;flex:none;font-weight:600}
+.exp-cat .bar{flex:1;height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.exp-cat .bar i{display:block;height:100%;background:var(--arr);border-radius:6px}
+.exp-cat .amt{width:5.8rem;text-align:right;font-weight:700;flex:none}
+.btn-del{background:var(--dirty)}
+.profit-pos{color:#16a34a}.profit-neg{color:#dc2626}
+@media(max-width:640px){.exp-form{grid-template-columns:1fr}.exp-cat .nm{width:6.5rem}}
 .banner code{background:rgba(0,0,0,.06);padding:.05rem .35rem;border-radius:5px;font-size:.82em}
 
 .sec-title{display:flex;align-items:center;gap:.55rem;font-size:1.15rem;margin-bottom:1rem}
@@ -306,6 +320,7 @@ tbody tr:hover td{background:#faf7f2}
       <a data-nav="secRooms"><span class="ic" data-icon="grid"></span> ผังห้อง</a>
       <a data-nav="secCalendar"><span class="ic" data-icon="calendar"></span> ปฏิทิน</a>
       <a data-nav="secBookings"><span class="ic" data-icon="list"></span> รายการจอง</a>
+      <a data-nav="secMoney" class="admin-only"><span class="ic" data-icon="wallet"></span> รายรับ-รายจ่าย</a>
     </nav>
     <div class="side-foot">
       <button class="side-act act-refresh"><span class="ic" data-icon="refresh"></span> รีเฟรช</button>
@@ -441,6 +456,49 @@ tbody tr:hover td{background:#faf7f2}
           </div>
         </div>
       </section>
+
+      <!-- ── รายรับ-รายจ่าย (เฉพาะเจ้าของ — พนักงานมองไม่เห็นทั้งแท็บ) ── -->
+      <section id="secMoney" class="section admin-only">
+        <div class="sec-title"><span class="ic" data-icon="wallet"></span> รายรับ-รายจ่าย <small>จดค่าใช้จ่าย เห็นกำไรจริงต่อเดือน</small></div>
+        <div class="card">
+          <div class="cal-head">
+            <button class="cal-nav" id="expPrev" aria-label="เดือนก่อนหน้า">‹</button>
+            <b id="expTitle"></b>
+            <button class="cal-nav" id="expNext" aria-label="เดือนถัดไป">›</button>
+          </div>
+          <div class="stat-row" style="margin-top:.9rem">
+            <div class="stat" data-accent="free"><span class="stat-ico"><span class="ic" data-icon="chart"></span></span><div><div class="num" id="pRev">฿0</div><div class="lbl">รายรับ (ตามยอดจอง)</div></div></div>
+            <div class="stat" data-accent="arr"><span class="stat-ico"><span class="ic" data-icon="wallet"></span></span><div><div class="num" id="pExp">฿0</div><div class="lbl">รายจ่าย</div></div></div>
+            <div class="stat" data-accent="brand"><span class="stat-ico"><span class="ic" data-icon="percent"></span></span><div><div class="num" id="pNet">฿0</div><div class="lbl">กำไร (รายรับ − รายจ่าย)</div></div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1.2rem">
+          <div class="sec-title sub"><span class="ic" data-icon="wallet"></span> บันทึกรายจ่ายใหม่</div>
+          <form class="exp-form" id="expForm">
+            <div><label>วันที่</label><input type="date" id="exDate" required></div>
+            <div><label>หมวด</label><select id="exCat"></select></div>
+            <div><label>จำนวนเงิน (฿)</label><input id="exAmount" inputmode="decimal" placeholder="เช่น 1,200" required></div>
+            <div><label>วิธีจ่าย</label><select id="exMethod"><option>เงินสด</option><option>โอน</option><option>พร้อมเพย์</option><option>บัตร</option></select></div>
+            <div class="full"><label>จ่ายให้ (ร้าน/คน)</label><input id="exVendor" placeholder="เช่น การไฟฟ้า / ช่างแอร์ / แม็คโคร"></div>
+            <div class="full"><label>หมายเหตุ</label><input id="exNote" placeholder="ถ้ามี"></div>
+            <div class="full"><button class="mbtn mbtn-primary" type="submit" id="exSubmit">บันทึกรายจ่าย</button></div>
+          </form>
+        </div>
+        <div class="card" style="margin-top:1.2rem">
+          <div class="sec-title sub"><span class="ic" data-icon="chart"></span> แยกตามหมวด</div>
+          <div id="expCats"></div>
+        </div>
+        <div class="card" style="margin-top:1.2rem">
+          <div class="sec-title sub"><span class="ic" data-icon="list"></span> รายการรายจ่าย <small id="expCount"></small></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>วันที่</th><th>หมวด</th><th>จ่ายให้</th><th>วิธี</th><th>จำนวน (฿)</th><th></th></tr></thead>
+              <tbody id="expBody"></tbody>
+            </table>
+            <div class="empty" id="expEmpty" style="display:none">ยังไม่มีรายจ่ายในเดือนนี้</div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -449,6 +507,7 @@ tbody tr:hover td{background:#faf7f2}
     <a data-nav="secCalendar"><span class="ic" data-icon="calendar"></span>ปฏิทิน</a>
     <a data-nav="secBookings"><span class="ic" data-icon="list"></span>รายการ</a>
     <a data-nav="secOverview"><span class="ic" data-icon="chart"></span>สรุป</a>
+    <a data-nav="secMoney" class="admin-only"><span class="ic" data-icon="wallet"></span>เงิน</a>
   </nav>
 </div>
 
@@ -459,7 +518,8 @@ tbody tr:hover td{background:#faf7f2}
 "use strict";
 const $ = (id) => document.getElementById(id);
 const KEY_STORE = "hoh-admin-key";
-let DATA = null, calYM = null, selDay = null;
+let DATA = null, calYM = null, selDay = null, expYM = null;
+const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
 
 const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 const THAI_MONTHS_AB = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -615,6 +675,8 @@ function showDash(){
   $("appView").style.display = "flex";
   const t = DATA.today;
   calYM = [Number(t.slice(0,4)), Number(t.slice(5,7)) - 1];
+  expYM = [Number(t.slice(0,4)), Number(t.slice(5,7)) - 1];
+  $("exDate").value = t;
   selDay = null;
   document.querySelectorAll(".section").forEach((s) => s.classList.toggle("active", s.id === "secRooms"));
   document.querySelectorAll("[data-nav]").forEach((n) => n.classList.toggle("on", n.dataset.nav === "secRooms"));
@@ -659,6 +721,46 @@ function renderAll(){
   renderCal();
   renderTable();
   renderIcal();
+  renderExpenses();
+}
+
+/* ── รายรับ-รายจ่าย (เฉพาะเจ้าของ) ── */
+function renderExpenses(){
+  if (!DATA || DATA.role === "staff") return;
+  const [y, m] = expYM;
+  const ym = `${y}-${String(m + 1).padStart(2, "0")}`;
+  $("expTitle").textContent = `${THAI_MONTHS[m]} ${y + 543}`;
+
+  const exps = (DATA.expenses || []).filter((x) => String(x.date || "").slice(0, 7) === ym);
+  const expTotal = exps.reduce((s, x) => s + bahtNum(x.amount), 0);
+  // รายรับนับตามเดือนที่เช็คอิน — ให้ตรงกับกราฟรายได้ 6 เดือน
+  const rev = activeBookings().filter((b) => b.checkin.slice(0, 7) === ym)
+    .reduce((s, b) => s + bahtNum(b.amount), 0);
+  const net = rev - expTotal;
+  $("pRev").textContent = "฿" + rev.toLocaleString();
+  $("pExp").textContent = "฿" + expTotal.toLocaleString();
+  $("pNet").textContent = (net < 0 ? "-฿" : "฿") + Math.abs(net).toLocaleString();
+  $("pNet").className = "num " + (net >= 0 ? "profit-pos" : "profit-neg");
+
+  const byCat = {};
+  exps.forEach((x) => { const c = x.category || "อื่นๆ"; byCat[c] = (byCat[c] || 0) + bahtNum(x.amount); });
+  const maxCat = Math.max(1, ...Object.values(byCat));
+  $("expCats").innerHTML = Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([c, v]) => `
+    <div class="exp-cat"><span class="nm">${esc(c)}</span><span class="bar"><i style="width:${Math.max(3, Math.round(v / maxCat * 100))}%"></i></span><span class="amt">฿${v.toLocaleString()}</span></div>`).join("")
+    || `<div class="empty">ยังไม่มีข้อมูลเดือนนี้</div>`;
+
+  const sorted = exps.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  $("expCount").textContent = sorted.length ? `${sorted.length} รายการ · รวม ฿${expTotal.toLocaleString()}` : "";
+  $("expEmpty").style.display = sorted.length ? "none" : "";
+  $("expBody").innerHTML = sorted.map((x) => `
+    <tr>
+      <td data-label="วันที่">${fmtD(x.date)}</td>
+      <td data-label="หมวด">${esc(x.category || "-")}</td>
+      <td data-label="จ่ายให้">${esc(x.vendor || "-")}${x.note ? `<br><span class="src">${esc(x.note)}</span>` : ""}</td>
+      <td data-label="วิธี">${esc(x.method || "-")}</td>
+      <td data-label="จำนวน"><b>${esc(x.amount || "-")}</b></td>
+      <td data-label="จัดการ"><button class="btn-sm btn-del" data-expdel="${esc(x.id)}">ลบ</button></td>
+    </tr>`).join("");
 }
 
 /* ── ผังห้อง ── */
@@ -1089,6 +1191,36 @@ $("calNext").addEventListener("click", () => { calYM[1]++; if (calYM[1] > 11) { 
 $("q").addEventListener("input", renderTable);
 $("fRange").addEventListener("change", renderTable);
 $("fixBanner").addEventListener("click", () => { $("fRange").value = "needsfix"; showSection("secBookings"); renderTable(); });
+EXP_CATS.forEach((c) => { const o = document.createElement("option"); o.textContent = c; $("exCat").appendChild(o); });
+$("expPrev").addEventListener("click", () => { expYM[1]--; if (expYM[1] < 0) { expYM[1] = 11; expYM[0]--; } renderExpenses(); });
+$("expNext").addEventListener("click", () => { expYM[1]++; if (expYM[1] > 11) { expYM[1] = 0; expYM[0]++; } renderExpenses(); });
+$("expForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const date = $("exDate").value, amount = $("exAmount").value.trim();
+  if (!date || !bahtNum(amount)) { toast("ใส่วันที่และจำนวนเงินก่อน"); return; }
+  const body = {
+    action: "expadd", date, amount,
+    category: $("exCat").value, method: $("exMethod").value,
+    vendor: $("exVendor").value.trim(), note: $("exNote").value.trim(),
+  };
+  const btn = $("exSubmit");
+  btn.disabled = true;
+  const r1 = await apiUpdate(body);
+  btn.disabled = false;
+  if (!r1) return;
+  await afterAction(() => { (DATA.expenses = DATA.expenses || []).push({ ...body, id: r1.id || ("LOCAL-" + Math.random().toString(36).slice(2, 8)) }); });
+  $("exAmount").value = ""; $("exVendor").value = ""; $("exNote").value = "";
+  expYM = [Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1]; // เด้งไปเดือนของรายการที่เพิ่งบันทึก
+  renderExpenses();
+});
+$("expBody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-expdel]");
+  if (!btn) return;
+  if (!confirm("ลบรายจ่ายนี้?")) return;
+  const id = btn.dataset.expdel;
+  const r1 = await apiUpdate({ action: "expdel", id });
+  if (r1) await afterAction(() => { DATA.expenses = (DATA.expenses || []).filter((x) => x.id !== id); });
+});
 $("tblBody").addEventListener("click", (e) => {
   const btn = e.target.closest("[data-edit]");
   if (!btn) return;

@@ -16,9 +16,11 @@ var TOKEN = "เปลี่ยนรหัสลับตรงนี้";
 
 var SHEET_NAME = "Bookings";
 var ROOMS_SHEET = "Rooms";
+var EXPENSES_SHEET = "Expenses";
 var LABEL_DONE = "HOH-บันทึกแล้ว";
 var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no"];
 var ROOM_HEADERS = ["room", "clean", "note"];
+var EXP_HEADERS = ["id", "date", "category", "amount", "vendor", "method", "note", "created"];
 // คอลัมน์ที่หน้า /admin แก้ไขได้ผ่าน action=update
 var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests"];
 
@@ -111,6 +113,56 @@ function setRoomClean_(room, clean, note) {
   return false;
 }
 
+/* ── ชีต Expenses: บันทึกรายจ่าย (ค่าน้ำ ไฟ แม่บ้าน ซ่อม ฯลฯ) ── */
+
+function getExpensesSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(EXPENSES_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(EXPENSES_SHEET);
+    sh.appendRow(EXP_HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, EXP_HEADERS.length).setFontWeight("bold");
+  }
+  return sh;
+}
+
+function readExpenses_() {
+  var sh = getExpensesSheet_();
+  var values = sh.getDataRange().getValues();
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    if (!asText_(values[i][0])) continue;
+    var row = {};
+    for (var c = 0; c < EXP_HEADERS.length; c++) row[EXP_HEADERS[c]] = asText_(values[i][c]);
+    row._rowIndex = i + 1;
+    rows.push(row);
+  }
+  return rows;
+}
+
+function appendExpense_(x) {
+  var sh = getExpensesSheet_();
+  var id = "EXP-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyMMddHHmmss");
+  sh.appendRow([
+    id, x.date || Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd"),
+    x.category || "อื่นๆ", x.amount || "", x.vendor || "", x.method || "",
+    x.note || "", Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd HH:mm"),
+  ]);
+  return id;
+}
+
+function deleteExpense_(id) {
+  var rows = readExpenses_();
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].id === String(id)) {
+      getExpensesSheet_().deleteRow(rows[i]._rowIndex);
+      return true;
+    }
+  }
+  return false;
+}
+
 function findById_(id) {
   if (!id) return null;
   var rows = readAll_();
@@ -138,7 +190,8 @@ function doGet(e) {
   if (p.action === "list") {
     var rows = readAll_().map(function (r) { delete r._rowIndex; return r; });
     var rooms = readRooms_().map(function (r) { delete r._rowIndex; return r; });
-    return json_({ bookings: rows, rooms: rooms });
+    var exps = readExpenses_().map(function (r) { delete r._rowIndex; return r; });
+    return json_({ bookings: rows, rooms: rooms, expenses: exps });
   }
   return json_({ error: "unknown-action" });
 }
@@ -179,6 +232,15 @@ function doPost(e) {
   if (b.action === "roomclean") {
     var done = setRoomClean_(b.room, b.clean || "สะอาด", b.note);
     return json_(done ? { ok: true } : { error: "room-not-found" });
+  }
+  // บันทึก/ลบรายจ่าย (จากหน้า /admin แท็บ "รายจ่าย")
+  if (b.action === "expadd") {
+    if (!b.amount || !b.date) return json_({ error: "missing-fields" });
+    var expId = appendExpense_(b);
+    return json_({ ok: true, id: expId });
+  }
+  if (b.action === "expdel") {
+    return json_(deleteExpense_(b.id) ? { ok: true } : { error: "not-found" });
   }
   return json_({ error: "unknown-action" });
 }
