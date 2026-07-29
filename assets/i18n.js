@@ -138,6 +138,7 @@ const I18N = {
   "av.low.post":     { th: " ห้องสุดท้าย", en: " room(s) left" },
   "av.full":         { th: "ขออภัย วันที่เลือกห้องเต็ม — ลองเลื่อนวันดูนะครับ", en: "Sorry, we're fully booked on those dates — try different dates" },
   "av.note":         { th: "ตามข้อมูลระบบ ยืนยันแน่นอนอีกครั้งเมื่อเราตอบกลับ", en: "Based on live data — final confirmation in our reply" },
+  "av.uncertain":    { th: "ส่งคำขอมาได้เลย — เราจะเช็คห้องว่างและยืนยันให้ภายใน 24 ชม.", en: "Send your request — we'll check availability and confirm within 24 hrs" },
 
   /* ── ขั้นตอนการจอง 3 สเต็ป ── */
   "bs.t":            { th: "จองง่าย ๆ ใน 3 ขั้นตอน", en: "How booking works" },

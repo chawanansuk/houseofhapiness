@@ -233,8 +233,10 @@ function processMessage_(msg) {
   var existing = findById_(id);
 
   if (isCancel) {
-    if (existing) setStatus_(existing._rowIndex, "ยกเลิก", "ยกเลิกตามอีเมล " + fmtDate_(msg.getDate()));
-    else appendBooking_({ id: id, source: "Booking.com", name: extractGuestName_(text), status: "ยกเลิก", note: "อีเมลยกเลิก (ไม่พบการจองเดิมในชีต)" });
+    // หาแถวเดิมแบบหลวม ๆ ด้วย: id ตรงเป๊ะ → เทียบเฉพาะตัวเลขเลขที่จอง
+    var hit = existing || (resNo ? findByResNo_(resNo) : null);
+    if (hit) setStatus_(hit._rowIndex, "ยกเลิก", "ยกเลิกตามอีเมล " + fmtDate_(msg.getDate()));
+    else appendBooking_({ id: id, source: "Booking.com", name: extractGuestName_(text), status: "ยกเลิก", note: "อีเมลยกเลิกแต่ไม่พบการจองเดิมในชีต (orphan) — เปิด Pulse ตรวจว่ายกเลิกรายการไหน" });
     return;
   }
   if (isModify) {
@@ -249,7 +251,19 @@ function processMessage_(msg) {
   // → บันทึกเท่าที่มี แล้วติดสถานะ "รอเติมชื่อจาก Pulse" ไม่ปล่อยให้การจองหายเงียบ ๆ
   var dates = extractDates_(text);
   var guest = extractGuestName_(text);
-  var incomplete = !guest || !dates.checkin;
+
+  // fallback: หัวข้ออีเมลมักมีวันเช็คอิน เช่น "คุณมีการจองใหม่! วันจันทร์ที่ 10 สิงหาคม ค.ศ. 2026"
+  // ใช้เป็นวันเช็คอินแบบ "คาดการณ์" — ดีกว่าปล่อยว่างจนระบบนับห้องว่างไม่ได้
+  var fromSubject = false;
+  if (!dates.checkin) {
+    var sd = findAnyDate_(subject);
+    if (sd) { dates.checkin = sd; fromSubject = true; }
+  }
+
+  var incomplete = !guest || !dates.checkin || !dates.checkout;
+  var noteBits = [];
+  if (fromSubject) noteBits.push("วันเช็คอินคาดจากหัวข้ออีเมล — ยืนยันวันจริง/วันออกใน Pulse");
+  if (incomplete) noteBits.push("อีเมลไม่ระบุรายละเอียดครบ — เปิดแอป Pulse แล้วเติมข้อมูล (" + subject + ")");
   appendBooking_({
     id: id,
     source: "Booking.com",
@@ -260,8 +274,19 @@ function processMessage_(msg) {
     rooms: extractRooms_(text),
     amount: extractAmount_(text),
     status: incomplete ? "รอเติมชื่อจาก Pulse" : "ยืนยันแล้ว",
-    note: incomplete ? "อีเมลไม่ระบุรายละเอียดครบ — เปิดแอป Pulse แล้วเติมชื่อ/วันที่ในชีต (" + subject + ")" : "",
+    note: noteBits.join(" | "),
   });
+}
+
+// หาแถวจากเลขที่จองแบบเทียบเฉพาะตัวเลข (id ในชีตอาจมี prefix BDC- หรือรูปแบบต่างกัน)
+function findByResNo_(resNo) {
+  var digits = String(resNo).replace(/\D/g, "");
+  if (!digits) return null;
+  var rows = readAll_();
+  for (var i = 0; i < rows.length; i++) {
+    if (String(rows[i].id || "").replace(/\D/g, "") === digits) return rows[i];
+  }
+  return null;
 }
 
 /* ═══════════════ สรุปงานส่งอีเมลทุกเช้า ═══════════════ */
@@ -358,7 +383,9 @@ function parseDate_(s) {
     "มกราคม": 1, "กุมภาพันธ์": 2, "มีนาคม": 3, "เมษายน": 4, "พฤษภาคม": 5, "มิถุนายน": 6,
     "กรกฎาคม": 7, "สิงหาคม": 8, "กันยายน": 9, "ตุลาคม": 10, "พฤศจิกายน": 11, "ธันวาคม": 12,
   };
-  m = s.match(/(\d{1,2})\s+([A-Za-z฀-๿.]+)\s+(\d{4})/);
+  // รองรับ "ค.ศ./พ.ศ." คั่นระหว่างเดือนกับปี เช่น "10 สิงหาคม ค.ศ. 2026"
+  // (รูปแบบหัวข้ออีเมล Booking.com ภาษาไทย — เดิมอ่านไม่ได้เลยเพราะไม่รองรับตัวคั่นนี้)
+  m = s.match(/(\d{1,2})\s+([A-Za-z฀-๿.]+?)\s+(?:ค\.?ศ\.?|พ\.?ศ\.?)?\s*(\d{4})/);
   if (m) {
     var key = m[2].toLowerCase().replace(/\.$/, "");
     var mo = months[key.slice(0, 3)] || months[key];
@@ -374,6 +401,18 @@ function parseDate_(s) {
     if (y2 > 2400) y2 -= 543;
     return y2 + "-" + pad2_(Number(m[2])) + "-" + pad2_(Number(m[1]));
   }
+  return "";
+}
+
+// หา "วันที่แรกที่เจอ" ในข้อความสั้น ๆ (ใช้กับหัวข้ออีเมล) — คืน YYYY-MM-DD หรือ ""
+function findAnyDate_(text) {
+  var s = String(text || "");
+  var m = s.match(/\d{4}-\d{2}-\d{2}/);
+  if (m) return parseDate_(m[0]);
+  m = s.match(/\d{1,2}\s+[A-Za-z฀-๿.]+\s+(?:ค\.?ศ\.?|พ\.?ศ\.?)?\s*\d{4}/);
+  if (m) return parseDate_(m[0]);
+  m = s.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
+  if (m) return parseDate_(m[0]);
   return "";
 }
 
@@ -399,4 +438,37 @@ function setupTriggers() {
 /** ทดสอบด้วยมือ: รัน scanBookingEmails ทันที แล้วเปิดชีตดูผล */
 function testScanNow() {
   scanBookingEmails();
+}
+
+/** ซ่อมข้อมูลย้อนหลัง — รันด้วยมือ 1 ครั้งหลังอัปเดตสคริปต์เป็น v4:
+ *  ไล่อีเมลที่เคยสแกนไปแล้ว (label HOH-บันทึกแล้ว) มาเติม "วันเช็คอิน"
+ *  ให้แถวที่วันที่ยังว่าง โดยอ่านจากหัวข้ออีเมล (เช่น "...วันจันทร์ที่ 10 สิงหาคม ค.ศ. 2026")
+ *  เติมเฉพาะช่องที่ว่างเท่านั้น ไม่ทับข้อมูลที่กรอกมือไว้แล้ว */
+function repairMissingDates() {
+  var threads = GmailApp.search('label:"' + LABEL_DONE + '" from:booking.com', 0, 100);
+  var sh = getSheet_();
+  var fixed = 0;
+  threads.forEach(function (thread) {
+    thread.getMessages().forEach(function (msg) {
+      var subject = msg.getSubject() || "";
+      var text = subject + "\n" + (msg.getPlainBody() || "");
+      var resNo = extractReservationNo_(text);
+      if (!resNo) return;
+      var row = findByResNo_(resNo);
+      if (!row || /^\d{4}-\d{2}-\d{2}$/.test(row.checkin)) return; // ไม่มีแถว หรือมีวันที่แล้ว → ข้าม
+      var d = extractDates_(text);
+      var ciDate = d.checkin || findAnyDate_(subject);
+      if (!ciDate) return;
+      sh.getRange(row._rowIndex, HEADERS.indexOf("checkin") + 1).setValue(ciDate);
+      if (d.checkout && !/^\d{4}-\d{2}-\d{2}$/.test(row.checkout)) {
+        sh.getRange(row._rowIndex, HEADERS.indexOf("checkout") + 1).setValue(d.checkout);
+      }
+      var cell = sh.getRange(row._rowIndex, HEADERS.indexOf("note") + 1);
+      var old = asText_(cell.getValue());
+      var tag = "เติมวันเช็คอินจากหัวข้ออีเมล — ยืนยันวันจริง/วันออกใน Pulse";
+      if (old.indexOf(tag) < 0) cell.setValue(old ? old + " | " + tag : tag);
+      fixed++;
+    });
+  });
+  Logger.log("เติมวันที่ให้ " + fixed + " รายการ");
 }

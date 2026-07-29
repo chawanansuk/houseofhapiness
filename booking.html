@@ -351,7 +351,11 @@ function checkAvailability() {
       const r = await fetch(`/api/availability?checkin=${s.ci}&checkout=${s.co}`, { signal: availCtrl.signal });
       const j = await r.json();
       if (!j.ok || sig !== availSig) return;
-      if (j.full) {
+      if (j.warning === "uncertain") {
+        // มีการจองที่ยังไม่รู้วันที่ — อย่าการันตีเลขห้องว่าง ใช้ข้อความ "ขอเช็คก่อน" แทน
+        badge.className = "avail-badge uncertain";
+        badge.textContent = t("av.uncertain");
+      } else if (j.full) {
         badge.className = "avail-badge full";
         badge.textContent = t("av.full");
       } else if (j.available <= 2) {

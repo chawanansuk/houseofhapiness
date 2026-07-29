@@ -5,11 +5,30 @@
  * ถ้ายังไม่ได้ตั้งค่า SHEET_WEBAPP_URL จะตอบ ok โดยไม่บันทึก (ไม่กระทบลูกค้า)
  */
 
+// rate limit แบบเบา ๆ ต่ออินสแตนซ์ (กัน spam bot ยิงถี่ — ไม่ใช่กำแพงเหล็ก แต่พอกันมือบอน)
+const RATE_MAX = 5, RATE_WINDOW_MS = 60 * 60 * 1000;
+const hits = new Map();
+
+function rateLimited(ip) {
+  const now = Date.now();
+  const list = (hits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (list.length >= RATE_MAX) { hits.set(ip, list); return true; }
+  list.push(now);
+  hits.set(ip, list);
+  if (hits.size > 5000) hits.clear(); // กันหน่วยความจำบวมในอินสแตนซ์อายุยาว
+  return false;
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "method-not-allowed" });
+  }
+
+  const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+  if (rateLimited(ip)) {
+    return res.status(429).json({ ok: false, error: "too-many-requests" });
   }
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();

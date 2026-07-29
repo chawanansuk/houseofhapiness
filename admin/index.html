@@ -90,6 +90,10 @@ input,select{font-family:inherit}
 .banner.demo{background:var(--arr-bg);border:1px solid #f0e2c8;color:#8a6412}
 .banner.demo b{color:#6d4e0e}
 .banner.warn{background:var(--dirty-bg);border:1px solid #f3d3ce;color:var(--dirty)}
+.banner.fix{background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;cursor:pointer}
+.banner.fix:hover{filter:brightness(.98)}
+.row-fix td{background:#fdf6e3}
+.btn-edit{background:var(--brand)}
 .banner code{background:rgba(0,0,0,.06);padding:.05rem .35rem;border-radius:5px;font-size:.82em}
 
 .sec-title{display:flex;align-items:center;gap:.55rem;font-size:1.15rem;margin-bottom:1rem}
@@ -324,6 +328,12 @@ tbody tr:hover td{background:#faf7f2}
           ตั้งค่าตามคู่มือ <code>backoffice/SETUP.md</code> เพื่อใช้ข้อมูลจริง
         </div>
         <div class="banner warn" id="srcWarn"></div>
+        <div class="banner fix" id="fixBanner"></div>
+        <div class="banner warn" id="icalBanner">
+          <b>ยังไม่ได้เชื่อมปฏิทิน Booking.com (iCal)</b> — ตัวเลขห้องว่างบนหน้าเว็บยังไม่แม่น
+          ไปที่ Extranet → Rates &amp; Availability → Sync calendars → Export แล้วเอา URL
+          มาใส่ env <code>BOOKING_ICAL_URLS</code> บน Vercel (ดู <code>backoffice/SETUP.md</code>)
+        </div>
       </div>
 
       <!-- ── ภาพรวม ── -->
@@ -408,12 +418,13 @@ tbody tr:hover td{background:#faf7f2}
               <option value="upcoming" selected>กำลังพัก + จะเข้าพัก</option>
               <option value="all">ทั้งหมด</option>
               <option value="past">ที่ผ่านมาแล้ว</option>
+              <option value="needsfix">ข้อมูลไม่ครบ</option>
             </select>
           </div>
           <div class="tbl-wrap">
             <table>
               <thead><tr>
-                <th>เช็คอิน</th><th>เช็คเอาต์</th><th>คืน</th><th>ห้อง</th><th>ผู้เข้าพัก</th><th>ช่องทาง</th><th>ยอด (฿)</th><th>สถานะ</th>
+                <th>เช็คอิน</th><th>เช็คเอาต์</th><th>คืน</th><th>ห้อง</th><th>ผู้เข้าพัก</th><th>ช่องทาง</th><th>ยอด (฿)</th><th>สถานะ</th><th></th>
               </tr></thead>
               <tbody id="tblBody"></tbody>
             </table>
@@ -503,6 +514,8 @@ function statusBadge(st){
   return `<span class="badge b-ok">${esc(s)}</span>`;
 }
 const isCancelled = (b) => /ยกเลิก|cancel/i.test(String(b.status || ""));
+// การจองที่อีเมล Booking.com ไม่บอกรายละเอียด — ต้องเปิดแอป Pulse มาเติมมือ
+const needsFix = (b) => !isCancelled(b) && (!isYMD(b.checkin) || !isYMD(b.checkout) || !String(b.name || "").trim());
 const isCheckedOut = (b) => /เช็คเอาต์|checked.?out/i.test(String(b.status || ""));
 const isInhouse = (b) => /เข้าพัก/.test(String(b.status || ""));
 const activeBookings = () => (DATA.bookings || []).filter((b) => !isCancelled(b) && isYMD(b.checkin) && isYMD(b.checkout));
@@ -613,14 +626,22 @@ function renderAll(){
   const staff = DATA.role === "staff";
   document.body.classList.toggle("staff-mode", staff);
   $("roleTag").textContent = staff ? "โหมดพนักงาน" : "Back Office";
-  $("demoBanner").style.display = DATA.demo ? "" : "none";
+  // หมายเหตุ: .banner ใน CSS เป็น display:none — ต้องสั่ง "block" ตรง ๆ (ค่า "" จะไม่โผล่)
+  $("demoBanner").style.display = DATA.demo ? "block" : "none";
   const w = [];
   if (!DATA.demo && DATA.sources) {
     if (!DATA.sources.sheet) w.push("Google Sheets: " + (DATA.sources.sheetError || "เชื่อมไม่สำเร็จ"));
     if (DATA.sources.icalError && DATA.sources.icalError.indexOf("ยังไม่ได้ตั้ง") !== 0) w.push("iCal: " + DATA.sources.icalError);
   }
-  $("srcWarn").style.display = w.length ? "" : "none";
+  $("srcWarn").style.display = w.length ? "block" : "none";
   $("srcWarn").textContent = w.length ? ("ปัญหาการเชื่อมต่อ — " + w.join(" · ")) : "";
+
+  const fixList = (DATA.bookings || []).filter(needsFix);
+  $("fixBanner").style.display = fixList.length ? "block" : "none";
+  $("fixBanner").innerHTML = `<b>รายการรอเติมข้อมูล (${fixList.length})</b> — อีเมล Booking.com ไม่บอกชื่อ/วันที่
+    เปิดแอป Pulse ดูรายละเอียด แล้วแตะที่นี่เพื่อเติมทีละรายการ`;
+  $("icalBanner").style.display =
+    (!DATA.demo && DATA.sources && String(DATA.sources.icalError || "").indexOf("ยังไม่ได้ตั้ง") === 0) ? "block" : "none";
 
   const t = DATA.today;
   const act = activeBookings();
@@ -855,6 +876,49 @@ function openMoveModal(b, fromRoom){
 function openModal(html){ $("modalBox").innerHTML = html; $("overlay").classList.add("open"); }
 function closeModal(){ $("overlay").classList.remove("open"); }
 
+/* ── ฟอร์มเติม/แก้ข้อมูลการจอง (ใช้คู่กับแอป Pulse ที่มีรายละเอียดแขก) ── */
+function openEditModal(b){
+  const staff = DATA.role === "staff";
+  const rooms = DATA.rooms || [];
+  const html = `
+    <h3>${needsFix(b) ? "เติมข้อมูลการจอง" : "แก้ไขการจอง"}</h3>
+    <div class="msub">#${esc(b.id)} · ${esc(b.source || "-")}${b.note ? `<br>${esc(b.note)}` : ""}</div>
+    <label>ชื่อผู้เข้าพัก</label><input id="edName" value="${esc(b.name || "")}" placeholder="คัดจากแอป Pulse / Extranet">
+    <label>เช็คอิน</label><input type="date" id="edIn" value="${isYMD(b.checkin) ? b.checkin : ""}">
+    <label>เช็คเอาต์</label><input type="date" id="edOut" value="${isYMD(b.checkout) ? b.checkout : ""}">
+    <label>ห้อง</label><select id="edRoom"><option value="">— ยังไม่จัดห้อง —</option>${rooms.map((r) =>
+      `<option${String(b.room_no || "") === r.room ? " selected" : ""}>${esc(r.room)}</option>`).join("")}</select>
+    <label>เบอร์โทร</label><input id="edPhone" value="${esc(b.phone || "")}" placeholder="ถ้ามี">
+    <label>จำนวนผู้เข้าพัก</label><input id="edGuests" inputmode="numeric" value="${esc(b.guests || "")}" placeholder="เช่น 2">
+    ${staff ? "" : `<label>ยอดเงิน (฿)</label><input id="edAmount" inputmode="decimal" value="${esc(b.amount || "")}" placeholder="เช่น 1,600">`}
+    <div class="mact">
+      <button class="mbtn mbtn-primary" id="actSaveEdit">บันทึก</button>
+      <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
+    </div>`;
+  openModal(html);
+  $("actSaveEdit").onclick = async () => {
+    const ci = $("edIn").value, co = $("edOut").value;
+    if (ci && co && co <= ci) { toast("วันเช็คเอาต์ต้องอยู่หลังวันเช็คอิน"); return; }
+    const fields = {
+      name: $("edName").value.trim(),
+      checkin: ci, checkout: co,
+      room_no: $("edRoom").value,
+      phone: $("edPhone").value.trim(),
+      guests: $("edGuests").value.trim(),
+    };
+    if (!staff) fields.amount = $("edAmount").value.trim();
+    // เติมครบแล้ว ล้างโน้ตเตือนของตัวแกะอีเมลทิ้ง จะได้หลุดจาก worklist
+    if (fields.name && ci && co && /อ่านวันที่จากอีเมลไม่ได้|รอเติมชื่อจาก Pulse/.test(String(b.note || ""))) fields.note = "";
+    // ส่งเฉพาะช่องที่เปลี่ยนจริง — กันเผลอลบค่าเดิมด้วยค่าว่าง
+    Object.keys(fields).forEach((k) => { if (String(fields[k]) === String(b[k] == null ? "" : b[k])) delete fields[k]; });
+    if (!Object.keys(fields).length) { closeModal(); return; }
+    const r1 = await apiUpdate({ action: "update", id: b.id, fields });
+    if (r1) await afterAction(() => Object.assign(b, fields));
+    closeModal();
+  };
+  $("actClose").onclick = closeModal;
+}
+
 /* ── สถิติเดือนนี้ ── */
 function renderMonthStats(){
   const t = DATA.today;
@@ -973,6 +1037,7 @@ function renderTable(){
   rows = rows.filter((b) => {
     if (range === "upcoming") return !isYMD(b.checkout) || b.checkout >= t;
     if (range === "past") return isYMD(b.checkout) && b.checkout < t;
+    if (range === "needsfix") return needsFix(b);
     return true;
   });
   if (q) rows = rows.filter((b) =>
@@ -983,7 +1048,7 @@ function renderTable(){
   $("tblCount").textContent = `${rows.length} รายการ`;
   $("tblEmpty").style.display = rows.length ? "none" : "";
   $("tblBody").innerHTML = rows.map((b) => `
-    <tr class="${isCancelled(b) ? "row-cancel" : ""}">
+    <tr class="${isCancelled(b) ? "row-cancel" : needsFix(b) ? "row-fix" : ""}">
       <td data-label="เช็คอิน">${fmtD(b.checkin)}${b.checkin === t ? " (วันนี้)" : ""}</td>
       <td data-label="เช็คเอาต์">${fmtD(b.checkout)}</td>
       <td data-label="คืน">${nightsOf(b)}</td>
@@ -992,6 +1057,7 @@ function renderTable(){
       <td data-label="ช่องทาง"><span class="src">${esc(b.source || "-")}</span>${b.id ? `<br><span class="src">#${esc(b.id)}</span>` : ""}</td>
       <td data-label="ยอด">${esc(b.amount || "-")}</td>
       <td data-label="สถานะ">${statusBadge(b.status)}</td>
+      <td data-label="จัดการ">${b.id && !isCancelled(b) ? `<button class="btn-sm btn-edit" data-edit="${esc(b.id)}">${needsFix(b) ? "เติมข้อมูล" : "แก้ไข"}</button>` : ""}</td>
     </tr>`).join("");
 }
 
@@ -1022,6 +1088,13 @@ $("calPrev").addEventListener("click", () => { calYM[1]--; if (calYM[1] < 0) { c
 $("calNext").addEventListener("click", () => { calYM[1]++; if (calYM[1] > 11) { calYM[1] = 0; calYM[0]++; } renderCal(); });
 $("q").addEventListener("input", renderTable);
 $("fRange").addEventListener("change", renderTable);
+$("fixBanner").addEventListener("click", () => { $("fRange").value = "needsfix"; showSection("secBookings"); renderTable(); });
+$("tblBody").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-edit]");
+  if (!btn) return;
+  const b = (DATA.bookings || []).find((x) => String(x.id) === btn.dataset.edit);
+  if (b) openEditModal(b);
+});
 $("overlay").addEventListener("click", (e) => { if (e.target === $("overlay")) closeModal(); });
 
 /* ───────── init ───────── */

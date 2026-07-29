@@ -6,7 +6,13 @@
  *
  * วิธีนับ: ต่อคืน occupied = จองตรง(ชีต) + max(จอง Booking.com ในชีต, ปฏิทิน iCal)
  * (กันนับซ้ำกรณีการจองเดียวกันโผล่ทั้งในชีตและ iCal)
- * available = ค่าต่ำสุดของ (ห้องทั้งหมด - occupied) ตลอดช่วงที่เลือก
+ * available = ค่าต่ำสุดของ (ห้องทั้งหมด - occupied) ตลอดช่วงที่เลือก แล้วหัก SAFETY_BUFFER
+ *
+ * การจองที่ "ไม่รู้วันที่" (อีเมล Booking.com ไม่บอกวัน — checkin/checkout ว่าง)
+ * นับแยกเป็น unknown และตอบ warning:"uncertain" ให้หน้าเว็บเปลี่ยนข้อความ
+ * เป็น "ขอเช็คห้องว่างก่อน" แทนการยืนยันจำนวนห้องที่อาจไม่จริง
+ *
+ * env เสริม: SAFETY_BUFFER = จำนวนห้องที่กันไว้ไม่ขายผ่านเว็บ (ค่าเริ่มต้น 1)
  */
 
 module.exports = async (req, res) => {
@@ -40,8 +46,10 @@ module.exports = async (req, res) => {
   }
 
   const total = rooms.length || 15;
-  const active = bookings.filter((b) =>
-    !/ยกเลิก|cancel/i.test(String(b.status || "")) && isYMD(b.checkin) && isYMD(b.checkout));
+  const notCancelled = bookings.filter((b) => !/ยกเลิก|cancel/i.test(String(b.status || "")));
+  const active = notCancelled.filter((b) => isYMD(b.checkin) && isYMD(b.checkout));
+  // การจองที่ยังไม่รู้วันที่ = กันห้องอยู่ที่ไหนสักวันแต่ระบุไม่ได้ — ห้ามการันตีเลขห้องว่าง
+  const unknown = notCancelled.length - active.length;
   const isBdc = (b) => /booking\.com/i.test(String(b.source || ""));
 
   let minAvail = total;
@@ -54,11 +62,18 @@ module.exports = async (req, res) => {
     minAvail = Math.min(minAvail, Math.max(0, total - occupied));
   }
 
-  return res.status(200).json({
+  const rawStr = (process.env.SAFETY_BUFFER || "").trim();
+  const rawBuffer = rawStr === "" ? NaN : Number(rawStr); // ระวัง: Number("") = 0 ไม่ใช่ NaN
+  const buffer = Number.isFinite(rawBuffer) && rawBuffer >= 0 ? Math.floor(rawBuffer) : 1;
+  const available = Math.max(0, minAvail - (demoMode ? 0 : buffer));
+
+  const out = {
     ok: true, demo: demoMode, total, nights,
-    available: minAvail,
-    full: minAvail <= 0,
-  });
+    available,
+    full: available <= 0 && unknown === 0,
+  };
+  if (unknown > 0) { out.unknown = unknown; out.warning = "uncertain"; }
+  return res.status(200).json(out);
 };
 
 /* ── helpers (สำเนาย่อจาก data.js — แต่ละ function ต้อง standalone) ── */

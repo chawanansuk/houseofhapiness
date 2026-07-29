@@ -12,7 +12,7 @@
  *   SHEET_TOKEN        รหัสลับ ต้องตรงกับค่า TOKEN ในสคริปต์
  *   BOOKING_ICAL_URLS  ลิงก์ iCal จาก Booking.com Extranet คั่นด้วยจุลภาค (ใส่ชื่อห้องได้: "ห้อง A|https://...")
  *
- * การยืนยันตัวตน: header "x-admin-key" หรือ query "?key=" ต้องตรงกับรหัสข้างบน
+ * การยืนยันตัวตน: header "x-admin-key" เท่านั้น (ไม่รับ query string — กันรหัสรั่วเข้า log/referrer)
  * รหัสเจ้าของ → role "admin" / รหัสพนักงาน → role "staff" (ยอดเงินถูกตัดออกฝั่งเซิร์ฟเวอร์)
  */
 
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
   const adminPass = (process.env.ADMIN_PASSWORD || "").trim();
   const staffPass = (process.env.STAFF_PASSWORD || "").trim();
   const demoMode = !adminPass;
-  const key = String(req.headers["x-admin-key"] || (req.query && req.query.key) || "");
+  const key = String(req.headers["x-admin-key"] || "");
 
   const role = demoMode
     ? (key === DEMO_KEY ? "admin" : key === DEMO_STAFF_KEY ? "staff" : null)
