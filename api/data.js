@@ -172,26 +172,28 @@ function demoBookings(today) {
     status, note: "ข้อมูลตัวอย่าง", created: "", room_no: room_no || "",
   });
   return [
-    mk("คุณสมชาย ใจดี", -2, 1, "Booking.com", "ยืนยันแล้ว", 2, "081-111-2233", "2,400", "101"),
-    mk("Ms. Emma Wilson", -1, 3, "Booking.com", "ยืนยันแล้ว", 2, "", "3,200", "103"),
-    mk("คุณวราภรณ์ ศรีสุข", 0, 2, "Booking.com", "ยืนยันแล้ว", 1, "089-555-6677", "1,600", "105"),
+    mk("คุณสมชาย ใจดี", -2, 1, "Booking.com", "เข้าพักอยู่", 2, "081-111-2233", "2,400", "701"),
+    mk("Ms. Emma Wilson", -1, 3, "Booking.com", "เข้าพักอยู่", 2, "", "3,200", "703"),
+    mk("คุณวราภรณ์ ศรีสุข", 0, 2, "Booking.com", "ยืนยันแล้ว", 1, "089-555-6677", "1,600", "705"),
     mk("Mr. Kenji Tanaka", 0, 4, "Booking.com", "ยืนยันแล้ว", 2, "", "3,200"),
-    mk("คุณอนันต์ พูนสุข", 1, 2, "เว็บไซต์ (จองตรง)", "รอยืนยัน", 2, "086-999-0011", "800"),
-    mk("Mr. Liam O'Connor", 2, 5, "Booking.com", "ยืนยันแล้ว", 3, "", "2,400"),
+    mk("คุณอนันต์ พูนสุข", 1, 2, "เว็บไซต์ (จองตรง)", "รอยืนยัน", 2, "086-999-0011", "800", "714-จองตรง"),
+    mk("Mr. Liam O'Connor", 2, 5, "Booking.com", "ยืนยันแล้ว", 3, "", "2,400", "707-สองเตียง"),
     mk("คุณพิมพ์ชนก แก้วใส", 3, 6, "เว็บไซต์ (จองตรง)", "รอยืนยัน", 2, "092-333-4455", "2,400"),
-    mk("Ms. Sofia Rossi", 5, 8, "Booking.com", "ยืนยันแล้ว", 2, "", "2,400", "110"),
-    mk("คุณธนา รุ่งเรือง", -6, -4, "Booking.com", "เช็คเอาต์แล้ว", 2, "084-777-8899", "1,600", "102"),
+    mk("Ms. Sofia Rossi", 5, 8, "Booking.com", "ยืนยันแล้ว", 2, "", "2,400", "710"),
+    mk("คุณธนา รุ่งเรือง", -6, -4, "Booking.com", "เช็คเอาต์แล้ว", 2, "084-777-8899", "1,600", "702"),
     mk("Mr. David Chen", 7, 9, "Booking.com", "ยกเลิก", 2, "", "1,600"),
   ];
 }
 
+// ผังห้องจริง เรียงตามที่พนักงานคุ้นจาก AzHotel
+const REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707-สองเตียง", "708-สองเตียง",
+  "709", "710", "713", "714-จองตรง", "715-สองเตียง", "716", "717", "718",
+  "จั่ว1", "จั่ว2", "จั่ว3", "จั่ว4"];
+
 function demoRooms() {
-  const rooms = [];
-  for (let i = 1; i <= 15; i++) {
-    const no = "1" + String(i).padStart(2, "0");
-    rooms.push({ room: no, clean: (no === "102" || no === "108") ? "รอทำความสะอาด" : "สะอาด", note: "" });
-  }
-  return rooms;
+  return REAL_ROOMS.map((no) => ({
+    room: no, clean: (no === "702" || no === "708-สองเตียง") ? "รอทำความสะอาด" : "สะอาด", note: "",
+  }));
 }
 
 function demoExpenses(today) {
@@ -207,8 +209,8 @@ function demoExpenses(today) {
 
 function demoIcal(today) {
   return [
-    { start: shiftDate(today, -2), end: shiftDate(today, 1), summary: "CLOSED - Not available", room: "ห้อง 101" },
-    { start: shiftDate(today, 0), end: shiftDate(today, 4), summary: "CLOSED - Not available", room: "ห้อง 102" },
-    { start: shiftDate(today, 2), end: shiftDate(today, 5), summary: "CLOSED - Not available", room: "ห้อง 103" },
+    { start: shiftDate(today, -2), end: shiftDate(today, 1), summary: "CLOSED - Not available", room: "ห้อง 701" },
+    { start: shiftDate(today, 0), end: shiftDate(today, 4), summary: "CLOSED - Not available", room: "ห้อง 702" },
+    { start: shiftDate(today, 2), end: shiftDate(today, 5), summary: "CLOSED - Not available", room: "ห้อง 703" },
   ];
 }

@@ -108,6 +108,23 @@ input,select{font-family:inherit}
 .btn-del{background:var(--dirty)}
 .profit-pos{color:#16a34a}.profit-neg{color:#dc2626}
 @media(max-width:640px){.exp-form{grid-template-columns:1fr}.exp-cat .nm{width:6.5rem}}
+/* ── ไทม์ไลน์การจอง ── */
+.tl-todaybtn{width:auto;padding:0 .8rem;font-size:.78rem;font-weight:700;white-space:nowrap;font-family:"Prompt",sans-serif}
+.tl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.tl-row{display:grid;grid-template-columns:var(--tlcols);min-height:38px;border-top:1px solid var(--line)}
+.tl-row.tl-head{border-top:none;background:#faf6ee;min-height:auto}
+.tl-roomcell{grid-row:1;grid-column:1;position:sticky;left:0;z-index:3;background:#fff;border-right:1px solid var(--line);display:flex;align-items:center;gap:.35rem;padding:.3rem .55rem;font-weight:700;font-size:.8rem;white-space:nowrap}
+.tl-head .tl-roomcell{background:#faf6ee}
+.tl-daycell{padding:.3rem .15rem;text-align:center;font-size:.68rem;color:var(--muted);border-left:1px solid var(--line)}
+.tl-daycell b{display:block;font-size:.85rem;color:#3a2f24}
+.tl-cell{grid-row:1;border-left:1px solid var(--line);cursor:pointer;z-index:1}
+.tl-cell:hover{background:rgba(138,90,52,.08)}
+.tl-we{background:#faf7ef}
+.tl-today{background:rgba(240,220,174,.32)}
+.tl-bar{grid-row:1;z-index:2;margin:5px 3px;border:none;border-radius:8px;color:#fff;font-size:.74rem;font-weight:600;font-family:"Prompt",sans-serif;padding:0 .5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer;min-width:0}
+.tl-bar:hover{filter:brightness(1.08)}
+.tl-book{background:#3b82f6}.tl-in{background:#16a34a}.tl-out{background:#c9bda9;color:#5f5443}
+.tl-dirtydot{width:7px;height:7px;border-radius:50%;background:var(--dirty);flex:none}
 .banner code{background:rgba(0,0,0,.06);padding:.05rem .35rem;border-radius:5px;font-size:.82em}
 
 .sec-title{display:flex;align-items:center;gap:.55rem;font-size:1.15rem;margin-bottom:1rem}
@@ -316,6 +333,7 @@ tbody tr:hover td{background:#faf7f2}
       <span>House of Happiness<small id="roleTag">Back Office</small></span>
     </div>
     <nav class="side-nav">
+      <a data-nav="secTimeline"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์</a>
       <a data-nav="secOverview"><span class="ic" data-icon="chart"></span> ภาพรวม</a>
       <a data-nav="secRooms"><span class="ic" data-icon="grid"></span> ผังห้อง</a>
       <a data-nav="secCalendar"><span class="ic" data-icon="calendar"></span> ปฏิทิน</a>
@@ -371,6 +389,26 @@ tbody tr:hover td{background:#faf7f2}
         <div class="card admin-only">
           <div class="chart" id="revChart"></div>
           <div class="chart-note" id="revNote"></div>
+        </div>
+      </section>
+
+      <!-- ── ไทม์ไลน์การจอง (สไตล์ AzHotel ที่พนักงานคุ้นมือ) ── -->
+      <section id="secTimeline" class="section">
+        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = แก้ไข</small></div>
+        <div class="card">
+          <div class="cal-head">
+            <button class="cal-nav" id="tlPrev" aria-label="ย้อน 7 วัน">‹</button>
+            <b id="tlTitle"></b>
+            <button class="cal-nav" id="tlNext" aria-label="ถัดไป 7 วัน">›</button>
+            <button class="cal-nav tl-todaybtn" id="tlToday">วันนี้</button>
+          </div>
+          <div class="legend" style="margin:.5rem 0 .7rem">
+            <span><i class="sw" style="background:#3b82f6"></i>ยังไม่เช็คอิน</span>
+            <span><i class="sw" style="background:#16a34a"></i>เข้าพักอยู่</span>
+            <span><i class="sw" style="background:#c9bda9"></i>เช็คเอาต์แล้ว</span>
+            <span><i class="sw" style="background:var(--dirty)"></i>· จุดแดงข้างเลขห้อง = รอทำความสะอาด</span>
+          </div>
+          <div class="tl-wrap" id="tlWrap"></div>
         </div>
       </section>
 
@@ -503,6 +541,7 @@ tbody tr:hover td{background:#faf7f2}
   </div>
 
   <nav class="tabbar">
+    <a data-nav="secTimeline"><span class="ic" data-icon="gantt"></span>ไทม์ไลน์</a>
     <a data-nav="secRooms"><span class="ic" data-icon="grid"></span>ผังห้อง</a>
     <a data-nav="secCalendar"><span class="ic" data-icon="calendar"></span>ปฏิทิน</a>
     <a data-nav="secBookings"><span class="ic" data-icon="list"></span>รายการ</a>
@@ -518,7 +557,8 @@ tbody tr:hover td{background:#faf7f2}
 "use strict";
 const $ = (id) => document.getElementById(id);
 const KEY_STORE = "hoh-admin-key";
-let DATA = null, calYM = null, selDay = null, expYM = null;
+let DATA = null, calYM = null, selDay = null, expYM = null, tlStart = null;
+const TL_DAYS = 14;
 const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
 
 const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
@@ -542,6 +582,7 @@ const IP = {
   wallet:'<rect x="3.5" y="6.5" width="17" height="13" rx="2.5"/><path d="M3.5 10h17"/><circle cx="16.5" cy="14" r="1.2"/>',
   bed:'<path d="M3 8v10"/><path d="M3 12h13a4 4 0 0 1 4 4v2"/><path d="M3 18h18"/><path d="M7 12v-1.4A1.6 1.6 0 0 1 8.6 9h2.8A1.6 1.6 0 0 1 13 10.6V12"/>',
   percent:'<path d="M6 18 18 6"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>',
+  gantt:'<path d="M4 6h9"/><path d="M8 12h12"/><path d="M6 18h8"/>',
   check:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.2l2.6 2.6L16 9.2"/>',
 };
 const svg = (n, c) => `<svg class="ic${c ? " " + c : ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
@@ -678,8 +719,9 @@ function showDash(){
   expYM = [Number(t.slice(0,4)), Number(t.slice(5,7)) - 1];
   $("exDate").value = t;
   selDay = null;
-  document.querySelectorAll(".section").forEach((s) => s.classList.toggle("active", s.id === "secRooms"));
-  document.querySelectorAll("[data-nav]").forEach((n) => n.classList.toggle("on", n.dataset.nav === "secRooms"));
+  tlStart = null;
+  document.querySelectorAll(".section").forEach((s) => s.classList.toggle("active", s.id === "secTimeline"));
+  document.querySelectorAll("[data-nav]").forEach((n) => n.classList.toggle("on", n.dataset.nav === "secTimeline"));
   renderAll();
   paintIcons();
 }
@@ -714,6 +756,7 @@ function renderAll(){
   const roomCount = (DATA.rooms || []).length;
   $("stFree").textContent = roomCount ? Math.max(0, roomCount - liveStay.length) : "–";
 
+  renderTimeline();
   renderRoomBoard();
   renderToday();
   renderMonthStats();
@@ -722,6 +765,84 @@ function renderAll(){
   renderTable();
   renderIcal();
   renderExpenses();
+}
+
+/* ── ไทม์ไลน์การจอง (ห้องเป็นแถว วันเป็นคอลัมน์ แบบที่พนักงานคุ้นจาก AzHotel) ── */
+const isWeekendYMD = (d) => { const g = new Date(d + "T00:00:00Z").getUTCDay(); return g === 0 || g === 6; };
+
+function renderTimeline(){
+  if (!DATA) return;
+  if (!tlStart) tlStart = shiftYMD(DATA.today, -1);
+  const days = Array.from({ length: TL_DAYS }, (_, i) => shiftYMD(tlStart, i));
+  const first = days[0], last = days[TL_DAYS - 1];
+  $("tlTitle").textContent = `${fmtD(first)} – ${fmtD(last)}`;
+
+  const t = DATA.today;
+  const rooms = DATA.rooms || [];
+  const withRoom = (DATA.bookings || []).filter((b) =>
+    !isCancelled(b) && isYMD(b.checkin) && isYMD(b.checkout) && String(b.room_no || "").trim());
+  const cols = `--tlcols:96px repeat(${TL_DAYS}, minmax(56px, 1fr))`;
+
+  let html = `<div class="tl-row tl-head" style="${cols}"><div class="tl-roomcell"></div>` +
+    days.map((d, i) => `<div class="tl-daycell${d === t ? " tl-today" : isWeekendYMD(d) ? " tl-we" : ""}" style="grid-column:${i + 2};grid-row:1">
+      <b>${Number(d.slice(8, 10))}</b>${THAI_MONTHS_AB[Number(d.slice(5, 7)) - 1]} ${DOW[new Date(d + "T00:00:00Z").getUTCDay()]}</div>`).join("") + `</div>`;
+
+  for (const room of rooms) {
+    html += `<div class="tl-row" style="${cols}">`;
+    html += `<div class="tl-roomcell">${esc(room.room)}${String(room.clean || "") === "รอทำความสะอาด" ? '<i class="tl-dirtydot"></i>' : ""}</div>`;
+    days.forEach((d, i) => {
+      html += `<div class="tl-cell${d === t ? " tl-today" : isWeekendYMD(d) ? " tl-we" : ""}" data-room="${esc(room.room)}" data-date="${d}" style="grid-column:${i + 2};grid-row:1"></div>`;
+    });
+    withRoom.filter((b) => String(b.room_no) === room.room && b.checkin <= last && b.checkout > first).forEach((b) => {
+      const s = Math.max(0, Math.round((Date.parse(b.checkin) - Date.parse(first)) / 86400000));
+      const e = Math.min(TL_DAYS, Math.round((Date.parse(b.checkout) - Date.parse(first)) / 86400000));
+      if (e <= s) return;
+      const cls = isCheckedOut(b) ? "tl-out" : isInhouse(b) ? "tl-in" : "tl-book";
+      html += `<button class="tl-bar ${cls}" style="grid-column:${s + 2} / ${e + 2};grid-row:1" data-barid="${esc(b.id)}" title="${esc(b.name || "")} ${fmtD(b.checkin)} → ${fmtD(b.checkout)}">${esc(b.name || "ไม่ระบุชื่อ")}</button>`;
+    });
+    html += `</div>`;
+  }
+  $("tlWrap").innerHTML = html;
+}
+
+/* ── สร้างการจองจากช่องว่างในไทม์ไลน์ ── */
+function openCreateModal(room, date){
+  const staff = DATA.role === "staff";
+  const html = `
+    <h3>สร้างการจอง — ห้อง ${esc(room)}</h3>
+    <div class="msub">เริ่มเข้าพัก ${fmtD(date)}</div>
+    <label>ชื่อลูกค้า</label><input id="crName" placeholder="ชื่อ-นามสกุล" autofocus>
+    <label>เบอร์โทร</label><input id="crPhone" placeholder="ถ้ามี">
+    <label>เช็คอิน</label><input type="date" id="crIn" value="${date}">
+    <label>เช็คเอาต์</label><input type="date" id="crOut" value="${shiftYMD(date, 1)}">
+    <label>จำนวนผู้เข้าพัก</label><input id="crGuests" inputmode="numeric" placeholder="เช่น 2">
+    <label>ช่องทาง</label><select id="crSource"><option>จองตรง</option><option>Walk-in</option><option>โทรจอง</option><option>Booking.com</option><option>Agoda</option></select>
+    <label>สถานะ</label><select id="crStatus"><option>ยืนยันแล้ว</option><option>รอยืนยัน</option><option>เข้าพักอยู่</option></select>
+    ${staff ? "" : `<label>ราคาจอง (฿)</label><input id="crAmount" inputmode="decimal" placeholder="เช่น 800">`}
+    <label>หมายเหตุ</label><input id="crNote" placeholder="ถ้ามี">
+    <div class="mact">
+      <button class="mbtn mbtn-primary" id="actCreate">บันทึกการจอง</button>
+      <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
+    </div>`;
+  openModal(html);
+  if (date === DATA.today) $("crStatus").value = "เข้าพักอยู่"; // แตะช่องวันนี้ = มักเป็น walk-in
+  $("actCreate").onclick = async () => {
+    const name = $("crName").value.trim();
+    const ci = $("crIn").value, co = $("crOut").value;
+    if (!name) { toast("ใส่ชื่อลูกค้าก่อน"); return; }
+    if (!ci || !co || co <= ci) { toast("วันเช็คเอาต์ต้องอยู่หลังวันเช็คอิน"); return; }
+    const body = {
+      action: "add", name, checkin: ci, checkout: co, room_no: room,
+      phone: $("crPhone").value.trim(), guests: $("crGuests").value.trim(),
+      source: $("crSource").value, status: $("crStatus").value,
+      amount: staff ? "" : $("crAmount").value.trim(),
+      note: $("crNote").value.trim(),
+    };
+    const r1 = await apiUpdate(body);
+    if (r1) await afterAction(() => { DATA.bookings.push({ ...body, id: r1.id || ("LOCAL-" + name), rooms: 1, created: "" }); });
+    closeModal();
+  };
+  $("actClose").onclick = closeModal;
 }
 
 /* ── รายรับ-รายจ่าย (เฉพาะเจ้าของ) ── */
@@ -1192,6 +1313,19 @@ $("q").addEventListener("input", renderTable);
 $("fRange").addEventListener("change", renderTable);
 $("fixBanner").addEventListener("click", () => { $("fRange").value = "needsfix"; showSection("secBookings"); renderTable(); });
 EXP_CATS.forEach((c) => { const o = document.createElement("option"); o.textContent = c; $("exCat").appendChild(o); });
+$("tlPrev").addEventListener("click", () => { tlStart = shiftYMD(tlStart, -7); renderTimeline(); });
+$("tlNext").addEventListener("click", () => { tlStart = shiftYMD(tlStart, 7); renderTimeline(); });
+$("tlToday").addEventListener("click", () => { tlStart = shiftYMD(DATA.today, -1); renderTimeline(); });
+$("tlWrap").addEventListener("click", (e) => {
+  const bar = e.target.closest(".tl-bar");
+  if (bar) {
+    const b = (DATA.bookings || []).find((x) => String(x.id) === bar.dataset.barid);
+    if (b) openEditModal(b);
+    return;
+  }
+  const cell = e.target.closest(".tl-cell");
+  if (cell) openCreateModal(cell.dataset.room, cell.dataset.date);
+});
 $("expPrev").addEventListener("click", () => { expYM[1]--; if (expYM[1] < 0) { expYM[1] = 11; expYM[0]--; } renderExpenses(); });
 $("expNext").addEventListener("click", () => { expYM[1]++; if (expYM[1] > 11) { expYM[1] = 0; expYM[0]++; } renderExpenses(); });
 $("expForm").addEventListener("submit", async (ev) => {

@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
   if (demoMode) {
     const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
     bookings = demoBookings(today);
-    rooms = Array.from({ length: 15 }, (_, i) => ({ room: String(101 + i) }));
+    rooms = Array.from({ length: 20 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 20 ห้อง
   } else {
     const [sheet, ic] = await Promise.all([fetchSheet(), fetchIcal()]);
     bookings = sheet.rows;

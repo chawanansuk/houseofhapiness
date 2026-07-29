@@ -20,6 +20,10 @@ var EXPENSES_SHEET = "Expenses";
 var LABEL_DONE = "HOH-บันทึกแล้ว";
 var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no"];
 var ROOM_HEADERS = ["room", "clean", "note"];
+// รายชื่อห้องจริง เรียงตามผังที่พนักงานคุ้นจาก AzHotel (แก้ชื่อ/ลำดับได้ในชีต Rooms)
+var REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707-สองเตียง", "708-สองเตียง",
+  "709", "710", "713", "714-จองตรง", "715-สองเตียง", "716", "717", "718",
+  "จั่ว1", "จั่ว2", "จั่ว3", "จั่ว4"];
 var EXP_HEADERS = ["id", "date", "category", "amount", "vendor", "method", "note", "created"];
 // คอลัมน์ที่หน้า /admin แก้ไขได้ผ่าน action=update
 var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests"];
@@ -83,8 +87,8 @@ function getRoomsSheet_() {
     sh.appendRow(ROOM_HEADERS);
     sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, ROOM_HEADERS.length).setFontWeight("bold");
-    // สร้างห้องตั้งต้น 101-115 (แก้ชื่อ/เพิ่ม/ลบ ได้เองในชีต)
-    for (var i = 1; i <= 15; i++) sh.appendRow(["1" + (i < 10 ? "0" + i : i), "สะอาด", ""]);
+    // สร้างห้องตั้งต้นตามผังจริง (แก้ชื่อ/เพิ่ม/ลบ ได้เองในชีต)
+    for (var i = 0; i < REAL_ROOMS.length; i++) sh.appendRow([REAL_ROOMS[i], "สะอาด", ""]);
   }
   return sh;
 }
@@ -500,6 +504,23 @@ function setupTriggers() {
 /** ทดสอบด้วยมือ: รัน scanBookingEmails ทันที แล้วเปิดชีตดูผล */
 function testScanNow() {
   scanBookingEmails();
+}
+
+/** รันมือ 1 ครั้ง (ถ้าชีต Rooms เดิมยังเป็น 101-115):
+ *  เขียนรายชื่อห้องใหม่ตามผังจริง (REAL_ROOMS ด้านบน) ทับของเดิมทั้งแท็บ
+ *  สถานะความสะอาด/โน้ตของห้องที่ชื่อตรงกันจะถูกเก็บไว้ */
+function applyRealRoomList() {
+  var sh = getRoomsSheet_();
+  var old = {};
+  readRooms_().forEach(function (r) { old[r.room] = r; });
+  sh.clearContents();
+  sh.appendRow(ROOM_HEADERS);
+  sh.getRange(1, 1, 1, ROOM_HEADERS.length).setFontWeight("bold");
+  for (var i = 0; i < REAL_ROOMS.length; i++) {
+    var prev = old[REAL_ROOMS[i]] || {};
+    sh.appendRow([REAL_ROOMS[i], prev.clean || "สะอาด", prev.note || ""]);
+  }
+  Logger.log("อัปเดตรายชื่อห้องเป็นผังจริง " + REAL_ROOMS.length + " ห้องแล้ว");
 }
 
 /** ซ่อมข้อมูลย้อนหลัง — รันด้วยมือ 1 ครั้งหลังอัปเดตสคริปต์เป็น v4:
