@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api
 
-Sitemap: https://houseofhapiness.vercel.app/sitemap.xml
+Sitemap: https://houseofhappinessbangkok.com/sitemap.xml

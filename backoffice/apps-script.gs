@@ -387,7 +387,7 @@ function dailyDigest() {
     pulse.forEach(function (r) { L.push("  - #" + r.id + (r.checkin ? " เข้า " + r.checkin : " (ไม่ทราบวัน)")); });
   }
   L.push("");
-  L.push("เปิดหลังบ้าน: https://houseofhapiness.vercel.app/admin/");
+  L.push("เปิดหลังบ้าน: https://houseofhappinessbangkok.com/admin/");
 
   MailApp.sendEmail(
     Session.getEffectiveUser().getEmail(),
