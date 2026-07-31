@@ -357,41 +357,80 @@ function findByResNo_(resNo) {
 
 /* ═══════════════ สรุปงานส่งอีเมลทุกเช้า ═══════════════ */
 
-/** ส่งสรุปงานวันนี้เข้าอีเมลเจ้าของ (Trigger เรียกทุกเช้า ~08:00) */
+function bahtNum_(v) {
+  var n = Number(String(v == null ? "" : v).replace(/[^\d.]/g, ""));
+  return isNaN(n) ? 0 : n;
+}
+
+function fmtBaht_(n) {
+  var neg = n < 0;
+  var s = Math.abs(Math.round(n)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-฿" : "฿") + s;
+}
+
+/** ส่งสรุปงาน + เงินเดือนนี้ เข้าอีเมลเจ้าของ (Trigger เรียกทุกเช้า ~08:00) */
 function dailyDigest() {
   var tz = "Asia/Bangkok";
   var today = Utilities.formatDate(new Date(), tz, "yyyy-MM-dd");
+  var isYMD = function (s) { return /^\d{4}-\d{2}-\d{2}$/.test(s); };
   var rows = readAll_();
   var act = rows.filter(function (r) {
-    return !/ยกเลิก/.test(r.status) && /^\d{4}-\d{2}-\d{2}$/.test(r.checkin) && /^\d{4}-\d{2}-\d{2}$/.test(r.checkout);
+    return !/ยกเลิก/.test(r.status) && isYMD(r.checkin) && isYMD(r.checkout);
   });
   var notOut = function (r) { return !/เช็คเอาต์แล้ว/.test(r.status); };
   var ci = act.filter(function (r) { return r.checkin === today && notOut(r); });
   var co = act.filter(function (r) { return r.checkout === today && notOut(r); });
   var stay = act.filter(function (r) { return r.checkin <= today && today < r.checkout && notOut(r); });
   var dirty = readRooms_().filter(function (r) { return r.clean === "รอทำความสะอาด"; });
-  var pulse = rows.filter(function (r) { return /รอเติมชื่อ/.test(r.status); });
+
+  // รายการข้อมูลไม่ครบ (ตรงกับแบนเนอร์เหลืองในหลังบ้าน): ขาดชื่อ หรือขาดวันเข้า/ออก
+  var needFix = rows.filter(function (r) {
+    return !/ยกเลิก/.test(r.status) && (!r.name || !isYMD(r.checkin) || !isYMD(r.checkout));
+  });
+
+  // เงินเดือนนี้ — รายรับนับตามเดือนที่เช็คอิน (ตรงกับกราฟในหลังบ้าน) หักรายจ่ายจากชีต Expenses
+  var ym = today.slice(0, 7);
+  var rev = 0, revCount = 0;
+  rows.forEach(function (r) {
+    if (/ยกเลิก/.test(r.status)) return;
+    if (String(r.checkin).slice(0, 7) === ym && bahtNum_(r.amount) > 0) { rev += bahtNum_(r.amount); revCount++; }
+  });
+  var expTotal = 0, expCount = 0;
+  readExpenses_().forEach(function (x) {
+    if (String(x.date).slice(0, 7) === ym) { expTotal += bahtNum_(x.amount); expCount++; }
+  });
+  var profit = rev - expTotal;
 
   var L = [];
   L.push("สรุปงาน House of Happiness — " + Utilities.formatDate(new Date(), tz, "d MMM yyyy"));
   L.push("");
+  L.push("== งานวันนี้ ==");
   L.push("เช็คอินวันนี้: " + ci.length + " รายการ");
   ci.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : " | ยังไม่จัดห้อง") + " | " + r.source); });
   L.push("เช็คเอาต์วันนี้: " + co.length + " รายการ");
   co.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : "")); });
   L.push("กำลังเข้าพักคืนนี้: " + stay.length + " ห้อง");
   L.push("ห้องรอทำความสะอาด: " + (dirty.length ? dirty.map(function (r) { return r.room; }).join(", ") : "ไม่มี"));
-  if (pulse.length) {
+  L.push("");
+  L.push("== เงินเดือนนี้ (" + ym + ") ==");
+  L.push("รายรับตามยอดจอง: " + fmtBaht_(rev) + (revCount ? " (" + revCount + " การจอง)" : " — ยังไม่มีการจองที่ใส่ยอดเงิน"));
+  L.push("รายจ่าย: " + fmtBaht_(expTotal) + (expCount ? " (" + expCount + " รายการ)" : ""));
+  L.push("กำไร: " + fmtBaht_(profit));
+  if (needFix.length) {
     L.push("");
-    L.push("!! มีการจอง " + pulse.length + " รายการรอเติมชื่อจาก Pulse:");
-    pulse.forEach(function (r) { L.push("  - #" + r.id + (r.checkin ? " เข้า " + r.checkin : " (ไม่ทราบวัน)")); });
+    L.push("== ข้อมูลค้าง ==");
+    L.push("รายการรอเติมข้อมูล (ชื่อ/วันที่): " + needFix.length + " รายการ — เปิดหลังบ้านแตะแบนเนอร์เหลือง เทียบกับแอป Pulse");
+    needFix.slice(0, 8).forEach(function (r) {
+      L.push("  - #" + r.id + (isYMD(r.checkin) ? " เข้า " + r.checkin : " (ไม่ทราบวันเข้า)") + (isYMD(r.checkout) ? "" : " ขาดวันออก") + (r.name ? "" : " ขาดชื่อ"));
+    });
+    if (needFix.length > 8) L.push("  ...และอีก " + (needFix.length - 8) + " รายการ");
   }
   L.push("");
   L.push("เปิดหลังบ้าน: https://houseofhappinessbangkok.com/admin/");
 
   MailApp.sendEmail(
     Session.getEffectiveUser().getEmail(),
-    "[HOH] สรุปงานวันนี้ — เช็คอิน " + ci.length + " · เช็คเอาต์ " + co.length + " · ทำความสะอาด " + dirty.length,
+    "[HOH] เช็คอิน " + ci.length + " · เช็คเอาต์ " + co.length + " · พัก " + stay.length + " ห้อง" + (needFix.length ? " · ค้างเติม " + needFix.length : ""),
     L.join("\n")
   );
 }
