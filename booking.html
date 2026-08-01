@@ -373,6 +373,14 @@ document.addEventListener("langchange", () => { availSig = ""; checkAvailability
 const _update = update;
 update = function () { _update(); checkAvailability(); };
 
+// ราคาจริงจากแผงตั้งค่าในชีต (แท็บ Site) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
+fetch("/api/site").then((r) => r.json()).then((j) => {
+  if (!j.ok || !j.price || j.price === CONFIG.rooms[0].price) return;
+  CONFIG.rooms.forEach((r2) => { r2.price = j.price; });
+  renderRooms();
+  update();
+}).catch(() => {});
+
 // บันทึกคำขอจองเข้าระบบหลังบ้าน (Google Sheets) แบบเงียบ ๆ — ล้มเหลวก็ไม่กระทบลูกค้า
 let loggedSig = "";
 function logBooking() {

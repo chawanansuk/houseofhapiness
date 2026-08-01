@@ -102,6 +102,9 @@
   </div>
 </nav>
 
+<!-- ประกาศจากแผงตั้งค่าในชีต (แท็บ Site) — มีข้อความเมื่อไหร่ค่อยโชว์ -->
+<div class="site-announce" id="siteAnnounce" hidden><span id="siteAnnounceTxt"></span></div>
+
 <header class="hero">
   <p class="kicker">Boutique Aparthotel — Bangkok Riverside</p>
   <h1>House of Happiness</h1>
@@ -169,7 +172,7 @@
       </div>
       <div class="price-box">
         <div class="from" data-i18n="rooms.from">เริ่มต้น</div>
-        <div class="amount">฿800</div>
+        <div class="amount" id="priceAmt">฿800</div>
         <div class="unit" data-i18n="rooms.night">/ คืน</div>
         <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
       </div>
@@ -384,6 +387,24 @@
     hbOut.min = n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate());
     if (hbOut.value && hbOut.value < hbOut.min) hbOut.value = hbOut.min;
   });
+})();
+
+// ราคา + ประกาศ จากแผงตั้งค่าในชีต (แท็บ Site) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
+(function () {
+  fetch("/api/site").then(function (r) { return r.json(); }).then(function (j) {
+    if (!j.ok) return;
+    if (j.price) {
+      var el = document.getElementById("priceAmt");
+      if (el) el.textContent = "฿" + j.price.toLocaleString();
+    }
+    var apply = function () {
+      var txt = (j.ann && j.ann[getLang()]) || "";
+      document.getElementById("siteAnnounceTxt").textContent = txt;
+      document.getElementById("siteAnnounce").hidden = !txt;
+    };
+    apply();
+    document.addEventListener("langchange", apply);
+  }).catch(function () {});
 })();
 
 // ปุ่มติดต่อลอย

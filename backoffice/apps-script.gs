@@ -25,6 +25,13 @@ var REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707-สองเต
   "709", "710", "713", "714-จองตรง", "715-สองเตียง", "716", "717", "718",
   "จั่ว1", "จั่ว2", "จั่ว3", "จั่ว4"];
 var EXP_HEADERS = ["id", "date", "category", "amount", "vendor", "method", "note", "created"];
+var SITE_SHEET = "Site";
+// แผงตั้งค่าเว็บ — แก้คอลัมน์ value ในแท็บ Site แล้วหน้าเว็บอัปเดตเองภายใน ~2 นาที
+var SITE_DEFAULTS = [
+  ["price_per_night", "800", "ราคาต่อคืน (บาท) — หน้าเว็บใช้โชว์และคำนวณราคา"],
+  ["announcement_th", "", "ประกาศแถบบนหน้าแรก ภาษาไทย (เว้นว่าง = ไม่แสดง)"],
+  ["announcement_en", "", "ประกาศหน้าแรก ภาษาอังกฤษ (เว้นว่าง = ไม่แสดง)"],
+];
 // คอลัมน์ที่หน้า /admin แก้ไขได้ผ่าน action=update
 var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests"];
 
@@ -167,6 +174,31 @@ function deleteExpense_(id) {
   return false;
 }
 
+/* ── ชีต Site: แผงตั้งค่าเว็บ (ราคา/ประกาศ) แก้ได้เองไม่ต้องแตะโค้ด ── */
+
+function getSiteSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SITE_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(SITE_SHEET);
+    sh.appendRow(["key", "value", "คำอธิบาย (แก้เฉพาะช่อง value)"]);
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, 3).setFontWeight("bold");
+    for (var i = 0; i < SITE_DEFAULTS.length; i++) sh.appendRow(SITE_DEFAULTS[i]);
+  }
+  return sh;
+}
+
+function readSite_() {
+  var values = getSiteSheet_().getDataRange().getValues();
+  var site = {};
+  for (var i = 1; i < values.length; i++) {
+    var k = asText_(values[i][0]);
+    if (k) site[k] = asText_(values[i][1]);
+  }
+  return site;
+}
+
 function findById_(id) {
   if (!id) return null;
   var rows = readAll_();
@@ -196,6 +228,10 @@ function doGet(e) {
     var rooms = readRooms_().map(function (r) { delete r._rowIndex; return r; });
     var exps = readExpenses_().map(function (r) { delete r._rowIndex; return r; });
     return json_({ bookings: rows, rooms: rooms, expenses: exps });
+  }
+  // ค่าตั้งค่าเว็บ (ราคา/ประกาศ) — /api/site เรียกด้วย token ฝั่งเซิร์ฟเวอร์
+  if (p.action === "site") {
+    return json_({ site: readSite_() });
   }
   return json_({ error: "unknown-action" });
 }
