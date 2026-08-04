@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>กิน-เที่ยวรอบซอย ท่าดินแดง | Local Food & Walking Guide — House of Happiness Bangkok</title>
+<meta name="description" content="ไกด์ลับฉบับเจ้าของที่พัก: 13 ร้านอร่อยรอบซอยท่าดินแดง 16 + เส้นทางเดินเที่ยวคลองสาน 10 จุด พร้อมแผนที่และวิธีเดินทาง | Insider guide: 13 street-food gems and a 10-stop walking route around Tha Din Daeng, Khlong San.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:title" content="กิน-เที่ยวรอบซอย ท่าดินแดง — House of Happiness Bangkok">
+<meta property="og:description" content="13 ร้านอร่อยเดินถึงใน 10 นาที + เส้นทางเดินเที่ยวคลองสาน 10 จุด — ไกด์ลับฉบับเจ้าของที่พัก">
+<meta property="og:image" content="https://houseofhappinessbangkok.com/images/local/satay.webp">
+<link rel="canonical" href="https://houseofhappinessbangkok.com/local.html">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#f7f1e6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preload" as="image" href="images/local/satay.webp">
+<style>
+/* ── สไตล์เฉพาะหน้า "กิน-เที่ยวรอบซอย" ── */
+.lc-hero{position:relative; padding:4.6rem 1.2rem 3rem; text-align:center; overflow:hidden}
+.lc-hero::before{content:""; position:absolute; inset:0; background:url("images/local/satay.webp") center 40%/cover; z-index:-2}
+.lc-hero::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(247,241,230,0.93),rgba(247,241,230,0.88) 55%,var(--bg,#f7f1e6)); z-index:-1}
+.lc-hero h1{font-family:var(--font-display); font-size:clamp(1.7rem,4.6vw,2.7rem); color:var(--dark); margin-bottom:0.6rem}
+.lc-hero p{color:var(--muted); max-width:46em; margin:0 auto; line-height:1.75}
+.lc-stats{display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap; margin-top:1.2rem}
+.lc-stats span{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:0.35rem 0.95rem; font-size:0.82rem; font-weight:700; color:var(--gold-dark); font-family:"Prompt",sans-serif}
+.lc-wrap{max-width:1080px; margin:0 auto; padding:0 1.2rem 3.5rem}
+.lc-group{margin:2.6rem 0 1.1rem; display:flex; align-items:center; gap:0.7rem}
+.lc-group h2{font-family:"Prompt",sans-serif; font-size:1.12rem; color:var(--gold-dark); white-space:nowrap}
+.lc-group::after{content:""; flex:1; height:1px; background:var(--line)}
+.lc-groupsub{font-size:0.86rem; color:var(--muted); margin:-0.5rem 0 1.1rem; line-height:1.6}
+/* แผนที่ */
+#lcMap{height:420px; border-radius:var(--radius); border:1px solid var(--line); box-shadow:0 6px 20px rgba(62,47,35,0.08); z-index:1}
+.lc-mapnote{font-size:0.76rem; color:var(--muted); margin-top:0.55rem}
+.lc-pin-walk{background:#2f5f9e; color:#fff; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.78rem; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.35); font-family:"Prompt",sans-serif}
+.lc-pin-food{background:#a2352c; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.35)}
+.lc-legend{display:flex; gap:1.1rem; flex-wrap:wrap; margin-top:0.6rem; font-size:0.8rem; color:var(--muted)}
+.lc-legend i{display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:0.35rem; vertical-align:-1px}
+/* ฟิลเตอร์ร้านอาหาร */
+.lc-filters{display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.2rem}
+.lc-chip{border:1.5px solid var(--line); background:var(--card); color:var(--muted); border-radius:999px; padding:0.4rem 1rem; font-size:0.84rem; font-weight:700; cursor:pointer; font-family:"Prompt",sans-serif; transition:all .15s}
+.lc-chip.on{background:var(--gold); border-color:var(--gold); color:#fff}
+/* การ์ดร้าน */
+.lc-foodgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.15rem}
+.lc-food{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 16px rgba(62,47,35,0.06); transition:transform .18s ease, box-shadow .18s ease}
+.lc-food:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(62,47,35,0.12)}
+.lc-fimg{aspect-ratio:16/11; background:linear-gradient(135deg,var(--gold-soft),#e8d9c3); position:relative; overflow:hidden}
+.lc-fimg img{width:100%; height:100%; object-fit:cover; display:block}
+.lc-open{position:absolute; top:0.6rem; left:0.6rem; border-radius:999px; padding:0.22rem 0.7rem; font-size:0.72rem; font-weight:700; font-family:"Prompt",sans-serif; backdrop-filter:blur(4px)}
+.lc-open.yes{background:rgba(22,122,58,0.92); color:#fff}
+.lc-open.no{background:rgba(255,255,255,0.88); color:#7a6c5c}
+.lc-fbody{padding:0.95rem 1.05rem 1.15rem; display:flex; flex-direction:column; gap:0.45rem; flex:1}
+.lc-fbody h3{font-family:"Prompt",sans-serif; font-size:1.02rem; color:var(--dark); line-height:1.35}
+.lc-fbody .sub{font-size:0.8rem; color:var(--gold-dark); font-weight:700; margin-top:-0.2rem}
+.lc-meta{font-size:0.8rem; color:var(--muted); line-height:1.65}
+.lc-meta b{color:var(--text)}
+.lc-dishes{display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.15rem}
+.lc-dishes span{background:#f6efe2; border:1px solid var(--line); color:#6d5b45; border-radius:999px; padding:0.18rem 0.6rem; font-size:0.73rem}
+.lc-walktxt{font-size:0.8rem; color:var(--muted); line-height:1.6; flex:1}
+.lc-flink{margin-top:0.55rem; align-self:flex-start; font-size:0.82rem; font-weight:700; color:var(--gold-dark); text-decoration:none; border-bottom:1.5px solid var(--gold); padding-bottom:1px}
+.lc-flink:hover{color:var(--gold)}
+/* เส้นทางเดินเที่ยว */
+.lc-walkgrid{display:grid; gap:0.9rem}
+.lc-stop{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:1rem 1.1rem; display:flex; gap:1rem; align-items:flex-start; box-shadow:0 3px 12px rgba(62,47,35,0.05)}
+.lc-num{flex:none; width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold-dark,#6d4425)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:"Prompt",sans-serif; font-size:1rem; box-shadow:0 3px 8px rgba(138,90,52,0.35)}
+.lc-stop h3{font-family:"Prompt",sans-serif; font-size:0.98rem; color:var(--dark)}
+.lc-stop .en{font-size:0.78rem; color:var(--gold-dark); font-weight:600}
+.lc-stop p{font-size:0.84rem; color:var(--text); line-height:1.6; margin-top:0.25rem}
+.lc-stop .time{font-size:0.76rem; color:var(--muted); margin-top:0.3rem}
+.lc-stop .go{flex:none; align-self:center; font-size:0.8rem; font-weight:700; color:var(--gold-dark); text-decoration:none; border:1.5px solid var(--gold); border-radius:999px; padding:0.35rem 0.85rem; white-space:nowrap}
+.lc-stop .go:hover{background:var(--gold); color:#fff}
+@media (max-width:640px){ .lc-stop{flex-wrap:wrap} .lc-stop .go{align-self:flex-start; margin-left:calc(38px + 1rem)} }
+.lc-fullroute{margin-top:1.1rem; text-align:center}
+/* การเดินทาง */
+.lc-trgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0.9rem}
+.lc-tr{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:0.95rem 1rem; display:flex; gap:0.8rem; align-items:flex-start}
+.lc-tr .ic{font-size:1.5rem; flex:none}
+.lc-tr h4{font-family:"Prompt",sans-serif; font-size:0.9rem; color:var(--dark)}
+.lc-tr p{font-size:0.78rem; color:var(--muted); line-height:1.55; margin-top:0.15rem}
+.lc-tr a{font-size:0.75rem; font-weight:700; color:var(--gold-dark)}
+.lc-note{font-size:0.78rem; color:var(--muted); margin-top:1.6rem}
+.lc-cta{text-align:center; margin-top:2.8rem}
+.lc-cta p{color:var(--muted); font-size:0.9rem; margin-bottom:0.9rem}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="brand" href="index.html"><span class="logo">🏠</span> House of Happiness</a>
+  <div class="navlinks">
+    <a href="attractions.html" data-i18n="atr.title">เที่ยวอะไรใกล้ที่พัก</a>
+    <a href="index.html" data-i18n="bk.back">← กลับหน้าหลัก</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button data-lang="th" onclick="setLang('th')">ไทย</button>
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</nav>
+
+<header class="lc-hero">
+  <h1 data-i18n="lc.title">กิน-เที่ยวรอบซอย ท่าดินแดง</h1>
+  <p data-i18n="lc.sub">ไกด์ลับฉบับเจ้าของที่พัก — ร้านอร่อยหน้าปากซอยที่คนท้องถิ่นกินจริง และเส้นทางเดินเที่ยวคลองสานที่นักท่องเที่ยวส่วนใหญ่ไม่รู้จัก</p>
+  <div class="lc-stats">
+    <span data-i18n="lc.stat1">🍜 13 ร้านเด็ด เดินถึงใน 1-10 นาที</span>
+    <span data-i18n="lc.stat2">🚶 เส้นทางเดินเที่ยว 10 จุด</span>
+    <span data-i18n="lc.stat3">🚌 วิธีเดินทาง 8 แบบ</span>
+  </div>
+</header>
+
+<div class="lc-wrap">
+
+  <!-- ── แผนที่รวม ── -->
+  <section id="mapSection" hidden>
+    <div class="lc-group"><h2 data-i18n="lc.map.t">🗺️ แผนที่รวมทุกจุด</h2></div>
+    <div id="lcMap"></div>
+    <div class="lc-legend">
+      <span><i style="background:#a2352c"></i><span data-i18n="lc.map.lf">ร้านอาหาร</span></span>
+      <span><i style="background:#2f5f9e"></i><span data-i18n="lc.map.lw">เส้นทางเดินเที่ยว (ตามหมายเลข)</span></span>
+    </div>
+    <p class="lc-mapnote" data-i18n="lc.map.note">* ตำแหน่งจาก OpenStreetMap โดยประมาณ — กดปุ่มนำทางของแต่ละจุดเพื่อเส้นทางแม่นยำ</p>
+  </section>
+
+  <!-- ── ร้านอร่อยรอบซอย ── -->
+  <div class="lc-group"><h2 data-i18n="lc.food.t">🍜 ของอร่อยรอบซอย 16</h2></div>
+  <p class="lc-groupsub" data-i18n="lc.food.sub">ทุกร้านคือร้านที่เราแนะนำแขกด้วยตัวเอง — ป้าย "เปิดอยู่" คำนวณจากเวลาไทยตอนนี้ ระยะเดินนับจากหน้าที่พัก</p>
+  <div class="lc-filters" id="lcFilters"></div>
+  <div class="lc-foodgrid" id="lcFoodGrid"></div>
+
+  <!-- ── เส้นทางเดินเที่ยว ── -->
+  <div class="lc-group"><h2 data-i18n="lc.walk.t">🚶 เส้นทางเดินเที่ยวคลองสาน 10 จุด</h2></div>
+  <p class="lc-groupsub" data-i18n="lc.walk.sub">เดินจากที่พักเลียบย่านเก่าริมเจ้าพระยา จบที่ท่าน้ำคลองสาน — เดินสบาย ๆ ครึ่งวัน แวะกิน แวะไหว้พระ แวะคาเฟ่</p>
+  <div class="lc-walkgrid" id="lcWalkGrid"></div>
+  <div class="lc-fullroute">
+    <a class="btn btn-gold" id="lcFullRoute" target="_blank" rel="noopener" data-i18n="lc.walkfull">เปิดเส้นทางเดินทั้งหมดใน Google Maps</a>
+  </div>
+
+  <!-- ── การเดินทาง ── -->
+  <div class="lc-group"><h2 data-i18n="lc.tr.t">🚌 เดินทางในย่านนี้ยังไง</h2></div>
+  <div class="lc-trgrid" id="lcTrGrid"></div>
+
+  <p class="lc-note" data-i18n="lc.note">* เวลาเปิด-ปิดและระยะเวลาเดินเป็นค่าโดยประมาณ ร้านริมทางอาจหยุดตามสะดวก — ไม่แน่ใจถามเราได้เสมอ</p>
+
+  <div class="lc-cta">
+    <p data-i18n="lc.cta.d">อยากตื่นมามีของอร่อยทั้งซอยรออยู่หน้าบ้านไหม?</p>
+    <a class="btn btn-gold" href="booking.html" data-i18n="lc.cta.b">จองห้องพักกับเรา</a>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="foot-bottom">© House of Happiness · Khlong San, Bangkok · <a href="index.html" style="color:inherit">houseofhappinessbangkok.com</a></div>
+</footer>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+ {"@type":"ListItem","position":1,"name":"House of Happiness","item":"https://houseofhappinessbangkok.com/"},
+ {"@type":"ListItem","position":2,"name":"Local Food & Walking Guide","item":"https://houseofhappinessbangkok.com/local.html"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"Street food near House of Happiness (Tha Din Daeng, Khlong San)",
+"itemListElement":[
+ {"@type":"ListItem","position":1,"item":{"@type":"FoodEstablishment","name":"Rice Porridge stall at Soi 16","address":"Tha Din Daeng Soi 16, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":2,"item":{"@type":"FoodEstablishment","name":"Pung Pung Grilled Sandwich","address":"Tha Din Daeng Soi 16, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":3,"item":{"@type":"FoodEstablishment","name":"Khao Mu Daeng Mu Krob Soi 14-16","address":"377 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":4,"item":{"@type":"FoodEstablishment","name":"Kha Mu Phi San (Braised Pork Trotter)","address":"Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":5,"item":{"@type":"FoodEstablishment","name":"Khao Niao Ping Mae Kung","address":"Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":6,"item":{"@type":"FoodEstablishment","name":"Nomsod Tadindang Cafe","address":"411 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":7,"item":{"@type":"FoodEstablishment","name":"Bokkia Tha Din Daeng","address":"323 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":8,"item":{"@type":"FoodEstablishment","name":"PonMaree Bakery","address":"282 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":9,"item":{"@type":"FoodEstablishment","name":"Tee Moo Satay","address":"183 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":10,"item":{"@type":"FoodEstablishment","name":"Ann Tha Din Daeng","address":"167 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":11,"item":{"@type":"FoodEstablishment","name":"Chua Jeab Ngon (Braised Goose)","address":"398-400 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":12,"item":{"@type":"FoodEstablishment","name":"Rama Long Song Tha Din Daeng","address":"61 Tha Din Daeng Rd, Khlong San, Bangkok"}},
+ {"@type":"ListItem","position":13,"item":{"@type":"FoodEstablishment","name":"Krua Tha Din Daeng (Seafood)","address":"48 Tha Din Daeng Rd, Khlong San, Bangkok"}}
+]}
+</script>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/ui.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script>
+"use strict";
+/* ═══ ข้อมูลจาก The Foodie's Guide ของที่พัก + คู่มือเดินเที่ยวท่าดินแดง-คลองสาน ═══
+   ทุกรายการมี {th,en} — เรนเดอร์ใหม่เมื่อสลับภาษา (event "langchange") */
+
+const ORIGIN = "House of Happiness 558/1 Tha Din Daeng Rd Khlong San Bangkok";
+const nav2 = (q) => `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(ORIGIN)}&destination=${encodeURIComponent(q)}&travelmode=walking`;
+
+const FOOD = [
+  { key:"jok", img:"jok", cats:["morning","dinner"],
+    name:{th:"ร้านโจ๊ก ปากซอย 16", en:"Rice Porridge Stall at Soi 16"},
+    sub:{th:"โจ๊กหม้อริมทางเจ้าเก่า", en:"Old-school street congee"},
+    hours:[["05:00","10:00"],["16:00","22:00"]], closed:[], dist:0,
+    walk:{th:"อยู่ปากซอย 16 หน้าที่พักเลย เดินไม่ถึง 1 นาที", en:"Right at the Soi 16 entrance — under a minute from your door."},
+    dishes:[{th:"โจ๊กหมูสับใส่ไข่",en:"Pork porridge + egg"},{th:"โจ๊กเครื่องในรวม",en:"Assorted offal porridge"},{th:"โจ๊กไข่เยี่ยวม้า",en:"Century-egg porridge"}],
+    q:"Tha Din Daeng Soi 16 Khlong San Bangkok" },
+  { key:"pungpung", img:"pungpung", cats:["dinner","sweet"],
+    name:{th:"ปังปัง แซนวิชย่าง", en:"Pung Pung Grilled Sandwich"},
+    sub:{th:"แซนวิชย่างร้อน ๆ เริ่มต้น ฿10", en:"Hot grilled sandwiches from ฿10"},
+    hours:[["16:30","21:00"]], closed:[], dist:0,
+    walk:{th:"ปากซอย 16 เช่นกัน — เหมาะซื้อเป็นของว่างมื้อเย็น", en:"Also at the Soi 16 entrance — perfect evening snack."},
+    dishes:[{th:"ไส้แฮมชีส",en:"Ham & cheese"},{th:"ไส้หมูหยอง",en:"Pork floss"},{th:"ไส้หวาน (ช็อกโกแลต/สังขยา)",en:"Sweet fillings"}],
+    q:"Tha Din Daeng Soi 16 Khlong San Bangkok" },
+  { key:"khaomudaeng", img:"khaomudaeng", cats:["morning"],
+    name:{th:"ข้าวหมูแดงหมูกรอบ ซอย 14-16", en:"Khao Mu Daeng Mu Krob (Soi 14-16)"},
+    sub:{th:"เปิดตั้งแต่ตี 4 — มื้อเช้าสายลึก", en:"Opens 4 AM — the true local breakfast"},
+    hours:[["04:00","10:30"]], closed:[1,2], dist:30,
+    walk:{th:"ออกปากซอยแล้วข้ามถนนไปฝั่งตรงข้าม ร้านอยู่ตรงนั้นเลย (~1 นาที) · หยุดจันทร์-อังคาร", en:"Cross the road from Soi 16 — it's right there (~1 min). Closed Mon-Tue."},
+    dishes:[{th:"ข้าวหมูแดงหมูกรอบ",en:"Red & crispy pork rice"},{th:"กุนเชียงพะโล้",en:"Braised Chinese sausage"},{th:"ไข่ต้มพะโล้",en:"Braised egg"}],
+    q:"377 Tha Din Daeng Rd Khlong San Bangkok" },
+  { key:"khamu", img:"khamu", cats:["morning","lunch"],
+    name:{th:"ขาหมูพี่สันต์", en:"Kha Mu Phi San (Braised Pork Trotter)"},
+    sub:{th:"ขาหมูพะโล้ตัวจริง — หมดก่อนเที่ยงบ่อย", en:"Legendary trotter — often sold out by noon"},
+    hours:[["07:00","14:00"]], closed:[], dist:120,
+    walk:{th:"ข้ามถนนฝั่งเลขคี่ เลี้ยวซ้าย เดิน 1-2 นาที · แนะนำไปก่อนเที่ยง", en:"Cross to the odd side, turn left, 1-2 min walk. Go before noon!"},
+    dishes:[{th:"ข้าวขาหมู",en:"Trotter on rice"},{th:"คากิ (ข้อขาหมู)",en:"Pork knuckle"},{th:"ไส้พะโล้",en:"Braised intestines"}],
+    q:"ขาหมูพี่สันต์ ท่าดินแดง คลองสาน" },
+  { key:"khaoniao", img:"khaoniao", cats:["sweet","lunch"],
+    name:{th:"ข้าวเหนียวปิ้งแม่กุ้ง", en:"Khao Niao Ping Mae Kung"},
+    sub:{th:"ข้าวเหนียวปิ้งใบตองหอม ๆ", en:"Banana-leaf grilled sticky rice"},
+    hours:[["10:00","19:00"]], closed:[], dist:150, soldout:true,
+    walk:{th:"ข้ามถนน เลี้ยวซ้าย เดินไปทางซอย 13 ~2 นาที · ขายจนกว่าจะหมด", en:"Cross the road, turn left toward Soi 13 (~2 min). Until sold out."},
+    dishes:[{th:"ไส้เผือก",en:"Taro filling"},{th:"ไส้กล้วย",en:"Banana filling"},{th:"ไส้กุ้ง (คาว)",en:"Savory shrimp filling"}],
+    q:"ข้าวเหนียวปิ้งแม่กุ้ง ท่าดินแดง" },
+  { key:"nomsod", img:"nomsod", cats:["sweet","dinner"],
+    name:{th:"นมสด ท่าดินแดง", en:"Nomsod Tadindang Cafe"},
+    sub:{th:"ร้านนมสดเจ้าดังประจำย่าน", en:"The neighbourhood's famous milk bar"},
+    hours:[["12:00","21:00"]], closed:[], dist:130,
+    walk:{th:"ข้ามถนน เลี้ยวซ้าย เดินไปทางซอย 15 แค่ 1-2 นาที", en:"Cross the road, turn left toward Soi 15 — 1-2 min."},
+    dishes:[{th:"นมสดร้อน/เย็น",en:"Fresh milk hot/iced"},{th:"ขนมปังนึ่งสังขยาใบเตย",en:"Steamed bread + pandan custard"},{th:"ปังปิ้งเนยนมน้ำตาล",en:"Butter-condensed milk toast"}],
+    q:"นมสดท่าดินแดง 411 Tha Din Daeng Rd Bangkok" },
+  { key:"bokkia", img:"bokkia", cats:["sweet"],
+    name:{th:"โบ๊กเกี้ย ท่าดินแดง", en:"Bokkia Tha Din Daeng"},
+    sub:{th:"ของหวานจีนโบราณหากินยาก", en:"Rare old-Chinese dessert soup"},
+    hours:[["15:30","19:00"]], closed:[], dist:180,
+    walk:{th:"ข้ามถนน เลี้ยวซ้าย เดินไปทางซอย 11 ~2-3 นาที", en:"Cross the road, turn left toward Soi 11 (~2-3 min)."},
+    dishes:[{th:"โบ๊กเกี้ยรวมมิตรน้ำเชื่อม",en:"Assorted bokkia in syrup"},{th:"โบ๊กเกี้ยน้ำลำไย",en:"Bokkia in longan syrup"},{th:"บะหมี่หวาน",en:"Sweet egg noodles"}],
+    q:"323 Tha Din Daeng Rd Khlong San Bangkok" },
+  { key:"ponmaree", img:"ponmaree", cats:["morning","sweet"],
+    name:{th:"PonMaree Bakery", en:"PonMaree Bakery"},
+    sub:{th:"เบเกอรีโฮมเมดเปิดเช้ายันค่ำ", en:"Homemade bakery, open all day"},
+    hours:[["06:30","20:30"]], closed:[], dist:200,
+    walk:{th:"ข้ามถนน เลี้ยวซ้าย เดินไปทางซอย 11 ~2-3 นาที", en:"Cross the road, turn left toward Soi 11 (~2-3 min)."},
+    dishes:[{th:"ขนมปังไส้หมูหยอง",en:"Pork-floss bun"},{th:"ขนมปังแฮมชีส",en:"Ham & cheese bun"},{th:"ขนมปังไส้สังขยา",en:"Pandan custard bun"}],
+    q:"PonMaree Bakery Tha Din Daeng Bangkok" },
+  { key:"satay", img:"satay", cats:["lunch","dinner"],
+    name:{th:"ตี๋ หมูสะเต๊ะ", en:"Tee Moo Satay"},
+    sub:{th:"หมูสะเต๊ะรสเด็ดเจ้าประจำ", en:"The go-to pork satay stand"},
+    hours:[["07:30","22:30"]], closed:[], dist:250,
+    walk:{th:"ออกซอยเลี้ยวขวา เดิน 3-4 นาที ร้านอยู่ขวามือ", en:"Exit the soi, turn right, 3-4 min — on your right."},
+    dishes:[{th:"หมูสะเต๊ะ",en:"Pork satay"},{th:"ตับสะเต๊ะ",en:"Liver satay"},{th:"ขนมปังปิ้งจิ้มน้ำจิ้ม",en:"Grilled bread"}],
+    q:"183 Tha Din Daeng Rd Khlong San Bangkok" },
+  { key:"ann", img:"ann", cats:["lunch","dinner"],
+    name:{th:"แอน ท่าดินแดง", en:"Ann Tha Din Daeng"},
+    sub:{th:"อาหารตามสั่งรสจัดจ้าน", en:"Punchy made-to-order Thai food"},
+    hours:[["10:30","20:00"]], closed:[1,2], dist:280,
+    walk:{th:"ข้ามถนน เลี้ยวซ้าย เดินไปทางซอย 9 ~3-4 นาที · หยุดจันทร์-อังคาร", en:"Cross the road, turn left toward Soi 9 (~3-4 min). Closed Mon-Tue."},
+    dishes:[{th:"เนื้อปูผัดพริกเหลือง",en:"Crab meat + yellow chili"},{th:"กุ้งทอดเกลือ",en:"Salt-fried shrimp"},{th:"หมูกรอบคั่วพริกเกลือ",en:"Crispy pork chili-salt"}],
+    q:"167 Tha Din Daeng Rd Khlong San Bangkok" },
+  { key:"goose", img:"goose", cats:["morning","lunch"],
+    name:{th:"ฉั่วเจียบง้วน (ห่านพะโล้)", en:"Chua Jeab Ngon (Braised Goose)"},
+    sub:{th:"ห่านพะโล้สูตรแต้จิ๋วดั้งเดิม", en:"Traditional Teochew braised goose"},
+    hours:[["08:30","16:00"]], closed:[], dist:350,
+    walk:{th:"ออกซอยเลี้ยวขวา เดินตรง ~4-5 นาที ร้านอยู่ระหว่างซอย 12-14", en:"Exit the soi, turn right, walk ~4-5 min — between Soi 12 and 14."},
+    dishes:[{th:"เนื้อห่านพะโล้",en:"Braised goose"},{th:"ไส้ห่านพะโล้",en:"Braised goose intestines"},{th:"ต้มจับฉ่าย",en:"Chinese vegetable stew"}],
+    q:"398 Tha Din Daeng Rd Khlong San Bangkok" },
+  { key:"rama", img:"rama", cats:["lunch"],
+    name:{th:"พระรามลงสรง ท่าดินแดง", en:"Rama Long Song Tha Din Daeng"},
+    sub:{th:"เมนูโบราณหากินยากที่สุดในลิสต์", en:"The rarest old-Bangkok dish on this list"},
+    hours:[["11:00","16:00"]], closed:[], dist:850, soldout:true,
+    walk:{th:"ออกซอยเลี้ยวขวา เดินตรงไปทางท่าเรือ ~10-12 นาที ฝั่งเดียวกับซอย", en:"Turn right, walk toward the pier ~10-12 min, same side as the soi."},
+    dishes:[{th:"ข้าวพระรามลงสรง",en:"Rama Long Song rice"},{th:"เส้นหมี่พระรามลงสรง",en:"With rice vermicelli"},{th:"แบบน้ำซุป",en:"Soup style"}],
+    q:"61 Tha Din Daeng Rd Khlong San Bangkok" },
+  { key:"krua", img:"krua", cats:["lunch","dinner"],
+    name:{th:"ครัวท่าดินแดง", en:"Krua Tha Din Daeng (Seafood)"},
+    sub:{th:"ซีฟู้ดมื้อค่ำใกล้ท่าเรือ", en:"Seafood dinner near the pier"},
+    hours:[["11:00","21:00"]], closed:[], dist:780,
+    walk:{th:"ออกซอยเลี้ยวขวา เดินตรงไปทางท่าเรือ ~10 นาที", en:"Turn right, walk straight toward the pier (~10 min)."},
+    dishes:[{th:"ปูทะเลผัดผงกะหรี่",en:"Curry-powder crab"},{th:"กุ้งแช่บ๊วยผัดพริกเกลือ",en:"Chili-salt river prawns"},{th:"ปลากะพงทอดน้ำปลา",en:"Fish-sauce fried sea bass"}],
+    q:"48 Tha Din Daeng Rd Khlong San Bangkok" },
+];
+
+const WALK = [
+  { key:"hoh", name:{th:"House of Happiness (จุดเริ่มต้น)", en:"House of Happiness (Start)"},
+    desc:{th:"ออกเดินจากที่พักในซอยท่าดินแดง 16 — แวะซื้อโจ๊ก/กาแฟปากซอยก่อนได้", en:"Start from your apartment in Soi 16 — grab congee or coffee at the alley mouth first."},
+    time:{th:"", en:""}, q:"House of Happiness Tha Din Daeng 16 Bangkok" },
+  { key:"shrine", name:{th:"ศาลเจ้าซำไนเก็ง", en:"Sam Nai Keng Shrine"},
+    desc:{th:"ศาลเจ้าจีนเก่าแก่สุดซอย 15 บรรยากาศเงียบสงบ", en:"A quiet, historic Chinese shrine at the end of Soi 15."},
+    time:{th:"เดินจากจุดก่อนหน้า ~3 นาที", en:"~3 min from previous stop"}, q:"ศาลเจ้าซำไนเก็ง ท่าดินแดง" },
+  { key:"market", name:{th:"ตลาดท่าดินแดง", en:"Tha Din Daeng Market"},
+    desc:{th:"ตลาดท้องถิ่น+สตรีทฟู้ดชื่อดัง คึกคักช่วงเช้าและเย็น", en:"Beloved local market and street food, busiest mornings and evenings."},
+    time:{th:"~4 นาที", en:"~4 min"}, q:"ตลาดท่าดินแดง คลองสาน" },
+  { key:"pier_tdd", name:{th:"ท่าเรือท่าดินแดง", en:"Tha Din Daeng Pier"},
+    desc:{th:"สุดถนนท่าดินแดง — ลงเรือข้ามฟากไปฝั่งราชวงศ์/เยาวราชได้เลย", en:"End of Tha Din Daeng Rd — hop the cross-river ferry to Ratchawong / Chinatown."},
+    time:{th:"~6 นาที", en:"~6 min"}, q:"Tha Din Daeng Pier Bangkok" },
+  { key:"watthong", name:{th:"วัดทองนพคุณ", en:"Wat Thong Nopphakhun"},
+    desc:{th:"วัดเก่าแก่งานจิตรกรรมงดงาม ย่านถนนสมเด็จเจ้าพระยา", en:"An old temple with beautiful murals on Somdet Chao Phraya Rd."},
+    time:{th:"~10 นาที", en:"~10 min"}, q:"วัดทองนพคุณ คลองสาน" },
+  { key:"park", name:{th:"อุทยานเฉลิมพระเกียรติสมเด็จย่า", en:"Princess Mother Memorial Park"},
+    desc:{th:"สวนร่มรื่น+พิพิธภัณฑ์บ้านโบราณ ซอยสมเด็จเจ้าพระยา 3", en:"Leafy park and heritage-house museum in Somdet Chao Phraya Soi 3."},
+    time:{th:"~5 นาที", en:"~5 min"}, q:"Princess Mother Memorial Park Bangkok" },
+  { key:"cheechin", name:{th:"วัดจีจินเกาะ", en:"Chee Chin Khor Temple"},
+    desc:{th:"เจดีย์ 8 ชั้นริมแม่น้ำ วิวเจ้าพระยาชั้นบนสวยมาก", en:"Riverside 8-story pagoda with a superb Chao Phraya view up top."},
+    time:{th:"~8 นาที", en:"~8 min"}, q:"Chee Chin Khor Temple Bangkok" },
+  { key:"jam", name:{th:"The Jam Factory", en:"The Jam Factory"},
+    desc:{th:"โกดังเก่าแปลงเป็นคาเฟ่ ร้านหนังสือ แกลเลอรี — พักขาได้ที่นี่", en:"Warehouse-turned cafe, bookshop and gallery — a perfect rest stop."},
+    time:{th:"~12 นาที", en:"~12 min"}, q:"The Jam Factory Bangkok" },
+  { key:"watsuwan", name:{th:"วัดสุวรรณ", en:"Wat Suwan"},
+    desc:{th:"วัดเก่าแก่ริมถนนเจริญนคร ใกล้ท่าน้ำคลองสาน", en:"Ancient temple on Charoen Nakhon Rd near Khlong San pier."},
+    time:{th:"~3 นาที", en:"~3 min"}, q:"วัดสุวรรณ เจริญนคร คลองสาน" },
+  { key:"pier_ks", name:{th:"ท่าน้ำคลองสาน (จุดสิ้นสุด)", en:"Khlong San Pier (End)"},
+    desc:{th:"จบทริป — ข้ามเรือไปสี่พระยา หรือต่อสายสีทองที่สถานีคลองสาน", en:"Trip's end — ferry to Si Phraya or catch the Gold Line at Khlong San station."},
+    time:{th:"~4 นาที", en:"~4 min"}, q:"Khlong San Pier Bangkok" },
+];
+
+const TRANSPORT = [
+  { ic:"⛴️", name:{th:"เรือข้ามฟาก", en:"Cross-River Ferry"},
+    desc:{th:"ท่าดินแดง↔ราชวงศ์ และ คลองสาน↔สี่พระยา — ไม่กี่บาท วิวดีสุดคุ้ม", en:"Tha Din Daeng↔Ratchawong and Khlong San↔Si Phraya — a few baht, great views."} },
+  { ic:"🚤", name:{th:"เรือด่วนสุภัทรา", en:"Supatra Express Boat"},
+    desc:{th:"เส้นทางและตารางเรือดูที่เว็บไซต์", en:"Routes & timetable on the website"}, url:"https://supatraboat.com/" },
+  { ic:"🚝", name:{th:"รถไฟฟ้าสายสีทอง", en:"Gold Line Skytrain"},
+    desc:{th:"สถานีคลองสาน (ใกล้ The Jam Factory) เชื่อม BTS กรุงธนบุรี", en:"Khlong San station (near The Jam Factory), links to BTS Krung Thonburi"} },
+  { ic:"🛺", name:{th:"Muvmi ตุ๊กตุ๊กไฟฟ้า", en:"Muvmi E-Tuk Tuk"},
+    desc:{th:"เรียกผ่านแอป ราคาย่อมเยา วิ่งทั่วย่านฝั่งธนฯ", en:"App-based, budget-friendly, covers the Thonburi side"}, url:"https://muvmi.co/" },
+  { ic:"🚗", name:{th:"Grab / Bolt", en:"Grab / Bolt"},
+    desc:{th:"ปักหมุดชื่อสถานที่ตามในหน้านี้ได้เลย", en:"Use any place name on this page as your pick-up/drop-off"} },
+  { ic:"🚌", name:{th:"รถรับส่ง ICONSIAM", en:"ICONSIAM Shuttle"},
+    desc:{th:"รถรับส่งฟรีรอบย่านจากไอคอนสยาม", en:"Free shuttle loops around the area from ICONSIAM"}, url:"https://www.iconsiam.com/en" },
+  { ic:"🚲", name:{th:"ทัวร์จักรยาน Co van Kessel", en:"Co van Kessel Bike Tours"},
+    desc:{th:"ปั่นชมตรอกซอกซอยย่านเก่ากับไกด์", en:"Guided rides through the old town's hidden alleys"}, url:"https://www.covankessel.com/" },
+  { ic:"🏍️", name:{th:"วินมอเตอร์ไซค์", en:"Motorbike Taxi"},
+    desc:{th:"มีวินหน้าตลาดท่าดินแดง — บอกจุดหมายสั้น ๆ ได้เลย", en:"Stand in front of Tha Din Daeng Market — just name your stop"} },
+];
+
+/* ── ตัวช่วย ── */
+const L2 = () => getLang();
+const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+// เวลาไทยตอนนี้ (นาทีตั้งแต่เที่ยงคืน + วันในสัปดาห์)
+function bkkNow(){
+  const d = new Date(Date.now() + (7 * 60 + new Date().getTimezoneOffset()) * 60000);
+  return { min: d.getHours() * 60 + d.getMinutes(), day: d.getDay() };
+}
+const toMin = (s) => Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
+
+function openState(f){
+  const now = bkkNow();
+  if ((f.closed || []).includes(now.day)) return { open: false, next: null };
+  for (const [a, b] of f.hours) {
+    if (now.min >= toMin(a) && now.min < toMin(b)) return { open: true };
+  }
+  const next = f.hours.find(([a]) => toMin(a) > now.min);
+  return { open: false, next: next ? next[0] : null };
+}
+
+function hoursText(f){
+  const t = f.hours.map(([a, b]) => `${a}-${b}`).join(", ");
+  const days = (f.closed || []).length ? (L2() === "th" ? " · หยุดจันทร์-อังคาร" : " · Closed Mon-Tue") : "";
+  const so = f.soldout ? (L2() === "th" ? " (หรือจนกว่าจะหมด)" : " (or until sold out)") : "";
+  return t + so + days;
+}
+
+function distText(m){
+  if (m <= 10) return L2() === "th" ? "หน้าปากซอย" : "At the alley mouth";
+  if (m < 1000) return `~${m} ${L2() === "th" ? "ม." : "m"}`;
+  return `~${(m / 1000).toFixed(1)} ${L2() === "th" ? "กม." : "km"}`;
+}
+
+/* ── ร้านอาหาร + ฟิลเตอร์ ── */
+let curFilter = "all";
+const FILTERS = [
+  { id: "all",     th: "ทั้งหมด",        en: "All" },
+  { id: "morning", th: "มื้อเช้า",        en: "Breakfast" },
+  { id: "sweet",   th: "หวาน/คาเฟ่",     en: "Sweet & cafe" },
+  { id: "lunch",   th: "มื้อกลางวัน",     en: "Lunch" },
+  { id: "dinner",  th: "มื้อเย็น",        en: "Dinner" },
+];
+
+function renderFilters(){
+  document.getElementById("lcFilters").innerHTML = FILTERS.map((f) =>
+    `<button class="lc-chip${curFilter === f.id ? " on" : ""}" data-f="${f.id}">${f[L2()]}</button>`).join("");
+}
+
+function renderFood(){
+  const lang = L2();
+  const list = FOOD.filter((f) => curFilter === "all" || f.cats.includes(curFilter))
+    .slice().sort((a, b) => a.dist - b.dist);
+  document.getElementById("lcFoodGrid").innerHTML = list.map((f) => {
+    const st = openState(f);
+    const badge = st.open
+      ? `<span class="lc-open yes">● ${lang === "th" ? "เปิดอยู่ตอนนี้" : "Open now"}</span>`
+      : `<span class="lc-open no">${lang === "th" ? "ปิดอยู่" : "Closed"}${st.next ? (lang === "th" ? " · เปิด " : " · opens ") + st.next : ""}</span>`;
+    return `<article class="lc-food">
+      <div class="lc-fimg"><img src="images/local/${f.img}.webp" alt="${esc(f.name[lang])}" loading="lazy" onerror="this.remove()">${badge}</div>
+      <div class="lc-fbody">
+        <h3>${esc(f.name[lang])}</h3>
+        <div class="sub">${esc(f.sub[lang])}</div>
+        <div class="lc-meta">🕐 <b>${hoursText(f)}</b><br>📍 ${distText(f.dist)} · ${esc(f.walk[lang])}</div>
+        <div class="lc-dishes">${f.dishes.map((d) => `<span>${esc(d[lang])}</span>`).join("")}</div>
+        <a class="lc-flink" target="_blank" rel="noopener" href="${nav2(f.q)}">${lang === "th" ? "นำทางไปร้านนี้" : "Navigate"} →</a>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+document.getElementById("lcFilters").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-f]");
+  if (!b) return;
+  curFilter = b.dataset.f;
+  renderFilters();
+  renderFood();
+});
+
+/* ── เส้นทางเดินเที่ยว ── */
+function renderWalk(){
+  const lang = L2();
+  document.getElementById("lcWalkGrid").innerHTML = WALK.map((w, i) => `
+    <div class="lc-stop">
+      <div class="lc-num">${i + 1}</div>
+      <div style="flex:1">
+        <h3>${esc(w.name[lang])}</h3>
+        <div class="en">${esc(w.name[lang === "th" ? "en" : "th"])}</div>
+        <p>${esc(w.desc[lang])}</p>
+        ${w.time[lang] ? `<div class="time">🚶 ${esc(w.time[lang])}</div>` : ""}
+      </div>
+      <a class="go" target="_blank" rel="noopener" href="${nav2(w.q)}">${lang === "th" ? "นำทาง" : "Map"}</a>
+    </div>`).join("");
+  // ลิงก์เส้นทางเดินครบทุกจุดใน Google Maps (จุด 2-9 เป็น waypoint)
+  const wp = WALK.slice(1, 9).map((w) => encodeURIComponent(w.q)).join("|");
+  document.getElementById("lcFullRoute").href =
+    `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(ORIGIN)}&destination=${encodeURIComponent(WALK[9].q)}&waypoints=${wp}&travelmode=walking`;
+}
+
+/* ── การเดินทาง ── */
+function renderTransport(){
+  const lang = L2();
+  document.getElementById("lcTrGrid").innerHTML = TRANSPORT.map((t) => `
+    <div class="lc-tr"><div class="ic">${t.ic}</div>
+      <div><h4>${esc(t.name[lang])}</h4><p>${esc(t.desc[lang])}</p>
+      ${t.url ? `<a href="${t.url}" target="_blank" rel="noopener">${lang === "th" ? "เว็บไซต์" : "Website"} ↗</a>` : ""}</div>
+    </div>`).join("");
+}
+
+/* ── แผนที่ Leaflet — พิกัดจริง geocode ตอน build (data/local-geo.json) ── */
+function initMap(geo){
+  const keys = Object.keys(geo || {});
+  if (!window.L || keys.length < 3) return;
+  document.getElementById("mapSection").hidden = false;
+  const map = L.map("lcMap", { scrollWheelZoom: false });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+
+  const used = {};
+  const jitter = (p) => {
+    const k = p.lat.toFixed(5) + "," + p.lon.toFixed(5);
+    used[k] = (used[k] || 0) + 1;
+    return { lat: p.lat + (used[k] - 1) * 0.00012, lon: p.lon + (used[k] - 1) * 0.00016 };
+  };
+  const pts = [];
+  const lang = L2();
+
+  WALK.forEach((w, i) => {
+    const p = geo[w.key];
+    if (!p) return;
+    const j = jitter(p);
+    pts.push([j.lat, j.lon]);
+    L.marker([j.lat, j.lon], { icon: L.divIcon({ className: "", html: `<div class="lc-pin-walk">${i + 1}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }) })
+      .addTo(map).bindPopup(`<b>${esc(w.name[lang])}</b><br><a target="_blank" rel="noopener" href="${nav2(w.q)}">${lang === "th" ? "นำทาง" : "Navigate"} →</a>`);
+  });
+  const routePts = WALK.map((w) => geo[w.key]).filter(Boolean).map((p) => [p.lat, p.lon]);
+  if (routePts.length >= 2) {
+    L.polyline(routePts, { color: "#2f5f9e", weight: 3, dashArray: "7 6", opacity: 0.65 }).addTo(map);
+  }
+  FOOD.forEach((f) => {
+    const p = geo[f.key];
+    if (!p) return;
+    const j = jitter(p);
+    pts.push([j.lat, j.lon]);
+    L.marker([j.lat, j.lon], { icon: L.divIcon({ className: "", html: `<div class="lc-pin-food">🍜</div>`, iconSize: [22, 22], iconAnchor: [11, 11] }) })
+      .addTo(map).bindPopup(`<b>${esc(f.name[lang])}</b><br>${esc(hoursText(f))}<br><a target="_blank" rel="noopener" href="${nav2(f.q)}">${lang === "th" ? "นำทาง" : "Navigate"} →</a>`);
+  });
+  if (pts.length) map.fitBounds(pts, { padding: [28, 28] });
+  map.on("click", () => map.scrollWheelZoom.enable());
+}
+
+/* ── เริ่มงาน ── */
+function renderAllLc(){ renderFilters(); renderFood(); renderWalk(); renderTransport(); }
+renderAllLc();
+applyLang();
+document.addEventListener("langchange", renderAllLc);
+
+window.addEventListener("load", () => {
+  fetch("data/local-geo.json")
+    .then((r) => r.ok ? r.json() : {})
+    .then((geo) => initMap(geo))
+    .catch(() => {});
+});
+</script>
+
+</body>
+</html>
