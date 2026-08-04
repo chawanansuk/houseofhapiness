@@ -34,22 +34,24 @@ const LANDMARKS = {
 };
 
 // ── ร้านริมถนนท่าดินแดง: วางตามแนวถนน ──
-// off = เมตรจากปากซอย 16 "ไปทางท่าเรือ" (ติดลบ = ไปทางตรงข้าม/ฝั่งลาดหญ้า)
-// soi = ถ้า OSM มีซอยนี้ ใช้พิกัดหัวซอยแทน (แม่นกว่าระยะเดินโดยประมาณ)
+// ลำดับความแม่น: หมุดร้านจริงใน OSM (re) > เลขที่บ้านจากป้าย addr ใน OSM (house)
+//   > หัวซอยจาก OSM (soi) > ระยะเดินจากปากซอย 16 ไปทางลาดหญ้า (dist เมตร รวม ~60 ม.ในซอย)
+// หมายเหตุทิศ: OSM ยืนยันว่าซอยเลขมาก (16) อยู่ใกล้ท่าเรือ เลขน้อย (9) อยู่ทางลาดหญ้า
+// และเลขที่บ้านไล่จากฝั่งลาดหญ้า (48, 61) ขึ้นไปทางท่าเรือ (377, 411)
 const SHOPS = [
-  { key: "jok",         off: 0,    soi: 16 },
-  { key: "pungpung",    off: 0,    soi: 16 },
-  { key: "khaomudaeng", off: 20 },            // ฝั่งตรงข้ามปากซอย 16
-  { key: "khamu",       off: -120 },
-  { key: "nomsod",      off: -130, soi: 15 },
-  { key: "khaoniao",    off: -150, soi: 13 },
-  { key: "bokkia",      off: -180, soi: 11 },
-  { key: "ponmaree",    off: -200 },
-  { key: "ann",         off: -280, soi: 9 },
-  { key: "satay",       off: 250 },
-  { key: "goose",       off: 350,  soi: [12, 14] },
-  { key: "krua",        off: 780 },
-  { key: "rama",        off: 850 },
+  { key: "jok",         dist: 0,   soi: 16 },
+  { key: "pungpung",    dist: 0,   soi: 16 },
+  { key: "khaomudaeng", dist: 30,  house: 377 }, // ฝั่งตรงข้ามปากซอย 16
+  { key: "khamu",       dist: 120, re: "ขาหมู.*สันต์|พี่สันต์" },
+  { key: "nomsod",      dist: 130, house: 411, re: "นมสด.*ท่าดินแดง|Nomsod" },
+  { key: "khaoniao",    dist: 150, soi: 13, re: "ข้าวเหนียวปิ้ง.*(กุ้ง|ท่าดินแดง)" },
+  { key: "bokkia",      dist: 180, house: 323, soi: 11, re: "โบ๊กเกี้ย|บ๊กเกี๊ย|โบ๊เกี้ย" },
+  { key: "ponmaree",    dist: 200, house: 282, re: "PonMaree|ปอนมารี|พรมารี" },
+  { key: "ann",         dist: 280, house: 167, soi: 9, re: "แอน.*ท่าดินแดง" },
+  { key: "satay",       dist: 250, house: 183, re: "สะเต๊ะ.*ท่าดินแดง|ตี๋.*สะเต๊ะ" },
+  { key: "goose",       dist: 350, house: 398, re: "ฉั่วเจียบง้วน|ห่านพะโล้.*ท่าดินแดง" },
+  { key: "krua",        dist: 780, house: 48,  re: "ครัวท่าดินแดง|Khrua Thadindaeng|Krua Tha Din Daeng" },
+  { key: "rama",        dist: 850, house: 61,  re: "พระรามลงสรง" },
 ];
 
 // สำรอง: ถ้าดึงเส้นถนนไม่สำเร็จ ใช้ Nominatim แบบเดิม (แม่นน้อยกว่าแต่ดีกว่าไม่มี)
@@ -184,10 +186,17 @@ async function geocodeSet(dict, out) {
   }
 }
 
-// ดึงทุก way ชื่อมี "ท่าดินแดง" (ถนนหลัก + ซอย) พร้อมพิกัดเส้น
+// ดึงจาก OSM ในคำขอเดียว: ถนน+ซอยท่าดินแดง, ป้ายเลขที่บ้านบนถนนนี้, ร้านตามชื่อ, ท่าเรือข้ามฟาก
 async function overpassWays() {
-  const q = '[out:json][timeout:25];way["highway"]["name"~"ท่าดินแดง"]' +
-    `(${BBOX.latMin},${BBOX.lonMin},${BBOX.latMax},${BBOX.lonMax});out geom;`;
+  const bb = `(${BBOX.latMin},${BBOX.lonMin},${BBOX.latMax},${BBOX.lonMax})`;
+  const nameRe = SHOPS.filter((s) => s.re).map((s) => s.re).join("|");
+  const q = `[out:json][timeout:30];(` +
+    `way["highway"]["name"~"ท่าดินแดง"]${bb};` +
+    `nwr["addr:street"~"ท่าดินแดง"]["addr:housenumber"]${bb};` +
+    `nwr["name"~"${nameRe}"]${bb};` +
+    `nwr["amenity"="ferry_terminal"]${bb};` +
+    `nwr["man_made"="pier"]["name"~"ท่าดินแดง"]${bb};` +
+    `);out tags geom;`;
   const hosts = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
   for (const host of hosts) {
     try {
@@ -204,16 +213,75 @@ async function overpassWays() {
   return null;
 }
 
+// จุดตัวแทนของ element (node = ตรง ๆ, way = จุดกึ่งกลางเส้น/รูปทรง)
+function elPoint(el) {
+  if (typeof el.lat === "number" && typeof el.lon === "number") return { lat: el.lat, lon: el.lon };
+  const g = el.geometry || [];
+  if (!g.length) return null;
+  let lat = 0, lon = 0;
+  for (const p of g) { lat += p.lat; lon += p.lon; }
+  return { lat: lat / g.length, lon: lon / g.length };
+}
+
+// โมเดลเลขที่บ้าน → ระยะบนถนน (เทียบจากป้าย addr ใน OSM ฝั่งเลขคู่/คี่เดียวกันก่อน)
+function houseModel(anchors, line) {
+  const list = anchors
+    .map((a) => { const pa = line.distAlong(a.pt); return pa.off <= 80 ? { no: a.no, d: pa.at } : null; })
+    .filter(Boolean)
+    .sort((a, b) => a.no - b.no);
+  return (no) => {
+    const same = list.filter((a) => a.no % 2 === no % 2);
+    const use = same.length >= 2 ? same : list;
+    if (use.length < 2) {
+      const exactOnly = use.find((a) => a.no === no);
+      return exactOnly ? exactOnly.d : null;
+    }
+    const exact = use.find((a) => a.no === no);
+    if (exact) return exact.d;
+    let lo = null, hi = null;
+    for (const a of use) {
+      if (a.no <= no && (!lo || a.no > lo.no)) lo = a;
+      if (a.no >= no && (!hi || a.no < hi.no)) hi = a;
+    }
+    if (!lo) { lo = use[0]; hi = use[1]; }
+    else if (!hi) { hi = use[use.length - 1]; lo = use[use.length - 2]; }
+    if (hi.no === lo.no) return lo.d;
+    return lo.d + ((hi.d - lo.d) * (no - lo.no)) / (hi.no - lo.no);
+  };
+}
+
 /* ══ วางหมุดร้านตามแนวถนน ══ */
 function placeShopsOnRoad(elements, out) {
-  const mainGeoms = [], soiWays = [];
+  const mainGeoms = [], soiWays = [], anchors = [], pois = {}, ferries = [];
   for (const el of elements || []) {
-    const name = (el.tags && el.tags.name) || "";
-    const geom = (el.geometry || []).map((g) => ({ lat: g.lat, lon: g.lon }));
-    if (geom.length < 2) continue;
-    const m = name.match(/(\d+)(?:\/\d+)?\s*$/); // ชื่อลงท้ายด้วยเลข = ซอย
-    if (m) soiWays.push({ num: Number(m[1]), geom });
-    else mainGeoms.push(geom);
+    const tags = el.tags || {};
+    const name = [tags.name, tags["name:th"], tags["name:en"], tags.alt_name].filter(Boolean).join(" | ");
+    const isRoad = tags.highway && /ท่าดินแดง/.test(tags.name || "");
+    if (isRoad) {
+      const geom = (el.geometry || []).map((g) => ({ lat: g.lat, lon: g.lon }));
+      if (geom.length < 2) continue;
+      const m = (tags.name || "").match(/(\d+)(?:\/\d+)?\s*$/); // ชื่อลงท้ายด้วยเลข = ซอย
+      if (m) soiWays.push({ num: Number(m[1]), geom });
+      else mainGeoms.push(geom);
+      continue;
+    }
+    const pt = elPoint(el);
+    if (!pt || !inBox(pt.lat, pt.lon)) continue;
+    // ป้ายเลขที่บ้านบนถนนท่าดินแดง
+    if (/ท่าดินแดง/.test(tags["addr:street"] || "") && tags["addr:housenumber"]) {
+      const no = parseInt(String(tags["addr:housenumber"]), 10);
+      if (Number.isFinite(no) && no > 0) anchors.push({ no, pt });
+    }
+    // ท่าเรือข้ามฟาก
+    if (tags.amenity === "ferry_terminal" || tags.man_made === "pier") {
+      ferries.push({ name, pt });
+    }
+    // ร้านตามชื่อ (ร้านแรกที่ regex ตรงชนะ)
+    if (name) {
+      for (const s of SHOPS) {
+        if (s.re && !pois[s.key] && new RegExp(s.re, "i").test(name)) pois[s.key] = round6(pt);
+      }
+    }
   }
   if (!mainGeoms.length) return false;
 
@@ -237,30 +305,47 @@ function placeShopsOnRoad(elements, out) {
     }
   }
 
-  // ตำแหน่งปากซอย 16: จาก OSM ตรง ๆ > เทียบจากซอยข้างเคียง > ประมาณ 880 ม.จากท่าเรือ
+  // ตำแหน่งปากซอย 16: จาก OSM ตรง ๆ > เทียบจากซอยข้างเคียง (ซอยเลขน้อยอยู่ทางลาดหญ้า = d มาก)
   let d16 = sois[16] ? sois[16].d : null;
   if (d16 == null) {
-    // gap = ระยะจากหัวซอยนั้นถึงปากซอย 16 (บวก = ซอย 16 อยู่ใกล้ท่าเรือกว่า)
-    for (const [num, gap] of [[15, -110], [13, -160], [11, -190], [9, -290], [14, 320], [12, 380]]) {
-      if (sois[num]) { d16 = sois[num].d + gap; break; }
+    for (const [num, gap] of [[14, 60], [13, 50], [11, 155], [9, 210]]) {
+      if (sois[num]) { d16 = sois[num].d - gap; break; } // gap = ซอยนั้นอยู่ใต้ซอย 16 กี่เมตร
     }
   }
-  if (d16 == null) d16 = 880;
+  if (d16 == null) d16 = 260; // ค่าที่วัดจริงจาก OSM รอบก่อน
   d16 = Math.max(30, Math.min(line.total - 30, d16));
 
+  const houseD = houseModel(anchors, line);
+  const methods = [];
   for (const s of SHOPS) {
-    let p = null;
-    if (s.soi) {
-      const nums = Array.isArray(s.soi) ? s.soi : [s.soi];
-      const js = nums.map((n) => sois[n]).filter(Boolean);
-      if (js.length === nums.length && js.length) {
-        p = js.length === 1
-          ? js[0].junction
-          : round6({ lat: (js[0].junction.lat + js[1].junction.lat) / 2, lon: (js[0].junction.lon + js[1].junction.lon) / 2 });
-      }
+    let p = null, how = "";
+    if (pois[s.key]) { p = pois[s.key]; how = "ร้านจริง"; }
+    if (!p && s.house != null) {
+      const d = houseD(s.house);
+      if (d != null) { p = line.pointAt(d); how = `บ้านเลขที่ ${s.house}`; }
     }
-    if (!p) p = line.pointAt(d16 - s.off);
+    if (!p && s.soi && sois[s.soi]) { p = sois[s.soi].junction; how = `หัวซอย ${s.soi}`; }
+    if (!p) {
+      // ระยะเดินจากที่พัก (หัก ~60 ม.ในซอย) ไล่ไปทางลาดหญ้า = d เพิ่ม
+      p = line.pointAt(d16 + Math.max(0, s.dist - 60));
+      how = "ระยะเดิน";
+    }
     out[s.key] = p;
+    methods.push(`${s.key}=${how}`);
+  }
+
+  // ท่าเรือท่าดินแดง: หมุด ferry_terminal ชื่อตรง > ferry ใกล้ปลายถนนฝั่งท่าเรือ
+  // > ถ้าค่าจาก Nominatim ห่างปลายถนนเกิน 300 ม. ให้ย้ายมาปลายถนน (ท่าเรืออยู่สุดถนนตามนิยาม)
+  const roadEnd = line.pointAt(0);
+  const named = ferries.find((f) => /ท่าดินแดง|Din Daeng/i.test(f.name));
+  const near = ferries.filter((f) => havM(f.pt, roadEnd) < 200)
+    .sort((a, b) => havM(a.pt, roadEnd) - havM(b.pt, roadEnd))[0];
+  if (named) out.pier_tdd = round6(named.pt);
+  else if (near) out.pier_tdd = round6(near.pt);
+  else if (!out.pier_tdd || havM(out.pier_tdd, roadEnd) > 300) {
+    console.log("pier_tdd: ใช้ปลายถนนแทน (Nominatim ห่าง " +
+      (out.pier_tdd ? Math.round(havM(out.pier_tdd, roadEnd)) : "-") + " ม.)");
+    out.pier_tdd = roadEnd;
   }
 
   // ที่พักอยู่ "ใน" ซอย 16: ถ้า OSM มีเส้นซอย เดินเข้าไป 60 ม. ไม่งั้นใช้ปากซอย
@@ -272,7 +357,8 @@ function placeShopsOnRoad(elements, out) {
     out.hoh = line.pointAt(d16);
   }
 
-  console.log(`road: ${Math.round(line.total)}m · sois: ${Object.keys(sois).sort((a, b) => a - b).join(",") || "-"} · d16=${Math.round(d16)}m`);
+  console.log(`road: ${Math.round(line.total)}m · sois: ${Object.keys(sois).sort((a, b) => a - b).join(",") || "-"} · d16=${Math.round(d16)}m · addr:${anchors.length} ป้าย · ferry:${ferries.length}`);
+  console.log("วิธีวางหมุด: " + methods.join(", "));
   return true;
 }
 
