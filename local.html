@@ -449,7 +449,15 @@ function renderTransport(){
 
 /* ── แผนที่ Leaflet — พิกัดจริง geocode ตอน build (data/local-geo.json) ── */
 function initMap(geo){
-  const keys = Object.keys(geo || {});
+  geo = Object.assign({}, geo || {});
+  // จุดที่ geocode ไม่ติด (ซอยเล็กไม่มีใน OSM) — อนุมานจากจุดข้างเคียงที่ติด
+  const mid = (a, b) => (a && b) ? { lat: (a.lat + b.lat) / 2, lon: (a.lon + b.lon) / 2 } : null;
+  geo.hoh = geo.hoh || geo.khaomudaeng;                 // ปากซอย 16 อยู่ตรงข้ามร้านเลขที่ 377
+  geo.jok = geo.jok || geo.hoh;
+  geo.pungpung = geo.pungpung || geo.hoh;
+  geo.khaoniao = geo.khaoniao || mid(geo.khamu, geo.bokkia);
+  geo.cheechin = geo.cheechin || mid(geo.park, geo.jam);
+  const keys = Object.keys(geo).filter((k) => geo[k]);
   if (!window.L || keys.length < 3) return;
   document.getElementById("mapSection").hidden = false;
   const map = L.map("lcMap", { scrollWheelZoom: false });

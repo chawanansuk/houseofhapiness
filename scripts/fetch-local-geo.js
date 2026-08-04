@@ -22,7 +22,7 @@ const PLACES = {
   pier_tdd:   ["ท่าเรือท่าดินแดง กรุงเทพ", "Tha Din Daeng Pier Bangkok"],
   watthong:   ["วัดทองนพคุณ คลองสาน", "Wat Thong Nopphakhun Bangkok"],
   park:       ["อุทยานเฉลิมพระเกียรติสมเด็จพระศรีนครินทราบรมราชชนนี กรุงเทพ", "Princess Mother Memorial Park Bangkok"],
-  cheechin:   ["Chee Chin Khor Temple Bangkok", "มูลนิธิจีจินเกาะ กรุงเทพ"],
+  cheechin:   ["Chee Chin Khor Temple Bangkok", "Che Chin Khor Bangkok", "สมาคมจีจินเกาะ กรุงเทพ", "247 Chiang Mai Road Khlong San Bangkok"],
   jam:        ["The Jam Factory Bangkok"],
   watsuwan:   ["วัดสุวรรณ คลองสาน กรุงเทพ", "Wat Suwan Charoen Nakhon Bangkok"],
   pier_ks:    ["ท่าเรือคลองสาน กรุงเทพ", "Khlong San Pier Bangkok"],
