@@ -54,6 +54,19 @@ const SHOPS = [
   { key: "rama",        dist: 850, house: 61,  re: "พระรามลงสรง" },
 ];
 
+// ── แลนด์มาร์กเส้นทางเดิน: ค้นชื่อจริงใน OSM (way/node) แล้วเลือกตัวที่ใกล้จุดอ้างอิงตามที่อยู่ในไกด์ ──
+// กันเคส Nominatim จับผิดที่ เช่น "วัดสุวรรณ" มีหลายวัด — ไกด์บอกว่าอยู่ใกล้ท่าน้ำคลองสาน
+const LANDMARK_POIS = [
+  { key: "shrine",   re: "ซำไนเก็ง",                                            ref: { lat: 13.7350, lon: 100.5040 }, max: 500 },
+  { key: "market",   re: "ตลาดท่าดินแดง",                                        ref: { lat: 13.7340, lon: 100.5025 }, max: 500 },
+  { key: "watthong", re: "ทองนพคุณ",                                            ref: { lat: 13.7320, lon: 100.5070 }, max: 700 },
+  { key: "park",     re: "สมเด็จพระศรีนคริน|สวนสมเด็จย่า|Princess Mother",          ref: { lat: 13.7350, lon: 100.5010 }, max: 900 },
+  { key: "cheechin", re: "จีจินเกาะ|Chee Chin|Che Chin",                          ref: { lat: 13.7350, lon: 100.5065 }, max: 700 },
+  { key: "jam",      re: "Jam Factory",                                          ref: { lat: 13.7293, lon: 100.5105 }, max: 500 },
+  { key: "watsuwan", re: "วัดสุวรรณ",                                             ref: { lat: 13.7291, lon: 100.5116 }, max: 500 },
+  { key: "pier_ks",  re: "ท่าเรือคลองสาน|ท่าน้ำคลองสาน|Khlong San Pier",            ref: { lat: 13.7291, lon: 100.5116 }, max: 400 },
+];
+
 // สำรอง: ถ้าดึงเส้นถนนไม่สำเร็จ ใช้ Nominatim แบบเดิม (แม่นน้อยกว่าแต่ดีกว่าไม่มี)
 const SHOP_FALLBACK = {
   jok:        ["Tha Din Daeng Soi 16, Khlong San, Bangkok"],
@@ -189,7 +202,8 @@ async function geocodeSet(dict, out) {
 // ดึงจาก OSM ในคำขอเดียว: ถนน+ซอยท่าดินแดง, ป้ายเลขที่บ้านบนถนนนี้, ร้านตามชื่อ, ท่าเรือข้ามฟาก
 async function overpassWays() {
   const bb = `(${BBOX.latMin},${BBOX.lonMin},${BBOX.latMax},${BBOX.lonMax})`;
-  const nameRe = SHOPS.filter((s) => s.re).map((s) => s.re).join("|");
+  const nameRe = SHOPS.filter((s) => s.re).map((s) => s.re)
+    .concat(LANDMARK_POIS.map((l) => l.re)).join("|");
   const q = `[out:json][timeout:30];(` +
     `way["highway"]["name"~"ท่าดินแดง"]${bb};` +
     `nwr["addr:street"~"ท่าดินแดง"]["addr:housenumber"]${bb};` +
@@ -252,7 +266,7 @@ function houseModel(anchors, line) {
 
 /* ══ วางหมุดร้านตามแนวถนน ══ */
 function placeShopsOnRoad(elements, out) {
-  const mainGeoms = [], soiWays = [], anchors = [], pois = {}, ferries = [];
+  const mainGeoms = [], soiWays = [], anchors = [], pois = {}, ferries = [], namedEls = [];
   for (const el of elements || []) {
     const tags = el.tags || {};
     const name = [tags.name, tags["name:th"], tags["name:en"], tags.alt_name].filter(Boolean).join(" | ");
@@ -278,6 +292,7 @@ function placeShopsOnRoad(elements, out) {
     }
     // ร้านตามชื่อ (ร้านแรกที่ regex ตรงชนะ)
     if (name) {
+      namedEls.push({ name, pt });
       for (const s of SHOPS) {
         if (s.re && !pois[s.key] && new RegExp(s.re, "i").test(name)) pois[s.key] = round6(pt);
       }
@@ -356,6 +371,20 @@ function placeShopsOnRoad(elements, out) {
   } else {
     out.hoh = line.pointAt(d16);
   }
+
+  // แลนด์มาร์กเส้นทางเดิน: หมุดจริงจาก OSM ชนะ Nominatim (เลือกตัวที่ใกล้จุดอ้างอิงสุด)
+  const lmFixed = [];
+  for (const lm of LANDMARK_POIS) {
+    const cands = namedEls.filter((n) => new RegExp(lm.re, "i").test(n.name))
+      .map((n) => ({ pt: n.pt, d: havM(n.pt, lm.ref) }))
+      .sort((a, b) => a.d - b.d);
+    if (cands.length && cands[0].d <= lm.max) {
+      const moved = out[lm.key] ? Math.round(havM(out[lm.key], cands[0].pt)) : null;
+      out[lm.key] = round6(cands[0].pt);
+      lmFixed.push(`${lm.key}${moved != null ? `(ขยับ ${moved}ม.)` : ""}`);
+    }
+  }
+  if (lmFixed.length) console.log("แลนด์มาร์กจาก OSM: " + lmFixed.join(", "));
 
   console.log(`road: ${Math.round(line.total)}m · sois: ${Object.keys(sois).sort((a, b) => a - b).join(",") || "-"} · d16=${Math.round(d16)}m · addr:${anchors.length} ป้าย · ferry:${ferries.length}`);
   console.log("วิธีวางหมุด: " + methods.join(", "));
