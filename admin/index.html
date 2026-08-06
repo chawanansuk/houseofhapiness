@@ -488,6 +488,7 @@ tbody tr:hover td{background:#faf7f2}
               <option value="past">ที่ผ่านมาแล้ว</option>
               <option value="needsfix">ข้อมูลไม่ครบ</option>
             </select>
+            <button class="btn-sm" id="csvBook" type="button" title="ดาวน์โหลดรายการที่กรองอยู่เป็นไฟล์ CSV เปิดใน Excel ได้">⬇ Export CSV</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -542,7 +543,8 @@ tbody tr:hover td{background:#faf7f2}
           <div id="expCats"></div>
         </div>
         <div class="card" style="margin-top:1.2rem">
-          <div class="sec-title sub"><span class="ic" data-icon="list"></span> รายการรายจ่าย <small id="expCount"></small></div>
+          <div class="sec-title sub"><span class="ic" data-icon="list"></span> รายการรายจ่าย <small id="expCount"></small>
+            <button class="btn-sm" id="csvExp" type="button" style="margin-left:auto" title="ดาวน์โหลดรายจ่ายเดือนที่เลือกเป็นไฟล์ CSV เปิดใน Excel ได้">⬇ Export CSV</button></div>
           <div class="tbl-wrap">
             <table>
               <thead><tr><th>วันที่</th><th>หมวด</th><th>จ่ายให้</th><th>วิธี</th><th>จำนวน (฿)</th><th></th></tr></thead>
@@ -1298,7 +1300,8 @@ function renderDayDetail(){
 }
 
 /* ── ตาราง ── */
-function renderTable(){
+// รายการจองตามฟิลเตอร์/คำค้นที่เลือกอยู่ — ใช้ทั้งวาดตารางและ Export CSV
+function visibleRows(){
   const q = $("q").value.trim().toLowerCase();
   const range = $("fRange").value;
   const t = DATA.today;
@@ -1313,6 +1316,12 @@ function renderTable(){
     [b.name, b.phone, b.id, b.source, b.note, b.room_no].some((v) => String(v || "").toLowerCase().includes(q)));
   rows.sort((a, b) => String(a.checkin || "").localeCompare(String(b.checkin || "")));
   if (range === "past") rows.reverse();
+  return rows;
+}
+
+function renderTable(){
+  const t = DATA.today;
+  const rows = visibleRows();
 
   $("tblCount").textContent = `${rows.length} รายการ`;
   $("tblEmpty").style.display = rows.length ? "none" : "";
@@ -1357,6 +1366,45 @@ $("calPrev").addEventListener("click", () => { calYM[1]--; if (calYM[1] < 0) { c
 $("calNext").addEventListener("click", () => { calYM[1]++; if (calYM[1] > 11) { calYM[1] = 0; calYM[0]++; } renderCal(); });
 $("q").addEventListener("input", renderTable);
 $("fRange").addEventListener("change", renderTable);
+
+/* ── Export CSV (มี BOM ให้เปิดใน Excel แล้วภาษาไทยไม่เพี้ยน) ── */
+function dlCSV(name, header, lines){
+  const csv = "\uFEFF" + [header].concat(lines).map((row) =>
+    row.map((v) => {
+      const s = String(v == null ? "" : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+$("csvBook").addEventListener("click", () => {
+  if (!DATA) return;
+  const rows = visibleRows();
+  if (!rows.length) { toast("ไม่มีรายการให้ดาวน์โหลด"); return; }
+  dlCSV(`bookings-${DATA.today}.csv`,
+    ["เช็คอิน", "เช็คเอาต์", "คืน", "ห้อง", "ชื่อผู้เข้าพัก", "เบอร์โทร", "ช่องทาง", "หมายเลขจอง", "ยอด(บาท)", "สถานะ", "หมายเหตุ"],
+    rows.map((b) => [b.checkin || "", b.checkout || "", nightsOf(b) || "", b.room_no || "", b.name || "",
+      b.phone || "", b.source || "", b.id || "", String(b.amount || "").replace(/,/g, ""), b.status || "", b.note || ""]));
+  toast(`ดาวน์โหลด ${rows.length} รายการแล้ว`);
+});
+$("csvExp").addEventListener("click", () => {
+  if (!DATA || DATA.role === "staff") return;
+  const [y, m] = expYM;
+  const ym = `${y}-${String(m + 1).padStart(2, "0")}`;
+  const exps = (DATA.expenses || []).filter((x) => String(x.date || "").slice(0, 7) === ym)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (!exps.length) { toast("เดือนนี้ยังไม่มีรายจ่าย"); return; }
+  dlCSV(`expenses-${ym}.csv`,
+    ["วันที่", "หมวด", "จ่ายให้", "วิธีจ่าย", "จำนวน(บาท)", "หมายเหตุ"],
+    exps.map((x) => [x.date || "", x.category || "", x.vendor || "", x.method || "",
+      String(x.amount || "").replace(/,/g, ""), x.note || ""]));
+  toast(`ดาวน์โหลดรายจ่าย ${exps.length} รายการแล้ว`);
+});
 $("fixBanner").addEventListener("click", () => { $("fRange").value = "needsfix"; showSection("secBookings"); renderTable(); });
 EXP_CATS.forEach((c) => { const o = document.createElement("option"); o.textContent = c; $("exCat").appendChild(o); });
 $("tlPrev").addEventListener("click", () => { tlStart = shiftYMD(tlStart, -7); renderTimeline(); });
