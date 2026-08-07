@@ -378,9 +378,10 @@ tbody tr:hover td{background:#faf7f2}
         <div class="banner warn" id="srcWarn"></div>
         <div class="banner fix" id="fixBanner"></div>
         <div class="banner warn" id="icalBanner">
-          <b>ยังไม่ได้เชื่อมปฏิทิน Booking.com (iCal)</b> — ตัวเลขห้องว่างบนหน้าเว็บยังไม่แม่น
-          ไปที่ Extranet → Rates &amp; Availability → Sync calendars → Export แล้วเอา URL
-          มาใส่ env <code>BOOKING_ICAL_URLS</code> บน Vercel (ดู <code>backoffice/SETUP.md</code>)
+          <b>อัปเดตข้อมูลจาก Booking.com ด้วยไฟล์รายการจอง</b> — Booking ยกเลิก iCal แล้ว
+          วิธีใหม่: เข้า Extranet (คอมพิวเตอร์) → เมนู <b>การจอง/Reservations</b> → กด <b>ดาวน์โหลด CSV</b>
+          แล้วมากดปุ่ม <b>⬆ นำเข้าไฟล์ Booking</b> ในแท็บ "รายการจอง" — วันที่/ชื่อ/ยอดจะเติมให้อัตโนมัติ
+          (แนะนำทำสัปดาห์ละครั้ง)
         </div>
       </div>
 
@@ -489,6 +490,8 @@ tbody tr:hover td{background:#faf7f2}
               <option value="needsfix">ข้อมูลไม่ครบ</option>
             </select>
             <button class="btn-sm" id="csvBook" type="button" title="ดาวน์โหลดรายการที่กรองอยู่เป็นไฟล์ CSV เปิดใน Excel ได้">⬇ Export CSV</button>
+            <button class="btn-sm" id="csvImportBtn" type="button" title="นำเข้าไฟล์ CSV รายการจองที่ดาวน์โหลดจาก Booking.com Extranet — เติมวันที่/ชื่อ/ยอดให้รายการที่ข้อมูลไม่ครบอัตโนมัติ">⬆ นำเข้าไฟล์ Booking</button>
+            <input type="file" id="csvImportFile" accept=".csv,.txt,.tsv" hidden>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -1392,6 +1395,116 @@ $("csvBook").addEventListener("click", () => {
       b.phone || "", b.source || "", b.id || "", String(b.amount || "").replace(/,/g, ""), b.status || "", b.note || ""]));
   toast(`ดาวน์โหลด ${rows.length} รายการแล้ว`);
 });
+/* ── นำเข้าไฟล์รายการจองจาก Booking.com Extranet (แทน iCal ที่ถูกยกเลิก) ──
+   จับคู่ด้วยหมายเลขการจอง แล้วเติมเฉพาะช่องที่ยังว่าง/ต่างจากไฟล์: วันที่ ชื่อ ยอด สถานะยกเลิก */
+function parseCSV(text){
+  // ตัด BOM + รองรับทั้ง , และ ; และ Tab (Excel บางเครื่องเซฟเป็น ;)
+  text = text.replace(/^\uFEFF/, "");
+  const firstLine = text.slice(0, text.indexOf("\n") + 1 || text.length);
+  const delim = [",", ";", "\t"].map((d) => [d, (firstLine.match(new RegExp("\\" + d, "g")) || []).length])
+    .sort((a, b) => b[1] - a[1])[0][0];
+  const rows = [];
+  let cur = [""], inQ = false, ri = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') { if (text[i + 1] === '"') { cur[cur.length - 1] += '"'; i++; } else inQ = false; }
+      else cur[cur.length - 1] += c;
+    } else if (c === '"') inQ = true;
+    else if (c === delim) cur.push("");
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      if (cur.length > 1 || cur[0] !== "") rows.push(cur);
+      cur = [""];
+    } else cur[cur.length - 1] += c;
+  }
+  if (cur.length > 1 || cur[0] !== "") rows.push(cur);
+  return rows;
+}
+
+// แปลงวันที่หลายรูปแบบ → YYYY-MM-DD (รับ 2026-08-10, 10-08-2026, 10/08/2026, มีเวลาต่อท้ายได้)
+function normDate(s){
+  s = String(s || "").trim().split(" ")[0];
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return s;
+  m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+  if (m) return `${m[3]}-${String(m[2]).padStart(2, "0")}-${String(m[1]).padStart(2, "0")}`;
+  return "";
+}
+const digitsOf = (v) => String(v || "").replace(/\D/g, "");
+
+function findImportCols(header){
+  const H = header.map((h) => String(h || "").toLowerCase());
+  const find = (re) => H.findIndex((h) => re.test(h));
+  return {
+    resno:    find(/book.?number|reservation.?number|เลขที่การจอง|หมายเลขการจอง|หมายเลขที่พัก|เลขอ้างอิง/),
+    checkin:  find(/check.?-?in|arrival|เช็ค.?อิน|วันเข้าพัก/),
+    checkout: find(/check.?-?out|departure|เช็ค.?เอ|วันออก/),
+    name:     find(/guest.?name|booker|ชื่อผู้เข้าพัก|ชื่อลูกค้า|^ชื่อ/),
+    status:   find(/^status|สถานะ/),
+    price:    find(/^price|total.?(price|amount)|ราคา|ยอดรวม/),
+  };
+}
+
+$("csvImportBtn").addEventListener("click", () => $("csvImportFile").click());
+$("csvImportFile").addEventListener("change", async (ev) => {
+  const file = ev.target.files[0];
+  ev.target.value = "";
+  if (!file || !DATA) return;
+  if (DATA.demo) { toast("โหมดตัวอย่าง — เชื่อมชีตจริงก่อนจึงนำเข้าได้"); return; }
+  const text = await file.text();
+  const rows = parseCSV(text);
+  if (rows.length < 2) { toast("อ่านไฟล์ไม่ได้ — ต้องเป็น CSV จาก Extranet"); return; }
+  const cols = findImportCols(rows[0]);
+  if (cols.resno < 0 || cols.checkin < 0 || cols.checkout < 0) {
+    toast("ไม่รู้จักหัวตารางของไฟล์นี้ — ส่งไฟล์ให้ผู้ดูแลระบบปรับตัวอ่านได้");
+    return;
+  }
+  // จับคู่กับรายการในชีตด้วยตัวเลขของหมายเลขการจอง
+  const byDigits = {};
+  (DATA.bookings || []).forEach((b) => { const d = digitsOf(b.id); if (d.length >= 6) byDigits[d] = b; });
+  const jobs = [];
+  let unmatched = 0;
+  for (const r of rows.slice(1)) {
+    const resno = digitsOf(r[cols.resno]);
+    if (resno.length < 6) continue;
+    const b = byDigits[resno];
+    if (!b) { unmatched++; continue; }
+    const fields = {};
+    const ci = normDate(r[cols.checkin]), co = normDate(r[cols.checkout]);
+    if (ci && b.checkin !== ci) fields.checkin = ci;
+    if (co && b.checkout !== co) fields.checkout = co;
+    if (cols.name >= 0) {
+      const nm = String(r[cols.name] || "").trim();
+      if (nm && !String(b.name || "").trim()) fields.name = nm;
+    }
+    if (cols.price >= 0 && DATA.role !== "staff") {
+      const amt = String(r[cols.price] || "").replace(/[^\d.]/g, "");
+      if (amt && !String(b.amount || "").trim()) fields.amount = Math.round(Number(amt)).toLocaleString();
+    }
+    if (cols.status >= 0 && /cancel|ยกเลิก/i.test(String(r[cols.status] || "")) && !isCancelled(b)) {
+      fields.status = "ยกเลิก";
+    }
+    // เติมวันที่ครบแล้ว → ล้างโน้ตเตือนจากตัวอ่านอีเมล
+    const willHaveDates = (fields.checkin || b.checkin) && (fields.checkout || b.checkout);
+    if (willHaveDates && /อ่านวันที่จากอีเมลไม่ได้/.test(String(b.note || ""))) fields.note = "";
+    if (Object.keys(fields).length) jobs.push({ id: b.id, fields });
+  }
+  if (!jobs.length) {
+    toast(unmatched ? `ข้อมูลตรงกันหมดแล้ว (ในไฟล์มี ${unmatched} รายการที่ไม่อยู่ในระบบ)` : "ข้อมูลตรงกันหมดแล้ว ไม่มีอะไรต้องอัปเดต");
+    return;
+  }
+  if (!confirm(`พบข้อมูลที่จะอัปเดต ${jobs.length} รายการ` + (unmatched ? ` (ข้าม ${unmatched} รายการที่ไม่อยู่ในระบบ)` : "") + "\nเริ่มนำเข้าเลยไหม? ใช้เวลาประมาณ " + Math.ceil(jobs.length * 1.5) + " วินาที")) return;
+  let done = 0, fail = 0;
+  for (const j of jobs) {
+    const r1 = await apiUpdate({ action: "update", id: j.id, fields: j.fields });
+    r1 ? done++ : fail++;
+    toast(`กำลังนำเข้า… ${done + fail}/${jobs.length}`);
+  }
+  await reload();
+  toast(`นำเข้าเสร็จ: อัปเดต ${done} รายการ` + (fail ? ` · ล้มเหลว ${fail}` : ""));
+});
+
 $("csvExp").addEventListener("click", () => {
   if (!DATA || DATA.role === "staff") return;
   const [y, m] = expYM;
