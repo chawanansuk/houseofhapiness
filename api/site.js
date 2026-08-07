@@ -5,7 +5,7 @@
  * ถ้ายังไม่ได้ตั้งค่าชีต หรือสคริปต์ยังเป็นเวอร์ชันเก่า → ตอบค่า default เว็บไม่พัง
  */
 
-const DEFAULTS = { price: 800, ann: { th: "", en: "" } };
+const DEFAULTS = { price: 700, ann: { th: "", en: "" } }; // price = ราคาห้อง Standard (ราคาเริ่มต้น)
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=600");

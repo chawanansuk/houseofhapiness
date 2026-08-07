@@ -172,15 +172,32 @@ const CONFIG = {
   email: "houseofhapinessbangkok@gmail.com",    // อีเมลรับคำขอจอง
   rooms: [
     {
-      id: "apt",
-      name: { th: "อพาร์ตเมนต์ 1 ห้องนอน", en: "One-Bedroom Apartment" },
+      id: "std",
+      name: { th: "ห้อง Standard — เตียงใหญ่", en: "Standard — Double Bed" },
       desc: {
-        th: "ห้องนอนแยก + ห้องนั่งเล่น · ระเบียงวิวเมือง · ครัวเล็ก · เลือกเตียงใหญ่/2 เตียงแยกได้ · พัก 2 ท่าน (สูงสุด 3)",
-        en: "Separate bedroom + living room · city-view balcony · kitchenette · double or twin beds · sleeps 2 (max 3)",
+        th: "เตียงใหญ่ 1 เตียง · ระเบียง · ครัวเล็ก ตู้เย็น · พัก 2 ท่าน",
+        en: "1 double bed · balcony · kitchenette & fridge · sleeps 2",
       },
-      price: 800, // บาท/คืน — แก้ให้ตรงราคาปัจจุบันได้ที่นี่
+      price: 700, // บาท/คืน — แก้ให้ตรงราคาปัจจุบันได้ที่นี่
     },
-    // เพิ่มห้องประเภทอื่นได้โดย copy บล็อกด้านบนแล้วแก้ id/ชื่อ/ราคา
+    {
+      id: "stu",
+      name: { th: "ห้อง Studio — 2 เตียงแยก", en: "Studio — Twin Beds" },
+      desc: {
+        th: "2 เตียงแยก เหมาะเพื่อน/พี่น้อง · ระเบียง · ครัวเล็ก ตู้เย็น · พัก 2 ท่าน (สูงสุด 3)",
+        en: "2 single beds · balcony · kitchenette & fridge · sleeps 2 (max 3)",
+      },
+      price: 800,
+    },
+    {
+      id: "dlx",
+      name: { th: "ห้อง Deluxe — มีห้องนั่งเล่นแยก", en: "Deluxe — Separate Living Room" },
+      desc: {
+        th: "ห้องนอนแยก + ห้องนั่งเล่นโซฟา · ระเบียง · ครัวเล็ก ตู้เย็น · พัก 2 ท่าน (สูงสุด 3)",
+        en: "Separate bedroom + living room with sofa · balcony · kitchenette & fridge · sleeps 2 (max 3)",
+      },
+      price: 850,
+    },
   ],
 };
 /* ═══════════════════════════════════════════════════════════ */
@@ -375,8 +392,9 @@ update = function () { _update(); checkAvailability(); };
 
 // ราคาจริงจากแผงตั้งค่าในชีต (แท็บ Site) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
 fetch("/api/site").then((r) => r.json()).then((j) => {
-  if (!j.ok || !j.price || j.price === CONFIG.rooms[0].price) return;
-  CONFIG.rooms.forEach((r2) => { r2.price = j.price; });
+  // price จากชีต = ราคาห้อง Standard (ห้องแรก) เท่านั้น — ห้องอื่นแก้ใน CONFIG ด้านบน
+  if (!j.ok || !j.price || j.source !== "sheet" || j.price === CONFIG.rooms[0].price) return;
+  CONFIG.rooms[0].price = j.price;
   renderRooms();
   update();
 }).catch(() => {});
