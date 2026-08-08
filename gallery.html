@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>รูปทั้งหมด | Photo Gallery — House of Happiness Bangkok</title>
-<meta name="description" content="รูปห้องพัก ห้องน้ำ ส่วนกลาง และตัวอาคารของ House of Happiness คลองสาน กรุงเทพฯ กว่า 30 รูป | Full photo gallery of our serviced apartments in Khlong San, Bangkok.">
+<meta name="description" content="รูปห้องพัก ห้องน้ำ และตัวอาคารของ House of Happiness คลองสาน กรุงเทพฯ กว่า 30 รูป | Full photo gallery of our serviced apartments in Khlong San, Bangkok.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:title" content="รูปทั้งหมด — House of Happiness Bangkok">
-<meta property="og:description" content="ห้องนอน · ห้องน้ำ · ส่วนกลาง · ตัวอาคาร — ชมรูปจริงของที่พักกว่า 30 รูป">
+<meta property="og:description" content="ห้องนอน · ห้องน้ำ · ตัวอาคาร — ชมรูปจริงของที่พักกว่า 30 รูป">
 <meta property="og:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/gallery.html">
 <meta name="robots" content="index, follow">
@@ -69,7 +69,7 @@
 
 <header class="gl-hero">
   <h1 id="glTitle">รูปทั้งหมดของที่พัก</h1>
-  <p id="glSub">ห้องพักทุกแบบ ห้องน้ำ ส่วนกลาง และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา</p>
+  <p id="glSub">ห้องพักทุกแบบ ห้องน้ำ และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา</p>
 </header>
 
 <div class="gl-wrap" id="glWrap"></div>
@@ -107,8 +107,8 @@ var GROUPS = [
     { f: "images/gallery/twin2.jpg",    th: "ห้องเตียงคู่ พร้อมทีวีติดผนัง", en: "Twin room with wall-mounted TV" },
     { f: "images/gallery/twin3.jpg",    th: "ห้องเตียงคู่ อีกมุมหนึ่ง", en: "Twin room from another angle" }
   ]},
-  { th: "ห้องนั่งเล่นและครัวเล็ก", en: "Living room & kitchenette", items: [
-    { f: "images/living.jpg", th: "ห้องนั่งเล่นพร้อมมุมครัวเล็ก", en: "Living area with kitchenette corner" },
+  { th: "ห้องนั่งเล่น", en: "Living room", items: [
+    { f: "images/living.jpg", th: "ห้องนั่งเล่นในห้องพัก", en: "Living area" },
     { f: "images/deluxe.jpg", th: "ห้องนั่งเล่นแยกของห้อง Deluxe", en: "Separate living room of the Deluxe apartment" }
   ]},
   { th: "ห้องน้ำ", en: "Bathrooms", items: [
@@ -120,11 +120,11 @@ var GROUPS = [
     { f: "images/gallery/bath5.jpg", th: "อ่างล้างหน้า กระจก และฝักบัว", en: "Basin, mirror and shower" },
     { f: "images/gallery/bath6.jpg", th: "ห้องน้ำโมเสก อีกมุมหนึ่ง", en: "Mosaic bathroom from another angle" }
   ]},
-  { th: "ส่วนกลางและบริการ", en: "Common areas & facilities", items: [
+  { th: "ภายในอาคารและบริการ", en: "Inside the building & facilities", items: [
     { f: "images/reception.jpg",       th: "จุดต้อนรับ / เช็คอิน", en: "Reception / check-in" },
     { f: "images/entrance.jpg",        th: "ทางเข้าที่พัก", en: "The entrance" },
     { f: "images/gallery/hallway.jpg", th: "โถงทางเดินและบันไดภายในอาคาร", en: "Interior hallway and staircase" },
-    { f: "images/gallery/lounge.jpg",  th: "มุมนั่งเล่นส่วนกลาง", en: "Common seating corner" },
+    { f: "images/gallery/lounge.jpg",  th: "มุมนั่งเล่นหน้าห้องพัก", en: "Seating corner in the hallway" },
     { f: "images/gallery/laundry.jpg", th: "เครื่องซักผ้าหยอดเหรียญ (เหรียญ 10 บาท)", en: "Coin-operated washing machine (10-baht coins)" },
     { f: "images/gallery/keybox.jpg",  th: "กล่องคืนกุญแจ สำหรับเช็คเอาท์เช้าตรู่", en: "Key drop box for early check-out" }
   ]},
@@ -143,8 +143,8 @@ function render() {
   var lang = getLang();
   document.getElementById("glTitle").textContent = lang === "en" ? "All Photos" : "รูปทั้งหมดของที่พัก";
   document.getElementById("glSub").textContent = lang === "en"
-    ? "Every room type, bathrooms, common areas and the building — real photos taken at our place."
-    : "ห้องพักทุกแบบ ห้องน้ำ ส่วนกลาง และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา";
+    ? "Every room type, bathrooms and the building — real photos taken at our place."
+    : "ห้องพักทุกแบบ ห้องน้ำ และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา";
   var idx = 0;
   document.getElementById("glWrap").innerHTML = GROUPS.map(function (g) {
     var cards = g.items.map(function (it) {
