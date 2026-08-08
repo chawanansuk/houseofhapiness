@@ -55,6 +55,7 @@ const I18N = {
   "gallery.reception":{ th: "จุดต้อนรับ / เช็คอิน", en: "Reception / check-in" },
   "loc.handmap":     { th: "แผนที่ฉบับวาดมือของเรา — เรือ รถไฟฟ้า และจุดเที่ยวรอบที่พัก", en: "Our hand-drawn area map — boats, trains and sights around the hotel" },
   "gallery.building":{ th: "ตัวอาคาร", en: "The building" },
+  "gallery.all":     { th: "ดูรูปทั้งหมด (30+ รูป) →", en: "See all photos (30+) →" },
   "amen.title":      { th: "สิ่งอำนวยความสะดวก", en: "Amenities" },
   "amen.1":  { th: "ฟรี Wi-Fi ทุกห้อง", en: "Free in-room Wi-Fi" },
   "amen.2":  { th: "เครื่องปรับอากาศ", en: "Air conditioning" },
