@@ -65,8 +65,10 @@ async function run() {
         if (!orig) continue;
 
         // ชื่อไฟล์บน Commons = ส่วนท้ายของ URL ต้นฉบับ
-        // (REST API บางทีส่ง URL แบบ thumb "3840px-ชื่อไฟล์" มา ต้องตัด prefix ออกให้เหลือชื่อจริง)
-        const fname = decodeURIComponent(orig.split("/").pop()).replace(/^\d+px-/, "");
+        // (REST API บางทีส่ง URL แบบ thumb "3840px-ชื่อไฟล์" มา ต้องตัด prefix ออกให้เหลือชื่อจริง
+        //  และต่อท้ายด้วย ?utm_source=... ซึ่งต้องตัดทิ้ง ไม่งั้นชื่อไฟล์ผิด → ขอรูปย่อไม่ได้
+        //  แล้วไปตกที่การโหลดรูปต้นฉบับเต็มความละเอียดแทน หนักเป็นสิบเมกะไบต์)
+        const fname = decodeURIComponent(orig.split("?")[0].split("/").pop()).replace(/^\d+px-/, "");
 
         // ขอรูปย่อกว้าง 900px ผ่าน Special:FilePath (redirect ไป thumb ที่ถูกต้องเอง)
         const thumbUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fname)}?width=900`;
@@ -76,6 +78,11 @@ async function run() {
           size = await download(thumbUrl, dest);
         } catch {
           size = await download(orig, dest); // รูปต้นฉบับเล็กกว่า 900px → ใช้ต้นฉบับ
+        }
+        // กันพลาดซ้ำรอยเดิม: รูปย่อกว้าง 900px ไม่ควรเกิน ~600KB
+        // ถ้าเกินแปลว่าไปได้รูปต้นฉบับเต็มความละเอียดมา ต้องเห็นใน log ทันที
+        if (size > 600 * 1024) {
+          console.warn(`เตือน: ${item.slug} หนัก ${Math.round(size / 1024)}KB — น่าจะได้รูปต้นฉบับแทนรูปย่อ`);
         }
 
         // ดึงไลเซนส์ + ผู้ถ่าย เพื่อทำเครดิต
