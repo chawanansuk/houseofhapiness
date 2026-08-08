@@ -1,0 +1,3 @@
+/* ไฟล์สำรอง — ตอน build สคริปต์ scripts/fetch-fonts.js จะเขียนทับด้วยฟอนต์ที่เก็บไว้ในเว็บเราเอง
+   ถ้าขั้นตอนนั้นล้มเหลว ไฟล์นี้จะยังทำงานแทน เว็บจึงไม่มีวันเสียฟอนต์ */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap");
