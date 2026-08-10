@@ -612,6 +612,21 @@ textarea { resize: vertical; min-height: 4.5rem; }
 .summary .note { font-size: 0.84rem; color: var(--muted); }
 .actions { display: grid; gap: 0.7rem; margin-top: 1.1rem; }
 .actions .btn { width: 100%; }
+/* ปุ่ม LINE = ช่องทางหลัก ทำให้เด่นกว่าปุ่มอื่นชัดเจน */
+.actions .btn-primary-action {
+  font-size: 1.05rem;
+  padding: 1rem 1.2rem;
+  font-weight: 700;
+  box-shadow: 0 6px 22px rgba(6, 199, 85, 0.42);
+}
+/* เส้นคั่น "หรือช่องทางอื่น" — บอกว่าที่เหลือเป็นตัวเลือกสำรอง */
+.alt-sep {
+  display: flex; align-items: center; gap: 0.7rem;
+  margin: 0.2rem 0 0; font-size: 0.78rem; color: var(--muted);
+}
+.alt-sep::before, .alt-sep::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
 .policy { font-size: 0.84rem; color: var(--muted); margin-top: 1rem; line-height: 1.6; }
 
 /* Booking sticky total bar (mobile) */

@@ -111,7 +111,8 @@
       <h2><span class="step">4</span><span data-i18n="bk.step4">สรุปการจอง</span></h2>
       <div class="summary" id="summary"></div>
       <div class="actions">
-        <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">ส่งคำขอจองทาง LINE</a>
+        <a class="btn btn-line btn-primary-action" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">จองผ่าน LINE — ตอบไวที่สุด</a>
+        <p class="alt-sep" id="altSep"><span data-i18n="bk.oralt">หรือช่องทางอื่น</span></p>
         <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
@@ -166,7 +167,7 @@
 const CONFIG = {
   // ใส่ LINE Official Account ID จริง เช่น "@abc1234" แล้วปุ่ม LINE จะแสดงอัตโนมัติ
   // ปล่อยว่าง "" = ซ่อนปุ่ม LINE (ลูกค้าจะเห็นเฉพาะปุ่มอีเมล)
-  lineId: "",
+  lineId: "@060hvzok",
   email: "houseofhapinessbangkok@gmail.com",    // อีเมลรับคำขอจอง
   rooms: [
     {
@@ -322,6 +323,7 @@ function update() {
 
   const btnLine = $("btnLine"), btnMail = $("btnMail");
   btnLine.style.display = CONFIG.lineId ? "" : "none";
+  $("altSep").style.display = CONFIG.lineId ? "" : "none"; // ไม่มี LINE ก็ไม่ต้องมีเส้นคั่น
   btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
   btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
   $("btnCopy").setAttribute("aria-disabled", ready ? "false" : "true");
