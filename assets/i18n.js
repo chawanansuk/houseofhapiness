@@ -261,7 +261,7 @@ const I18N = {
 
   /* ── หน้าจอง ── */
   "bk.title":        { th: "จองตรงกับ House of Happiness", en: "Book Direct with House of Happiness" },
-  "bk.sub":          { th: "ราคาดีกว่าจองผ่านเว็บตัวกลาง · ยืนยันไวทาง LINE", en: "Better rates than OTA sites · fast confirmation via LINE" },
+  "bk.sub":          { th: "ราคาดีกว่าจองผ่านเว็บตัวกลาง · ยืนยันไวทาง LINE/WhatsApp", en: "Better rates than OTA sites · fast confirmation via WhatsApp or LINE" },
   "bk.back":         { th: "← กลับหน้าหลัก", en: "← Back to home" },
   "bk.step1":        { th: "เลือกประเภทห้องพัก", en: "Choose your room" },
   "bk.step2":        { th: "เลือกวันเข้าพัก", en: "Choose your dates" },
@@ -285,7 +285,8 @@ const I18N = {
   "bk.nights":       { th: "คืน", en: "night(s)" },
   "bk.total":        { th: "รวม", en: "Total" },
   "bk.approx":       { th: "ราคาโดยประมาณ ยืนยันราคาสุดท้ายเมื่อโรงแรมตอบกลับ", en: "Estimated price — final rate confirmed by the hotel." },
-  "bk.sendline":     { th: "จองผ่าน LINE — ตอบไวที่สุด", en: "Book via LINE — fastest reply" },
+  "bk.sendline":     { th: "จองผ่าน LINE", en: "Book via LINE" },
+  "bk.sendwa":       { th: "จองผ่าน WhatsApp", en: "Book via WhatsApp" },
   "bk.oralt":        { th: "หรือช่องทางอื่น", en: "or other options" },
   "bk.sendmail":     { th: "ส่งคำขอจองทางอีเมล", en: "Send booking request via email" },
   "bk.copy":         { th: "คัดลอกข้อความจอง", en: "Copy booking message" },
@@ -301,7 +302,7 @@ const I18N = {
   "bk.hint.phone":   { th: "กรอกเบอร์โทร", en: "enter your phone number" },
   "bk.trust.1":      { th: "ไม่ต้องชำระเงินออนไลน์ — จ่ายที่โรงแรม", en: "No online payment — pay at the hotel" },
   "bk.trust.2":      { th: "ยืนยันการจองภายใน 24 ชั่วโมง", en: "Booking confirmed within 24 hours" },
-  "bk.trust.3":      { th: "สอบถาม/แก้ไขการจองได้ทางอีเมลหรือ LINE", en: "Questions or changes welcome via email or LINE" },
+  "bk.trust.3":      { th: "สอบถาม/แก้ไขการจองได้ทาง LINE, WhatsApp หรืออีเมล", en: "Questions or changes welcome via LINE, WhatsApp or email" },
 };
 
 /* ─── ตัวจัดการภาษา ─── */

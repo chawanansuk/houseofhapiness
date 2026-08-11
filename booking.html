@@ -111,7 +111,8 @@
       <h2><span class="step">4</span><span data-i18n="bk.step4">สรุปการจอง</span></h2>
       <div class="summary" id="summary"></div>
       <div class="actions">
-        <a class="btn btn-line btn-primary-action" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">จองผ่าน LINE — ตอบไวที่สุด</a>
+        <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">จองผ่าน LINE</a>
+        <a class="btn btn-wa" id="btnWa" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendwa">จองผ่าน WhatsApp</a>
         <p class="alt-sep" id="altSep"><span data-i18n="bk.oralt">หรือช่องทางอื่น</span></p>
         <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
@@ -168,6 +169,7 @@ const CONFIG = {
   // ใส่ LINE Official Account ID จริง เช่น "@abc1234" แล้วปุ่ม LINE จะแสดงอัตโนมัติ
   // ปล่อยว่าง "" = ซ่อนปุ่ม LINE (ลูกค้าจะเห็นเฉพาะปุ่มอีเมล)
   lineId: "@060hvzok",
+  waNumber: "66994419465",              // เบอร์ WhatsApp รูปแบบสากล (ไม่มี + ไม่มีเว้นวรรค) ปล่อยว่าง "" = ซ่อนปุ่ม
   email: "houseofhapinessbangkok@gmail.com",    // อีเมลรับคำขอจอง
   rooms: [
     {
@@ -321,16 +323,37 @@ function update() {
 • ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}`;
   lastMsg = msg;
 
-  const btnLine = $("btnLine"), btnMail = $("btnMail");
-  btnLine.style.display = CONFIG.lineId ? "" : "none";
-  $("altSep").style.display = CONFIG.lineId ? "" : "none"; // ไม่มี LINE ก็ไม่ต้องมีเส้นคั่น
+  const btnLine = $("btnLine"), btnWa = $("btnWa"), btnMail = $("btnMail");
+  const hasLine = !!CONFIG.lineId, hasWa = !!CONFIG.waNumber;
+  btnLine.style.display = hasLine ? "" : "none";
+  btnWa.style.display = hasWa ? "" : "none";
+
+  // ปุ่มแชทหลักตามภาษา: หน้าไทยเน้น LINE (ลูกค้าไทย) / หน้าอังกฤษเน้น WhatsApp (ฝรั่ง)
+  // ถ้ามีช่องทางเดียวก็ใช้อันนั้นเป็นหลัก
+  let primary = null;
+  if (hasLine && hasWa) primary = L ? btnLine : btnWa;
+  else if (hasWa) primary = btnWa;
+  else if (hasLine) primary = btnLine;
+
+  [btnLine, btnWa].forEach((b) => b.classList.remove("btn-primary-action"));
+  if (primary) primary.classList.add("btn-primary-action");
+  // จัดลำดับด้วย CSS order: หลัก=1, เส้นคั่น=2, รอง=3, อีเมล=4, คัดลอก=5
+  btnLine.style.order = primary === btnLine ? "1" : "3";
+  btnWa.style.order = primary === btnWa ? "1" : "3";
+  $("altSep").style.order = "2";
+  btnMail.style.order = "4";
+  $("btnCopy").style.order = "5";
+  $("altSep").style.display = primary ? "" : "none"; // ไม่มีปุ่มแชทเลยก็ไม่ต้องมีเส้นคั่น
+
   btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
+  btnWa.setAttribute("aria-disabled", ready ? "false" : "true");
   btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
   $("btnCopy").setAttribute("aria-disabled", ready ? "false" : "true");
   if (ready) {
     // สำคัญ: ต้องวาง @id ดิบ ๆ ในพาธ ห้าม encode ตัว "@" เป็น %40
     // ไม่งั้น LINE หาบัญชีไม่เจอ แล้วเด้งไปหน้าแรก line.me แทนที่จะเปิดแชท
     btnLine.href = `https://line.me/R/oaMessage/${CONFIG.lineId}/?${encodeURIComponent(msg)}`;
+    btnWa.href = `https://wa.me/${CONFIG.waNumber}?text=${encodeURIComponent(msg)}`;
     btnMail.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent((L ? "คำขอจองห้องพัก - " : "Booking request - ") + s.name)}&body=${encodeURIComponent(msg)}`;
   }
 
@@ -421,7 +444,7 @@ function logBooking() {
     }).catch(() => {});
   } catch {}
 }
-["btnLine", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
+["btnLine", "btnWa", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
 
 // คัดลอกข้อความจองไปคลิปบอร์ด (มี fallback สำหรับเบราว์เซอร์เก่า)
 async function copyToClipboard(text) {
@@ -448,6 +471,7 @@ $("btnCopy").addEventListener("click", async () => {
 // กดปุ่ม LINE = คัดลอกข้อความติดคลิปบอร์ดไว้ด้วยเสมอ
 // เผื่อ LINE เติมข้อความให้ไม่สำเร็จ (iPhone บางรุ่น/เปิดบนคอมพิวเตอร์) ลูกค้าจะได้วางเองได้ทันที
 $("btnLine").addEventListener("click", () => { copyToClipboard(lastMsg); });
+$("btnWa").addEventListener("click", () => { copyToClipboard(lastMsg); });
 
 // รับค่าที่เลือกไว้จากกล่องเช็คห้องว่างหน้าแรก (booking.html?checkin=...&checkout=...&guests=...)
 function prefillFromQuery() {
