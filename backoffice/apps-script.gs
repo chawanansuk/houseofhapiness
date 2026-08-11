@@ -28,7 +28,7 @@ var EXP_HEADERS = ["id", "date", "category", "amount", "vendor", "method", "note
 var SITE_SHEET = "Site";
 // แผงตั้งค่าเว็บ — แก้คอลัมน์ value ในแท็บ Site แล้วหน้าเว็บอัปเดตเองภายใน ~2 นาที
 var SITE_DEFAULTS = [
-  ["price_per_night", "800", "ราคาต่อคืน (บาท) — หน้าเว็บใช้โชว์และคำนวณราคา"],
+  ["price_per_night", "700", "ราคาห้อง Standard (บาท/คืน) — หน้าเว็บใช้เป็นราคาเริ่มต้นที่โชว์"],
   ["announcement_th", "", "ประกาศแถบบนหน้าแรก ภาษาไทย (เว้นว่าง = ไม่แสดง)"],
   ["announcement_en", "", "ประกาศหน้าแรก ภาษาอังกฤษ (เว้นว่าง = ไม่แสดง)"],
 ];
