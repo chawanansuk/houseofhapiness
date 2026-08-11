@@ -328,7 +328,9 @@ function update() {
   btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
   $("btnCopy").setAttribute("aria-disabled", ready ? "false" : "true");
   if (ready) {
-    btnLine.href = `https://line.me/R/oaMessage/${encodeURIComponent(CONFIG.lineId)}/?${encodeURIComponent(msg)}`;
+    // สำคัญ: ต้องวาง @id ดิบ ๆ ในพาธ ห้าม encode ตัว "@" เป็น %40
+    // ไม่งั้น LINE หาบัญชีไม่เจอ แล้วเด้งไปหน้าแรก line.me แทนที่จะเปิดแชท
+    btnLine.href = `https://line.me/R/oaMessage/${CONFIG.lineId}/?${encodeURIComponent(msg)}`;
     btnMail.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent((L ? "คำขอจองห้องพัก - " : "Booking request - ") + s.name)}&body=${encodeURIComponent(msg)}`;
   }
 
@@ -421,22 +423,31 @@ function logBooking() {
 }
 ["btnLine", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
 
-// คัดลอกข้อความจอง — สำรองไว้กรณีเครื่องลูกค้าไม่มีแอปอีเมล จะได้เอาไปวางใน LINE/แชทเองได้
-$("btnCopy").addEventListener("click", async () => {
+// คัดลอกข้อความจองไปคลิปบอร์ด (มี fallback สำหรับเบราว์เซอร์เก่า)
+async function copyToClipboard(text) {
   try {
-    await navigator.clipboard.writeText(lastMsg);
+    await navigator.clipboard.writeText(text);
   } catch {
     const ta = document.createElement("textarea");
-    ta.value = lastMsg;
+    ta.value = text;
     document.body.appendChild(ta);
     ta.select();
     document.execCommand("copy");
     ta.remove();
   }
+}
+
+// ปุ่มคัดลอก — สำรองไว้กรณีเครื่องลูกค้าไม่มีแอปอีเมล จะได้เอาไปวางใน LINE/แชทเองได้
+$("btnCopy").addEventListener("click", async () => {
+  await copyToClipboard(lastMsg);
   const btn = $("btnCopy");
   btn.textContent = t("bk.copied");
   setTimeout(() => { btn.textContent = t("bk.copy"); }, 2000);
 });
+
+// กดปุ่ม LINE = คัดลอกข้อความติดคลิปบอร์ดไว้ด้วยเสมอ
+// เผื่อ LINE เติมข้อความให้ไม่สำเร็จ (iPhone บางรุ่น/เปิดบนคอมพิวเตอร์) ลูกค้าจะได้วางเองได้ทันที
+$("btnLine").addEventListener("click", () => { copyToClipboard(lastMsg); });
 
 // รับค่าที่เลือกไว้จากกล่องเช็คห้องว่างหน้าแรก (booking.html?checkin=...&checkout=...&guests=...)
 function prefillFromQuery() {
