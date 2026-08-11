@@ -90,8 +90,16 @@ input,select{font-family:inherit}
 .banner.warn{background:var(--dirty-bg);border:1px solid #f3d3ce;color:var(--dirty)}
 .banner.fix{background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;cursor:pointer}
 .banner.fix:hover{filter:brightness(.98)}
+.banner.newreq{background:var(--free-bg);border:1px solid #bbf7d0;color:#15803d;cursor:pointer}
+.banner.newreq:hover{filter:brightness(.98)}
 .row-fix td{background:#fdf6e3}
+.row-new td{background:#f0fdf4}
+.row-new td:first-child{box-shadow:inset 3px 0 0 var(--free)}
+.tag-new{display:inline-block;background:var(--free);color:#fff;border-radius:999px;padding:.05rem .45rem;font-size:.62rem;font-weight:700;margin-left:.35rem;vertical-align:middle}
+.stat-click{cursor:pointer;transition:border-color .15s}
+.stat-click:hover{border-color:var(--free)}
 .btn-edit{background:var(--brand)}
+.btn-confirm{background:var(--free)}
 /* ── รายรับ-รายจ่าย ── */
 .exp-form{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-top:.5rem}
 .exp-form label{display:block;font-size:.78rem;font-weight:700;margin-bottom:.25rem}
@@ -276,6 +284,10 @@ tbody tr:hover td{background:#faf7f2}
 .mbtn-in{background:var(--free);color:#fff}
 .mbtn-out{background:var(--arr);color:#fff}
 .mbtn-ghost{background:#fff;border:1px solid var(--line-2);color:var(--ink)}
+.mbtn-danger{background:transparent;border:none;color:var(--dirty);font-size:.82rem;margin-top:.55rem;width:100%;text-align:center;cursor:pointer;font-family:"Prompt",sans-serif;font-weight:700}
+.mbtn-danger:hover{text-decoration:underline}
+.confirm-sum{background:var(--free-bg);border:1px solid #cde; border-radius:11px;padding:.7rem .85rem;margin-bottom:.9rem;font-size:.9rem;line-height:1.6}
+.confirm-sum .src{font-size:.8rem;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:5rem;transform:translateX(-50%) translateY(20px);background:var(--sidebar);color:#fff;border-radius:999px;padding:.65rem 1.3rem;font-size:.85rem;opacity:0;pointer-events:none;transition:all .25s;z-index:99;max-width:92vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -374,6 +386,7 @@ tbody tr:hover td{background:#faf7f2}
           ตั้งค่าตามคู่มือ <code>backoffice/SETUP.md</code> เพื่อใช้ข้อมูลจริง
         </div>
         <div class="banner warn" id="srcWarn"></div>
+        <div class="banner newreq" id="newBanner"></div>
         <div class="banner fix" id="fixBanner"></div>
         <div class="banner warn" id="icalBanner">
           <b>อัปเดตข้อมูลจาก Booking.com ด้วยไฟล์รายการจอง</b> — Booking ยกเลิก iCal แล้ว
@@ -391,6 +404,7 @@ tbody tr:hover td{background:#faf7f2}
           <div class="stat" data-accent="occ"><span class="stat-ico"><span class="ic" data-icon="logout"></span></span><div><div class="num" id="stCheckout">–</div><div class="lbl">เช็คเอาต์วันนี้</div></div></div>
           <div class="stat" data-accent="brand"><span class="stat-ico"><span class="ic" data-icon="user"></span></span><div><div class="num" id="stStaying">–</div><div class="lbl">กำลังเข้าพักคืนนี้</div></div></div>
           <div class="stat" data-accent="free"><span class="stat-ico"><span class="ic" data-icon="key"></span></span><div><div class="num" id="stFree">–</div><div class="lbl">ห้องว่างคืนนี้</div></div></div>
+          <div class="stat stat-click" id="statNew" data-accent="brand" style="display:none"><span class="stat-ico"><span class="ic" data-icon="list"></span></span><div><div class="num" id="stNew">0</div><div class="lbl">คำขอจองตรงรอยืนยัน</div></div></div>
         </div>
         <div class="sec-title sub"><span class="ic" data-icon="chart"></span> สถิติเดือนนี้ <small id="statMonthLbl"></small></div>
         <div class="stat-row">
@@ -483,6 +497,7 @@ tbody tr:hover td{background:#faf7f2}
             </div>
             <select id="fRange">
               <option value="upcoming" selected>กำลังพัก + จะเข้าพัก</option>
+              <option value="newdirect">คำขอจองตรง (รอยืนยัน)</option>
               <option value="all">ทั้งหมด</option>
               <option value="past">ที่ผ่านมาแล้ว</option>
               <option value="needsfix">ข้อมูลไม่ครบ</option>
@@ -635,6 +650,8 @@ function statusBadge(st){
 const isCancelled = (b) => /ยกเลิก|cancel/i.test(String(b.status || ""));
 // การจองที่อีเมล Booking.com ไม่บอกรายละเอียด — ต้องเปิดแอป Pulse มาเติมมือ
 const needsFix = (b) => !isCancelled(b) && (!isYMD(b.checkin) || !isYMD(b.checkout) || !String(b.name || "").trim());
+// คำขอจองตรงจากเว็บที่ยังรอเจ้าของยืนยัน (จัดห้อง/ตอบรับ) — ตัวที่ต้องรีบจัดการ
+const isDirectPending = (b) => !isCancelled(b) && /จองตรง|เว็บไซต์/.test(String(b.source || "")) && /รอ|pending/i.test(String(b.status || ""));
 const isCheckedOut = (b) => /เช็คเอาต์|checked.?out/i.test(String(b.status || ""));
 const isInhouse = (b) => /เข้าพัก/.test(String(b.status || ""));
 const activeBookings = () => (DATA.bookings || []).filter((b) => !isCancelled(b) && isYMD(b.checkin) && isYMD(b.checkout));
@@ -762,6 +779,13 @@ function renderAll(){
   $("fixBanner").style.display = fixList.length ? "block" : "none";
   $("fixBanner").innerHTML = `<b>รายการรอเติมข้อมูล (${fixList.length})</b> — อีเมล Booking.com ไม่บอกชื่อ/วันที่
     เปิดแอป Pulse ดูรายละเอียด แล้วแตะที่นี่เพื่อเติมทีละรายการ`;
+
+  // คำขอจองตรงใหม่จากเว็บ — เด้งเตือนบนสุด + ตัวเลขในภาพรวม (สิ่งที่ต้องรีบยืนยัน)
+  const newList = (DATA.bookings || []).filter(isDirectPending);
+  $("newBanner").style.display = newList.length ? "block" : "none";
+  $("newBanner").innerHTML = `<b>🟢 คำขอจองตรงใหม่ (${newList.length})</b> — ลูกค้าจองผ่านเว็บ รอคุณยืนยันและจัดห้อง · แตะเพื่อดู`;
+  $("statNew").style.display = newList.length ? "" : "none";
+  $("stNew").textContent = newList.length;
   $("icalBanner").style.display =
     (!DATA.demo && DATA.sources && String(DATA.sources.icalError || "").indexOf("ยังไม่ได้ตั้ง") === 0) ? "block" : "none";
 
@@ -1191,6 +1215,44 @@ function openEditModal(b){
   $("actClose").onclick = closeModal;
 }
 
+/* ── ยืนยันคำขอจองตรงแบบเร็ว: จัดห้อง + เปลี่ยนสถานะเป็น "ยืนยันแล้ว" ในคลิกเดียว ── */
+function openConfirmModal(b){
+  const staff = DATA.role === "staff";
+  const rooms = DATA.rooms || [];
+  const html = `
+    <h3>ยืนยันคำขอจองตรง</h3>
+    <div class="msub">#${esc(b.id)} · ${esc(b.source || "-")}</div>
+    <div class="confirm-sum">
+      <div><b>${esc(b.name || "-")}</b>${b.phone ? ` · ${esc(b.phone)}` : ""}</div>
+      <div>${fmtD(b.checkin)} → ${fmtD(b.checkout)} · ${nightsOf(b)} คืน · ${esc(b.guests || "-")} คน${staff ? "" : (b.amount ? ` · ฿${esc(b.amount)}` : "")}</div>
+      ${b.note ? `<div class="src">${esc(b.note)}</div>` : ""}
+    </div>
+    <label>จัดห้องให้ (เลือกภายหลังได้)</label>
+    <select id="cfRoom"><option value="">— ยังไม่จัดห้อง —</option>${rooms.map((r) =>
+      `<option${String(b.room_no || "") === r.room ? " selected" : ""}>${esc(r.room)}</option>`).join("")}</select>
+    <div class="mact">
+      <button class="mbtn mbtn-in" id="cfOk">✓ ยืนยันการจอง</button>
+      <button class="mbtn mbtn-ghost" id="cfClose">ปิด</button>
+    </div>
+    <button class="mbtn-danger" id="cfReject">ปฏิเสธ / ยกเลิกคำขอนี้</button>`;
+  openModal(html);
+  $("cfOk").onclick = async () => {
+    const fields = { status: "ยืนยันแล้ว" };
+    const room = $("cfRoom").value;
+    if (String(room) !== String(b.room_no || "")) fields.room_no = room;
+    const r1 = await apiUpdate({ action: "update", id: b.id, fields });
+    if (r1) await afterAction(() => Object.assign(b, fields));
+    closeModal();
+  };
+  $("cfReject").onclick = async () => {
+    if (!confirm("ยกเลิกคำขอจองนี้? ลูกค้าจะไม่ถูกจัดห้อง")) return;
+    const r1 = await apiUpdate({ action: "update", id: b.id, fields: { status: "ยกเลิก" } });
+    if (r1) await afterAction(() => Object.assign(b, { status: "ยกเลิก" }));
+    closeModal();
+  };
+  $("cfClose").onclick = closeModal;
+}
+
 /* ── สถิติเดือนนี้ ── */
 function renderMonthStats(){
   const t = DATA.today;
@@ -1309,6 +1371,7 @@ function visibleRows(){
   let rows = (DATA.bookings || []).slice();
   rows = rows.filter((b) => {
     if (range === "upcoming") return !isYMD(b.checkout) || b.checkout >= t;
+    if (range === "newdirect") return isDirectPending(b);
     if (range === "past") return isYMD(b.checkout) && b.checkout < t;
     if (range === "needsfix") return needsFix(b);
     return true;
@@ -1327,16 +1390,16 @@ function renderTable(){
   $("tblCount").textContent = `${rows.length} รายการ`;
   $("tblEmpty").style.display = rows.length ? "none" : "";
   $("tblBody").innerHTML = rows.map((b) => `
-    <tr class="${isCancelled(b) ? "row-cancel" : needsFix(b) ? "row-fix" : ""}">
+    <tr class="${isCancelled(b) ? "row-cancel" : isDirectPending(b) ? "row-new" : needsFix(b) ? "row-fix" : ""}">
       <td data-label="เช็คอิน">${fmtD(b.checkin)}${b.checkin === t ? " (วันนี้)" : ""}</td>
       <td data-label="เช็คเอาต์">${fmtD(b.checkout)}</td>
       <td data-label="คืน">${nightsOf(b)}</td>
       <td data-label="ห้อง">${b.room_no ? `<b>${esc(b.room_no)}</b>` : `<span class="src">-</span>`}</td>
-      <td data-label="ผู้เข้าพัก"><b>${esc(b.name || "-")}</b>${b.phone ? `<br><span class="src">${esc(b.phone)}</span>` : ""}${b.note ? `<br><span class="src">${esc(b.note)}</span>` : ""}</td>
+      <td data-label="ผู้เข้าพัก"><b>${esc(b.name || "-")}</b>${isDirectPending(b) ? `<span class="tag-new">ใหม่</span>` : ""}${b.phone ? `<br><span class="src">${esc(b.phone)}</span>` : ""}${b.note ? `<br><span class="src">${esc(b.note)}</span>` : ""}</td>
       <td data-label="ช่องทาง"><span class="src">${esc(b.source || "-")}</span>${b.id ? `<br><span class="src">#${esc(b.id)}</span>` : ""}</td>
       <td data-label="ยอด">${esc(b.amount || "-")}</td>
       <td data-label="สถานะ">${statusBadge(b.status)}</td>
-      <td data-label="จัดการ">${b.id && !isCancelled(b) ? `<button class="btn-sm btn-edit" data-edit="${esc(b.id)}">${needsFix(b) ? "เติมข้อมูล" : "แก้ไข"}</button>` : ""}</td>
+      <td data-label="จัดการ">${b.id && !isCancelled(b) ? `${isDirectPending(b) ? `<button class="btn-sm btn-confirm" data-confirm="${esc(b.id)}">✓ ยืนยัน</button> ` : ""}<button class="btn-sm btn-edit" data-edit="${esc(b.id)}">${needsFix(b) ? "เติมข้อมูล" : "แก้ไข"}</button>` : ""}</td>
     </tr>`).join("");
 }
 
@@ -1517,6 +1580,10 @@ $("csvExp").addEventListener("click", () => {
   toast(`ดาวน์โหลดรายจ่าย ${exps.length} รายการแล้ว`);
 });
 $("fixBanner").addEventListener("click", () => { $("fRange").value = "needsfix"; showSection("secBookings"); renderTable(); });
+// แถบ/การ์ด "คำขอจองตรงใหม่" → กรองมาดูเฉพาะรายการรอยืนยัน
+function showNewDirect(){ $("fRange").value = "newdirect"; showSection("secBookings"); renderTable(); }
+$("newBanner").addEventListener("click", showNewDirect);
+$("statNew").addEventListener("click", showNewDirect);
 EXP_CATS.forEach((c) => { const o = document.createElement("option"); o.textContent = c; $("exCat").appendChild(o); });
 $("tlPrev").addEventListener("click", () => { tlStart = shiftYMD(tlStart, -7); renderTimeline(); });
 $("tlNext").addEventListener("click", () => { tlStart = shiftYMD(tlStart, 7); renderTimeline(); });
@@ -1567,6 +1634,12 @@ $("expBody").addEventListener("click", async (e) => {
   if (r1) await afterAction(() => { DATA.expenses = (DATA.expenses || []).filter((x) => x.id !== id); });
 });
 $("tblBody").addEventListener("click", (e) => {
+  const cf = e.target.closest("[data-confirm]");
+  if (cf) {
+    const b = (DATA.bookings || []).find((x) => String(x.id) === cf.dataset.confirm);
+    if (b) openConfirmModal(b);
+    return;
+  }
   const btn = e.target.closest("[data-edit]");
   if (!btn) return;
   const b = (DATA.bookings || []).find((x) => String(x.id) === btn.dataset.edit);
