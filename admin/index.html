@@ -219,6 +219,8 @@ input,select{font-family:inherit}
 .btn-sm{padding:.42rem .8rem;border-radius:8px;font-size:.8rem;font-weight:700;font-family:"Prompt",sans-serif;color:#fff;white-space:nowrap;transition:filter .15s}
 .btn-sm:hover{filter:brightness(1.08)}
 .btn-in{background:var(--free)}.btn-out{background:var(--arr)}.btn-clean{background:var(--occ)}
+.btn-import{display:inline-block;padding:.5rem 1rem;border:none;border-radius:9px;background:var(--brand);color:#fff;font-family:"Prompt",sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:filter .15s}
+.btn-import:hover{filter:brightness(1.08)}
 .today-empty{text-align:center;color:var(--muted);font-size:.88rem;padding:1.6rem .5rem}
 .today-empty .ic{width:28px;height:28px;color:var(--free);margin-bottom:.5rem}
 
@@ -391,8 +393,8 @@ tbody tr:hover td{background:#faf7f2}
         <div class="banner warn" id="icalBanner">
           <b>อัปเดตข้อมูลจาก Booking.com ด้วยไฟล์รายการจอง</b> — Booking ยกเลิก iCal แล้ว
           วิธีใหม่: เข้า Extranet (คอมพิวเตอร์) → เมนู <b>การจอง/Reservations</b> → กด <b>ดาวน์โหลด CSV</b>
-          แล้วมากดปุ่ม <b>⬆ นำเข้าไฟล์ Booking</b> ในแท็บ "รายการจอง" — วันที่/ชื่อ/ยอดจะเติมให้อัตโนมัติ
-          (แนะนำทำสัปดาห์ละครั้ง)
+          แล้วเลือกไฟล์ที่ปุ่มด้านล่างได้เลย — วันที่/ชื่อ/ยอดจะเติมให้อัตโนมัติ (แนะนำทำสัปดาห์ละครั้ง)
+          <div style="margin-top:.6rem"><button class="btn-import" id="csvImportBtn2" type="button">⬆ เลือกไฟล์ CSV เพื่อนำเข้า</button></div>
         </div>
       </div>
 
@@ -503,7 +505,7 @@ tbody tr:hover td{background:#faf7f2}
               <option value="needsfix">ข้อมูลไม่ครบ</option>
             </select>
             <button class="btn-sm" id="csvBook" type="button" title="ดาวน์โหลดรายการที่กรองอยู่เป็นไฟล์ CSV เปิดใน Excel ได้">⬇ Export CSV</button>
-            <button class="btn-sm" id="csvImportBtn" type="button" title="นำเข้าไฟล์ CSV รายการจองที่ดาวน์โหลดจาก Booking.com Extranet — เติมวันที่/ชื่อ/ยอดให้รายการที่ข้อมูลไม่ครบอัตโนมัติ">⬆ นำเข้าไฟล์ Booking</button>
+            <button class="btn-sm btn-import" id="csvImportBtn" type="button" title="นำเข้าไฟล์ CSV รายการจองที่ดาวน์โหลดจาก Booking.com Extranet — เติมวันที่/ชื่อ/ยอดให้รายการที่ข้อมูลไม่ครบอัตโนมัติ">⬆ นำเข้าไฟล์ Booking</button>
             <input type="file" id="csvImportFile" accept=".csv,.txt,.tsv" hidden>
           </div>
           <div class="tbl-wrap">
@@ -1508,6 +1510,7 @@ function findImportCols(header){
 }
 
 $("csvImportBtn").addEventListener("click", () => $("csvImportFile").click());
+$("csvImportBtn2").addEventListener("click", () => $("csvImportFile").click());
 $("csvImportFile").addEventListener("change", async (ev) => {
   const file = ev.target.files[0];
   ev.target.value = "";
