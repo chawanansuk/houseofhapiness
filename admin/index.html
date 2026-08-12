@@ -392,9 +392,9 @@ tbody tr:hover td{background:#faf7f2}
         <div class="banner fix" id="fixBanner"></div>
         <div class="banner warn" id="icalBanner">
           <b>อัปเดตข้อมูลจาก Booking.com ด้วยไฟล์รายการจอง</b> — Booking ยกเลิก iCal แล้ว
-          วิธีใหม่: เข้า Extranet (คอมพิวเตอร์) → เมนู <b>การจอง/Reservations</b> → กด <b>ดาวน์โหลด CSV</b>
-          แล้วเลือกไฟล์ที่ปุ่มด้านล่างได้เลย — วันที่/ชื่อ/ยอดจะเติมให้อัตโนมัติ (แนะนำทำสัปดาห์ละครั้ง)
-          <div style="margin-top:.6rem"><button class="btn-import" id="csvImportBtn2" type="button">⬆ เลือกไฟล์ CSV เพื่อนำเข้า</button></div>
+          วิธีใหม่: เข้า Extranet (คอมพิวเตอร์) → เมนู <b>การจอง/Reservations</b> → กด <b>ดาวน์โหลด</b>
+          (ไฟล์ CSV หรือ Excel .xls/.xlsx ก็ได้) แล้วเลือกไฟล์ที่ปุ่มด้านล่าง — วันที่/ชื่อ/ยอดจะเติมให้อัตโนมัติ (แนะนำทำสัปดาห์ละครั้ง)
+          <div style="margin-top:.6rem"><button class="btn-import" id="csvImportBtn2" type="button">⬆ เลือกไฟล์ Booking เพื่อนำเข้า</button></div>
         </div>
       </div>
 
@@ -506,7 +506,7 @@ tbody tr:hover td{background:#faf7f2}
             </select>
             <button class="btn-sm" id="csvBook" type="button" title="ดาวน์โหลดรายการที่กรองอยู่เป็นไฟล์ CSV เปิดใน Excel ได้">⬇ Export CSV</button>
             <button class="btn-sm btn-import" id="csvImportBtn" type="button" title="นำเข้าไฟล์ CSV รายการจองที่ดาวน์โหลดจาก Booking.com Extranet — เติมวันที่/ชื่อ/ยอดให้รายการที่ข้อมูลไม่ครบอัตโนมัติ">⬆ นำเข้าไฟล์ Booking</button>
-            <input type="file" id="csvImportFile" accept=".csv,.txt,.tsv" hidden>
+            <input type="file" id="csvImportFile" accept=".csv,.txt,.tsv,.xls,.xlsx" hidden>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -1509,6 +1509,28 @@ function findImportCols(header){
   };
 }
 
+// โหลดตัวอ่าน Excel (SheetJS) เฉพาะตอนจำเป็น — ไฟล์ .xls/.xlsx จาก Booking.com เป็น Excel จริง ไม่ใช่ CSV
+let _xlsxPromise = null;
+function loadXLSX(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (_xlsxPromise) return _xlsxPromise;
+  _xlsxPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "/assets/xlsx.core.min.js";
+    s.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error("โหลดตัวอ่าน Excel ไม่สำเร็จ"));
+    s.onerror = () => { _xlsxPromise = null; reject(new Error("โหลดตัวอ่าน Excel ไม่ได้ — ตรวจอินเทอร์เน็ต")); };
+    document.head.appendChild(s);
+  });
+  return _xlsxPromise;
+}
+// อ่านไฟล์ Excel → ตารางแถว (array ของ array) รูปแบบเดียวกับ parseCSV
+async function readSpreadsheet(file){
+  const XLSX = await loadXLSX();
+  const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false, blankrows: false });
+}
+
 $("csvImportBtn").addEventListener("click", () => $("csvImportFile").click());
 $("csvImportBtn2").addEventListener("click", () => $("csvImportFile").click());
 $("csvImportFile").addEventListener("change", async (ev) => {
@@ -1516,9 +1538,12 @@ $("csvImportFile").addEventListener("change", async (ev) => {
   ev.target.value = "";
   if (!file || !DATA) return;
   if (DATA.demo) { toast("โหมดตัวอย่าง — เชื่อมชีตจริงก่อนจึงนำเข้าได้"); return; }
-  const text = await file.text();
-  const rows = parseCSV(text);
-  if (rows.length < 2) { toast("อ่านไฟล์ไม่ได้ — ต้องเป็น CSV จาก Extranet"); return; }
+  let rows;
+  try {
+    if (/\.xlsx?$/i.test(file.name)) { toast("กำลังอ่านไฟล์ Excel…"); rows = await readSpreadsheet(file); }
+    else rows = parseCSV(await file.text());
+  } catch (e) { toast("อ่านไฟล์ไม่สำเร็จ: " + ((e && e.message) || e)); return; }
+  if (!rows || rows.length < 2) { toast("อ่านไฟล์ไม่ได้ — ต้องเป็นไฟล์รายการจองจาก Extranet"); return; }
   const cols = findImportCols(rows[0]);
   if (cols.resno < 0 || cols.checkin < 0 || cols.checkout < 0) {
     toast("ไม่รู้จักหัวตารางของไฟล์นี้ — ส่งไฟล์ให้ผู้ดูแลระบบปรับตัวอ่านได้");
