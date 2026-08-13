@@ -18,8 +18,8 @@ const FIXTURE = {
     { id: "BDC-1", source: "Booking.com", status: "รอเติมชื่อจาก Pulse", checkin: "", checkout: "" },
     { id: "BDC-2", source: "Booking.com", status: "รอเติมชื่อจาก Pulse", checkin: "", checkout: "" },
     { id: "BDC-3", source: "Booking.com", status: "ยืนยันแล้ว", checkin: "", checkout: "" },
-    { id: "BDC-6400663895", source: "Booking.com", status: "ยืนยันแล้ว", checkin: "2026-08-10", checkout: "2026-08-12" },
-    { id: "BDC-9", source: "Booking.com", status: "ยกเลิก", checkin: "2026-08-10", checkout: "2026-08-11" },
+    { id: "BDC-6400663895", source: "Booking.com", status: "ยืนยันแล้ว", checkin: "2026-08-10", checkout: "2026-08-12", rooms: "3" },
+    { id: "BDC-9", source: "Booking.com", status: "ยกเลิก", checkin: "2026-08-10", checkout: "2026-08-11", rooms: "4" },
   ],
   rooms: Array.from({ length: 15 }, (_, i) => ({ room: String(101 + i) })),
 };
@@ -30,7 +30,7 @@ const availability = require("../api/availability.js");
 const book = require("../api/book.js");
 
 function call(handler, { method = "GET", query = {}, headers = {}, body = {} } = {}) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const res = {
       code: 200,
       setHeader() {},
@@ -38,16 +38,15 @@ function call(handler, { method = "GET", query = {}, headers = {}, body = {} } =
       json(o) { resolve({ code: this.code, body: o }); },
       end() { resolve({ code: this.code, body: null }); },
     };
-    handler({ method, query, headers, body }, res);
+    Promise.resolve(handler({ method, query, headers, body }, res)).catch(reject);
   });
 }
 
-(async () => {
-  // 1) วันที่มีการจองจริง (2026-08-10) ต้องไม่ตอบว่าว่างทั้ง 15 ห้อง
+module.exports = (async () => {
+  // 1) การจอง 1 รายการที่จอง 3 ห้อง ต้องหัก 3 ห้อง ไม่ใช่ 1 ห้อง
   let r = await call(availability, { query: { checkin: "2026-08-10", checkout: "2026-08-11" } });
   assert.equal(r.code, 200);
-  assert.ok(r.body.available < 15, "วันที่มีจองต้องได้ available < 15, ได้ " + r.body.available);
-  assert.equal(r.body.available, 13, "15 ห้อง - จอง 1 - buffer 1 = 13");
+  assert.equal(r.body.available, 11, "15 ห้อง - จอง 3 ห้อง - buffer 1 = 11");
   assert.equal(r.body.unknown, 3, "การจองไม่รู้วันที่ต้องนับได้ 3 (ไม่รวมยกเลิก)");
   assert.equal(r.body.warning, "uncertain", "มีการจองไม่รู้วันที่ → ต้องเตือน uncertain");
   assert.equal(r.body.full, false);
@@ -63,13 +62,26 @@ function call(handler, { method = "GET", query = {}, headers = {}, body = {} } =
   assert.equal(r.body.available, 15, "SAFETY_BUFFER=0 ต้องไม่หักห้อง");
   delete process.env.SAFETY_BUFFER;
 
-  // 4) วันที่ผิดรูปแบบ / checkout ก่อน checkin → 400
-  r = await call(availability, { query: { checkin: "2026-09-05", checkout: "2026-09-01" } });
-  assert.equal(r.code, 400);
-  r = await call(availability, { query: { checkin: "abc", checkout: "2026-09-01" } });
-  assert.equal(r.code, 400);
+  // 4) วันที่ผิดรูปแบบ, ลำดับผิด และวันที่ไม่มีจริง → 400 โดยไม่ throw/500
+  const invalidRanges = [
+    { checkin: "2026-09-05", checkout: "2026-09-01" },
+    { checkin: "abc", checkout: "2026-09-01" },
+    { checkin: "2026-13-01", checkout: "2026-13-02" },
+    { checkin: "2026-02-30", checkout: "2026-03-02" },
+    { checkin: "2025-02-29", checkout: "2025-03-01" },
+  ];
+  for (const query of invalidRanges) {
+    r = await call(availability, { query });
+    assert.equal(r.code, 400, JSON.stringify(query) + " ต้องตอบ 400");
+    assert.equal(r.body.error, "invalid-dates");
+  }
 
-  // 5) rate limit /api/book: ครั้งที่ 6 จาก IP เดิมใน 1 ชม. ต้องโดน 429
+  // 5) วัน leap year ที่มีจริงต้องผ่าน
+  r = await call(availability, { query: { checkin: "2028-02-29", checkout: "2028-03-01" } });
+  assert.equal(r.code, 200);
+  assert.equal(r.body.nights, 1);
+
+  // 6) rate limit /api/book: ครั้งที่ 6 จาก IP เดิมใน 1 ชม. ต้องโดน 429
   process.env.SHEET_WEBAPP_URL = ""; // ให้ book ตอบ not-configured ไม่ยิงออกจริง
   const mkBook = () => call(book, {
     method: "POST",
@@ -91,4 +103,9 @@ function call(handler, { method = "GET", query = {}, headers = {}, body = {} } =
   assert.equal(other.code, 200);
 
   console.log("ALL TESTS PASSED");
-})().catch((e) => { console.error("TEST FAILED:", e.message); process.exit(1); });
+  return "ALL TESTS PASSED";
+})().catch((e) => {
+  console.error("TEST FAILED:", e.message);
+  process.exitCode = 1;
+  throw e;
+});
