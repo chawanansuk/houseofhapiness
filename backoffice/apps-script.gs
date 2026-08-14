@@ -301,7 +301,8 @@ function json_(obj) {
  */
 function scanBookingEmails() {
   var label = GmailApp.getUserLabelByName(LABEL_DONE) || GmailApp.createLabel(LABEL_DONE);
-  var threads = GmailApp.search('from:(booking.com) newer_than:7d -label:"' + LABEL_DONE + '"');
+  // ดู 30 วันย้อนหลัง (กันกรณี trigger เคยหยุดไปหลายวัน จะได้ตามเก็บอีเมลที่ค้าง)
+  var threads = GmailApp.search('from:(booking.com) newer_than:30d -label:"' + LABEL_DONE + '"');
 
   threads.forEach(function (thread) {
     thread.getMessages().forEach(function (msg) {
@@ -324,10 +325,11 @@ function processMessage_(msg) {
   var body = msg.getPlainBody() || "";
   var text = subject + "\n" + body;
 
-  // ข้ามอีเมลที่ไม่ใช่เรื่องการจอง (โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ)
-  var isNew = /new booking|new reservation|การจองใหม่|คุณมีการจองใหม่/i.test(subject);
-  var isCancel = /cancel|ยกเลิก/i.test(subject);
-  var isModify = /modif|change|เปลี่ยนแปลง|แก้ไข/i.test(subject);
+  // ข้ามอีเมลที่ไม่ใช่เรื่องการจอง (ข้อความจากแขก, โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ)
+  // หัวข้อจริงของ Booking.com ปัจจุบัน: "มีการจองใหม่ (…)", "มีการจองถูกยกเลิก (…)", "มีการปรับเปลี่ยนการจอง (…)"
+  var isNew = /new booking|new reservation|การจองใหม่|จองใหม่/i.test(subject);
+  var isCancel = /cancel|ยกเลิก|ถูกยกเลิก/i.test(subject);
+  var isModify = /modif|change|เปลี่ยนแปลง|ปรับเปลี่ยน|แก้ไข/i.test(subject);
   if (!isNew && !isCancel && !isModify) return;
 
   var resNo = extractReservationNo_(text);
@@ -474,9 +476,14 @@ function dailyDigest() {
 /* ── ตัวช่วยสกัดข้อมูลจากเนื้ออีเมล (รองรับไทย/อังกฤษหลายรูปแบบ) ── */
 
 function extractReservationNo_(text) {
-  var m = text.match(/(?:reservation(?:\s+number)?|booking number|confirmation number|หมายเลขการจอง|เลขที่การจอง)[^\d]{0,30}(\d{9,13})/i);
+  // 1) จากหัวข้อ Booking.com ปัจจุบัน: "…มีการจองใหม่ (6660020011, วันที่…)"
+  var m = text.match(/\((\d{9,13})\s*[,)]/);
   if (m) return m[1];
-  m = text.match(/\b(\d{10})\b/); // เลข 10 หลักโดด ๆ มักเป็นเลขการจอง
+  // 2) จากคำนำหน้าในเนื้อความ (รองรับทั้ง "หมายเลขการจอง" และ "หมายเลขยืนยันการจอง")
+  m = text.match(/(?:reservation(?:\s+number)?|booking number|confirmation number|หมายเลข(?:ยืนยัน)?การจอง|เลขที่การจอง)[^\d]{0,30}(\d{9,13})/i);
+  if (m) return m[1];
+  // 3) สำรอง: เลข 10–13 หลักโดด ๆ มักเป็นเลขการจอง
+  m = text.match(/\b(\d{10,13})\b/);
   return m ? m[1] : "";
 }
 
