@@ -90,7 +90,7 @@ module.exports = (async () => {
   });
   for (let i = 0; i < 5; i++) {
     const b = await mkBook();
-    assert.equal(b.code, 200, "5 ครั้งแรกต้องผ่าน (ครั้งที่ " + (i + 1) + ")");
+    assert.equal(b.code, 503, "5 ครั้งแรกต้องผ่าน rate limit และแจ้งว่า service ยังไม่ได้ตั้งค่า (ครั้งที่ " + (i + 1) + ")");
   }
   const blocked = await mkBook();
   assert.equal(blocked.code, 429, "ครั้งที่ 6 ต้องโดน rate limit");
@@ -100,7 +100,52 @@ module.exports = (async () => {
     headers: { "x-forwarded-for": "198.51.100.7" },
     body: { name: "ทดสอบ2", checkin: "2026-09-01", checkout: "2026-09-02" },
   });
-  assert.equal(other.code, 200);
+  assert.equal(other.code, 503);
+
+  // 7) ต้องตอบสำเร็จเฉพาะเมื่อ Apps Script ยืนยัน ok และส่ง booking id กลับมา
+  process.env.SHEET_WEBAPP_URL = "https://sheet.fixture/exec";
+  const validBody = {
+    name: "CODEX TEST", phone: "0000000000",
+    checkin: "2026-09-10", checkout: "2026-09-11",
+    guests: "2", rooms: "1", total: "700",
+    room: "ห้อง Standard", note: "test only",
+  };
+  global.fetch = async (_url, options) => {
+    const sent = JSON.parse(options.body);
+    assert.equal(sent.note, "ประเภทห้อง: ห้อง Standard · test only");
+    return { ok: true, text: async () => JSON.stringify({ ok: true, id: "WEB-TEST-1" }) };
+  };
+  const saved = await call(book, {
+    method: "POST", headers: { "x-forwarded-for": "203.0.113.16" }, body: validBody,
+  });
+  assert.equal(saved.code, 201);
+  assert.deepEqual(saved.body, { ok: true, saved: true, id: "WEB-TEST-1" });
+
+  // 8) HTTP 200 จาก Apps Script ไม่พอ — JSON ต้องยืนยันการบันทึกด้วย
+  global.fetch = async () => ({ ok: true, text: async () => JSON.stringify({ error: "unauthorized" }) });
+  const rejected = await call(book, {
+    method: "POST", headers: { "x-forwarded-for": "203.0.113.17" }, body: validBody,
+  });
+  assert.equal(rejected.code, 502);
+  assert.equal(rejected.body.saved, false);
+
+  global.fetch = async () => ({ ok: true, text: async () => "not-json" });
+  const invalidJson = await call(book, {
+    method: "POST", headers: { "x-forwarded-for": "203.0.113.18" }, body: validBody,
+  });
+  assert.equal(invalidJson.code, 502);
+
+  global.fetch = async () => { throw new Error("offline"); };
+  const unavailable = await call(book, {
+    method: "POST", headers: { "x-forwarded-for": "203.0.113.19" }, body: validBody,
+  });
+  assert.equal(unavailable.code, 502);
+  assert.equal(unavailable.body.error, "booking-storage-unavailable");
+
+  const missingPhone = await call(book, {
+    method: "POST", headers: { "x-forwarded-for": "203.0.113.20" }, body: { ...validBody, phone: "" },
+  });
+  assert.equal(missingPhone.code, 400);
 
   console.log("ALL TESTS PASSED");
   return "ALL TESTS PASSED";
