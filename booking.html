@@ -9,10 +9,24 @@
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
-<meta property="og:image" content="https://houseofhappinessbangkok.com/images/og.png">
+<meta property="og:description" content="จองตรงราคาดีกว่า ไม่ผ่านคนกลาง พร้อมส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://houseofhappinessbangkok.com/booking.html">
+<meta property="og:site_name" content="House of Happiness">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="683">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
+<meta name="twitter:description" content="จองตรงราคาดีกว่า ไม่ผ่านคนกลาง พร้อมส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="preload" as="image" href="images/attractions/riverboat.jpg">
+<link rel="preload" as="image" href="images/attractions/riverboat.jpg" type="image/jpeg" fetchpriority="high">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/booking.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
@@ -98,11 +112,11 @@
     <div class="card reveal">
       <h2><span class="step">3</span><span data-i18n="bk.step3">ข้อมูลผู้จอง</span></h2>
       <label for="name" data-i18n="bk.name">ชื่อ-นามสกุล</label>
-      <input type="text" id="name" data-i18n="bk.name.ph" data-i18n-attr="placeholder" required>
+      <input type="text" id="name" data-i18n="bk.name.ph" data-i18n-attr="placeholder" autocomplete="name" maxlength="120" required>
       <label for="phone" data-i18n="bk.phone">เบอร์โทรศัพท์</label>
-      <input type="tel" id="phone" placeholder="08x-xxx-xxxx" required>
+      <input type="tel" id="phone" placeholder="08x-xxx-xxxx" autocomplete="tel" inputmode="tel" maxlength="40" required>
       <label for="note" data-i18n="bk.note">ความต้องการเพิ่มเติม (ถ้ามี)</label>
-      <textarea id="note" data-i18n="bk.note.ph" data-i18n-attr="placeholder"></textarea>
+      <textarea id="note" data-i18n="bk.note.ph" data-i18n-attr="placeholder" maxlength="500"></textarea>
     </div>
   </div>
 
