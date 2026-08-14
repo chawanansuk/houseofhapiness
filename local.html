@@ -8,16 +8,29 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<meta property="og:title" content="กิน-เที่ยวรอบซอย ท่าดินแดง — House of Happiness Bangkok">
-<meta property="og:description" content="13 ร้านอร่อยเดินถึงใน 10 นาที + เส้นทางเดินเที่ยวคลองสาน 10 จุด — ไกด์ลับฉบับเจ้าของที่พัก">
+<meta property="og:title" content="กิน-เที่ยวรอบซอย ท่าดินแดง | Local Guide — House of Happiness Bangkok">
+<meta property="og:description" content="13 ร้านอร่อยรอบท่าดินแดง และเส้นทางเดินเที่ยวคลองสาน 10 จุด พร้อมแผนที่จากเจ้าของที่พัก">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://houseofhappinessbangkok.com/local.html">
+<meta property="og:site_name" content="House of Happiness">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="https://houseofhappinessbangkok.com/images/local/satay.webp">
+<meta property="og:image:width" content="960">
+<meta property="og:image:height" content="720">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="กิน-เที่ยวรอบซอย ท่าดินแดง | Local Guide — House of Happiness Bangkok">
+<meta name="twitter:description" content="13 ร้านอร่อยรอบท่าดินแดง และเส้นทางเดินเที่ยวคลองสาน 10 จุด พร้อมแผนที่จากเจ้าของที่พัก">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/local/satay.webp">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/local.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="preload" as="image" href="images/local/satay.webp">
+<link rel="preload" as="image" href="images/local/satay.webp" type="image/webp" fetchpriority="high">
 <style>
 /* ── สไตล์เฉพาะหน้า "กิน-เที่ยวรอบซอย" ── */
 .lc-hero{position:relative; padding:4.6rem 1.2rem 3rem; text-align:center; overflow:hidden}
@@ -395,7 +408,7 @@ function renderFood(){
       ? `<span class="lc-open yes">● ${lang === "th" ? "เปิดอยู่ตอนนี้" : "Open now"}</span>`
       : `<span class="lc-open no">${lang === "th" ? "ปิดอยู่" : "Closed"}${st.next ? (lang === "th" ? " · เปิด " : " · opens ") + st.next : ""}</span>`;
     return `<article class="lc-food">
-      <div class="lc-fimg"><img src="images/local/${f.img}.webp" alt="${esc(f.name[lang])}" loading="lazy" onerror="this.remove()">${badge}</div>
+      <div class="lc-fimg"><img src="images/local/${f.img}.webp" alt="${esc(f.name[lang])}" width="960" height="660" loading="lazy" decoding="async" onerror="this.remove()">${badge}</div>
       <div class="lc-fbody">
         <h3>${esc(f.name[lang])}</h3>
         <div class="sub">${esc(f.sub[lang])}</div>
