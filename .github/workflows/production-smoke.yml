@@ -1,29 +1,113 @@
 name: Production smoke test
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/production-smoke.yml"
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   smoke:
+    name: Check live website and API
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Check homepage and dependencies
+      - name: Check public pages, admin login, and API
         shell: bash
         run: |
           set -euo pipefail
           base="https://houseofhappinessbangkok.com"
-          curl --fail --silent --show-error "$base/" > /dev/null
-          curl --fail --silent --show-error "$base/booking.html" > /dev/null
-          health="$(curl --fail --silent --show-error "$base/api/health")"
+
+          fetch() {
+            curl --fail --location --silent --show-error \
+              --max-time 20 --retry 2 --retry-delay 2 "$1"
+          }
+
+          check_page() {
+            local path="$1"
+            local marker="$2"
+            local body
+            echo "Checking $path"
+            body="$(fetch "$base$path")"
+            grep --fixed-strings "$marker" <<< "$body" > /dev/null
+          }
+
+          check_page "/" 'id="main"'
+          check_page "/booking.html" 'id="bookingForm"'
+          check_page "/gallery.html" 'id="glWrap"'
+          check_page "/admin/" 'id="loginForm"'
+          fetch "$base/_vercel/insights/script.js" > /dev/null
+
+          health="$(fetch "$base/api/health")"
           echo "$health" | jq -e '.ok == true'
 
           checkin="$(date -u -d '+2 days' +%F)"
           checkout="$(date -u -d '+3 days' +%F)"
-          availability="$(curl --fail --silent --show-error "$base/api/availability?checkin=$checkin&checkout=$checkout")"
+          availability="$(fetch "$base/api/availability?checkin=$checkin&checkout=$checkout")"
           echo "$availability" | jq -e '.ok == true and (.available | type == "number")'
+
+      - name: Open or update a production alert
+        if: failure() && github.event_name != 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "Production smoke test failed";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              "@chawanansuk ระบบตรวจพบว่าเว็บไซต์หรือ API Production มีปัญหา",
+              "",
+              `เวลา: ${new Date().toISOString()}`,
+              `Workflow: ${runUrl}`,
+            ].join("\n");
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = issues.find((issue) => issue.title === title && !issue.pull_request);
+            if (existing) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                ...context.repo,
+                title,
+                body,
+              });
+            }
+
+      - name: Close the alert after recovery
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "Production smoke test failed";
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = issues.find((issue) => issue.title === title && !issue.pull_request);
+            if (existing) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: existing.number,
+                body: `Production recovered at ${new Date().toISOString()}.`,
+              });
+              await github.rest.issues.update({
+                ...context.repo,
+                issue_number: existing.number,
+                state: "closed",
+                state_reason: "completed",
+              });
+            }
