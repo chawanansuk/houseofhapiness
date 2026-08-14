@@ -35,6 +35,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 input,select{font-family:inherit}
 .ic{width:1.15em;height:1.15em;display:inline-block;vertical-align:-0.2em;flex:none}
 .num{font-variant-numeric:tabular-nums}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 
 /* ── splash ── */
 .splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;z-index:80}
@@ -340,6 +341,7 @@ tbody tr:hover td{background:#faf7f2}
     <h1>เข้าสู่ระบบหลังบ้าน</h1>
     <p>ผังห้อง · เช็คอิน-เช็คเอาต์ · การจอง</p>
     <form id="loginForm">
+      <label class="sr-only" for="passInput">รหัสผ่าน</label>
       <input type="password" id="passInput" placeholder="รหัสผ่าน" autocomplete="current-password" autofocus>
       <button class="btn-primary" id="loginBtn" type="submit">เข้าสู่ระบบ</button>
     </form>
@@ -377,8 +379,8 @@ tbody tr:hover td{background:#faf7f2}
     <header class="topbar">
       <span class="tb-brand"><span class="side-logo"><span class="ic" data-icon="home"></span></span> HOH หลังบ้าน</span>
       <span class="sp"></span>
-      <button class="tb-act act-refresh"><span class="ic" data-icon="refresh"></span></button>
-      <button class="tb-act act-logout"><span class="ic" data-icon="logout"></span></button>
+      <button class="tb-act act-refresh" type="button" aria-label="รีเฟรชข้อมูล"><span class="ic" data-icon="refresh"></span></button>
+      <button class="tb-act act-logout" type="button" aria-label="ออกจากระบบ"><span class="ic" data-icon="logout"></span></button>
     </header>
 
     <div class="content">
@@ -495,9 +497,9 @@ tbody tr:hover td{background:#faf7f2}
           <div class="tools">
             <div class="search-wrap">
               <span class="ic" data-icon="search"></span>
-              <input type="search" id="q" placeholder="ค้นหาชื่อ / เบอร์โทร / ห้อง / หมายเลขการจอง…">
+              <input type="search" id="q" aria-label="ค้นหารายการจอง" placeholder="ค้นหาชื่อ / เบอร์โทร / ห้อง / หมายเลขการจอง…">
             </div>
-            <select id="fRange">
+            <select id="fRange" aria-label="กรองรายการจอง">
               <option value="upcoming" selected>กำลังพัก + จะเข้าพัก</option>
               <option value="newdirect">คำขอจองตรง (รอยืนยัน)</option>
               <option value="all">ทั้งหมด</option>
@@ -531,7 +533,9 @@ tbody tr:hover td{background:#faf7f2}
 
       <!-- ── รายรับ-รายจ่าย (เฉพาะเจ้าของ — พนักงานมองไม่เห็นทั้งแท็บ) ── -->
       <section id="secMoney" class="section admin-only">
-        <div class="sec-title"><span class="ic" data-icon="wallet"></span> รายรับ-รายจ่าย <small>จดค่าใช้จ่าย เห็นกำไรจริงต่อเดือน</small></div>
+        <div class="sec-title"><span class="ic" data-icon="wallet"></span> รายรับ-รายจ่าย <small>จดค่าใช้จ่าย เห็นกำไรจริงต่อเดือน</small>
+          <button class="btn-sm" id="csvSummary" type="button" style="margin-left:auto" title="ดาวน์โหลดสรุปรายรับ รายจ่าย และกำไรของเดือนที่เลือก">⬇ สรุปเดือน CSV</button>
+        </div>
         <div class="card">
           <div class="cal-head">
             <button class="cal-nav" id="expPrev" aria-label="เดือนก่อนหน้า">‹</button>
@@ -585,14 +589,14 @@ tbody tr:hover td{background:#faf7f2}
   </nav>
 </div>
 
-<div class="overlay" id="overlay"><div class="modal" id="modalBox"></div></div>
-<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modalBox" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle" tabindex="-1"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 "use strict";
 const $ = (id) => document.getElementById(id);
 const KEY_STORE = "hoh-admin-key";
-let DATA = null, calYM = null, selDay = null, expYM = null, tlStart = null;
+let DATA = null, calYM = null, selDay = null, expYM = null, tlStart = null, lastModalFocus = null;
 const TL_DAYS = 14;
 const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
 
@@ -622,6 +626,12 @@ const IP = {
 };
 const svg = (n, c) => `<svg class="ic${c ? " " + c : ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
 function paintIcons(root){ (root || document).querySelectorAll("[data-icon]").forEach((el) => { el.innerHTML = svg(el.dataset.icon); }); }
+function associateLabels(root){
+  (root || document).querySelectorAll("label:not([for])").forEach((label) => {
+    const control = label.nextElementSibling;
+    if (control && control.id && /^(INPUT|SELECT|TEXTAREA)$/.test(control.tagName)) label.htmlFor = control.id;
+  });
+}
 
 /* ───────── helpers ───────── */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1171,8 +1181,20 @@ function openMoveModal(b, fromRoom){
   $("actClose").onclick = closeModal;
 }
 
-function openModal(html){ $("modalBox").innerHTML = html; $("overlay").classList.add("open"); }
-function closeModal(){ $("overlay").classList.remove("open"); }
+function openModal(html){
+  lastModalFocus = document.activeElement;
+  $("modalBox").innerHTML = html;
+  const title = $("modalBox").querySelector("h3");
+  if (title) title.id = "adminModalTitle";
+  associateLabels($("modalBox"));
+  $("overlay").classList.add("open");
+  $("modalBox").focus();
+}
+function closeModal(){
+  if (!$("overlay").classList.contains("open")) return;
+  $("overlay").classList.remove("open");
+  if (lastModalFocus && document.contains(lastModalFocus)) lastModalFocus.focus();
+}
 
 /* ── ฟอร์มเติม/แก้ข้อมูลการจอง (ใช้คู่กับแอป Pulse ที่มีรายละเอียดแขก) ── */
 function openEditModal(b){
@@ -1434,12 +1456,15 @@ $("q").addEventListener("input", renderTable);
 $("fRange").addEventListener("change", renderTable);
 
 /* ── Export CSV (มี BOM ให้เปิดใน Excel แล้วภาษาไทยไม่เพี้ยน) ── */
+function safeCsvCell(v){
+  let s = String(v == null ? "" : v);
+  // ป้องกัน spreadsheet formula injection จากชื่อ/โน้ตที่ขึ้นต้นด้วย = + - หรือ @
+  if (/^[\t\r ]*[=+\-@]/.test(s)) s = "'" + s;
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
 function dlCSV(name, header, lines){
   const csv = "\uFEFF" + [header].concat(lines).map((row) =>
-    row.map((v) => {
-      const s = String(v == null ? "" : v);
-      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-    }).join(",")).join("\r\n");
+    row.map(safeCsvCell).join(",")).join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   a.download = name;
@@ -1594,6 +1619,32 @@ $("csvImportFile").addEventListener("change", async (ev) => {
   toast(`นำเข้าเสร็จ: อัปเดต ${done} รายการ` + (fail ? ` · ล้มเหลว ${fail}` : ""));
 });
 
+$("csvSummary").addEventListener("click", () => {
+  if (!DATA || DATA.role === "staff") return;
+  const [y, m] = expYM;
+  const ym = `${y}-${String(m + 1).padStart(2, "0")}`;
+  const bookings = activeBookings().filter((b) => String(b.checkin || "").slice(0, 7) === ym);
+  const exps = (DATA.expenses || []).filter((x) => String(x.date || "").slice(0, 7) === ym);
+  const revenue = bookings.reduce((sum, b) => sum + bahtNum(b.amount), 0);
+  const expenseTotal = exps.reduce((sum, x) => sum + bahtNum(x.amount), 0);
+  const nights = bookings.reduce((sum, b) => sum + (Number(nightsOf(b)) || 0), 0);
+  const byCategory = {};
+  exps.forEach((x) => {
+    const category = x.category || "อื่นๆ";
+    byCategory[category] = (byCategory[category] || 0) + bahtNum(x.amount);
+  });
+  const lines = [
+    ["เดือน", `${THAI_MONTHS[m]} ${y + 543}`, ""],
+    ["จำนวนการจอง", bookings.length, ""],
+    ["จำนวนคืนรวม", nights, ""],
+    ["รายรับ", "", revenue],
+    ["รายจ่าย", "", expenseTotal],
+    ["กำไรสุทธิ", "", revenue - expenseTotal],
+    ...Object.entries(byCategory).sort((a, b) => b[1] - a[1]).map(([category, amount]) => [`รายจ่าย: ${category}`, "", amount]),
+  ];
+  dlCSV(`monthly-summary-${ym}.csv`, ["รายการ", "จำนวน", "ยอด(บาท)"], lines);
+  toast("ดาวน์โหลดสรุปเดือนแล้ว");
+});
 $("csvExp").addEventListener("click", () => {
   if (!DATA || DATA.role === "staff") return;
   const [y, m] = expYM;
@@ -1674,14 +1725,28 @@ $("tblBody").addEventListener("click", (e) => {
   if (b) openEditModal(b);
 });
 $("overlay").addEventListener("click", (e) => { if (e.target === $("overlay")) closeModal(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && $("overlay").classList.contains("open")) closeModal();
+});
 
 /* ───────── init ───────── */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 paintIcons();
+associateLabels(document);
+document.querySelectorAll("[data-nav]").forEach((n) => {
+  if (!n.hasAttribute("href")) {
+    n.setAttribute("role", "button");
+    n.tabIndex = 0;
+    n.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        n.click();
+      }
+    });
+  }
+});
 (async () => {
-  const urlKey = new URLSearchParams(location.search).get("key");
-  const saved = urlKey || sessionStorage.getItem(KEY_STORE);
-  if (urlKey) history.replaceState(null, "", location.pathname);
+  const saved = sessionStorage.getItem(KEY_STORE);
   if (saved && await tryLogin(saved, true)) return;
   $("splash").style.display = "none";
   $("loginView").style.display = "";
