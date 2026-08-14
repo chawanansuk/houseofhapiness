@@ -117,6 +117,7 @@
         <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
+        <p class="booking-save-status" id="bookingSaveStatus" role="status" aria-live="polite" hidden></p>
       </div>
       <ul class="trust">
         <li>✅ <span data-i18n="bk.trust.1">ไม่ต้องชำระเงินออนไลน์ — จ่ายที่โรงแรม</span></li>
@@ -424,27 +425,77 @@ fetch("/api/site").then((r) => r.json()).then((j) => {
   update();
 }).catch(() => {});
 
-// บันทึกคำขอจองเข้าระบบหลังบ้าน (Google Sheets) แบบเงียบ ๆ — ล้มเหลวก็ไม่กระทบลูกค้า
-let loggedSig = "";
-function logBooking() {
+// บันทึกคำขอจองเข้าระบบหลังบ้าน — แสดงว่าบันทึกแล้วเฉพาะเมื่อ API ส่ง id กลับมา
+let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSaveId = "";
+function bookingSignature(s) {
+  return [s.room && s.room.id, s.name, s.phone, s.ci, s.co, s.guests, s.numRooms, s.total, s.note].join("|");
+}
+function renderBookingSaveStatus() {
+  const el = $("bookingSaveStatus");
+  el.hidden = !bookingSaveState;
+  el.className = `booking-save-status ${bookingSaveState}`;
+  if (bookingSaveState === "saving") el.textContent = t("bk.save.saving");
+  if (bookingSaveState === "saved") el.textContent = `${t("bk.save.saved")} ${bookingSaveId}`;
+  if (bookingSaveState === "failed") el.textContent = t("bk.save.failed");
+}
+async function logBooking() {
   const s = getState();
-  if (!(s.room && s.nights > 0 && s.name && s.phone)) return;
-  const sig = [s.name, s.phone, s.ci, s.co].join("|");
-  if (sig === loggedSig) return; // กดหลายปุ่มติดกัน = การจองเดียวกัน ไม่ส่งซ้ำ
+  if (!(s.room && s.nights > 0 && s.name && s.phone)) return { saved: false };
+  const sig = bookingSignature(s);
+  if (sig === loggedSig) {
+    if (bookingSavePromise) return bookingSavePromise;
+    if (bookingSaveState === "saved") return { ok: true, saved: true, id: bookingSaveId };
+  }
   loggedSig = sig;
-  try {
-    fetch("/api/book", {
+  bookingSaveState = "saving";
+  bookingSaveId = "";
+  renderBookingSaveStatus();
+  const request = (async () => {
+    try {
+      const r = await fetch("/api/book", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: true,
       body: JSON.stringify({
         name: s.name, phone: s.phone, checkin: s.ci, checkout: s.co,
-        guests: s.guests, rooms: s.numRooms, total: s.total, note: s.note,
+        guests: s.guests, rooms: s.numRooms, total: s.total,
+        room: s.room.name.th, note: s.note,
       }),
-    }).catch(() => {});
-  } catch {}
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || j.ok !== true || j.saved !== true || !j.id) throw new Error("not-saved");
+      if (loggedSig === sig) {
+        bookingSaveState = "saved";
+        bookingSaveId = j.id;
+        renderBookingSaveStatus();
+      }
+      return j;
+    } catch {
+      if (loggedSig === sig) {
+        loggedSig = ""; // กดซ้ำเพื่อ retry ได้
+        bookingSaveState = "failed";
+        bookingSaveId = "";
+        renderBookingSaveStatus();
+      }
+      return { ok: false, saved: false };
+    } finally {
+      if (bookingSavePromise === request) bookingSavePromise = null;
+    }
+  })();
+  bookingSavePromise = request;
+  return bookingSavePromise;
 }
 ["btnLine", "btnWa", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
+document.addEventListener("langchange", renderBookingSaveStatus);
+function resetBookingSaveStatusIfChanged() {
+  if (!loggedSig || bookingSignature(getState()) === loggedSig) return;
+  loggedSig = "";
+  bookingSaveState = "";
+  bookingSaveId = "";
+  renderBookingSaveStatus();
+}
+document.addEventListener("input", resetBookingSaveStatusIfChanged);
+document.addEventListener("change", resetBookingSaveStatusIfChanged);
 
 // คัดลอกข้อความจองไปคลิปบอร์ด (มี fallback สำหรับเบราว์เซอร์เก่า)
 async function copyToClipboard(text) {
