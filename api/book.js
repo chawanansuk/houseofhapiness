@@ -29,12 +29,14 @@ module.exports = async (req, res) => {
 
   const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
   if (rateLimited(ip)) {
+    console.warn(JSON.stringify({ event: "booking_rate_limited" }));
     return res.status(429).json({ ok: false, error: "too-many-requests" });
   }
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
   if (!url || !token) {
+    console.error(JSON.stringify({ event: "booking_storage_not_configured" }));
     return res.status(503).json({ ok: false, saved: false, error: "booking-service-not-configured" });
   }
 
@@ -77,11 +79,24 @@ module.exports = async (req, res) => {
     let result;
     try { result = JSON.parse(text); } catch { result = null; }
     if (!r.ok || !result || result.ok !== true || !result.id) {
+      console.error(JSON.stringify({
+        event: "booking_storage_rejected",
+        downstreamStatus: r.status || null,
+        downstreamOk: r.ok,
+        payloadOk: Boolean(result && result.ok === true),
+        hasId: Boolean(result && result.id),
+        downstreamError: result && result.error ? String(result.error).slice(0, 80) : null,
+      }));
       return res.status(502).json({ ok: false, saved: false, error: "booking-storage-failed" });
     }
+    console.info(JSON.stringify({ event: "booking_saved", bookingId: String(result.id) }));
     return res.status(201).json({ ok: true, saved: true, id: String(result.id) });
   } catch (e) {
     const timedOut = e && e.name === "AbortError";
+    console.error(JSON.stringify({
+      event: "booking_storage_unavailable",
+      reason: timedOut ? "timeout" : String((e && e.message) || "unavailable").slice(0, 120),
+    }));
     return res.status(timedOut ? 504 : 502).json({
       ok: false,
       saved: false,
