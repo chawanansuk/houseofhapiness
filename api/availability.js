@@ -22,7 +22,15 @@ module.exports = async (req, res) => {
     return res.status(405).json({ ok: false, error: "method-not-allowed" });
   }
 
-  const isYMD = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+  const isYMD = (s) => {
+    const value = String(s || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return date.getUTCFullYear() === year
+      && date.getUTCMonth() === month - 1
+      && date.getUTCDate() === day;
+  };
   const ci = String((req.query && req.query.checkin) || "");
   const co = String((req.query && req.query.checkout) || "");
   if (!isYMD(ci) || !isYMD(co) || co <= ci) {
@@ -51,12 +59,17 @@ module.exports = async (req, res) => {
   // การจองที่ยังไม่รู้วันที่ = กันห้องอยู่ที่ไหนสักวันแต่ระบุไม่ได้ — ห้ามการันตีเลขห้องว่าง
   const unknown = notCancelled.length - active.length;
   const isBdc = (b) => /booking\.com/i.test(String(b.source || ""));
+  const roomCount = (b) => {
+    const count = Number(b && b.rooms);
+    return Number.isFinite(count) && count >= 1 ? Math.floor(count) : 1;
+  };
+  const countRooms = (entries) => entries.reduce((sum, booking) => sum + roomCount(booking), 0);
 
   let minAvail = total;
   for (let d = ci; d < co; d = shiftDate(d, 1)) {
     const stay = active.filter((b) => b.checkin <= d && d < b.checkout);
-    const direct = stay.filter((b) => !isBdc(b)).length;
-    const bdcSheet = stay.length - direct;
+    const direct = countRooms(stay.filter((b) => !isBdc(b)));
+    const bdcSheet = countRooms(stay.filter(isBdc));
     const bdcIcal = ical.filter((e) => e.start <= d && d < e.end).length;
     const occupied = direct + Math.max(bdcSheet, bdcIcal);
     minAvail = Math.min(minAvail, Math.max(0, total - occupied));
