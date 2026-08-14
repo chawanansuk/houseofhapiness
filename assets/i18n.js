@@ -145,6 +145,7 @@ const I18N = {
 
   /* ── เช็คห้องว่างเรียลไทม์ ── */
   "av.checking":     { th: "กำลังเช็คห้องว่าง…", en: "Checking availability…" },
+  "av.unavailable":  { th: "ยังยืนยันห้องว่างไม่ได้ — กรุณาส่งคำขอเพื่อให้ทางที่พักตรวจสอบ", en: "Live availability is temporarily unavailable — send your request and the hotel will check for you." },
   "av.left.pre":     { th: "✓ วันที่เลือกว่าง — เหลือ ", en: "✓ Available — " },
   "av.left.post":    { th: " ห้อง", en: " room(s) left" },
   "av.low.pre":      { th: "⚡ ใกล้เต็ม! เหลือเพียง ", en: "⚡ Almost full! Only " },
