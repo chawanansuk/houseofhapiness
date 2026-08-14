@@ -7,7 +7,7 @@ const assert = require("assert");
 
 process.env.ADMIN_PASSWORD = "test-admin";
 process.env.SHEET_WEBAPP_URL = "https://sheet.fixture/exec";
-process.env.SHEET_TOKEN = "t";
+process.env.SHEET_TOKEN = "__TOKEN_SHOULD_NEVER_APPEAR__";
 process.env.BOOKING_ICAL_URLS = "";
 delete process.env.SAFETY_BUFFER;
 
@@ -24,10 +24,12 @@ const FIXTURE = {
   rooms: Array.from({ length: 15 }, (_, i) => ({ room: String(101 + i) })),
 };
 
-global.fetch = async () => ({ ok: true, json: async () => FIXTURE, text: async () => "" });
+const fetchFixture = async () => ({ ok: true, status: 200, json: async () => FIXTURE, text: async () => "" });
+global.fetch = fetchFixture;
 
 const availability = require("../api/availability.js");
 const book = require("../api/book.js");
+const health = require("../api/health.js");
 
 function call(handler, { method = "GET", query = {}, headers = {}, body = {} } = {}) {
   return new Promise((resolve, reject) => {
@@ -81,7 +83,15 @@ module.exports = (async () => {
   assert.equal(r.code, 200);
   assert.equal(r.body.nights, 1);
 
-  // 6) rate limit /api/book: ครั้งที่ 6 จาก IP เดิมใน 1 ชม. ต้องโดน 429
+  // 6) Sheet ล่มต้อง fail closed ห้ามแสดงตัวเลขห้องว่างที่มาจากข้อมูลว่าง
+  global.fetch = async () => { throw new Error("sheet offline"); };
+  r = await call(availability, { query: { checkin: "2026-09-01", checkout: "2026-09-02" } });
+  assert.equal(r.code, 503);
+  assert.equal(r.body.error, "availability-unavailable");
+  assert.equal(r.body.retryable, true);
+  global.fetch = fetchFixture;
+
+  // 7) rate limit /api/book: ครั้งที่ 6 จาก IP เดิมใน 1 ชม. ต้องโดน 429
   process.env.SHEET_WEBAPP_URL = ""; // ให้ book ตอบ not-configured ไม่ยิงออกจริง
   const mkBook = () => call(book, {
     method: "POST",
@@ -102,7 +112,7 @@ module.exports = (async () => {
   });
   assert.equal(other.code, 503);
 
-  // 7) ต้องตอบสำเร็จเฉพาะเมื่อ Apps Script ยืนยัน ok และส่ง booking id กลับมา
+  // 8) ต้องตอบสำเร็จเฉพาะเมื่อ Apps Script ยืนยัน ok และส่ง booking id กลับมา
   process.env.SHEET_WEBAPP_URL = "https://sheet.fixture/exec";
   const validBody = {
     name: "CODEX TEST", phone: "0000000000",
@@ -121,7 +131,7 @@ module.exports = (async () => {
   assert.equal(saved.code, 201);
   assert.deepEqual(saved.body, { ok: true, saved: true, id: "WEB-TEST-1" });
 
-  // 8) HTTP 200 จาก Apps Script ไม่พอ — JSON ต้องยืนยันการบันทึกด้วย
+  // 9) HTTP 200 จาก Apps Script ไม่พอ — JSON ต้องยืนยันการบันทึกด้วย
   global.fetch = async () => ({ ok: true, text: async () => JSON.stringify({ error: "unauthorized" }) });
   const rejected = await call(book, {
     method: "POST", headers: { "x-forwarded-for": "203.0.113.17" }, body: validBody,
@@ -146,6 +156,20 @@ module.exports = (async () => {
     method: "POST", headers: { "x-forwarded-for": "203.0.113.20" }, body: { ...validBody, phone: "" },
   });
   assert.equal(missingPhone.code, 400);
+
+  // 10) health endpoint ต้องรายงาน dependency โดยไม่คืน URL/token/ข้อมูลลูกค้า
+  global.fetch = fetchFixture;
+  r = await call(health);
+  assert.equal(r.code, 200);
+  assert.equal(r.body.ok, true);
+  assert.deepEqual(r.body.checks, { sheet: "ok", ical: "not-configured" });
+  assert.equal(JSON.stringify(r.body).includes(process.env.SHEET_TOKEN), false);
+
+  global.fetch = async () => { throw new Error("sheet offline"); };
+  r = await call(health);
+  assert.equal(r.code, 503);
+  assert.equal(r.body.ok, false);
+  assert.equal(r.body.checks.sheet, "unavailable");
 
   console.log("ALL TESTS PASSED");
   return "ALL TESTS PASSED";
