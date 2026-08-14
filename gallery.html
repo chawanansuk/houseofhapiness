@@ -91,12 +91,12 @@
 <div style="height:2.5rem"></div>
 
 <!-- ไลต์บ็อกซ์ -->
-<div class="lb" id="lb" role="dialog" aria-modal="true">
-  <button class="x" id="lbX" aria-label="ปิด">✕</button>
-  <button class="prev" id="lbPrev" aria-label="รูปก่อนหน้า">‹</button>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-describedby="lbCap">
+  <button class="x" id="lbX" type="button" aria-label="ปิด">✕</button>
+  <button class="prev" id="lbPrev" type="button" aria-label="รูปก่อนหน้า">‹</button>
   <img id="lbImg" src="" alt="">
   <div class="cap" id="lbCap"></div>
-  <button class="next" id="lbNext" aria-label="รูปถัดไป">›</button>
+  <button class="next" id="lbNext" type="button" aria-label="รูปถัดไป">›</button>
 </div>
 
 <script src="assets/i18n.js"></script>
@@ -160,8 +160,11 @@ function render() {
   document.getElementById("glWrap").innerHTML = GROUPS.map(function (g) {
     var cards = g.items.map(function (it) {
       var i = idx++;
-      return '<figure data-idx="' + i + '"><img src="' + it.f + '" alt="' + it.en + '" width="1024" height="768" loading="lazy" decoding="async" onerror="this.parentElement.remove()">' +
-        '<figcaption>' + (lang === "en" ? it.en : it.th) + '</figcaption></figure>';
+      var caption = lang === "en" ? it.en : it.th;
+      return '<figure data-idx="' + i + '" role="button" tabindex="0" aria-label="' +
+        (lang === "en" ? "Open photo: " : "เปิดรูป: ") + caption + '"><img src="' + it.f + '" alt="' + caption +
+        '" width="1024" height="768" loading="lazy" decoding="async" onerror="this.parentElement.remove()">' +
+        '<figcaption>' + caption + '</figcaption></figure>';
     }).join("");
     return '<div class="gl-group"><h2>' + (lang === "en" ? g.en : g.th) + '</h2></div><div class="gl-grid">' + cards + '</div>';
   }).join("");
@@ -172,17 +175,34 @@ document.addEventListener("langchange", render);
 // ไลต์บ็อกซ์: คลิกรูป → ดูใหญ่ เลื่อนซ้ายขวาได้
 var cur = 0;
 var lb = document.getElementById("lb");
-function show(i) {
+var lbTrigger = null;
+function show(i, trigger) {
+  if (trigger) lbTrigger = trigger;
   cur = (i + FLAT.length) % FLAT.length;
   document.getElementById("lbImg").src = FLAT[cur].f;
+  document.getElementById("lbImg").alt = getLang() === "en" ? FLAT[cur].en : FLAT[cur].th;
   document.getElementById("lbCap").textContent = getLang() === "en" ? FLAT[cur].en : FLAT[cur].th;
   lb.classList.add("open");
   document.body.style.overflow = "hidden";
+  document.getElementById("lbX").focus();
 }
-function hide() { lb.classList.remove("open"); document.body.style.overflow = ""; }
+function hide() {
+  if (!lb.classList.contains("open")) return;
+  lb.classList.remove("open");
+  document.body.style.overflow = "";
+  if (lbTrigger) lbTrigger.focus();
+}
+function openFromFigure(fig) { show(Number(fig.dataset.idx), fig); }
 document.getElementById("glWrap").addEventListener("click", function (e) {
   var fig = e.target.closest("figure[data-idx]");
-  if (fig) show(Number(fig.dataset.idx));
+  if (fig) openFromFigure(fig);
+});
+document.getElementById("glWrap").addEventListener("keydown", function (e) {
+  var fig = e.target.closest("figure[data-idx]");
+  if (fig && (e.key === "Enter" || e.key === " ")) {
+    e.preventDefault();
+    openFromFigure(fig);
+  }
 });
 document.getElementById("lbX").addEventListener("click", hide);
 document.getElementById("lbPrev").addEventListener("click", function () { show(cur - 1); });

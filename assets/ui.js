@@ -17,25 +17,51 @@ document.addEventListener("DOMContentLoaded", () => {
   els.forEach((el) => io.observe(el));
 });
 
-// Lightbox: กดรูปในแกลเลอรีเพื่อดูขนาดใหญ่ ปิดด้วยการคลิกหรือปุ่ม Esc
+// Lightbox: รองรับเมาส์ คีย์บอร์ด และ screen reader
 document.addEventListener("DOMContentLoaded", () => {
   const imgs = document.querySelectorAll(".gallery img");
   if (!imgs.length) return;
   const overlay = document.createElement("div");
   overlay.className = "lightbox";
-  overlay.innerHTML = '<img alt="">';
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Photo preview");
+  overlay.innerHTML = '<button class="lightbox-close" type="button" aria-label="Close photo preview">✕</button><img alt="">';
   overlay.hidden = true;
   document.body.appendChild(overlay);
   const big = overlay.querySelector("img");
-  imgs.forEach((img) =>
-    img.addEventListener("click", () => {
-      big.src = img.src;
-      big.alt = img.alt;
-      overlay.hidden = false;
-      document.body.style.overflow = "hidden";
-    }));
-  const close = () => { overlay.hidden = true; document.body.style.overflow = ""; };
-  overlay.addEventListener("click", close);
+  const closeBtn = overlay.querySelector(".lightbox-close");
+  let trigger = null;
+
+  const open = (img) => {
+    trigger = img;
+    big.src = img.src;
+    big.alt = img.alt;
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
+  };
+  const close = () => {
+    if (overlay.hidden) return;
+    overlay.hidden = true;
+    document.body.style.overflow = "";
+    trigger?.focus();
+  };
+
+  imgs.forEach((img) => {
+    img.tabIndex = 0;
+    img.setAttribute("role", "button");
+    img.setAttribute("aria-label", `View larger image: ${img.alt || "photo"}`);
+    img.addEventListener("click", () => open(img));
+    img.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open(img);
+      }
+    });
+  });
+  closeBtn.addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 });
 
@@ -71,3 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }, { rootMargin: "-30% 0px -60% 0px" });
   map.forEach((_, sec) => spy.observe(sec));
 });
+
+
+// Vercel Web Analytics: page views only, no custom events or booking/customer fields.
+// Vercel reports page paths without query parameters and does not use tracking cookies.
+(() => {
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  const script = document.createElement("script");
+  script.defer = true;
+  script.src = "/_vercel/insights/script.js";
+  document.head.appendChild(script);
+})();
