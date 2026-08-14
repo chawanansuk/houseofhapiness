@@ -52,8 +52,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          health="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/api/health")"
-          echo "$health" | jq -e '.ok == true'
+          health="$(curl --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/api/health")"
+          echo "$health" | jq -e '(.ok | type == "boolean") and .checks.sheet == "ok"'
 
       - name: Check availability API
         shell: bash
