@@ -26,15 +26,18 @@
 <meta name="twitter:title" content="House of Happiness — Aparthotel in Khlong San, Bangkok">
 <meta name="twitter:description" content="Serviced apartments near the Chao Phraya River — from ฿700/night. Book direct for the best rate.">
 <meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="preload" as="image" href="images/attractions/riverboat.jpg">
+<link rel="preload" as="image" href="images/attractions/riverboat.jpg" type="image/jpeg" fetchpriority="high">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Hotel",
   "name": "House of Happiness",
   "url": "https://houseofhappinessbangkok.com/",
+  "image": "https://houseofhappinessbangkok.com/images/bedroom.jpg",
   "description": "Serviced apartments (Standard, Studio twin and Deluxe with living room) in Khlong San, Bangkok, near the Chao Phraya River, Sampeng Market, Wat Pho and ICONSIAM.",
   "address": {
     "@type": "PostalAddress",
@@ -170,7 +173,7 @@
   <section id="rooms" class="reveal">
     <div class="sec-head"><h2 data-i18n="rooms.title">ห้องพักและราคา</h2></div>
     <div class="room-card">
-      <img class="room-thumb" src="images/standard.jpg" alt="Standard Apartment" loading="lazy" style="width:230px; max-width:100%; align-self:center; border-radius:12px; object-fit:cover; aspect-ratio:3/2" onerror="this.remove()">
+      <img class="room-thumb" src="images/standard.jpg" alt="Standard Apartment" width="1024" height="683" loading="lazy" decoding="async" style="width:230px; max-width:100%; align-self:center; border-radius:12px; object-fit:cover; aspect-ratio:3/2" onerror="this.remove()">
       <div class="info">
         <h3 data-i18n="rooms.std.name">ห้อง Standard — เตียงใหญ่</h3>
         <p data-i18n="rooms.std.desc"></p>
@@ -183,7 +186,7 @@
       </div>
     </div>
     <div class="room-card" style="margin-top:1.2rem">
-      <img class="room-thumb" src="images/studio.jpg" alt="Studio Apartment twin beds" loading="lazy" style="width:230px; max-width:100%; align-self:center; border-radius:12px; object-fit:cover; aspect-ratio:3/2" onerror="this.remove()">
+      <img class="room-thumb" src="images/studio.jpg" alt="Studio Apartment twin beds" width="1024" height="683" loading="lazy" decoding="async" style="width:230px; max-width:100%; align-self:center; border-radius:12px; object-fit:cover; aspect-ratio:3/2" onerror="this.remove()">
       <div class="info">
         <h3 data-i18n="rooms.stu.name">ห้อง Studio — 2 เตียงแยก</h3>
         <p data-i18n="rooms.stu.desc"></p>
@@ -196,7 +199,7 @@
       </div>
     </div>
     <div class="room-card" style="margin-top:1.2rem">
-      <img class="room-thumb" src="images/deluxe.jpg" alt="Deluxe Apartment with living room" loading="lazy" style="width:230px; max-width:100%; align-self:center; border-radius:12px; object-fit:cover; aspect-ratio:3/2" onerror="this.remove()">
+      <img class="room-thumb" src="images/deluxe.jpg" alt="Deluxe Apartment with living room" width="1024" height="668" loading="lazy" decoding="async" style="width:230px; max-width:100%; align-self:center; border-radius:12px; object-fit:cover; aspect-ratio:3/2" onerror="this.remove()">
       <div class="info">
         <h3 data-i18n="rooms.dlx.name">ห้อง Deluxe — มีห้องนั่งเล่นแยก</h3>
         <p data-i18n="rooms.dlx.desc"></p>
@@ -270,14 +273,14 @@
   <section id="gallery" class="reveal">
     <div class="sec-head"><h2 data-i18n="gallery.title">รูปห้องพัก</h2></div>
     <div class="gallery">
-      <figure data-icon="🛏️"><img src="images/bedroom.jpg" alt="Bedroom with balcony" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.bedroom">ห้องนอน</figcaption></figure>
-      <figure data-icon="🛏️"><img src="images/twin.jpg" alt="Twin bed room" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.twin">ห้องเตียงคู่ (2 เตียงแยก)</figcaption></figure>
-      <figure data-icon="🛋️"><img src="images/living.jpg" alt="Living area" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.living">ห้องนั่งเล่น</figcaption></figure>
-      <figure data-icon="🚿"><img src="images/bathroom.jpg" alt="Bathroom" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.bath">ห้องน้ำ</figcaption></figure>
-      <figure data-icon="🌆"><img src="images/balcony.jpg" alt="Private balcony" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.balcony">ระเบียงส่วนตัว</figcaption></figure>
-      <figure data-icon="🚪"><img src="images/entrance.jpg" alt="Entrance" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.entrance">ทางเข้าที่พัก</figcaption></figure>
-      <figure data-icon="🛎️"><img src="images/reception.jpg" alt="Reception area" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.reception">จุดต้อนรับ / เช็คอิน</figcaption></figure>
-      <figure data-icon="🏢"><img src="images/building.jpg" alt="Building exterior" loading="lazy" onerror="this.remove()"><figcaption data-i18n="gallery.building">ตัวอาคาร</figcaption></figure>
+      <figure data-icon="🛏️"><img src="images/bedroom.jpg" alt="Bedroom with balcony" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.bedroom">ห้องนอน</figcaption></figure>
+      <figure data-icon="🛏️"><img src="images/twin.jpg" alt="Twin bed room" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.twin">ห้องเตียงคู่ (2 เตียงแยก)</figcaption></figure>
+      <figure data-icon="🛋️"><img src="images/living.jpg" alt="Living area" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.living">ห้องนั่งเล่น</figcaption></figure>
+      <figure data-icon="🚿"><img src="images/bathroom.jpg" alt="Bathroom" width="512" height="768" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.bath">ห้องน้ำ</figcaption></figure>
+      <figure data-icon="🌆"><img src="images/balcony.jpg" alt="Private balcony" width="512" height="768" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.balcony">ระเบียงส่วนตัว</figcaption></figure>
+      <figure data-icon="🚪"><img src="images/entrance.jpg" alt="Entrance" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.entrance">ทางเข้าที่พัก</figcaption></figure>
+      <figure data-icon="🛎️"><img src="images/reception.jpg" alt="Reception area" width="1024" height="625" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.reception">จุดต้อนรับ / เช็คอิน</figcaption></figure>
+      <figure data-icon="🏢"><img src="images/building.jpg" alt="Building exterior" width="598" height="768" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.building">ตัวอาคาร</figcaption></figure>
     </div>
     <p style="text-align:center; margin-top:1.4rem">
       <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent" href="gallery.html" data-i18n="gallery.all">ดูรูปทั้งหมด (30+ รูป) →</a>
@@ -309,15 +312,15 @@
     </div>
     <a class="map-link" href="https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok" target="_blank" rel="noopener" data-i18n="loc.open">เปิดใน Google Maps →</a>
     <figure style="margin:1.4rem auto 0; max-width:560px; text-align:center">
-      <img src="images/map-hand.jpg" alt="House of Happiness hand-drawn area map" loading="lazy" style="width:100%; border-radius:14px; border:1px solid var(--line); box-shadow:0 6px 20px rgba(62,47,35,0.08)" onerror="this.parentElement.remove()">
+      <img src="images/map-hand.jpg" alt="House of Happiness hand-drawn area map" width="703" height="768" loading="lazy" decoding="async" style="width:100%; border-radius:14px; border:1px solid var(--line); box-shadow:0 6px 20px rgba(62,47,35,0.08)" onerror="this.parentElement.remove()">
       <figcaption style="font-size:0.8rem; color:var(--muted); margin-top:0.5rem" data-i18n="loc.handmap">แผนที่ฉบับวาดมือของเรา — เรือ รถไฟฟ้า และจุดเที่ยวรอบที่พัก</figcaption>
     </figure>
     <h3 class="near-head" data-i18n="near.title">สถานที่ใกล้เคียง</h3>
     <div class="near-photos">
-      <a href="attractions.html"><img src="images/attractions/skypark.jpg" alt="Chao Phraya Sky Park" loading="lazy" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.skypark.n">สวนลอยฟ้าเจ้าพระยา</span></a>
-      <a href="attractions.html"><img src="images/attractions/iconsiam.jpg" alt="ICONSIAM" loading="lazy" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.iconsiam.n">ICONSIAM</span></a>
-      <a href="attractions.html"><img src="images/attractions/watarun.jpg" alt="Wat Arun" loading="lazy" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.watarun.n">วัดอรุณราชวราราม</span></a>
-      <a href="attractions.html"><img src="images/attractions/yaowarat.jpg" alt="Yaowarat Chinatown" loading="lazy" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.yaowarat.n">เยาวราช (ไชน่าทาวน์)</span></a>
+      <a href="attractions.html"><img src="images/attractions/skypark.jpg" alt="Chao Phraya Sky Park" width="960" height="720" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.skypark.n">สวนลอยฟ้าเจ้าพระยา</span></a>
+      <a href="attractions.html"><img src="images/attractions/iconsiam.jpg" alt="ICONSIAM" width="704" height="1251" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.iconsiam.n">ICONSIAM</span></a>
+      <a href="attractions.html"><img src="images/attractions/watarun.jpg" alt="Wat Arun" width="960" height="640" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.watarun.n">วัดอรุณราชวราราม</span></a>
+      <a href="attractions.html"><img src="images/attractions/yaowarat.jpg" alt="Yaowarat Chinatown" width="960" height="721" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.yaowarat.n">เยาวราช (ไชน่าทาวน์)</span></a>
     </div>
     <ul class="nearby">
       <li><span class="ico">🏮</span><span class="nm" data-i18n="near.1">ตลาดสำเพ็ง</span><span class="dist" data-i18n="near.1.d">~900 ม.</span></li>
