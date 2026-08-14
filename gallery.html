@@ -8,12 +8,25 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<meta property="og:title" content="รูปทั้งหมด — House of Happiness Bangkok">
-<meta property="og:description" content="ห้องนอน · ห้องน้ำ · ตัวอาคาร — ชมรูปจริงของที่พักกว่า 30 รูป">
+<meta property="og:title" content="รูปทั้งหมด | Photo Gallery — House of Happiness Bangkok">
+<meta property="og:description" content="ชมรูปจริงของห้องพัก ห้องน้ำ ระเบียง และตัวอาคาร House of Happiness คลองสาน กรุงเทพฯ กว่า 30 รูป">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://houseofhappinessbangkok.com/gallery.html">
+<meta property="og:site_name" content="House of Happiness">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="683">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="รูปทั้งหมด | Photo Gallery — House of Happiness Bangkok">
+<meta name="twitter:description" content="ชมรูปจริงของห้องพัก ห้องน้ำ ระเบียง และตัวอาคาร House of Happiness คลองสาน กรุงเทพฯ กว่า 30 รูป">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/gallery.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <style>
@@ -147,7 +160,7 @@ function render() {
   document.getElementById("glWrap").innerHTML = GROUPS.map(function (g) {
     var cards = g.items.map(function (it) {
       var i = idx++;
-      return '<figure data-idx="' + i + '"><img src="' + it.f + '" alt="' + it.en + '" loading="lazy" onerror="this.parentElement.remove()">' +
+      return '<figure data-idx="' + i + '"><img src="' + it.f + '" alt="' + it.en + '" width="1024" height="768" loading="lazy" decoding="async" onerror="this.parentElement.remove()">' +
         '<figcaption>' + (lang === "en" ? it.en : it.th) + '</figcaption></figure>';
     }).join("");
     return '<div class="gl-group"><h2>' + (lang === "en" ? g.en : g.th) + '</h2></div><div class="gl-grid">' + cards + '</div>';
