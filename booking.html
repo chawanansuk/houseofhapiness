@@ -393,7 +393,13 @@ function checkAvailability() {
       availCtrl = new AbortController();
       const r = await fetch(`/api/availability?checkin=${s.ci}&checkout=${s.co}`, { signal: availCtrl.signal });
       const j = await r.json();
-      if (!j.ok || sig !== availSig) return;
+      if (!r.ok || !j.ok) {
+        if (sig !== availSig) return;
+        badge.className = "avail-badge uncertain";
+        badge.textContent = t("av.unavailable");
+        return;
+      }
+      if (sig !== availSig) return;
       if (j.warning === "uncertain") {
         // มีการจองที่ยังไม่รู้วันที่ — อย่าการันตีเลขห้องว่าง ใช้ข้อความ "ขอเช็คก่อน" แทน
         badge.className = "avail-badge uncertain";
@@ -408,7 +414,12 @@ function checkAvailability() {
         badge.className = "avail-badge ok";
         badge.innerHTML = `${t("av.left.pre")}${j.available}${t("av.left.post")} <small>· ${t("av.note")}</small>`;
       }
-    } catch { badge.hidden = true; }
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+      badge.hidden = false;
+      badge.className = "avail-badge uncertain";
+      badge.textContent = t("av.unavailable");
+    }
   }, 350);
 }
 // เรียกจาก update() ทุกครั้ง — sig guard ทำให้ยิง API เฉพาะตอน "ช่วงวัน" เปลี่ยนจริง
