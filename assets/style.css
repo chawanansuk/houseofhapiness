@@ -80,6 +80,14 @@ img { max-width: 100%; }
   .navlinks { display: none; }
   .nav-right { margin-left: auto; }
 }
+@media (max-width: 420px) {
+  .topnav { gap: 0.5rem; padding: 0.55rem 0.65rem; }
+  .topnav .brand { min-width: 0; gap: 0.25rem; font-size: 0.92rem; }
+  .topnav .brand .logo { font-size: 1rem; }
+  .topnav .nav-right { gap: 0.4rem; }
+  .lang-toggle button { padding: 0.3rem 0.55rem; }
+  .topnav .nav-right > .btn { display: none; }
+}
 
 /* ── Language toggle ── */
 .lang-toggle {
