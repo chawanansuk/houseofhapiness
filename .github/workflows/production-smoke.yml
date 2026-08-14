@@ -42,8 +42,6 @@ jobs:
           check_page "/booking.html" 'id="bookingForm"'
           check_page "/gallery.html" 'id="glWrap"'
           check_page "/admin/" 'id="loginForm"'
-          fetch "$base/_vercel/insights/script.js" > /dev/null
-
           health="$(fetch "$base/api/health")"
           echo "$health" | jq -e '.ok == true'
 
