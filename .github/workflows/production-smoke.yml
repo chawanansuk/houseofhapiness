@@ -4,6 +4,12 @@ on:
   pull_request:
     paths:
       - ".github/workflows/production-smoke.yml"
+      - "api/availability.js"
+      - "api/health.js"
+      - "tests/availability.test.js"
+  push:
+    branches:
+      - main
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
@@ -20,6 +26,10 @@ jobs:
     env:
       BASE_URL: https://houseofhappinessbangkok.com
     steps:
+      - name: Wait for Production deployment
+        if: github.event_name == 'push'
+        run: sleep 30
+
       - name: Check homepage
         shell: bash
         run: |
@@ -49,6 +59,7 @@ jobs:
           grep --fixed-strings 'id="loginForm"' <<< "$body" > /dev/null
 
       - name: Check health API
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -56,6 +67,7 @@ jobs:
           echo "$health" | jq -e '(.ok | type == "boolean") and .checks.sheet == "ok"'
 
       - name: Check availability API
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
