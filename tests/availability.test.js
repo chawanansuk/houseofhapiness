@@ -165,6 +165,21 @@ module.exports = (async () => {
   assert.deepEqual(r.body.checks, { sheet: "ok", ical: "not-configured" });
   assert.equal(JSON.stringify(r.body).includes(process.env.SHEET_TOKEN), false);
 
+  // รองรับ Apps Script deployment รุ่นเก่าที่ยังไม่ส่ง rooms
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({ bookings: FIXTURE.bookings }),
+    text: async () => "",
+  });
+  r = await call(health);
+  assert.equal(r.code, 200);
+  assert.equal(r.body.checks.sheet, "ok");
+  r = await call(availability, {
+    query: { checkin: "2026-08-10", checkout: "2026-08-11" },
+  });
+  assert.equal(r.code, 200);
+  assert.equal(r.body.total, 15);
+
   global.fetch = async () => { throw new Error("sheet offline"); };
   r = await call(health);
   assert.equal(r.code, 503);
