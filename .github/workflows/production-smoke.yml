@@ -17,37 +17,51 @@ jobs:
     name: Check live website and API
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      BASE_URL: https://houseofhappinessbangkok.com
     steps:
-      - name: Check public pages, admin login, and API
+      - name: Check homepage
         shell: bash
         run: |
           set -euo pipefail
-          base="https://houseofhappinessbangkok.com"
+          body="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/")"
+          grep --fixed-strings 'id="main"' <<< "$body" > /dev/null
 
-          fetch() {
-            curl --fail --location --silent --show-error \
-              --max-time 20 --retry 2 --retry-delay 2 "$1"
-          }
+      - name: Check booking page
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/booking.html")"
+          grep --fixed-strings 'id="bookingForm"' <<< "$body" > /dev/null
 
-          check_page() {
-            local path="$1"
-            local marker="$2"
-            local body
-            echo "Checking $path"
-            body="$(fetch "$base$path")"
-            grep --fixed-strings "$marker" <<< "$body" > /dev/null
-          }
+      - name: Check gallery page
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/gallery.html")"
+          grep --fixed-strings 'id="glWrap"' <<< "$body" > /dev/null
 
-          check_page "/" 'id="main"'
-          check_page "/booking.html" 'id="bookingForm"'
-          check_page "/gallery.html" 'id="glWrap"'
-          check_page "/admin/" 'id="loginForm"'
-          health="$(fetch "$base/api/health")"
+      - name: Check admin login page
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/admin/")"
+          grep --fixed-strings 'id="loginForm"' <<< "$body" > /dev/null
+
+      - name: Check health API
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/api/health")"
           echo "$health" | jq -e '.ok == true'
 
+      - name: Check availability API
+        shell: bash
+        run: |
+          set -euo pipefail
           checkin="$(date -u -d '+2 days' +%F)"
           checkout="$(date -u -d '+3 days' +%F)"
-          availability="$(fetch "$base/api/availability?checkin=$checkin&checkout=$checkout")"
+          availability="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/api/availability?checkin=$checkin&checkout=$checkout")"
           echo "$availability" | jq -e '.ok == true and (.available | type == "number")'
 
       - name: Open or update a production alert
