@@ -119,13 +119,15 @@ async function fetchSheet() {
     });
     if (!r.ok) return { ok: false, rows: [], rooms: [], error: `http-${r.status || "error"}` };
     const j = await r.json();
-    if (!Array.isArray(j && j.bookings) || !Array.isArray(j && j.rooms)) {
+    if (!Array.isArray(j && j.bookings)) {
       return { ok: false, rows: [], rooms: [], error: "invalid-response" };
     }
     return {
       ok: true,
       rows: j.bookings,
-      rooms: j.rooms,
+      // รองรับ Apps Script deployment รุ่นเก่าที่ยังไม่ส่ง rooms;
+      // ตัวคำนวณมี fallback จำนวนห้องอยู่แล้ว
+      rooms: Array.isArray(j.rooms) ? j.rooms : [],
     };
   } catch (e) {
     return { ok: false, rows: [], rooms: [], error: e && e.name === "AbortError" ? "timeout" : "unavailable" };
