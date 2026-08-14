@@ -32,7 +32,8 @@ async function checkSheet() {
     });
     if (!r.ok) return "unavailable";
     const j = await r.json();
-    return Array.isArray(j && j.bookings) && Array.isArray(j && j.rooms) ? "ok" : "invalid-response";
+    // bookings คือ dependency หลัก ส่วน rooms เป็น field ที่เพิ่มภายหลังและมี fallback
+    return Array.isArray(j && j.bookings) ? "ok" : "invalid-response";
   } catch (e) {
     return e && e.name === "AbortError" ? "timeout" : "unavailable";
   } finally {
