@@ -489,10 +489,11 @@ function prefillFromQuery() {
   if (isYMD(ci) && ci >= today) {
     $("checkin").value = ci;
     const next = new Date(ci);
-    next.setDate(next.getDate() + 1);
+    next.setDate(next.getDate() + MIN_NIGHTS);
     $("checkout").min = toYMD(next);
   }
-  if (isYMD(co) && co > ($("checkin").value || today)) $("checkout").value = co;
+  // รับค่าเช็คเอาท์เฉพาะที่เข้าพักครบขั้นต่ำ 2 คืน
+  if (isYMD(co) && co >= $("checkout").min) $("checkout").value = co;
   if (["1", "2", "3"].includes(g)) $("guests").value = g;
 }
 

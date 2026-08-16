@@ -757,6 +757,13 @@ textarea { resize: vertical; min-height: 4.5rem; }
   color: var(--muted);
 }
 .min-note::before { content: "ℹ "; }
+.hero-min-note {
+  margin: 0.6rem auto 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+}
+.hero-min-note::before { content: "ℹ "; }
 .quick-row {
   display: flex;
   flex-wrap: wrap;

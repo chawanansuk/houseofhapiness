@@ -134,6 +134,7 @@
     </div>
     <button class="btn btn-gold" type="submit" data-i18n="hb.cta">เช็คห้องว่าง →</button>
   </form>
+  <p class="hero-min-note" data-i18n="bk.minnights">เข้าพักขั้นต่ำ 2 คืน</p>
   <div class="rating-pill">
     <span class="stars">★★★★★</span>
     <span data-i18n="hero.rating">คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com</span>
@@ -426,7 +427,8 @@
   hbIn.min = today; hbOut.min = today;
   hbIn.addEventListener("change", function () {
     if (!hbIn.value) return;
-    var n = new Date(hbIn.value); n.setDate(n.getDate() + 1);
+    // เข้าพักขั้นต่ำ 2 คืน — เช็คเอาท์ต้องห่างจากเช็คอินอย่างน้อย 2 วัน
+    var n = new Date(hbIn.value); n.setDate(n.getDate() + 2);
     hbOut.min = n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate());
     if (hbOut.value && hbOut.value < hbOut.min) hbOut.value = hbOut.min;
   });
