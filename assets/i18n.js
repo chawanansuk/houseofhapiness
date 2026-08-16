@@ -282,6 +282,7 @@ const I18N = {
   "bk.empty":        { th: "กรุณาเลือกห้องและวันเข้าพักก่อน ระบบจะคำนวณราคาให้อัตโนมัติ",
                        en: "Choose a room and your dates — the price is calculated automatically." },
   "bk.baddates":     { th: "วันเช็คเอาท์ต้องอยู่หลังวันเช็คอิน", en: "Check-out must be after check-in." },
+  "bk.minnights":    { th: "เข้าพักขั้นต่ำ 2 คืน", en: "Minimum stay: 2 nights" },
   "bk.nights":       { th: "คืน", en: "night(s)" },
   "bk.total":        { th: "รวม", en: "Total" },
   "bk.approx":       { th: "ราคาโดยประมาณ ยืนยันราคาสุดท้ายเมื่อโรงแรมตอบกลับ", en: "Estimated price — final rate confirmed by the hotel." },

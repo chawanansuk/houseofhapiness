@@ -53,7 +53,10 @@ module.exports = async (req, res) => {
   };
 
   const isYMD = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-  if (!row.name || !isYMD(row.checkin) || !isYMD(row.checkout) || row.checkout <= row.checkin) {
+  // ที่พักรับจองขั้นต่ำ 2 คืน
+  const nights = (isYMD(row.checkin) && isYMD(row.checkout))
+    ? Math.round((Date.parse(row.checkout) - Date.parse(row.checkin)) / 86400000) : 0;
+  if (!row.name || !isYMD(row.checkin) || !isYMD(row.checkout) || nights < 2) {
     return res.status(400).json({ ok: false, error: "invalid-input" });
   }
 

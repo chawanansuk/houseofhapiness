@@ -751,6 +751,12 @@ textarea { resize: vertical; min-height: 4.5rem; }
 .nearby .dist { margin-left: auto; font-size: 0.84rem; color: var(--muted); white-space: nowrap; }
 
 /* ── Booking: quick picks & nights badge ── */
+.min-note {
+  margin: 0.55rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.min-note::before { content: "ℹ "; }
 .quick-row {
   display: flex;
   flex-wrap: wrap;
