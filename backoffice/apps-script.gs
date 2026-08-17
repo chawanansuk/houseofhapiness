@@ -606,14 +606,14 @@ function extractGuestName_(text) {
 
 function extractGuests_(text) {
   var s = String(text);
-  var m = s.match(/(?:number of guests|guests?|adults?|จำนวนผู้เข้าพัก|ผู้เข้าพัก|ผู้ใหญ่)\s*[:：-]?\s*(\d+)/i);
+  var m = s.match(/(?:number of guests|guests?|adults?|จำนวนผู้เข้าพัก|ผู้เข้าพัก|ผู้ใหญ่)[ \t]*[:：-]?[ \t]*(\d+)/i);
   if (!m) m = s.match(/(\d+)\s*(?:adults?|guests?|ผู้ใหญ่|ผู้เข้าพัก|ท่าน)(?:\b|$)/i);
   return m ? m[1] : "";
 }
 
 function extractRooms_(text) {
   var s = String(text);
-  var m = s.match(/(?:number of rooms|rooms?|units?|จำนวนห้อง|ห้องพัก)\s*[:：-]?\s*(\d+)/i);
+  var m = s.match(/(?:number of rooms|rooms?|units?|จำนวนห้อง|ห้องพัก)[ \t]*[:：-]?[ \t]*(\d+)/i);
   if (!m) m = s.match(/(\d+)\s*(?:rooms?|units?|ห้อง)(?:\b|$)/i);
   return m ? m[1] : "";
 }
