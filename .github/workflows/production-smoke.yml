@@ -5,8 +5,12 @@ on:
     paths:
       - ".github/workflows/production-smoke.yml"
       - "api/availability.js"
+      - "api/deployment.js"
       - "api/health.js"
+      - "scripts/verify-production-deploy.js"
       - "tests/availability.test.js"
+      - "tests/deployment.test.js"
+      - "vercel.json"
   push:
     branches:
       - main
@@ -58,6 +62,30 @@ jobs:
           body="$(curl --fail --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/admin/")"
           grep --fixed-strings 'id="loginForm"' <<< "$body" > /dev/null
 
+      - name: Check Production source
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          attempts=1
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then attempts=12; fi
+          for ((attempt=1; attempt<=attempts; attempt++)); do
+            source_json="$(curl --location --silent --show-error --max-time 20 "$BASE_URL/api/deployment" || true)"
+            if jq -e --arg sha "$GITHUB_SHA" '
+              .ok == true
+              and .source.provider == "github"
+              and .source.repository == "chawanansuk/houseofhapiness"
+              and .source.ref == "main"
+              and .source.sha == $sha
+            ' <<< "$source_json" > /dev/null 2>&1; then
+              exit 0
+            fi
+            if (( attempt < attempts )); then sleep 10; fi
+          done
+          echo "$source_json" | jq . || echo "$source_json"
+          echo "Production is not serving the latest GitHub main commit ($GITHUB_SHA)." >&2
+          exit 1
+
       - name: Check health API
         if: github.event_name != 'pull_request'
         shell: bash
@@ -84,7 +112,7 @@ jobs:
             const title = "Production smoke test failed";
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const body = [
-              "@chawanansuk ระบบตรวจพบว่าเว็บไซต์หรือ API Production มีปัญหา",
+              "@chawanansuk ระบบตรวจพบว่าเว็บไซต์, API หรือแหล่งที่มาของ Production มีปัญหา",
               "",
               `เวลา: ${new Date().toISOString()}`,
               `Workflow: ${runUrl}`,

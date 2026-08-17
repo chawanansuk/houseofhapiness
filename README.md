@@ -60,3 +60,26 @@ Analytics ทำงานเฉพาะหน้าสาธารณะที�
 ## เอกสาร Apps Script
 
 ดูขั้นตอนตั้งค่าและ deploy ที่ [backoffice/SETUP.md](backoffice/SETUP.md)
+
+## Booking.com iCal
+
+ตั้งค่า `BOOKING_ICAL_URLS` ใน Vercel เฉพาะ Production โดยคัดลอกลิงก์ Export calendar จาก Booking.com Extranet รูปแบบที่รองรับคือ:
+
+```text
+https://example.com/room-a.ics,https://example.com/room-b.ics
+```
+
+หรือใส่ชื่อกำกับแต่ละปฏิทินเพื่อดูแลค่าได้ง่าย:
+
+```text
+Standard|https://example.com/standard.ics,Deluxe|https://example.com/deluxe.ics
+```
+
+ลิงก์ iCal เป็นข้อมูลส่วนตัว ห้าม commit ลง repository หลังบันทึกค่าแล้วให้ Redeploy Production และตรวจ `/api/health` ว่า `checks.ical` เป็น `ok`
+
+## Deployment safety
+
+- Production build จะผ่านเมื่อ Vercel ระบุว่าแหล่งที่มาคือ GitHub repository `chawanansuk/houseofhapiness` branch `main` เท่านั้น
+- `/api/deployment` เปิดเผยเฉพาะ provider, repository, branch และ commit SHA เพื่อให้ Production smoke test ตรวจว่าโดเมนหลักกำลังเสิร์ฟ commit ล่าสุดจาก `main`
+- ต้องเปิด **Automatically expose System Environment Variables** ใน Vercel Project Settings เพื่อให้ Build Guard และ Monitoring อ่าน `VERCEL_GIT_*` ได้
+- ห้ามใช้ `vercel --prod` จากเครื่องนักพัฒนา ให้ merge Pull Request เข้า `main` และรอ GitHub integration deploy อัตโนมัติ

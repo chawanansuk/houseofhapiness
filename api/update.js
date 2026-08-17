@@ -1,20 +1,10 @@
 /**
- * POST /api/update — สั่งงานจากหน้า /admin: เช็คอิน/เช็คเอาต์/ย้ายห้อง/เปลี่ยนสถานะ/ทำความสะอาด
- *
- * ต้องส่ง header "x-admin-key" ตรงกับ ADMIN_PASSWORD หรือ STAFF_PASSWORD
- * (โหมดตัวอย่างใช้ demo1234 / staff1234 และจะไม่บันทึกจริง — ตอบ ok ให้ UI ทดลองได้)
- * รหัสพนักงานสั่งงานได้ทุกอย่าง ยกเว้นแก้ยอดเงิน (ฟิลด์ amount ถูกตัดทิ้ง)
- *
- * body รูปแบบใดรูปแบบหนึ่ง:
- *   { action: "update", id, fields: { status?, room_no?, note?, checkin?, checkout?, amount?, name?, phone?, guests? } }
- *   { action: "roomclean", room, clean, note? }
- *   { action: "add", name, checkin, checkout, room_no?, phone?, guests?, amount?, source?, status?, note? }
- *   { action: "expadd", date, category, amount, vendor?, method?, note? }   (เฉพาะเจ้าของ)
- *   { action: "expdel", id }                                               (เฉพาะเจ้าของ)
+ * POST /api/update — write admin actions to Google Sheets through Apps Script.
  */
 
 const DEMO_KEY = "demo1234";
 const DEMO_STAFF_KEY = "staff1234";
+const SHEET_TIMEOUT_MS = 12000;
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -40,7 +30,6 @@ module.exports = async (req, res) => {
   }
 
   if (role === "staff") {
-    // รายจ่ายเป็นเรื่องเงิน — เฉพาะเจ้าของเท่านั้น
     if (action === "expadd" || action === "expdel") {
       return res.status(403).json({ ok: false, error: "staff-not-allowed" });
     }
@@ -49,26 +38,54 @@ module.exports = async (req, res) => {
   }
 
   if (demoMode) {
-    // โหมดตัวอย่าง: ไม่บันทึกจริง แต่ตอบ ok ให้ UI เดินต่อได้
     return res.status(200).json({ ok: true, demo: true, saved: false });
   }
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url) return res.status(200).json({ ok: false, error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" });
+  if (!url || !token) {
+    console.error(JSON.stringify({ event: "admin_update_storage_not_configured" }));
+    return res.status(503).json({ ok: false, saved: false, error: "update-service-not-configured" });
+  }
 
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SHEET_TIMEOUT_MS);
   try {
     const r = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ ...b, token }),
       redirect: "follow",
+      signal: ctrl.signal,
     });
-    if (!r.ok) return res.status(200).json({ ok: false, error: `ชีตตอบ HTTP ${r.status}` });
-    const j = await r.json().catch(() => ({}));
-    if (j && j.error) return res.status(200).json({ ok: false, error: String(j.error) });
-    return res.status(200).json({ ok: true, saved: true, id: j.id });
+    const text = await r.text();
+    let result;
+    try { result = JSON.parse(text); } catch { result = null; }
+
+    if (!r.ok || !result || result.ok !== true) {
+      console.error(JSON.stringify({
+        event: "admin_update_storage_rejected",
+        downstreamStatus: r.status || null,
+        downstreamOk: r.ok,
+        payloadOk: Boolean(result && result.ok === true),
+        downstreamError: result && result.error ? String(result.error).slice(0, 80) : null,
+      }));
+      return res.status(502).json({ ok: false, saved: false, error: "update-storage-failed" });
+    }
+
+    return res.status(200).json({ ok: true, saved: true, id: result.id });
   } catch (e) {
-    return res.status(200).json({ ok: false, error: String((e && e.message) || e) });
+    const timedOut = e && e.name === "AbortError";
+    console.error(JSON.stringify({
+      event: "admin_update_storage_unavailable",
+      reason: timedOut ? "timeout" : String((e && e.message) || "unavailable").slice(0, 120),
+    }));
+    return res.status(timedOut ? 504 : 502).json({
+      ok: false,
+      saved: false,
+      error: timedOut ? "update-storage-timeout" : "update-storage-unavailable",
+    });
+  } finally {
+    clearTimeout(timer);
   }
 };
