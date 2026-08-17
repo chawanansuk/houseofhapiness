@@ -43,6 +43,9 @@ jobs:
       - name: Test admin update API
         run: node tests/update.test.js
 
+      - name: Test Booking.com email parser
+        run: node tests/booking-email-parser.test.js
+
       - name: Test Production deployment guard
         run: node tests/deployment.test.js
 
