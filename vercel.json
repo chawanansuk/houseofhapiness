@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "node scripts/verify-production-deploy.js",
+  "outputDirectory": ".",
   "redirects": [
     { "source": "/admin", "destination": "/admin/", "permanent": false }
   ],
@@ -28,3 +29,4 @@
     }
   ]
 }
+
