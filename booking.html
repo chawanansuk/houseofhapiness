@@ -82,11 +82,12 @@
         </div>
       </div>
       <p class="avail-badge" id="availBadge" hidden></p>
+      <p class="min-note" data-i18n="bk.minnights">เข้าพักขั้นต่ำ 2 คืน</p>
       <div class="quick-row" id="quickRow">
         <span data-i18n="bk.quick">เลือกไว:</span>
-        <button type="button" class="chip-btn" data-nights="1">1</button>
         <button type="button" class="chip-btn" data-nights="2">2</button>
         <button type="button" class="chip-btn" data-nights="3">3</button>
+        <button type="button" class="chip-btn" data-nights="5">5</button>
         <span class="nights-badge" id="nightsBadge" hidden></span>
       </div>
       <div class="row">
@@ -243,6 +244,7 @@ function renderRooms() {
 }
 
 // วันที่ตามเขตเวลาเครื่องผู้ใช้ (ไม่ใช่ UTC) เพื่อไม่ให้เลือกวันย้อนหลังได้ช่วงหลังเที่ยงคืน
+const MIN_NIGHTS = 2; // ที่พักรับจองขั้นต่ำ 2 คืน
 const toYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const today = toYMD(new Date());
 $("checkin").min = today;
@@ -251,8 +253,9 @@ $("checkout").min = today;
 $("checkin").addEventListener("change", () => {
   const ci = $("checkin").value;
   if (!ci) return;
+  // เช็คเอาท์ต้องห่างจากเช็คอินอย่างน้อย MIN_NIGHTS คืน
   const next = new Date(ci);
-  next.setDate(next.getDate() + 1);
+  next.setDate(next.getDate() + MIN_NIGHTS);
   $("checkout").min = toYMD(next);
   if ($("checkout").value && $("checkout").value < $("checkout").min) {
     $("checkout").value = $("checkout").min;
@@ -262,13 +265,15 @@ $("checkin").addEventListener("change", () => {
 // ปุ่ม "เลือกไว" — ตั้งเช็คเอาท์เป็น N คืนนับจากวันเช็คอิน (ถ้ายังไม่เลือกเช็คอิน ใช้วันนี้)
 document.querySelectorAll(".chip-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const n = +btn.dataset.nights;
+    const n = Math.max(MIN_NIGHTS, +btn.dataset.nights);
     if (!$("checkin").value) $("checkin").value = today;
-    const d = new Date($("checkin").value);
-    d.setDate(d.getDate() + 1);
-    $("checkout").min = toYMD(d);
-    d.setDate(d.getDate() + (n - 1));
-    $("checkout").value = toYMD(d);
+    const base = new Date($("checkin").value);
+    const minD = new Date(base);
+    minD.setDate(minD.getDate() + MIN_NIGHTS);
+    $("checkout").min = toYMD(minD);
+    const outD = new Date(base);
+    outD.setDate(outD.getDate() + n);
+    $("checkout").value = toYMD(outD);
     update();
   });
 });
@@ -304,13 +309,15 @@ function update() {
     el.classList.toggle("selected", el.querySelector("input").checked));
 
   const summary = $("summary");
-  if (s.room && s.nights > 0) {
+  if (s.room && s.nights >= MIN_NIGHTS) {
     summary.innerHTML = `
       <strong>${s.room.name[lang()]}</strong><br>
       ${fmtDate(s.ci)} → ${fmtDate(s.co)} · ${s.guests} ${t("bk.guests.n")}<br>
       <span class="breakdown">฿${s.room.price.toLocaleString()} × ${s.nights} ${t("bk.nights")} × ${s.numRooms} ${t("bk.rooms.n")}</span><br>
       <span class="total">${t("bk.total")} ฿${s.total.toLocaleString()}</span><br>
       <span class="note">${t("bk.approx")}</span>`;
+  } else if (s.room && s.ci && s.co && s.nights > 0 && s.nights < MIN_NIGHTS) {
+    summary.textContent = t("bk.minnights");
   } else if (s.room && s.ci && s.co) {
     summary.textContent = t("bk.baddates");
   } else {
@@ -319,12 +326,12 @@ function update() {
   $("stickyTotal").textContent = `฿${s.total.toLocaleString()}`;
 
   const badge = $("nightsBadge");
-  badge.hidden = !(s.nights > 0);
-  if (s.nights > 0) badge.textContent = `✓ ${s.nights} ${t("bk.nights")}`;
+  badge.hidden = !(s.nights >= MIN_NIGHTS);
+  if (s.nights >= MIN_NIGHTS) badge.textContent = `✓ ${s.nights} ${t("bk.nights")}`;
   document.querySelectorAll(".chip-btn").forEach((b) =>
     b.classList.toggle("active", +b.dataset.nights === s.nights));
 
-  const ready = s.room && s.nights > 0 && s.name && s.phone;
+  const ready = s.room && s.nights >= MIN_NIGHTS && s.name && s.phone;
   const L = lang() === "th";
   const msg = (L
     ? `สวัสดีครับ/ค่ะ ขอจองห้องพัก House of Happiness`
@@ -378,7 +385,8 @@ function update() {
   } else {
     const missing = [];
     if (!s.room) missing.push(t("bk.hint.room"));
-    if (!(s.nights > 0)) missing.push(t("bk.hint.dates"));
+    if (s.nights > 0 && s.nights < MIN_NIGHTS) missing.push(t("bk.minnights"));
+    else if (!(s.nights >= MIN_NIGHTS)) missing.push(t("bk.hint.dates"));
     if (!s.name) missing.push(t("bk.hint.name"));
     if (!s.phone) missing.push(t("bk.hint.phone"));
     hint.hidden = false;
@@ -557,10 +565,11 @@ function prefillFromQuery() {
   if (isYMD(ci) && ci >= today) {
     $("checkin").value = ci;
     const next = new Date(ci);
-    next.setDate(next.getDate() + 1);
+    next.setDate(next.getDate() + MIN_NIGHTS);
     $("checkout").min = toYMD(next);
   }
-  if (isYMD(co) && co > ($("checkin").value || today)) $("checkout").value = co;
+  // รับค่าเช็คเอาท์เฉพาะที่เข้าพักครบขั้นต่ำ 2 คืน
+  if (isYMD(co) && co >= $("checkout").min) $("checkout").value = co;
   if (["1", "2", "3"].includes(g)) $("guests").value = g;
 }
 
