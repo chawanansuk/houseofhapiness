@@ -545,7 +545,7 @@ function parseBookingEmail_(subject, body) {
 
   // ให้ยกเลิกมีลำดับสูงสุด เพราะหัวข้อบางแบบมีทั้ง "booking" และ "cancelled"
   if (/cancel(?:led|lation)?|ยกเลิก/i.test(cleanSubject)) type = "cancel";
-  else if (/modif(?:ied|ication)?|booking changed|reservation changed|change(?:d)?\s+(?:to\s+)?(?:booking|reservation)|เปลี่ยนแปลง|แก้ไข/i.test(cleanSubject)) type = "modify";
+  else if (/modif(?:ied|ication)?|booking changed|reservation changed|change(?:d)?\s+(?:to\s+)?(?:booking|reservation)|เปลี่ยนแปลง|ปรับเปลี่ยน|แก้ไข/i.test(cleanSubject)) type = "modify";
   else if (/new booking|new reservation|reservation confirmed|booking confirmation|การจองใหม่|คุณมีการจองใหม่|ยืนยันการจอง/i.test(cleanSubject)) type = "new";
 
   var dates = extractDates_(text);

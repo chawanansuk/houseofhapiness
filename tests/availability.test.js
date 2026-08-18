@@ -96,7 +96,7 @@ module.exports = (async () => {
   const mkBook = () => call(book, {
     method: "POST",
     headers: { "x-forwarded-for": "203.0.113.9" },
-    body: { name: "ทดสอบ", checkin: "2026-09-01", checkout: "2026-09-02" },
+    body: { name: "ทดสอบ", checkin: "2026-09-01", checkout: "2026-09-03" },
   });
   for (let i = 0; i < 5; i++) {
     const b = await mkBook();
@@ -108,7 +108,7 @@ module.exports = (async () => {
   const other = await call(book, {
     method: "POST",
     headers: { "x-forwarded-for": "198.51.100.7" },
-    body: { name: "ทดสอบ2", checkin: "2026-09-01", checkout: "2026-09-02" },
+    body: { name: "ทดสอบ2", checkin: "2026-09-01", checkout: "2026-09-03" },
   });
   assert.equal(other.code, 503);
 
@@ -116,7 +116,7 @@ module.exports = (async () => {
   process.env.SHEET_WEBAPP_URL = "https://sheet.fixture/exec";
   const validBody = {
     name: "CODEX TEST", phone: "0000000000",
-    checkin: "2026-09-10", checkout: "2026-09-11",
+    checkin: "2026-09-10", checkout: "2026-09-12",
     guests: "2", rooms: "1", total: "700",
     room: "ห้อง Standard", note: "test only",
   };
@@ -130,6 +130,13 @@ module.exports = (async () => {
   });
   assert.equal(saved.code, 201);
   assert.deepEqual(saved.body, { ok: true, saved: true, id: "WEB-TEST-1" });
+
+  // 8.1) ที่พักรับจองขั้นต่ำ 2 คืน — คำขอ 1 คืนต้องโดนปฏิเสธ
+  const oneNight = await call(book, {
+    method: "POST", headers: { "x-forwarded-for": "203.0.113.30" },
+    body: { ...validBody, checkin: "2026-09-10", checkout: "2026-09-11" },
+  });
+  assert.equal(oneNight.code, 400, "จอง 1 คืนต้องถูกปฏิเสธ (ขั้นต่ำ 2 คืน)");
 
   // 9) HTTP 200 จาก Apps Script ไม่พอ — JSON ต้องยืนยันการบันทึกด้วย
   global.fetch = async () => ({ ok: true, text: async () => JSON.stringify({ error: "unauthorized" }) });
