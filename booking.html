@@ -9,10 +9,24 @@
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
-<meta property="og:image" content="https://houseofhappinessbangkok.com/images/og.png">
+<meta property="og:description" content="จองตรงราคาดีกว่า ไม่ผ่านคนกลาง พร้อมส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://houseofhappinessbangkok.com/booking.html">
+<meta property="og:site_name" content="House of Happiness">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="683">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
+<meta name="twitter:description" content="จองตรงราคาดีกว่า ไม่ผ่านคนกลาง พร้อมส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="preload" as="image" href="images/attractions/riverboat.jpg">
+<link rel="preload" as="image" href="images/attractions/riverboat.jpg" type="image/jpeg" fetchpriority="high">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/booking.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
@@ -99,11 +113,11 @@
     <div class="card reveal">
       <h2><span class="step">3</span><span data-i18n="bk.step3">ข้อมูลผู้จอง</span></h2>
       <label for="name" data-i18n="bk.name">ชื่อ-นามสกุล</label>
-      <input type="text" id="name" data-i18n="bk.name.ph" data-i18n-attr="placeholder" required>
+      <input type="text" id="name" data-i18n="bk.name.ph" data-i18n-attr="placeholder" autocomplete="name" maxlength="120" required>
       <label for="phone" data-i18n="bk.phone">เบอร์โทรศัพท์</label>
-      <input type="tel" id="phone" placeholder="08x-xxx-xxxx" required>
+      <input type="tel" id="phone" placeholder="08x-xxx-xxxx" autocomplete="tel" inputmode="tel" maxlength="40" required>
       <label for="note" data-i18n="bk.note">ความต้องการเพิ่มเติม (ถ้ามี)</label>
-      <textarea id="note" data-i18n="bk.note.ph" data-i18n-attr="placeholder"></textarea>
+      <textarea id="note" data-i18n="bk.note.ph" data-i18n-attr="placeholder" maxlength="500"></textarea>
     </div>
   </div>
 
@@ -118,6 +132,7 @@
         <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
+        <p class="booking-save-status" id="bookingSaveStatus" role="status" aria-live="polite" hidden></p>
       </div>
       <ul class="trust">
         <li>✅ <span data-i18n="bk.trust.1">ไม่ต้องชำระเงินออนไลน์ — จ่ายที่โรงแรม</span></li>
@@ -400,7 +415,13 @@ function checkAvailability() {
       availCtrl = new AbortController();
       const r = await fetch(`/api/availability?checkin=${s.ci}&checkout=${s.co}`, { signal: availCtrl.signal });
       const j = await r.json();
-      if (!j.ok || sig !== availSig) return;
+      if (!r.ok || !j.ok) {
+        if (sig !== availSig) return;
+        badge.className = "avail-badge uncertain";
+        badge.textContent = t("av.unavailable");
+        return;
+      }
+      if (sig !== availSig) return;
       if (j.warning === "uncertain") {
         // มีการจองที่ยังไม่รู้วันที่ — อย่าการันตีเลขห้องว่าง ใช้ข้อความ "ขอเช็คก่อน" แทน
         badge.className = "avail-badge uncertain";
@@ -415,7 +436,12 @@ function checkAvailability() {
         badge.className = "avail-badge ok";
         badge.innerHTML = `${t("av.left.pre")}${j.available}${t("av.left.post")} <small>· ${t("av.note")}</small>`;
       }
-    } catch { badge.hidden = true; }
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+      badge.hidden = false;
+      badge.className = "avail-badge uncertain";
+      badge.textContent = t("av.unavailable");
+    }
   }, 350);
 }
 // เรียกจาก update() ทุกครั้ง — sig guard ทำให้ยิง API เฉพาะตอน "ช่วงวัน" เปลี่ยนจริง
@@ -432,27 +458,77 @@ fetch("/api/site").then((r) => r.json()).then((j) => {
   update();
 }).catch(() => {});
 
-// บันทึกคำขอจองเข้าระบบหลังบ้าน (Google Sheets) แบบเงียบ ๆ — ล้มเหลวก็ไม่กระทบลูกค้า
-let loggedSig = "";
-function logBooking() {
+// บันทึกคำขอจองเข้าระบบหลังบ้าน — แสดงว่าบันทึกแล้วเฉพาะเมื่อ API ส่ง id กลับมา
+let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSaveId = "";
+function bookingSignature(s) {
+  return [s.room && s.room.id, s.name, s.phone, s.ci, s.co, s.guests, s.numRooms, s.total, s.note].join("|");
+}
+function renderBookingSaveStatus() {
+  const el = $("bookingSaveStatus");
+  el.hidden = !bookingSaveState;
+  el.className = `booking-save-status ${bookingSaveState}`;
+  if (bookingSaveState === "saving") el.textContent = t("bk.save.saving");
+  if (bookingSaveState === "saved") el.textContent = `${t("bk.save.saved")} ${bookingSaveId}`;
+  if (bookingSaveState === "failed") el.textContent = t("bk.save.failed");
+}
+async function logBooking() {
   const s = getState();
-  if (!(s.room && s.nights > 0 && s.name && s.phone)) return;
-  const sig = [s.name, s.phone, s.ci, s.co].join("|");
-  if (sig === loggedSig) return; // กดหลายปุ่มติดกัน = การจองเดียวกัน ไม่ส่งซ้ำ
+  if (!(s.room && s.nights > 0 && s.name && s.phone)) return { saved: false };
+  const sig = bookingSignature(s);
+  if (sig === loggedSig) {
+    if (bookingSavePromise) return bookingSavePromise;
+    if (bookingSaveState === "saved") return { ok: true, saved: true, id: bookingSaveId };
+  }
   loggedSig = sig;
-  try {
-    fetch("/api/book", {
+  bookingSaveState = "saving";
+  bookingSaveId = "";
+  renderBookingSaveStatus();
+  const request = (async () => {
+    try {
+      const r = await fetch("/api/book", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: true,
       body: JSON.stringify({
         name: s.name, phone: s.phone, checkin: s.ci, checkout: s.co,
-        guests: s.guests, rooms: s.numRooms, total: s.total, note: s.note,
+        guests: s.guests, rooms: s.numRooms, total: s.total,
+        room: s.room.name.th, note: s.note,
       }),
-    }).catch(() => {});
-  } catch {}
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || j.ok !== true || j.saved !== true || !j.id) throw new Error("not-saved");
+      if (loggedSig === sig) {
+        bookingSaveState = "saved";
+        bookingSaveId = j.id;
+        renderBookingSaveStatus();
+      }
+      return j;
+    } catch {
+      if (loggedSig === sig) {
+        loggedSig = ""; // กดซ้ำเพื่อ retry ได้
+        bookingSaveState = "failed";
+        bookingSaveId = "";
+        renderBookingSaveStatus();
+      }
+      return { ok: false, saved: false };
+    } finally {
+      if (bookingSavePromise === request) bookingSavePromise = null;
+    }
+  })();
+  bookingSavePromise = request;
+  return bookingSavePromise;
 }
 ["btnLine", "btnWa", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
+document.addEventListener("langchange", renderBookingSaveStatus);
+function resetBookingSaveStatusIfChanged() {
+  if (!loggedSig || bookingSignature(getState()) === loggedSig) return;
+  loggedSig = "";
+  bookingSaveState = "";
+  bookingSaveId = "";
+  renderBookingSaveStatus();
+}
+document.addEventListener("input", resetBookingSaveStatusIfChanged);
+document.addEventListener("change", resetBookingSaveStatusIfChanged);
 
 // คัดลอกข้อความจองไปคลิปบอร์ด (มี fallback สำหรับเบราว์เซอร์เก่า)
 async function copyToClipboard(text) {

@@ -8,15 +8,28 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<meta property="og:title" content="เที่ยวอะไรใกล้ที่พัก — House of Happiness Bangkok">
-<meta property="og:description" content="ICONSIAM · สวนลอยฟ้าเจ้าพระยา · วัดอรุณ · เยาวราช — เดินทางง่ายจากที่พักย่านคลองสาน">
-<meta property="og:image" content="https://houseofhappinessbangkok.com/images/og.png">
+<meta property="og:title" content="เที่ยวอะไรใกล้ที่พัก | Things to Do Nearby — House of Happiness Bangkok">
+<meta property="og:description" content="ICONSIAM สวนลอยฟ้าเจ้าพระยา วัดอรุณ และเยาวราช พร้อมวิธีเดินทางจาก House of Happiness คลองสาน">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://houseofhappinessbangkok.com/attractions.html">
+<meta property="og:site_name" content="House of Happiness">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
+<meta property="og:image:width" content="960">
+<meta property="og:image:height" content="720">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="เที่ยวอะไรใกล้ที่พัก | Things to Do Nearby — House of Happiness Bangkok">
+<meta name="twitter:description" content="ICONSIAM สวนลอยฟ้าเจ้าพระยา วัดอรุณ และเยาวราช พร้อมวิธีเดินทางจาก House of Happiness คลองสาน">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/attractions.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="preload" as="image" href="images/attractions/skypark.jpg">
+<link rel="preload" as="image" href="images/attractions/skypark.jpg" type="image/jpeg" fetchpriority="high">
 <style>
 /* ── สไตล์เฉพาะหน้านี้ ── */
 .atr-hero{padding:4.2rem 1.2rem 2.6rem; text-align:center}
@@ -154,7 +167,7 @@ function card(a){
   return `<article class="atr-card">
     <div class="atr-img">
       <span class="ph">✦</span>
-      <img src="images/attractions/${a.slug}.jpg" alt="" loading="lazy"
+      <img src="images/attractions/${a.slug}.jpg" alt="${esc(a.name[lang])}" width="960" height="600" loading="lazy" decoding="async"
            onerror="this.remove()">
     </div>
     <div class="atr-body">

@@ -145,6 +145,7 @@ const I18N = {
 
   /* ── เช็คห้องว่างเรียลไทม์ ── */
   "av.checking":     { th: "กำลังเช็คห้องว่าง…", en: "Checking availability…" },
+  "av.unavailable":  { th: "ยังยืนยันห้องว่างไม่ได้ — กรุณาส่งคำขอเพื่อให้ทางที่พักตรวจสอบ", en: "Live availability is temporarily unavailable — send your request and the hotel will check for you." },
   "av.left.pre":     { th: "✓ วันที่เลือกว่าง — เหลือ ", en: "✓ Available — " },
   "av.left.post":    { th: " ห้อง", en: " room(s) left" },
   "av.low.pre":      { th: "⚡ ใกล้เต็ม! เหลือเพียง ", en: "⚡ Almost full! Only " },
@@ -292,6 +293,9 @@ const I18N = {
   "bk.sendmail":     { th: "ส่งคำขอจองทางอีเมล", en: "Send booking request via email" },
   "bk.copy":         { th: "คัดลอกข้อความจอง", en: "Copy booking message" },
   "bk.copied":       { th: "คัดลอกแล้ว ✓", en: "Copied ✓" },
+  "bk.save.saving":  { th: "กำลังบันทึกคำขอเข้าระบบ…", en: "Saving your request…" },
+  "bk.save.saved":   { th: "บันทึกคำขอเข้าระบบแล้ว · เลขที่", en: "Request saved · Reference" },
+  "bk.save.failed":  { th: "ยังบันทึกคำขอไม่สำเร็จ กรุณาส่งข้อความผ่าน LINE, WhatsApp หรืออีเมล หรือลองกดอีกครั้ง", en: "We couldn\'t save your request. Please send the message via LINE, WhatsApp or email, or try again." },
   "bk.policy":       { th: "นี่คือ “คำขอจอง” — ทางโรงแรมจะตรวจสอบห้องว่างและยืนยันกลับภายใน 24 ชั่วโมง การจองสมบูรณ์เมื่อได้รับการยืนยันจากโรงแรม · เช็คอิน 14:00–22:00 น. (แจ้งเวลามาถึงล่วงหน้า) เช็คเอาท์ 12:00 น. · มัดจำ ฿1,000 คืนตอนเช็คเอาท์ · ชำระเงินสดหรือโอน",
                        en: "This is a booking request — we check availability and confirm within 24 hours. Your booking is complete once confirmed by the hotel. Check-in 14:00–22:00 (please tell us your arrival time), check-out by 12:00. ฿1,000 refundable deposit at check-in. Pay by cash or bank transfer." },
   "bk.quick":        { th: "เลือกไว:", en: "Quick pick:" },

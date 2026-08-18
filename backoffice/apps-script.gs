@@ -301,8 +301,7 @@ function json_(obj) {
  */
 function scanBookingEmails() {
   var label = GmailApp.getUserLabelByName(LABEL_DONE) || GmailApp.createLabel(LABEL_DONE);
-  // ดู 30 วันย้อนหลัง (กันกรณี trigger เคยหยุดไปหลายวัน จะได้ตามเก็บอีเมลที่ค้าง)
-  var threads = GmailApp.search('from:(booking.com) newer_than:30d -label:"' + LABEL_DONE + '"');
+  var threads = GmailApp.search('from:(booking.com) newer_than:7d -label:"' + LABEL_DONE + '"');
 
   threads.forEach(function (thread) {
     thread.getMessages().forEach(function (msg) {
@@ -322,64 +321,128 @@ function scanBookingEmails() {
 
 function processMessage_(msg) {
   var subject = msg.getSubject() || "";
-  var body = msg.getPlainBody() || "";
-  var text = subject + "\n" + body;
+  var parsed = parseBookingEmail_(subject, msg.getPlainBody() || "");
+  if (!parsed.type) return; // โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ
 
-  // ข้ามอีเมลที่ไม่ใช่เรื่องการจอง (ข้อความจากแขก, โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ)
-  // หัวข้อจริงของ Booking.com ปัจจุบัน: "มีการจองใหม่ (…)", "มีการจองถูกยกเลิก (…)", "มีการปรับเปลี่ยนการจอง (…)"
-  var isNew = /new booking|new reservation|การจองใหม่|จองใหม่/i.test(subject);
-  var isCancel = /cancel|ยกเลิก|ถูกยกเลิก/i.test(subject);
-  var isModify = /modif|change|เปลี่ยนแปลง|ปรับเปลี่ยน|แก้ไข/i.test(subject);
-  if (!isNew && !isCancel && !isModify) return;
-
-  var resNo = extractReservationNo_(text);
+  var resNo = parsed.reservationNo;
   var id = resNo ? "BDC-" + resNo : "MAIL-" + msg.getId().slice(-8);
-  var existing = findById_(id);
+  var existing = findById_(id) || (resNo ? findByResNo_(resNo) : null);
 
-  if (isCancel) {
-    // หาแถวเดิมแบบหลวม ๆ ด้วย: id ตรงเป๊ะ → เทียบเฉพาะตัวเลขเลขที่จอง
-    var hit = existing || (resNo ? findByResNo_(resNo) : null);
-    if (hit) setStatus_(hit._rowIndex, "ยกเลิก", "ยกเลิกตามอีเมล " + fmtDate_(msg.getDate()));
-    else appendBooking_({ id: id, source: "Booking.com", name: extractGuestName_(text), status: "ยกเลิก", note: "อีเมลยกเลิกแต่ไม่พบการจองเดิมในชีต (orphan) — เปิด Pulse ตรวจว่ายกเลิกรายการไหน" });
+  if (parsed.type === "cancel") {
+    if (existing) {
+      setStatus_(existing._rowIndex, "ยกเลิก", "ยกเลิกตามอีเมล " + fmtDate_(msg.getDate()));
+    } else {
+      appendBooking_({
+        id: id, source: "Booking.com", name: parsed.name, status: "ยกเลิก",
+        note: "อีเมลยกเลิกแต่ไม่พบการจองเดิมในชีต (orphan) — เปิด Pulse ตรวจว่ายกเลิกรายการไหน",
+      });
+    }
     return;
   }
-  if (isModify) {
-    if (existing) setStatus_(existing._rowIndex, existing.status || "ยืนยันแล้ว", "มีการแก้ไขตามอีเมล " + fmtDate_(msg.getDate()) + " — ตรวจสอบใน Extranet");
-    else isNew = true; // อีเมลแก้ไขแต่ไม่มีแถวเดิม → บันทึกเป็นการจองใหม่
-    if (!isNew) return;
+
+  // อีเมลซ้ำและอีเมลแก้ไขช่วยเติมเฉพาะช่องที่ยังว่าง โดยไม่ทับค่าที่พนักงานแก้เอง
+  if (existing) {
+    var filled = backfillBooking_(existing, parsed);
+    var resolved = isBookingComplete_(existing);
+    var status = resolved && /รอเติม/.test(existing.status) ? "ยืนยันแล้ว" : (existing.status || "ยืนยันแล้ว");
+    if (parsed.type === "modify" || filled.length) {
+      var action = parsed.type === "modify" ? "มีการแก้ไขตามอีเมล " : "เติมข้อมูลจากอีเมลซ้ำ ";
+      var detail = filled.length ? " (เติม: " + filled.join(", ") + ")" : "";
+      setStatus_(existing._rowIndex, status, action + fmtDate_(msg.getDate()) + detail);
+    }
+    return;
   }
 
-  if (existing) return; // เคยบันทึกแล้ว ไม่เพิ่มซ้ำ
-
-  // อีเมลยุคใหม่ของ Booking.com มักไม่บอกชื่อแขก (ให้ไปดูใน Pulse)
-  // → บันทึกเท่าที่มี แล้วติดสถานะ "รอเติมชื่อจาก Pulse" ไม่ปล่อยให้การจองหายเงียบ ๆ
-  var dates = extractDates_(text);
-  var guest = extractGuestName_(text);
-
-  // fallback: หัวข้ออีเมลมักมีวันเช็คอิน เช่น "คุณมีการจองใหม่! วันจันทร์ที่ 10 สิงหาคม ค.ศ. 2026"
-  // ใช้เป็นวันเช็คอินแบบ "คาดการณ์" — ดีกว่าปล่อยว่างจนระบบนับห้องว่างไม่ได้
-  var fromSubject = false;
-  if (!dates.checkin) {
-    var sd = findAnyDate_(subject);
-    if (sd) { dates.checkin = sd; fromSubject = true; }
-  }
-
-  var incomplete = !guest || !dates.checkin || !dates.checkout;
+  // อีเมลแก้ไขแต่ยังไม่มีแถวเดิม: เก็บเป็นรายการใหม่เพื่อไม่ให้การจองหายเงียบ ๆ
+  var incomplete = !parsed.name || !parsed.checkin || !parsed.checkout;
   var noteBits = [];
-  if (fromSubject) noteBits.push("วันเช็คอินคาดจากหัวข้ออีเมล — ยืนยันวันจริง/วันออกใน Pulse");
+  if (parsed.checkinFromSubject) noteBits.push("วันเช็คอินคาดจากหัวข้ออีเมล — ยืนยันวันจริง/วันออกใน Pulse");
   if (incomplete) noteBits.push("อีเมลไม่ระบุรายละเอียดครบ — เปิดแอป Pulse แล้วเติมข้อมูล (" + subject + ")");
+  if (parsed.type === "modify") noteBits.push("สร้างจากอีเมลแก้ไข เพราะไม่พบรายการเดิมในชีต");
+
   appendBooking_({
     id: id,
     source: "Booking.com",
-    name: guest,
-    checkin: dates.checkin,
-    checkout: dates.checkout,
-    guests: extractGuests_(text),
-    rooms: extractRooms_(text),
-    amount: extractAmount_(text),
+    name: parsed.name,
+    checkin: parsed.checkin,
+    checkout: parsed.checkout,
+    guests: parsed.guests,
+    rooms: parsed.rooms,
+    amount: parsed.amount,
     status: incomplete ? "รอเติมชื่อจาก Pulse" : "ยืนยันแล้ว",
     note: noteBits.join(" | "),
   });
+}
+
+/**
+ * สแกนอีเมลเก่าย้อนหลัง 365 วันเพื่อซ่อมรายการ Booking.com ที่ข้อมูลไม่ครบ
+ * - ต้องกด Run เองเท่านั้น (ไม่มี Trigger)
+ * - เติมเฉพาะช่องว่างและไม่สร้างแถวใหม่ ไม่ทับค่าที่พนักงานแก้ไว้
+ * - ไม่ติด/ลบ label และไม่เปลี่ยนสถานะยกเลิก
+ */
+function repairIncompleteBookingsFromEmails() {
+  var rows = readAll_();
+  var pending = {};
+  rows.forEach(function (row) {
+    var resNo = String(row.id || "").replace(/\D/g, "");
+    if (resNo && !/ยกเลิก/.test(row.status) && !isBookingComplete_(row)) pending[resNo] = row;
+  });
+
+  var summary = { messages: 0, matched: 0, updatedBookings: 0, filledFields: 0 };
+  var threads = GmailApp.search('from:(booking.com) newer_than:365d', 0, 500);
+  threads.forEach(function (thread) {
+    thread.getMessages().forEach(function (msg) {
+      summary.messages++;
+      var parsed = parseBookingEmail_(msg.getSubject() || "", msg.getPlainBody() || "");
+      var row = parsed.reservationNo ? pending[parsed.reservationNo] : null;
+      if (!row || parsed.type === "cancel") return;
+      summary.matched++;
+      var filled = backfillBooking_(row, parsed);
+      if (!filled.length) return;
+      summary.updatedBookings++;
+      summary.filledFields += filled.length;
+      var status = isBookingComplete_(row) && /รอเติม/.test(row.status) ? "ยืนยันแล้ว" : (row.status || "ยืนยันแล้ว");
+      setStatus_(row._rowIndex, status, "ซ่อมข้อมูลจากอีเมลเก่า " + fmtDate_(msg.getDate()) + " (เติม: " + filled.join(", ") + ")");
+      row.status = status;
+    });
+  });
+  Logger.log(JSON.stringify(summary));
+  return summary;
+}
+
+function backfillBooking_(row, parsed) {
+  var sh = getSheet_();
+  var filled = [];
+  var fields = {
+    name: parsed.name,
+    checkin: parsed.checkin,
+    checkout: parsed.checkout,
+    guests: parsed.guests,
+    rooms: parsed.rooms,
+    amount: parsed.amount,
+  };
+
+  Object.keys(fields).forEach(function (key) {
+    var value = fields[key];
+    if (!value || asText_(row[key])) return;
+    sh.getRange(row._rowIndex, HEADERS.indexOf(key) + 1).setValue(value);
+    row[key] = String(value);
+    filled.push(key);
+  });
+
+  if (!asText_(row.nights) && /^\d{4}-\d{2}-\d{2}$/.test(row.checkin) && /^\d{4}-\d{2}-\d{2}$/.test(row.checkout)) {
+    var nights = Math.round((new Date(row.checkout) - new Date(row.checkin)) / 86400000);
+    if (nights > 0) {
+      sh.getRange(row._rowIndex, HEADERS.indexOf("nights") + 1).setValue(nights);
+      row.nights = String(nights);
+      filled.push("nights");
+    }
+  }
+  return filled;
+}
+
+function isBookingComplete_(row) {
+  return !!(asText_(row.name) && /^\d{4}-\d{2}-\d{2}$/.test(asText_(row.checkin)) && /^\d{4}-\d{2}-\d{2}$/.test(asText_(row.checkout)));
 }
 
 // หาแถวจากเลขที่จองแบบเทียบเฉพาะตัวเลข (id ในชีตอาจมี prefix BDC- หรือรูปแบบต่างกัน)
@@ -475,41 +538,105 @@ function dailyDigest() {
 
 /* ── ตัวช่วยสกัดข้อมูลจากเนื้ออีเมล (รองรับไทย/อังกฤษหลายรูปแบบ) ── */
 
+function parseBookingEmail_(subject, body) {
+  var cleanSubject = normalizeEmailText_(subject);
+  var text = normalizeEmailText_(cleanSubject + "\n" + (body || ""));
+  var type = "";
+
+  // ให้ยกเลิกมีลำดับสูงสุด เพราะหัวข้อบางแบบมีทั้ง "booking" และ "cancelled"
+  if (/cancel(?:led|lation)?|ยกเลิก/i.test(cleanSubject)) type = "cancel";
+  else if (/modif(?:ied|ication)?|booking changed|reservation changed|change(?:d)?\s+(?:to\s+)?(?:booking|reservation)|เปลี่ยนแปลง|แก้ไข/i.test(cleanSubject)) type = "modify";
+  else if (/new booking|new reservation|reservation confirmed|booking confirmation|การจองใหม่|คุณมีการจองใหม่|ยืนยันการจอง/i.test(cleanSubject)) type = "new";
+
+  var dates = extractDates_(text);
+  var fromSubject = false;
+  if (type === "new" && !dates.checkin) {
+    var subjectDate = findAnyDate_(cleanSubject);
+    if (subjectDate) {
+      dates.checkin = subjectDate;
+      fromSubject = true;
+    }
+  }
+
+  return {
+    type: type,
+    reservationNo: extractReservationNo_(text),
+    name: extractGuestName_(text),
+    checkin: dates.checkin,
+    checkout: dates.checkout,
+    guests: extractGuests_(text),
+    rooms: extractRooms_(text),
+    amount: extractAmount_(text),
+    checkinFromSubject: fromSubject,
+  };
+}
+
+function normalizeEmailText_(text) {
+  return String(text == null ? "" : text)
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\u00A0/g, " ")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map(function (line) { return line.replace(/[ \t]+/g, " ").trim(); })
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function extractReservationNo_(text) {
-  // 1) จากหัวข้อ Booking.com ปัจจุบัน: "…มีการจองใหม่ (6660020011, วันที่…)"
-  var m = text.match(/\((\d{9,13})\s*[,)]/);
-  if (m) return m[1];
-  // 2) จากคำนำหน้าในเนื้อความ (รองรับทั้ง "หมายเลขการจอง" และ "หมายเลขยืนยันการจอง")
-  m = text.match(/(?:reservation(?:\s+number)?|booking number|confirmation number|หมายเลข(?:ยืนยัน)?การจอง|เลขที่การจอง)[^\d]{0,30}(\d{9,13})/i);
-  if (m) return m[1];
-  // 3) สำรอง: เลข 10–13 หลักโดด ๆ มักเป็นเลขการจอง
-  m = text.match(/\b(\d{10,13})\b/);
+  var m = String(text).match(/(?:reservation(?:\s+(?:number|no\.?))?|booking(?:\s+(?:number|no\.?))?|confirmation(?:\s+(?:number|no\.?))?|หมายเลขการจอง|เลขที่การจอง|รหัสการจอง)\s*[:#：-]?\s*([0-9][0-9\s-]{7,20})/i);
+  if (m) {
+    var labeled = m[1].replace(/\D/g, "");
+    if (labeled.length >= 9 && labeled.length <= 13) return labeled;
+  }
+
+  // fallback เฉพาะหัวข้ออีเมล เพื่อลดการหยิบเบอร์โทร/ยอดเงิน 10 หลักจากเนื้อหา
+  var subject = String(text || "").split("\n")[0];
+  m = subject.match(/(?:^|\D)(\d{9,13})(?:\D|$)/);
   return m ? m[1] : "";
 }
 
 function extractGuestName_(text) {
-  var m = text.match(/(?:guest name|booker|booked by|ชื่อผู้เข้าพัก|ชื่อผู้จอง)\s*[:：]?\s*([^\n\r]{2,80})/i);
-  return m ? m[1].trim() : "";
+  var m = String(text).match(/(?:guest name|booker|booked by|ชื่อผู้เข้าพัก|ชื่อผู้จอง|ชื่อลูกค้า)\s*[:：-]?\s*([^\n\r|]{2,100})/i);
+  if (!m) return "";
+  return m[1]
+    .replace(/\s+(?:check[\s-]?(?:in|out)|arrival|departure|เช[็๊]กอิน|เช[็๊]กเอา(?:ต์|ท์)).*$/i, "")
+    .trim();
 }
 
 function extractGuests_(text) {
-  var m = text.match(/(\d+)\s*(?:adults?|guests?|ผู้ใหญ่|ผู้เข้าพัก|ท่าน)/i);
+  var s = String(text);
+  var m = s.match(/(?:number of guests|guests?|adults?|จำนวนผู้เข้าพัก|ผู้เข้าพัก|ผู้ใหญ่)[ \t]*[:：-]?[ \t]*(\d+)/i);
+  if (!m) m = s.match(/(\d+)[ \t]*(?:adults?|guests?|ผู้ใหญ่|ผู้เข้าพัก|ท่าน)(?:\b|$)/i);
   return m ? m[1] : "";
 }
 
 function extractRooms_(text) {
-  var m = text.match(/(\d+)\s*(?:rooms?|units?|ห้อง)/i);
+  var s = String(text);
+  var m = s.match(/(?:number of rooms|rooms?|units?|จำนวนห้อง|ห้องพัก)[ \t]*[:：-]?[ \t]*(\d+)/i);
+  if (!m) m = s.match(/(\d+)[ \t]*(?:rooms?|units?|ห้อง)(?:\b|$)/i);
   return m ? m[1] : "";
 }
 
 function extractAmount_(text) {
-  var m = text.match(/(?:total(?:\s+price)?|ราคารวม|ยอดรวม)[^\d฿]{0,20}(?:THB|฿)?\s*([\d,]+(?:\.\d{2})?)/i);
+  var m = String(text).match(/(?:total(?:\s+price)?|booking total|price|ราคารวม|ยอดรวม|ยอดชำระ)\s*[:：-]?\s*(?:THB|฿)?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:THB|฿)?/i);
   return m ? m[1] : "";
 }
 
 function extractDates_(text) {
-  var ci = matchDate_(text, /(?:check[\s-]?in|arrival|เช็คอิน|วันเข้าพัก)\s*[:：]?\s*([^\n\r]{4,60})/i);
-  var co = matchDate_(text, /(?:check[\s-]?out|departure|เช็คเอาต์|เช็คเอาท์|วันออก)\s*[:：]?\s*([^\n\r]{4,60})/i);
+  var s = String(text);
+  var ci = matchDate_(s, /(?:check[\s-]?in|arrival(?:\s+date)?|เช็คอิน|เช็กอิน|วันที่เช็คอิน|วันที่เช็กอิน|วันเข้าพัก)\s*[:：-]?\s*([^\n\r]{4,100})/i);
+  var co = matchDate_(s, /(?:check[\s-]?out|departure(?:\s+date)?|เช็คเอาต์|เช็คเอาท์|เช็กเอาต์|เช็กเอาท์|วันที่ออก|วันออก)\s*[:：-]?\s*([^\n\r]{4,100})/i);
+
+  // รูปแบบบรรทัดเดียว เช่น "Stay: 15 August 2026 - 17 August 2026"
+  if (!ci || !co) {
+    var range = s.match(/(?:stay|booking dates?|reservation dates?|ระยะเวลาเข้าพัก|ช่วงเข้าพัก|วันที่เข้าพัก)\s*[:：-]?\s*([^\n\r]{8,180})/i);
+    if (range) {
+      var found = findDateTokens_(range[1]);
+      if (!ci && found.length > 0) ci = found[0];
+      if (!co && found.length > 1) co = found[1];
+    }
+  }
   return { checkin: ci, checkout: co };
 }
 
@@ -518,50 +645,82 @@ function matchDate_(text, re) {
   return m ? parseDate_(m[1]) : "";
 }
 
-// แปลงวันที่หลายรูปแบบ → YYYY-MM-DD: "2026-07-13", "13 July 2026", "Sunday, 13 July 2026", "13 ก.ค. 2569", "13/07/2026"
-function parseDate_(s) {
-  s = String(s).trim();
-  var m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return m[1] + "-" + m[2] + "-" + m[3];
-
-  var months = {
-    jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
-    "ม.ค": 1, "ก.พ": 2, "มี.ค": 3, "เม.ย": 4, "พ.ค": 5, "มิ.ย": 6,
-    "ก.ค": 7, "ส.ค": 8, "ก.ย": 9, "ต.ค": 10, "พ.ย": 11, "ธ.ค": 12,
-    "มกราคม": 1, "กุมภาพันธ์": 2, "มีนาคม": 3, "เมษายน": 4, "พฤษภาคม": 5, "มิถุนายน": 6,
-    "กรกฎาคม": 7, "สิงหาคม": 8, "กันยายน": 9, "ตุลาคม": 10, "พฤศจิกายน": 11, "ธันวาคม": 12,
-  };
-  // รองรับ "ค.ศ./พ.ศ." คั่นระหว่างเดือนกับปี เช่น "10 สิงหาคม ค.ศ. 2026"
-  // (รูปแบบหัวข้ออีเมล Booking.com ภาษาไทย — เดิมอ่านไม่ได้เลยเพราะไม่รองรับตัวคั่นนี้)
-  m = s.match(/(\d{1,2})\s+([A-Za-z฀-๿.]+?)\s+(?:ค\.?ศ\.?|พ\.?ศ\.?)?\s*(\d{4})/);
-  if (m) {
-    var key = m[2].toLowerCase().replace(/\.$/, "");
-    var mo = months[key.slice(0, 3)] || months[key];
-    if (mo) {
-      var y = Number(m[3]);
-      if (y > 2400) y -= 543; // พ.ศ. → ค.ศ.
-      return y + "-" + pad2_(mo) + "-" + pad2_(Number(m[1]));
+function findDateTokens_(text) {
+  var s = String(text || "");
+  var patterns = [
+    /\d{4}-\d{1,2}-\d{1,2}/g,
+    /\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4}/g,
+    /\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-zก-๙.]+\s+(?:(?:ค|พ)\.?ศ\.?\s*)?\d{4}/gi,
+    /[A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?[,]?\s+\d{4}/gi,
+  ];
+  var hits = [];
+  patterns.forEach(function (re) {
+    var m;
+    while ((m = re.exec(s)) !== null) {
+      var value = parseDate_(m[0]);
+      if (value) hits.push({ index: m.index, value: value });
     }
-  }
-  m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  });
+  hits.sort(function (a, b) { return a.index - b.index; });
+  var result = [];
+  hits.forEach(function (hit) {
+    if (result.indexOf(hit.value) < 0) result.push(hit.value);
+  });
+  return result;
+}
+
+// แปลงวันที่หลายรูปแบบเป็น YYYY-MM-DD พร้อมตรวจว่าวันนั้นมีอยู่จริง
+function parseDate_(value) {
+  var s = normalizeEmailText_(value).replace(/,/g, " ");
+  var m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return validYmd_(Number(m[1]), Number(m[2]), Number(m[3]));
+
+  m = s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+  if (m) return validYmd_(normalYear_(Number(m[3])), Number(m[2]), Number(m[1]));
+
+  m = s.match(/(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-zก-๙.]+)\s+(?:(?:ค|พ)\.?ศ\.?\s*)?(\d{4})/i);
   if (m) {
-    var y2 = Number(m[3]);
-    if (y2 > 2400) y2 -= 543;
-    return y2 + "-" + pad2_(Number(m[2])) + "-" + pad2_(Number(m[1]));
+    var month = monthNumber_(m[2]);
+    return month ? validYmd_(normalYear_(Number(m[3])), month, Number(m[1])) : "";
+  }
+
+  m = s.match(/([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?\s+(\d{4})/i);
+  if (m) {
+    var monthFirst = monthNumber_(m[1]);
+    return monthFirst ? validYmd_(normalYear_(Number(m[3])), monthFirst, Number(m[2])) : "";
   }
   return "";
 }
 
-// หา "วันที่แรกที่เจอ" ในข้อความสั้น ๆ (ใช้กับหัวข้ออีเมล) — คืน YYYY-MM-DD หรือ ""
+function monthNumber_(name) {
+  var months = {
+    jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3, apr: 4, april: 4,
+    may: 5, jun: 6, june: 6, jul: 7, july: 7, aug: 8, august: 8,
+    sep: 9, sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11, dec: 12, december: 12,
+    "มค": 1, "กพ": 2, "มีค": 3, "เมย": 4, "พค": 5, "มิย": 6,
+    "กค": 7, "สค": 8, "กย": 9, "ตค": 10, "พย": 11, "ธค": 12,
+    "มกราคม": 1, "กุมภาพันธ์": 2, "มีนาคม": 3, "เมษายน": 4, "พฤษภาคม": 5, "มิถุนายน": 6,
+    "กรกฎาคม": 7, "สิงหาคม": 8, "กันยายน": 9, "ตุลาคม": 10, "พฤศจิกายน": 11, "ธันวาคม": 12,
+  };
+  var key = String(name || "").toLowerCase().replace(/\./g, "");
+  return months[key] || months[key.slice(0, 3)] || 0;
+}
+
+function normalYear_(year) {
+  return year > 2400 ? year - 543 : year;
+}
+
+function validYmd_(year, month, day) {
+  if (year < 2000 || year > 2200 || month < 1 || month > 12 || day < 1 || day > 31) return "";
+  var d = new Date(Date.UTC(year, month - 1, day));
+  if (d.getUTCFullYear() !== year || d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) return "";
+  return year + "-" + pad2_(month) + "-" + pad2_(day);
+}
+
+// หาเฉพาะวันที่ในหัวข้ออีเมล ใช้เป็น check-in แบบคาดการณ์เมื่อไม่มี label
 function findAnyDate_(text) {
-  var s = String(text || "");
-  var m = s.match(/\d{4}-\d{2}-\d{2}/);
-  if (m) return parseDate_(m[0]);
-  m = s.match(/\d{1,2}\s+[A-Za-z฀-๿.]+\s+(?:ค\.?ศ\.?|พ\.?ศ\.?)?\s*\d{4}/);
-  if (m) return parseDate_(m[0]);
-  m = s.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
-  if (m) return parseDate_(m[0]);
-  return "";
+  var found = findDateTokens_(text);
+  return found.length ? found[0] : "";
 }
 
 function pad2_(n) { return (n < 10 ? "0" : "") + n; }

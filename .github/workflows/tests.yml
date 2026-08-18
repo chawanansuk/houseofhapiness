@@ -1,0 +1,53 @@
+name: Site checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node regression tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          node --check assets/ui.js
+          for file in api/*.js scripts/*.js; do
+            node --check "$file"
+          done
+
+      - name: Test availability and booking API
+        run: node tests/availability.test.js
+
+      - name: Test admin update API
+        run: node tests/update.test.js
+
+      - name: Test Booking.com email parser
+        run: node tests/booking-email-parser.test.js
+
+      - name: Test Production deployment guard
+        run: node tests/deployment.test.js
+
+      - name: Test public site and admin regressions
+        run: node tests/site.test.js

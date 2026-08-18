@@ -16,13 +16,21 @@
  */
 
 module.exports = async (req, res) => {
-  // แคชที่ edge 2 นาที กันยิงถี่ใส่ Google Apps Script
-  res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
+  // error ห้ามแคช; จะตั้ง edge cache เฉพาะก่อนตอบสำเร็จ
+  res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") {
     return res.status(405).json({ ok: false, error: "method-not-allowed" });
   }
 
-  const isYMD = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+  const isYMD = (s) => {
+    const value = String(s || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return date.getUTCFullYear() === year
+      && date.getUTCMonth() === month - 1
+      && date.getUTCDate() === day;
+  };
   const ci = String((req.query && req.query.checkin) || "");
   const co = String((req.query && req.query.checkout) || "");
   if (!isYMD(ci) || !isYMD(co) || co <= ci) {
@@ -40,9 +48,17 @@ module.exports = async (req, res) => {
     rooms = Array.from({ length: 20 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 20 ห้อง
   } else {
     const [sheet, ic] = await Promise.all([fetchSheet(), fetchIcal()]);
+    if (!sheet.ok || !ic.ok) {
+      console.error(JSON.stringify({
+        event: "availability_upstream_failed",
+        sheet: sheet.error || "ok",
+        ical: ic.error || "ok",
+      }));
+      return res.status(503).json({ ok: false, error: "availability-unavailable", retryable: true });
+    }
     bookings = sheet.rows;
     rooms = sheet.rooms;
-    ical = ic;
+    ical = ic.events;
   }
 
   const total = rooms.length || 15;
@@ -51,12 +67,17 @@ module.exports = async (req, res) => {
   // การจองที่ยังไม่รู้วันที่ = กันห้องอยู่ที่ไหนสักวันแต่ระบุไม่ได้ — ห้ามการันตีเลขห้องว่าง
   const unknown = notCancelled.length - active.length;
   const isBdc = (b) => /booking\.com/i.test(String(b.source || ""));
+  const roomCount = (b) => {
+    const count = Number(b && b.rooms);
+    return Number.isFinite(count) && count >= 1 ? Math.floor(count) : 1;
+  };
+  const countRooms = (entries) => entries.reduce((sum, booking) => sum + roomCount(booking), 0);
 
   let minAvail = total;
   for (let d = ci; d < co; d = shiftDate(d, 1)) {
     const stay = active.filter((b) => b.checkin <= d && d < b.checkout);
-    const direct = stay.filter((b) => !isBdc(b)).length;
-    const bdcSheet = stay.length - direct;
+    const direct = countRooms(stay.filter((b) => !isBdc(b)));
+    const bdcSheet = countRooms(stay.filter(isBdc));
     const bdcIcal = ical.filter((e) => e.start <= d && d < e.end).length;
     const occupied = direct + Math.max(bdcSheet, bdcIcal);
     minAvail = Math.min(minAvail, Math.max(0, total - occupied));
@@ -73,6 +94,7 @@ module.exports = async (req, res) => {
     full: available <= 0 && unknown === 0,
   };
   if (unknown > 0) { out.unknown = unknown; out.warning = "uncertain"; }
+  res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
   return res.status(200).json(out);
 };
 
@@ -87,29 +109,47 @@ function shiftDate(ymd, days) {
 async function fetchSheet() {
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url) return { rows: [], rooms: [] };
+  if (!url || !token) return { ok: false, rows: [], rooms: [], error: "not-configured" };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
   try {
     const sep = url.includes("?") ? "&" : "?";
-    const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, { redirect: "follow" });
-    if (!r.ok) return { rows: [], rooms: [] };
+    const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, {
+      redirect: "follow", signal: ctrl.signal,
+    });
+    if (!r.ok) return { ok: false, rows: [], rooms: [], error: `http-${r.status || "error"}` };
     const j = await r.json();
+    if (!Array.isArray(j && j.bookings)) {
+      return { ok: false, rows: [], rooms: [], error: "invalid-response" };
+    }
     return {
-      rows: Array.isArray(j && j.bookings) ? j.bookings : [],
-      rooms: Array.isArray(j && j.rooms) ? j.rooms : [],
+      ok: true,
+      rows: j.bookings,
+      // รองรับ Apps Script deployment รุ่นเก่าที่ยังไม่ส่ง rooms;
+      // ตัวคำนวณมี fallback จำนวนห้องอยู่แล้ว
+      rooms: Array.isArray(j.rooms) ? j.rooms : [],
     };
-  } catch { return { rows: [], rooms: [] }; }
+  } catch (e) {
+    return { ok: false, rows: [], rooms: [], error: e && e.name === "AbortError" ? "timeout" : "unavailable" };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchIcal() {
   const raw = (process.env.BOOKING_ICAL_URLS || "").trim();
-  if (!raw) return [];
+  if (!raw) return { ok: true, events: [] };
   const entries = raw.split(",").map((s) => s.trim()).filter(Boolean)
     .map((s) => { const i = s.indexOf("|"); return i > 0 ? s.slice(i + 1).trim() : s; });
   const events = [];
-  await Promise.all(entries.map(async (url) => {
-    try {
-      const r = await fetch(url, { redirect: "follow" });
-      if (!r.ok) return;
+  let failures = 0;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    await Promise.all(entries.map(async (url) => {
+      try {
+        const r = await fetch(url, { redirect: "follow", signal: ctrl.signal });
+      if (!r.ok) { failures++; return; }
       const lines = String(await r.text()).replace(/\r\n[ \t]/g, "").split(/\r?\n/);
       let cur = null;
       for (const line of lines) {
@@ -123,9 +163,14 @@ async function fetchIcal() {
         if (key === "DTSTART" && m) cur.start = `${m[1]}-${m[2]}-${m[3]}`;
         else if (key === "DTEND" && m) cur.end = `${m[1]}-${m[2]}-${m[3]}`;
       }
-    } catch {}
-  }));
-  return events;
+      } catch { failures++; }
+    }));
+  } finally {
+    clearTimeout(timer);
+  }
+  return failures > 0
+    ? { ok: false, events, error: "feed-unavailable" }
+    : { ok: true, events };
 }
 
 function demoBookings(today) {
