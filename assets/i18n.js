@@ -305,7 +305,6 @@ const I18N = {
   "bk.hint.dates":   { th: "เลือกวันเข้าพัก", en: "pick your dates" },
   "bk.hint.name":    { th: "กรอกชื่อ", en: "enter your name" },
   "bk.hint.phone":   { th: "กรอกเบอร์โทร", en: "enter your phone number" },
-  "bk.trust.1":      { th: "ไม่ต้องชำระเงินออนไลน์ — จ่ายที่โรงแรม", en: "No online payment — pay at the hotel" },
   "bk.trust.2":      { th: "ยืนยันการจองภายใน 24 ชั่วโมง", en: "Booking confirmed within 24 hours" },
   "bk.trust.3":      { th: "สอบถาม/แก้ไขการจองได้ทาง LINE, WhatsApp หรืออีเมล", en: "Questions or changes welcome via LINE, WhatsApp or email" },
 };
