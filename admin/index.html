@@ -291,6 +291,11 @@ tbody tr:hover td{background:#faf7f2}
 .mbtn-danger:hover{text-decoration:underline}
 .confirm-sum{background:var(--free-bg);border:1px solid #cde; border-radius:11px;padding:.7rem .85rem;margin-bottom:.9rem;font-size:.9rem;line-height:1.6}
 .confirm-sum .src{font-size:.8rem;color:var(--muted)}
+.modal textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--line-2);border-radius:10px;background:#fff;font-size:.85rem;line-height:1.55;resize:vertical;font-family:inherit}
+.modal textarea:focus{outline:none;border-color:var(--brand)}
+.msg-langs{display:flex;gap:.4rem;margin:.3rem 0 .1rem}
+.lang-chip{border:1px solid var(--line-2);border-radius:999px;padding:.3rem .9rem;font-size:.8rem;font-weight:700;font-family:"Prompt",sans-serif;background:#fff;color:var(--muted);transition:background .15s,color .15s}
+.lang-chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .toast{position:fixed;left:50%;bottom:5rem;transform:translateX(-50%) translateY(20px);background:var(--sidebar);color:#fff;border-radius:999px;padding:.65rem 1.3rem;font-size:.85rem;opacity:0;pointer-events:none;transition:all .25s;z-index:99;max-width:92vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -396,6 +401,7 @@ tbody tr:hover td{background:#faf7f2}
           <b>อัปเดตข้อมูลจาก Booking.com ด้วยไฟล์รายการจอง</b> — Booking ยกเลิก iCal แล้ว
           วิธีใหม่: เข้า Extranet (คอมพิวเตอร์) → เมนู <b>การจอง/Reservations</b> → กด <b>ดาวน์โหลด</b>
           (ไฟล์ CSV หรือ Excel .xls/.xlsx ก็ได้) แล้วเลือกไฟล์ที่ปุ่มด้านล่าง — วันที่/ชื่อ/ยอดจะเติมให้อัตโนมัติ (แนะนำทำสัปดาห์ละครั้ง)
+          <div id="importAge" style="margin-top:.45rem;font-weight:700"></div>
           <div style="margin-top:.6rem"><button class="btn-import" id="csvImportBtn2" type="button">⬆ เลือกไฟล์ Booking เพื่อนำเข้า</button></div>
         </div>
       </div>
@@ -596,6 +602,8 @@ tbody tr:hover td{background:#faf7f2}
 "use strict";
 const $ = (id) => document.getElementById(id);
 const KEY_STORE = "hoh-admin-key";
+const DATA_CACHE = "hoh-admin-data";   // ข้อมูลรอบล่าสุด — เปิดหน้าใหม่โชว์ทันทีไม่ต้องรอชีต
+const LAST_IMPORT = "hoh-last-import"; // วันที่นำเข้าไฟล์ Booking ครั้งล่าสุด (เตือนให้ทำรายสัปดาห์)
 let DATA = null, calYM = null, selDay = null, expYM = null, tlStart = null, lastModalFocus = null;
 const TL_DAYS = 14;
 const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
@@ -645,6 +653,8 @@ function fmtD(ymd){
   const [y,m,d] = ymd.split("-").map(Number);
   return `${d} ${THAI_MONTHS_AB[m-1]} ${String((y+543)%100).padStart(2,"0")}`;
 }
+const EN_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmtEN = (ymd) => isYMD(ymd) ? `${Number(ymd.slice(8,10))} ${EN_MONTHS[Number(ymd.slice(5,7))-1]} ${ymd.slice(0,4)}` : String(ymd || "-");
 function shiftYMD(ymd, days){
   const d = new Date(ymd + "T00:00:00Z");
   d.setUTCDate(d.getUTCDate() + days);
@@ -715,6 +725,7 @@ async function tryLogin(key, silent){
     if (r.ok && j.ok) {
       sessionStorage.setItem(KEY_STORE, key);
       DATA = j;
+      try { sessionStorage.setItem(DATA_CACHE, JSON.stringify(j)); } catch {}
       showDash();
       return true;
     }
@@ -731,7 +742,14 @@ async function reload(){
   try {
     const r = await fetch("/api/data", { headers: { "x-admin-key": key }, cache: "no-store" });
     const j = await r.json().catch(() => ({}));
-    if (r.ok && j.ok) { DATA = j; renderAll(); }
+    if (r.ok && j.ok) {
+      DATA = j;
+      try { sessionStorage.setItem(DATA_CACHE, JSON.stringify(j)); } catch {}
+      renderAll();
+    } else if (r.status === 401) {
+      // รหัสหมดอายุ/ถูกเปลี่ยน — อย่าปล่อยให้ดูข้อมูลค้างโดยไม่รู้ตัว
+      logout();
+    }
   } catch {}
 }
 
@@ -745,6 +763,7 @@ async function probeDemoHint(){
 
 function logout(){
   sessionStorage.removeItem(KEY_STORE);
+  sessionStorage.removeItem(DATA_CACHE);
   location.href = location.pathname;
 }
 
@@ -800,6 +819,15 @@ function renderAll(){
   $("stNew").textContent = newList.length;
   $("icalBanner").style.display =
     (!DATA.demo && DATA.sources && String(DATA.sources.icalError || "").indexOf("ยังไม่ได้ตั้ง") === 0) ? "block" : "none";
+
+  // เตือนอายุการนำเข้าไฟล์ Booking — ข้อมูลวันที่/ยอดจะแม่นก็ต่อเมื่อนำเข้าสม่ำเสมอ
+  const lastImp = localStorage.getItem(LAST_IMPORT) || "";
+  const impDays = isYMD(lastImp) ? Math.round((Date.parse(DATA.today) - Date.parse(lastImp)) / 86400000) : -1;
+  $("importAge").textContent = impDays < 0
+    ? "ยังไม่เคยนำเข้าไฟล์จากเครื่องนี้"
+    : impDays > 7
+      ? `⏰ นำเข้าครั้งล่าสุด ${fmtD(lastImp)} (${impDays} วันแล้ว) — ถึงรอบอัปเดตแล้ว`
+      : `นำเข้าครั้งล่าสุด: ${impDays === 0 ? "วันนี้" : fmtD(lastImp)} ✓`;
 
   const t = DATA.today;
   const act = activeBookings();
@@ -1213,9 +1241,12 @@ function openEditModal(b){
     ${staff ? "" : `<label>ยอดเงิน (฿)</label><input id="edAmount" inputmode="decimal" value="${esc(b.amount || "")}" placeholder="เช่น 1,600">`}
     <div class="mact">
       <button class="mbtn mbtn-primary" id="actSaveEdit">บันทึก</button>
+      ${!needsFix(b) && !isCancelled(b) ? `<button class="mbtn mbtn-ghost" id="actMsg">✉ ข้อความยืนยันส่งลูกค้า</button>` : ""}
       <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
     </div>`;
   openModal(html);
+  const msgBtn = $("actMsg");
+  if (msgBtn) msgBtn.onclick = () => openMsgModal({ ...b });
   $("actSaveEdit").onclick = async () => {
     const ci = $("edIn").value, co = $("edOut").value;
     if (ci && co && co <= ci) { toast("วันเช็คเอาต์ต้องอยู่หลังวันเช็คอิน"); return; }
@@ -1264,9 +1295,13 @@ function openConfirmModal(b){
     const fields = { status: "ยืนยันแล้ว" };
     const room = $("cfRoom").value;
     if (String(room) !== String(b.room_no || "")) fields.room_no = room;
+    // เก็บสำเนาข้อมูลไว้ก่อน — afterAction จะดึงข้อมูลใหม่ทับ b
+    const snap = { ...b, status: "ยืนยันแล้ว", room_no: room || b.room_no || "" };
     const r1 = await apiUpdate({ action: "update", id: b.id, fields });
     if (r1) await afterAction(() => Object.assign(b, fields));
     closeModal();
+    // ยืนยันในระบบแล้ว ลูกค้ายังไม่รู้ — เปิดข้อความสำเร็จรูปให้คัดลอกไปตอบทันที
+    if (r1) openMsgModal(snap);
   };
   $("cfReject").onclick = async () => {
     if (!confirm("ยกเลิกคำขอจองนี้? ลูกค้าจะไม่ถูกจัดห้อง")) return;
@@ -1275,6 +1310,75 @@ function openConfirmModal(b){
     closeModal();
   };
   $("cfClose").onclick = closeModal;
+}
+
+/* ── ข้อความยืนยันส่งลูกค้า: คัดลอกไปวางใน LINE / WhatsApp ได้เลย ──
+   ปิดช่องว่าง "กดยืนยันในระบบแล้ว แต่ลูกค้าไม่รู้" — ระบบไม่ได้ส่งอะไรหาลูกค้าอัตโนมัติ
+   เจ้าของต้องตอบกลับในแชทที่ลูกค้าทักมา (LINE/WhatsApp) ข้อความนี้เตรียมให้ครบทุกรายละเอียด */
+const MAP_LINK = "https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok";
+function buildConfirmMsg(b, lang, payLink){
+  const nights = nightsOf(b);
+  const amt = bahtNum(b.amount);
+  const gs = String(b.guests || "").trim();
+  const lines = lang === "en" ? [
+    `Hello ${b.name || ""}! Your booking at House of Happiness is confirmed 🏡`,
+    ``,
+    `📅 Check-in: ${fmtEN(b.checkin)} (from 14:00 — staff until 18:00, self check-in after)`,
+    `📅 Check-out: ${fmtEN(b.checkout)} (by 12:00)`,
+    `🛏 ${nights || "-"} night(s)${b.room_no ? ` · Room ${b.room_no}` : ""}${gs ? ` · ${gs} guest(s)` : ""}`,
+  ] : [
+    `สวัสดีค่ะ คุณ${b.name || ""} 🙏 ขอยืนยันการจองที่ House of Happiness ค่ะ`,
+    ``,
+    `📅 เช็คอิน: ${fmtD(b.checkin)} (14:00 เป็นต้นไป — พนักงานอยู่ถึง 18:00 หลังจากนั้นเช็คอินด้วยตัวเอง)`,
+    `📅 เช็คเอาต์: ${fmtD(b.checkout)} (ภายใน 12:00)`,
+    `🛏 ${nights || "-"} คืน${b.room_no ? ` · ห้อง ${b.room_no}` : ""}${gs ? ` · ผู้เข้าพัก ${gs} ท่าน` : ""}`,
+  ];
+  if (amt) lines.push(lang === "en"
+    ? `💰 Total: ฿${amt.toLocaleString()}${payLink ? "" : " — pay at the hotel (cash / bank transfer / PromptPay)"}`
+    : `💰 ยอดชำระ: ฿${amt.toLocaleString()}${payLink ? "" : " — ชำระที่โรงแรม (เงินสด / โอน / พร้อมเพย์)"}`);
+  if (payLink) lines.push(lang === "en" ? `💳 Pay online: ${payLink}` : `💳 ชำระออนไลน์ได้ที่: ${payLink}`);
+  lines.push(
+    lang === "en" ? `🔖 Booking no.: ${b.id || "-"}` : `🔖 หมายเลขการจอง: ${b.id || "-"}`,
+    `📍 ${lang === "en" ? "Map" : "แผนที่"}: ${MAP_LINK}`,
+    ``,
+    lang === "en"
+      ? `A refundable ฿1,000 key deposit is collected at check-in. Please let us know your arrival time. See you soon! 😊`
+      : `มีมัดจำกุญแจ 1,000 บาท (คืนตอนเช็คเอาต์) รบกวนแจ้งเวลาที่จะมาถึงล่วงหน้านะคะ แล้วเจอกันค่ะ 😊`);
+  return lines.join("\n");
+}
+
+function openMsgModal(b){
+  const html = `
+    <h3>ส่งข้อความยืนยันให้ลูกค้า</h3>
+    <div class="msub">ระบบยืนยันให้แล้ว แต่ลูกค้ายังไม่รู้จนกว่าเราจะตอบกลับ — คัดลอกข้อความนี้ไปวางในแชท LINE / WhatsApp ที่ลูกค้าทักมา${b.phone ? ` (โทร ${esc(b.phone)})` : ""}</div>
+    <div class="msg-langs">
+      <button class="lang-chip on" data-msglang="th" type="button">ภาษาไทย</button>
+      <button class="lang-chip" data-msglang="en" type="button">English</button>
+    </div>
+    <label>ลิงก์จ่ายเงิน (ถ้ามี — วางลิงก์ Payment Link แล้วข้อความจะแทรกให้)</label>
+    <input id="msgPay" placeholder="https://… (เว้นว่างได้ = ชำระที่โรงแรม)">
+    <label>ข้อความ (แก้ก่อนคัดลอกได้)</label>
+    <textarea id="msgBox" rows="12"></textarea>
+    <div class="mact">
+      <button class="mbtn mbtn-primary" id="msgCopy">📋 คัดลอกข้อความ</button>
+      <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
+    </div>`;
+  openModal(html);
+  let lang = "th";
+  const refresh = () => { $("msgBox").value = buildConfirmMsg(b, lang, $("msgPay").value.trim()); };
+  $("modalBox").querySelectorAll("[data-msglang]").forEach((el) => el.onclick = () => {
+    lang = el.dataset.msglang;
+    $("modalBox").querySelectorAll("[data-msglang]").forEach((x) => x.classList.toggle("on", x === el));
+    refresh();
+  });
+  $("msgPay").oninput = refresh;
+  refresh();
+  $("msgCopy").onclick = async () => {
+    try { await navigator.clipboard.writeText($("msgBox").value); }
+    catch { $("msgBox").select(); document.execCommand("copy"); }
+    toast("คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย");
+  };
+  $("actClose").onclick = closeModal;
 }
 
 /* ── สถิติเดือนนี้ ── */
@@ -1605,6 +1709,8 @@ $("csvImportFile").addEventListener("change", async (ev) => {
     if (Object.keys(fields).length) jobs.push({ id: b.id, fields });
   }
   if (!jobs.length) {
+    localStorage.setItem(LAST_IMPORT, DATA.today); // ข้อมูลตรงกันหมด = เช็ครอบนี้แล้ว
+    renderAll();
     toast(unmatched ? `ข้อมูลตรงกันหมดแล้ว (ในไฟล์มี ${unmatched} รายการที่ไม่อยู่ในระบบ)` : "ข้อมูลตรงกันหมดแล้ว ไม่มีอะไรต้องอัปเดต");
     return;
   }
@@ -1615,6 +1721,7 @@ $("csvImportFile").addEventListener("change", async (ev) => {
     r1 ? done++ : fail++;
     toast(`กำลังนำเข้า… ${done + fail}/${jobs.length}`);
   }
+  if (done) localStorage.setItem(LAST_IMPORT, DATA.today);
   await reload();
   toast(`นำเข้าเสร็จ: อัปเดต ${done} รายการ` + (fail ? ` · ล้มเหลว ${fail}` : ""));
 });
@@ -1747,7 +1854,20 @@ document.querySelectorAll("[data-nav]").forEach((n) => {
 });
 (async () => {
   const saved = sessionStorage.getItem(KEY_STORE);
-  if (saved && await tryLogin(saved, true)) return;
+  if (saved) {
+    // เปิดไวขึ้น: โชว์ข้อมูลรอบก่อนทันที แล้วดึงของสดจากชีตมาแทนเงียบ ๆ
+    // (แคชอยู่ใน sessionStorage คู่กับรหัส — ปิดเบราว์เซอร์แล้วหายพร้อมกัน ไม่ค้างบนเครื่อง)
+    const cached = sessionStorage.getItem(DATA_CACHE);
+    if (cached) {
+      try {
+        DATA = JSON.parse(cached);
+        showDash();
+        reload();
+        return;
+      } catch { DATA = null; }
+    }
+    if (await tryLogin(saved, true)) return;
+  }
   $("splash").style.display = "none";
   $("loginView").style.display = "";
   probeDemoHint();
