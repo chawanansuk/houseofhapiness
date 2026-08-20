@@ -111,6 +111,63 @@ input,select{font-family:inherit}
 .req-badge{display:inline-block;background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:8px;padding:.1rem .5rem;font-size:.72rem;font-weight:700;margin-top:.25rem}
 .req-note{margin-top:.45rem;background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:8px;padding:.45rem .65rem;font-size:.83rem;line-height:1.5}
 .mobile-only{display:none}
+/* ── แถบสรุปตัวเลขใต้ topbar (มือถือ) — เห็นสถานะวันนี้ตลอดทุกแท็บ ── */
+.tb-stats{width:100%;display:flex;gap:.35rem .8rem;flex-wrap:wrap;font-size:.74rem;color:#c4b7a4;padding-top:.45rem;margin-top:.45rem;border-top:1px solid rgba(255,255,255,.12)}
+.tb-stats b{color:#fff;font-family:"Prompt",sans-serif}
+.tb-stats span{white-space:nowrap}
+/* ── หน้าแม่บ้าน: ปุ่มใหญ่ แตะง่าย ── */
+.hk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.9rem}
+.hk-card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--dirty);border-radius:14px;box-shadow:var(--shadow);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.6rem}
+.hk-card.hk-urgent{border-left-color:var(--arr);background:var(--arr-bg)}
+.hk-room{font-family:"Prompt",sans-serif;font-size:1.9rem;font-weight:700;line-height:1.1}
+.hk-note{font-size:.82rem;font-weight:700;color:#8a5a12}
+.hk-done{border-radius:12px;padding:.9rem 1rem;font-size:1rem;font-weight:700;font-family:"Prompt",sans-serif;background:var(--free);color:#fff;transition:filter .15s}
+.hk-done:hover{filter:brightness(1.08)}
+.hk-chips{display:flex;flex-wrap:wrap;gap:.55rem}
+.hk-chip{border:1px solid var(--line-2);background:var(--card);border-radius:12px;padding:.65rem 1.05rem;font-size:1rem;font-weight:700;font-family:"Prompt",sans-serif;color:var(--ink);transition:border-color .15s}
+.hk-chip:hover{border-color:var(--dirty);color:var(--dirty)}
+/* ── ลากแถบจองบนไทม์ไลน์ (desktop) ── */
+.tl-bar.dragging{opacity:.55;box-shadow:0 5px 16px rgba(30,20,10,.35)}
+.tl-row.drop-row .tl-cell{background:rgba(138,90,52,.16)}
+.drag-tag{position:fixed;z-index:100;background:var(--sidebar);color:#fff;font-size:.76rem;font-weight:700;font-family:"Prompt",sans-serif;padding:.28rem .65rem;border-radius:8px;pointer-events:none;display:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+/* ── โหมดมืด (เวรค่ำ) — สลับที่ปุ่ม 🌙 จำค่าไว้ในเครื่อง ── */
+html[data-theme="dark"]{
+  --brand:#c08a55; --brand-dark:#8a5a34; --brand-soft:#3a2e22;
+  --bg:#181410; --card:#241e18; --line:#372e25; --line-2:#4a3e31;
+  --ink:#ece3d7; --muted:#a39685; --muted-2:#7c7164;
+  --free:#3fca7a; --free-bg:#14301f;
+  --occ:#5b95f5; --occ-bg:#182741;
+  --arr:#e8a13c; --arr-bg:#332711;
+  --dirty:#ef6b5e; --dirty-bg:#381b17;
+  --shadow:0 1px 3px rgba(0,0,0,.4); --shadow-lg:0 8px 24px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] .login-wrap{background:radial-gradient(circle at 30% 15%, #241e18, var(--bg) 70%)}
+html[data-theme="dark"] .login-card input, html[data-theme="dark"] .modal input, html[data-theme="dark"] .modal select,
+html[data-theme="dark"] .modal textarea, html[data-theme="dark"] .exp-form input, html[data-theme="dark"] .exp-form select,
+html[data-theme="dark"] .tools select, html[data-theme="dark"] .search-wrap input, html[data-theme="dark"] .ti-action select,
+html[data-theme="dark"] .cal-nav, html[data-theme="dark"] .cell, html[data-theme="dark"] .mbtn-ghost{background:#2c251d;border-color:var(--line-2);color:var(--ink)}
+html[data-theme="dark"] .cell.out{background:transparent;border-color:transparent}
+html[data-theme="dark"] .minfo, html[data-theme="dark"] .task-item{background:#2c251d;border-color:var(--line)}
+html[data-theme="dark"] .tl-wrap, html[data-theme="dark"] .tl-roomcell{background:var(--card)}
+html[data-theme="dark"] .tl-row.tl-head, html[data-theme="dark"] .tl-head .tl-roomcell{background:#2c251d}
+html[data-theme="dark"] .tl-daycell b{color:var(--ink)}
+html[data-theme="dark"] .tl-we{background:#211b15}
+html[data-theme="dark"] .tl-today{background:rgba(192,138,85,.16)}
+html[data-theme="dark"] .tl-out{background:#4a4136;color:#c8bba9}
+html[data-theme="dark"] tbody tr:hover td{background:#2c251d}
+html[data-theme="dark"] .room-free{background:var(--card)}
+html[data-theme="dark"] .b-gray{background:#3a332b;color:var(--muted)}
+html[data-theme="dark"] .notify-bar, html[data-theme="dark"] .banner.fix, html[data-theme="dark"] .demo-hint,
+html[data-theme="dark"] .banner.demo, html[data-theme="dark"] .chip, html[data-theme="dark"] .tl-chip,
+html[data-theme="dark"] .req-badge, html[data-theme="dark"] .req-note{background:#332a14;border-color:#5a4a2a;color:#e0c27a}
+html[data-theme="dark"] .notify-bar{background:var(--card)}
+html[data-theme="dark"] .notify-bar.ok{color:var(--muted);border-color:var(--line)}
+html[data-theme="dark"] .banner.warn{background:#38201b;border-color:#5c352c;color:#f0a08f}
+html[data-theme="dark"] .banner.newreq{background:#143020;border-color:#245c38;color:#7fd6a0}
+html[data-theme="dark"] .hk-note{color:#e0c27a}
+html[data-theme="dark"] .banner code{background:rgba(255,255,255,.1)}
+html[data-theme="dark"] .row-fix td{background:#2e2818}
+html[data-theme="dark"] .row-new td{background:#16281d}
 /* ── รายรับ-รายจ่าย ── */
 .exp-form{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-top:.5rem}
 .exp-form label{display:block;font-size:.78rem;font-weight:700;margin-bottom:.25rem}
@@ -320,7 +377,7 @@ tbody tr:hover td{background:#faf7f2}
   .sidebar{display:none}
   .main{margin-left:0}
   .mobile-only{display:block}
-  .topbar{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;padding-top:calc(.7rem + env(safe-area-inset-top,0px));background:var(--sidebar);color:#fff;position:sticky;top:0;z-index:30}
+  .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem;padding:.7rem 1rem;padding-top:calc(.7rem + env(safe-area-inset-top,0px));background:var(--sidebar);color:#fff;position:sticky;top:0;z-index:30}
   .topbar .tb-brand{display:flex;align-items:center;gap:.5rem;font-family:"Prompt",sans-serif;font-weight:700;font-size:.98rem}
   .topbar .sp{flex:1}
   .tb-act{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#e0cba8}
@@ -381,11 +438,13 @@ tbody tr:hover td{background:#faf7f2}
       <a data-nav="secTimeline"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์</a>
       <a data-nav="secOverview"><span class="ic" data-icon="chart"></span> ภาพรวม</a>
       <a data-nav="secRooms"><span class="ic" data-icon="grid"></span> ผังห้อง</a>
+      <a data-nav="secClean"><span class="ic" data-icon="clean"></span> แม่บ้าน</a>
       <a data-nav="secCalendar"><span class="ic" data-icon="calendar"></span> ปฏิทิน</a>
       <a data-nav="secBookings"><span class="ic" data-icon="list"></span> รายการจอง</a>
       <a data-nav="secMoney" class="admin-only"><span class="ic" data-icon="wallet"></span> รายรับ-รายจ่าย</a>
     </nav>
     <div class="side-foot">
+      <button class="side-act act-theme"><span class="ic" data-icon="moon"></span> โหมดมืด</button>
       <button class="side-act act-refresh"><span class="ic" data-icon="refresh"></span> รีเฟรช</button>
       <button class="side-act act-logout"><span class="ic" data-icon="logout"></span> ออกจากระบบ</button>
     </div>
@@ -395,8 +454,10 @@ tbody tr:hover td{background:#faf7f2}
     <header class="topbar">
       <span class="tb-brand"><span class="side-logo"><span class="ic" data-icon="home"></span></span> HOH หลังบ้าน</span>
       <span class="sp"></span>
+      <button class="tb-act act-theme" type="button" aria-label="สลับโหมดมืด"><span class="ic" data-icon="moon"></span></button>
       <button class="tb-act act-refresh" type="button" aria-label="รีเฟรชข้อมูล"><span class="ic" data-icon="refresh"></span></button>
       <button class="tb-act act-logout" type="button" aria-label="ออกจากระบบ"><span class="ic" data-icon="logout"></span></button>
+      <div class="tb-stats" id="miniStats"></div>
     </header>
 
     <div class="content">
@@ -454,7 +515,7 @@ tbody tr:hover td{background:#faf7f2}
           <div class="sec-title sub"><span class="ic" data-icon="check"></span> งานวันนี้</div>
           <div id="todayBodyTop"></div>
         </div>
-        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = เมนูด่วน · แถบเริ่มบ่ายวันเข้า จบเที่ยงวันออก</small></div>
+        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = เมนูด่วน · (คอม) ลากแถบขึ้น-ลง = ย้ายห้อง · ลากขอบขวา = เลื่อนวันออก</small></div>
         <div class="card">
           <div class="cal-head">
             <button class="cal-nav" id="tlPrev" aria-label="ย้อน 7 วัน">‹</button>
@@ -494,6 +555,14 @@ tbody tr:hover td{background:#faf7f2}
             <div id="todayBody"></div>
           </aside>
         </div>
+      </section>
+
+      <!-- ── แม่บ้าน: ปุ่มใหญ่ กดจากมือถือหน้างานได้เลย (พนักงานเห็นแท็บนี้เป็นหน้าแรก) ── -->
+      <section id="secClean" class="section">
+        <div class="sec-title"><span class="ic" data-icon="clean"></span> ห้องรอทำความสะอาด <small id="cleanCount"></small></div>
+        <div class="hk-grid" id="cleanDirty"></div>
+        <div class="sec-title sub" style="margin-top:1.4rem"><span class="ic" data-icon="grid"></span> ห้องสะอาดแล้ว <small>แตะห้องเพื่อแจ้ง "รอทำความสะอาด"</small></div>
+        <div class="hk-chips" id="cleanRest"></div>
       </section>
 
       <!-- ── ปฏิทิน ── -->
@@ -610,6 +679,7 @@ tbody tr:hover td{background:#faf7f2}
   <nav class="tabbar">
     <a data-nav="secTimeline"><span class="ic" data-icon="gantt"></span>ไทม์ไลน์</a>
     <a data-nav="secRooms"><span class="ic" data-icon="grid"></span>ผังห้อง</a>
+    <a data-nav="secClean"><span class="ic" data-icon="clean"></span>แม่บ้าน</a>
     <a data-nav="secCalendar"><span class="ic" data-icon="calendar"></span>ปฏิทิน</a>
     <a data-nav="secBookings"><span class="ic" data-icon="list"></span>รายการ</a>
     <a data-nav="secOverview"><span class="ic" data-icon="chart"></span>สรุป</a>
@@ -654,6 +724,7 @@ const IP = {
   percent:'<path d="M6 18 18 6"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>',
   gantt:'<path d="M4 6h9"/><path d="M8 12h12"/><path d="M6 18h8"/>',
   check:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.2l2.6 2.6L16 9.2"/>',
+  moon:'<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
 };
 const svg = (n, c) => `<svg class="ic${c ? " " + c : ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ""}</svg>`;
 function paintIcons(root){ (root || document).querySelectorAll("[data-icon]").forEach((el) => { el.innerHTML = svg(el.dataset.icon); }); }
@@ -816,8 +887,10 @@ function showDash(){
   $("exDate").value = t;
   selDay = null;
   tlStart = null;
-  document.querySelectorAll(".section").forEach((s) => s.classList.toggle("active", s.id === "secTimeline"));
-  document.querySelectorAll("[data-nav]").forEach((n) => n.classList.toggle("on", n.dataset.nav === "secTimeline"));
+  // พนักงาน (รหัส staff) ส่วนใหญ่คือแม่บ้าน — เปิดมาเจอหน้าทำความสะอาดเลย
+  const home = DATA.role === "staff" ? "secClean" : "secTimeline";
+  document.querySelectorAll(".section").forEach((s) => s.classList.toggle("active", s.id === home));
+  document.querySelectorAll("[data-nav]").forEach((n) => n.classList.toggle("on", n.dataset.nav === home));
   renderAll();
   paintIcons();
 }
@@ -877,13 +950,24 @@ function renderAll(){
   const t = DATA.today;
   const act = activeBookings();
   const liveStay = act.filter((b) => !isCheckedOut(b) && staysOn(b, t));
-  $("stCheckin").textContent = act.filter((b) => b.checkin === t && !isCheckedOut(b)).length;
-  $("stCheckout").textContent = act.filter((b) => b.checkout === t).length;
+  const ciCount = act.filter((b) => b.checkin === t && !isCheckedOut(b)).length;
+  const coCount = act.filter((b) => b.checkout === t).length;
+  $("stCheckin").textContent = ciCount;
+  $("stCheckout").textContent = coCount;
   $("stStaying").textContent = liveStay.length;
   const roomCount = (DATA.rooms || []).length;
-  $("stFree").textContent = roomCount ? Math.max(0, roomCount - liveStay.length) : "–";
+  const freeCount = roomCount ? Math.max(0, roomCount - liveStay.length) : "–";
+  $("stFree").textContent = freeCount;
+
+  // แถบสรุปใต้ topbar มือถือ — เห็นภาพรวมวันนี้ตลอดไม่ว่าอยู่แท็บไหน
+  const dirtyCount = (DATA.rooms || []).filter((r) => String(r.clean || "") === "รอทำความสะอาด").length;
+  $("miniStats").innerHTML =
+    `<span>เข้า <b>${ciCount}</b></span><span>ออก <b>${coCount}</b></span>` +
+    `<span>พัก <b>${liveStay.length}</b></span><span>ว่าง <b>${freeCount}</b></span>` +
+    (dirtyCount ? `<span>🧹 รอทำ <b>${dirtyCount}</b></span>` : "");
 
   renderTimeline();
+  renderClean();
   renderRoomBoard();
   renderToday();
   renderMonthStats();
@@ -1074,6 +1158,25 @@ function renderRoomBoard(){
   const un = activeBookings().filter((b) => !isCheckedOut(b) && !String(b.room_no || "").trim() && staysOn(b, t));
   $("unassignedBox").style.display = un.length && rooms.length ? "" : "none";
   $("unassignedList").innerHTML = un.map((b) => `<span class="chip">${esc(b.name)} (${fmtD(b.checkin)})</span>`).join("");
+}
+
+/* ── หน้าแม่บ้าน: ห้องรอทำความสะอาดเป็นการ์ดใหญ่ ห้องที่มีแขกเข้าวันนี้ขึ้นเตือนให้ทำก่อน ── */
+function renderClean(){
+  const rooms = DATA.rooms || [];
+  const t = DATA.today;
+  const dirty = rooms.filter((r) => String(r.clean || "") === "รอทำความสะอาด");
+  const clean = rooms.filter((r) => String(r.clean || "") !== "รอทำความสะอาด");
+  const arriving = new Set(activeBookings()
+    .filter((b) => b.checkin === t && !isCheckedOut(b)).map((b) => String(b.room_no || "")));
+  $("cleanCount").textContent = dirty.length ? `${dirty.length} ห้อง` : "";
+  $("cleanDirty").innerHTML = dirty.length ? dirty.map((r) => `
+    <div class="hk-card${arriving.has(r.room) ? " hk-urgent" : ""}">
+      <div class="hk-room">${esc(r.room)}</div>
+      ${arriving.has(r.room) ? `<div class="hk-note">⚠ มีแขกเข้าวันนี้ — ทำห้องนี้ก่อน</div>` : ""}
+      <button class="hk-done" data-clean="${esc(r.room)}">✓ ทำความสะอาดเสร็จ</button>
+    </div>`).join("")
+    : `<div class="today-empty" style="grid-column:1/-1">${svg("check")}<div>ไม่มีห้องรอทำความสะอาด</div></div>`;
+  $("cleanRest").innerHTML = clean.map((r) => `<button class="hk-chip" data-dirty="${esc(r.room)}">${esc(r.room)}</button>`).join("");
 }
 
 /* ── งานวันนี้ ── */
@@ -1650,6 +1753,24 @@ document.querySelectorAll(".act-logout").forEach((b) => b.addEventListener("clic
 $("todayBody").addEventListener("click", onTodayClick);
 $("todayBodyTop").addEventListener("click", onTodayClick);
 $("notifyBar").addEventListener("click", () => { bannersOpen = !bannersOpen; renderAll(); });
+$("secClean").addEventListener("click", async (e) => {
+  const done = e.target.closest("[data-clean]");
+  if (done) {
+    const room = done.dataset.clean;
+    done.disabled = true;
+    const r1 = await apiUpdate({ action: "roomclean", room, clean: "สะอาด" });
+    if (r1) await afterAction(() => { const rr = (DATA.rooms || []).find((x) => x.room === room); if (rr) rr.clean = "สะอาด"; });
+    else done.disabled = false;
+    return;
+  }
+  const mark = e.target.closest("[data-dirty]");
+  if (mark) {
+    const room = mark.dataset.dirty;
+    if (!confirm(`แจ้งห้อง ${room} เป็น "รอทำความสะอาด"?`)) return;
+    const r1 = await apiUpdate({ action: "roomclean", room, clean: "รอทำความสะอาด" });
+    if (r1) await afterAction(() => { const rr = (DATA.rooms || []).find((x) => x.room === room); if (rr) rr.clean = "รอทำความสะอาด"; });
+  }
+});
 $("calPrev").addEventListener("click", () => { calYM[1]--; if (calYM[1] < 0) { calYM[1] = 11; calYM[0]--; } renderCal(); });
 $("calNext").addEventListener("click", () => { calYM[1]++; if (calYM[1] > 11) { calYM[1] = 0; calYM[0]++; } renderCal(); });
 $("q").addEventListener("input", renderTable);
@@ -1871,6 +1992,7 @@ $("tlPrev").addEventListener("click", () => { tlStart = shiftYMD(tlStart, -7); r
 $("tlNext").addEventListener("click", () => { tlStart = shiftYMD(tlStart, 7); renderTimeline(); });
 $("tlToday").addEventListener("click", () => { tlStart = shiftYMD(DATA.today, -1); renderTimeline(); });
 $("tlWrap").addEventListener("click", (e) => {
+  if (suppressTlClick) { suppressTlClick = false; return; } // เพิ่งลากเสร็จ ไม่ใช่การแตะ
   const bar = e.target.closest(".tl-bar");
   if (bar) {
     const b = (DATA.bookings || []).find((x) => String(x.id) === bar.dataset.barid);
@@ -1931,6 +2053,129 @@ $("overlay").addEventListener("click", (e) => { if (e.target === $("overlay")) c
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && $("overlay").classList.contains("open")) closeModal();
 });
+
+/* ── โหมดมืด: จำค่าที่เลือกไว้ในเครื่อง ถ้าไม่เคยเลือกตามระบบมือถือ ── */
+const THEME_KEY = "hoh-admin-theme";
+function applyTheme(t, save){
+  document.documentElement.setAttribute("data-theme", t);
+  if (save) { try { localStorage.setItem(THEME_KEY, t); } catch {} }
+  document.querySelectorAll(".act-theme.side-act").forEach((el) => {
+    el.innerHTML = `${svg("moon")} ${t === "dark" ? "โหมดสว่าง" : "โหมดมืด"}`;
+  });
+}
+applyTheme(localStorage.getItem(THEME_KEY) ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"), false);
+document.querySelectorAll(".act-theme").forEach((b) => b.addEventListener("click", () => {
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark", true);
+}));
+
+/* ── desktop เป็นหน้าเดียวยาว — ไฮไลต์เมนูซ้ายตามตำแหน่งที่เลื่อนถึง ── */
+let scrollTick = false;
+window.addEventListener("scroll", () => {
+  if (window.innerWidth < 1000 || scrollTick || !DATA) return;
+  scrollTick = true;
+  requestAnimationFrame(() => {
+    scrollTick = false;
+    let current = null;
+    document.querySelectorAll(".section").forEach((s) => {
+      if (s.offsetHeight && s.getBoundingClientRect().top <= 150) current = s.id;
+    });
+    if (current) document.querySelectorAll("[data-nav]").forEach((n) => n.classList.toggle("on", n.dataset.nav === current));
+  });
+}, { passive: true });
+
+/* ── ลากแถบจองบนไทม์ไลน์ (desktop เท่านั้น — มือถือแตะ = เมนูด่วนเหมือนเดิม)
+   ลากขึ้น-ลง = ย้ายห้อง · ลากขอบขวาของแถบ = เลื่อนวันเช็คเอาต์ · มี confirm ก่อนบันทึกกันลากพลาด ── */
+let tlDrag = null, suppressTlClick = false;
+const dragTag = document.createElement("div");
+dragTag.className = "drag-tag";
+document.body.appendChild(dragTag);
+const clearDropRows = () => document.querySelectorAll(".drop-row").forEach((el) => el.classList.remove("drop-row"));
+
+$("tlWrap").addEventListener("pointerdown", (e) => {
+  if (window.innerWidth < 1000 || e.button !== 0) return;
+  const bar = e.target.closest(".tl-bar");
+  if (!bar) return;
+  const b = (DATA.bookings || []).find((x) => String(x.id) === bar.dataset.barid);
+  if (!b || isCheckedOut(b)) return;
+  const r = bar.getBoundingClientRect();
+  tlDrag = { bar, b, mode: e.clientX > r.right - 14 ? "resize" : "move", x0: e.clientX, y0: e.clientY, moved: false, target: null };
+  try { bar.setPointerCapture(e.pointerId); } catch {}
+});
+
+$("tlWrap").addEventListener("pointermove", (e) => {
+  if (!tlDrag) {
+    // ยังไม่ได้ลาก: เปลี่ยน cursor บอกว่าขอบขวาคือจุดยืดวัน
+    if (window.innerWidth < 1000) return;
+    const bar = e.target.closest(".tl-bar");
+    if (bar) { const r = bar.getBoundingClientRect(); bar.style.cursor = e.clientX > r.right - 14 ? "ew-resize" : "grab"; }
+    return;
+  }
+  if (!tlDrag.moved) {
+    if (Math.hypot(e.clientX - tlDrag.x0, e.clientY - tlDrag.y0) < 6) return;
+    tlDrag.moved = true;
+    tlDrag.bar.classList.add("dragging");
+    tlDrag.bar.style.pointerEvents = "none"; // ให้ elementFromPoint ทะลุไปเจอช่องวัน/ห้องข้างใต้
+  }
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const cell = el && el.closest ? el.closest(".tl-cell") : null;
+  clearDropRows();
+  if (!cell) { tlDrag.target = null; dragTag.style.display = "none"; return; }
+  dragTag.style.display = "block";
+  dragTag.style.left = (e.clientX + 14) + "px";
+  dragTag.style.top = (e.clientY + 16) + "px";
+  if (tlDrag.mode === "move") {
+    tlDrag.target = cell.dataset.room;
+    cell.parentElement.classList.add("drop-row");
+    dragTag.textContent = "ย้ายไปห้อง " + tlDrag.target;
+  } else {
+    const co = shiftYMD(cell.dataset.date, 1); // ปล่อยบนคืนสุดท้าย → เช็คเอาต์เช้าวันถัดไป
+    if (co > tlDrag.b.checkin) {
+      tlDrag.target = co;
+      const n = Math.round((Date.parse(co) - Date.parse(tlDrag.b.checkin)) / 86400000);
+      dragTag.textContent = `ออก ${fmtD(co)} (${n} คืน)`;
+    } else {
+      tlDrag.target = null;
+      dragTag.textContent = "ต้องอยู่หลังวันเช็คอิน";
+    }
+  }
+});
+
+function endTlDrag(e, cancelled){
+  if (!tlDrag) return;
+  const d = tlDrag;
+  tlDrag = null;
+  d.bar.classList.remove("dragging");
+  d.bar.style.pointerEvents = "";
+  dragTag.style.display = "none";
+  clearDropRows();
+  if (!d.moved || cancelled) return; // แตะเฉย ๆ = เมนูด่วนตาม click ปกติ
+  suppressTlClick = true; // กัน click ที่ตามหลังการลากไปเปิดเมนูด่วน
+  if (!d.target) return;
+  if (d.mode === "move") {
+    if (String(d.target) === String(d.b.room_no || "")) return;
+    if (!confirm(`ย้าย ${d.b.name || "#" + d.b.id} ไปห้อง ${d.target}?`)) return;
+    (async () => {
+      const oldRoom = String(d.b.room_no || "");
+      const r1 = await apiUpdate({ action: "update", id: d.b.id, fields: { room_no: d.target } });
+      // แขกกำลังพักอยู่แล้วย้ายห้อง → ห้องเดิมต้องทำความสะอาด
+      if (r1 && oldRoom && isInhouse(d.b)) await apiUpdate({ action: "roomclean", room: oldRoom, clean: "รอทำความสะอาด" });
+      if (r1) await afterAction(() => {
+        d.b.room_no = d.target;
+        if (oldRoom && isInhouse(d.b)) { const rr = (DATA.rooms || []).find((x) => x.room === oldRoom); if (rr) rr.clean = "รอทำความสะอาด"; }
+      });
+    })();
+  } else {
+    if (d.target === d.b.checkout) return;
+    if (!confirm(`เปลี่ยนวันเช็คเอาต์ของ ${d.b.name || "#" + d.b.id} เป็น ${fmtD(d.target)}?`)) return;
+    (async () => {
+      const r1 = await apiUpdate({ action: "update", id: d.b.id, fields: { checkout: d.target } });
+      if (r1) await afterAction(() => { d.b.checkout = d.target; });
+    })();
+  }
+}
+$("tlWrap").addEventListener("pointerup", (e) => endTlDrag(e, false));
+$("tlWrap").addEventListener("pointercancel", (e) => endTlDrag(e, true));
 
 /* ───────── init ───────── */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
