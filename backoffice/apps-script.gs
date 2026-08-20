@@ -497,7 +497,10 @@ function importArrivalRows_(html) {
     if (tds.length < 4) continue;
     var resNo = (tds[0].match(/\d{9,13}/) || [""])[0];
     if (!resNo) continue; // แถวหัวตาราง / แถว layout อื่น ๆ
-    var name = tds[1].split("\n")[0].trim(); // บรรทัดแรก = ชื่อ (บรรทัดถัดไปอาจเป็นโน้ตเวลามาถึง)
+    // เซลล์ชื่อ: บรรทัดแรก = ชื่อแขก บรรทัดถัดไป = คำขอพิเศษ (เช่น ขอเช็คอินเช้า)
+    var cellLines = tds[1].split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+    var name = cellLines[0] || "";
+    var guestNote = cellLines.slice(1).join(" ").replace(/\s+/g, " ").trim().slice(0, 300);
     var ci = parseDate_(tds[2]), co = parseDate_(tds[3]);
     if (!name && !ci && !co) continue;
 
@@ -506,16 +509,21 @@ function importArrivalRows_(html) {
       appendBooking_({
         id: "BDC-" + resNo, source: "Booking.com", name: name,
         checkin: ci, checkout: co, status: "ยืนยันแล้ว",
-        note: "จากอีเมลสรุปเช็คอินวันนี้/พรุ่งนี้",
+        note: "จากอีเมลสรุปเช็คอินวันนี้/พรุ่งนี้" + (guestNote ? " | คำขอแขก: " + guestNote : ""),
       });
       count++;
       continue;
     }
     var filled = backfillBooking_(row, { name: name, checkin: ci, checkout: co });
-    if (!filled.length) continue;
+    // คำขอแขกสำคัญกับการเตรียมห้อง — เพิ่มลงโน้ตแม้ช่องอื่นครบแล้ว (กันซ้ำด้วยข้อความช่วงแรก)
+    var noteAdd = guestNote && String(row.note || "").indexOf(guestNote.slice(0, 40)) < 0
+      ? "คำขอแขก: " + guestNote : "";
+    if (!filled.length && !noteAdd) continue;
     var status = isBookingComplete_(row) && /รอเติม/.test(row.status) ? "ยืนยันแล้ว" : (row.status || "ยืนยันแล้ว");
-    setStatus_(row._rowIndex, status, "เติมจากอีเมลสรุปเช็คอิน (เติม: " + filled.join(", ") + ")");
+    var extra = filled.length ? "เติมจากอีเมลสรุปเช็คอิน (เติม: " + filled.join(", ") + ")" : "";
+    setStatus_(row._rowIndex, status, [extra, noteAdd].filter(Boolean).join(" | "));
     row.status = status;
+    row.note = String(row.note || "") + (noteAdd ? " | " + noteAdd : "");
     count++;
   }
   return count;
@@ -559,7 +567,9 @@ function dailyDigest() {
     return !/ยกเลิก/.test(r.status) && isYMD(r.checkin) && isYMD(r.checkout);
   });
   var notOut = function (r) { return !/เช็คเอาต์แล้ว/.test(r.status); };
+  var tomorrow = Utilities.formatDate(new Date(Date.now() + 86400000), tz, "yyyy-MM-dd");
   var ci = act.filter(function (r) { return r.checkin === today && notOut(r); });
+  var ciTmr = act.filter(function (r) { return r.checkin === tomorrow && notOut(r); });
   var co = act.filter(function (r) { return r.checkout === today && notOut(r); });
   var stay = act.filter(function (r) { return r.checkin <= today && today < r.checkout && notOut(r); });
   var dirty = readRooms_().filter(function (r) { return r.clean === "รอทำความสะอาด"; });
@@ -585,13 +595,22 @@ function dailyDigest() {
   var L = [];
   L.push("สรุปงาน House of Happiness — " + Utilities.formatDate(new Date(), tz, "d MMM yyyy"));
   L.push("");
+  // คำขอพิเศษของแขก (จากอีเมลสรุปเช็คอิน) — โชว์ต่อท้ายชื่อให้เตรียมตัวถูก
+  var guestReq = function (r) {
+    var m = String(r.note || "").match(/คำขอแขก:[^|]*/);
+    return m ? " | ⚠ " + m[0].trim() : "";
+  };
   L.push("== งานวันนี้ ==");
   L.push("เช็คอินวันนี้: " + ci.length + " รายการ");
-  ci.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : " | ยังไม่จัดห้อง") + " | " + r.source); });
+  ci.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : " | ยังไม่จัดห้อง") + " | " + r.source + guestReq(r)); });
   L.push("เช็คเอาต์วันนี้: " + co.length + " รายการ");
   co.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : "")); });
   L.push("กำลังเข้าพักคืนนี้: " + stay.length + " ห้อง");
   L.push("ห้องรอทำความสะอาด: " + (dirty.length ? dirty.map(function (r) { return r.room; }).join(", ") : "ไม่มี"));
+  L.push("");
+  L.push("== เตรียมพรุ่งนี้ ==");
+  L.push("เช็คอินพรุ่งนี้: " + ciTmr.length + " รายการ" + (ciTmr.length ? " — จัดห้อง/สั่งแม่บ้านล่วงหน้าได้เลย" : ""));
+  ciTmr.forEach(function (r) { L.push("  - " + (r.name || "(รอเติมชื่อ)") + (r.room_no ? " | ห้อง " + r.room_no : " | ยังไม่จัดห้อง") + " | " + r.source + guestReq(r)); });
   L.push("");
   L.push("== เงินเดือนนี้ (" + ym + ") ==");
   L.push("รายรับตามยอดจอง: " + fmtBaht_(rev) + (revCount ? " (" + revCount + " การจอง)" : " — ยังไม่มีการจองที่ใส่ยอดเงิน"));
@@ -611,7 +630,7 @@ function dailyDigest() {
 
   MailApp.sendEmail(
     Session.getEffectiveUser().getEmail(),
-    "[HOH] เช็คอิน " + ci.length + " · เช็คเอาต์ " + co.length + " · พัก " + stay.length + " ห้อง" + (needFix.length ? " · ค้างเติม " + needFix.length : ""),
+    "[HOH] เช็คอิน " + ci.length + " · เช็คเอาต์ " + co.length + " · พัก " + stay.length + " ห้อง · พรุ่งนี้ " + ciTmr.length + (needFix.length ? " · ค้างเติม " + needFix.length : ""),
     L.join("\n")
   );
 }
