@@ -1378,6 +1378,20 @@ function closeModal(){
   if (lastModalFocus && document.contains(lastModalFocus)) lastModalFocus.focus();
 }
 
+/* ── ยกเลิกการจอง: ไม่ลบแถวทิ้ง — ขีดฆ่าเก็บเป็นประวัติ ห้องกลับมาว่าง ── */
+async function cancelBooking(b){
+  if (!confirm(`ยกเลิกการจองของ ${b.name || "#" + b.id}?\nรายการจะถูกขีดฆ่า (เก็บเป็นประวัติในชีต) และห้องกลับมาว่าง`)) return;
+  const wasIn = isInhouse(b), room = String(b.room_no || "").trim();
+  const r1 = await apiUpdate({ action: "update", id: b.id, fields: { status: "ยกเลิก" } });
+  // แขกพักอยู่แล้วถูกยกเลิก → ห้องต้องทำความสะอาดก่อนขายต่อ
+  if (r1 && wasIn && room) await apiUpdate({ action: "roomclean", room, clean: "รอทำความสะอาด" });
+  if (r1) await afterAction(() => {
+    b.status = "ยกเลิก";
+    if (wasIn && room) { const rr = (DATA.rooms || []).find((x) => x.room === room); if (rr) rr.clean = "รอทำความสะอาด"; }
+  });
+  closeModal();
+}
+
 /* ── เมนูด่วนจากไทม์ไลน์: งานที่ทำบ่อยจบใน 1-2 แตะ ไม่ต้องผ่านฟอร์มแก้ไขเต็ม ── */
 function openQuickModal(b){
   const staff = DATA.role === "staff";
@@ -1400,10 +1414,12 @@ function openQuickModal(b){
       ${!needsFix(b) && !isCancelled(b) ? `<button class="mbtn mbtn-ghost" id="qkMsg">✉ ข้อความยืนยันส่งลูกค้า</button>` : ""}
       <button class="mbtn mbtn-primary" id="qkEdit">แก้ไขรายละเอียด</button>
       <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
-    </div>`;
+    </div>
+    ${isCancelled(b) ? "" : `<button class="mbtn-danger" id="qkCancel">ยกเลิกการจองนี้</button>`}`;
   openModal(html);
   const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
   on("qkConfirm", () => openConfirmModal(b));
+  on("qkCancel", () => cancelBooking(b));
   on("qkIn", async () => {
     const r1 = await apiUpdate({ action: "update", id: b.id, fields: { status: "เข้าพักอยู่" } });
     if (r1) await afterAction(() => { b.status = "เข้าพักอยู่"; });
@@ -1440,10 +1456,13 @@ function openEditModal(b){
       <button class="mbtn mbtn-primary" id="actSaveEdit">บันทึก</button>
       ${!needsFix(b) && !isCancelled(b) ? `<button class="mbtn mbtn-ghost" id="actMsg">✉ ข้อความยืนยันส่งลูกค้า</button>` : ""}
       <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
-    </div>`;
+    </div>
+    ${isCancelled(b) ? "" : `<button class="mbtn-danger" id="actCancelBk">ยกเลิกการจองนี้</button>`}`;
   openModal(html);
   const msgBtn = $("actMsg");
   if (msgBtn) msgBtn.onclick = () => openMsgModal({ ...b });
+  const cancelBtn = $("actCancelBk");
+  if (cancelBtn) cancelBtn.onclick = () => cancelBooking(b);
   $("actSaveEdit").onclick = async () => {
     const ci = $("edIn").value, co = $("edOut").value;
     if (ci && co && co <= ci) { toast("วันเช็คเอาต์ต้องอยู่หลังวันเช็คอิน"); return; }
