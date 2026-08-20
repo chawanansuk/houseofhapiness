@@ -101,6 +101,16 @@ input,select{font-family:inherit}
 .stat-click:hover{border-color:var(--free)}
 .btn-edit{background:var(--brand)}
 .btn-confirm{background:var(--free)}
+/* ── แถบแจ้งเตือนรวม (ยุบแบนเนอร์ 3 อันไว้ข้างใน แตะเพื่อขยาย) ── */
+.notify-bar{width:100%;display:flex;align-items:center;gap:.55rem;background:var(--card);border:1px solid #f0dcae;border-radius:12px;padding:.65rem .95rem;font-size:.86rem;font-weight:700;color:#8a5a12;box-shadow:var(--shadow);margin-bottom:.9rem;text-align:left;cursor:pointer;line-height:1.4}
+.notify-bar:hover{filter:brightness(.98)}
+.notify-bar.ok{color:var(--muted);border-color:var(--line)}
+.notify-bar .nb-arrow{margin-left:auto;flex:none;transition:transform .2s}
+.notify-bar.open .nb-arrow{transform:rotate(180deg)}
+/* ── ป้ายคำขอพิเศษของแขก (เด่นกว่าโน้ตทั่วไป) ── */
+.req-badge{display:inline-block;background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:8px;padding:.1rem .5rem;font-size:.72rem;font-weight:700;margin-top:.25rem}
+.req-note{margin-top:.45rem;background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:8px;padding:.45rem .65rem;font-size:.83rem;line-height:1.5}
+.mobile-only{display:none}
 /* ── รายรับ-รายจ่าย ── */
 .exp-form{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-top:.5rem}
 .exp-form label{display:block;font-size:.78rem;font-weight:700;margin-bottom:.25rem}
@@ -309,6 +319,7 @@ tbody tr:hover td{background:#faf7f2}
 @media(max-width:999px){
   .sidebar{display:none}
   .main{margin-left:0}
+  .mobile-only{display:block}
   .topbar{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;padding-top:calc(.7rem + env(safe-area-inset-top,0px));background:var(--sidebar);color:#fff;position:sticky;top:0;z-index:30}
   .topbar .tb-brand{display:flex;align-items:center;gap:.5rem;font-family:"Prompt",sans-serif;font-weight:700;font-size:.98rem}
   .topbar .sp{flex:1}
@@ -395,6 +406,11 @@ tbody tr:hover td{background:#faf7f2}
           ตั้งค่าตามคู่มือ <code>backoffice/SETUP.md</code> เพื่อใช้ข้อมูลจริง
         </div>
         <div class="banner warn" id="srcWarn"></div>
+        <!-- แถบแจ้งเตือนรวม — แบนเนอร์รายละเอียดถูกยุบไว้ข้างใน ไม่บังหน้างานบนมือถือ -->
+        <button class="notify-bar" id="notifyBar" type="button" style="display:none">
+          <span>🔔</span><span id="notifyText"></span><span class="nb-arrow">▾</span>
+        </button>
+        <div id="bannerGroup" style="display:none">
         <div class="banner newreq" id="newBanner"></div>
         <div class="banner fix" id="fixBanner"></div>
         <div class="banner warn" id="icalBanner">
@@ -404,6 +420,7 @@ tbody tr:hover td{background:#faf7f2}
           <div id="importAge" style="margin-top:.45rem;font-weight:700"></div>
           <div style="margin-top:.6rem"><button class="btn-import" id="csvImportBtn2" type="button">⬆ เลือกไฟล์ Booking เพื่อนำเข้า</button></div>
         </div>
+        </div><!-- /bannerGroup -->
       </div>
 
       <!-- ── ภาพรวม ── -->
@@ -432,7 +449,12 @@ tbody tr:hover td{background:#faf7f2}
 
       <!-- ── ไทม์ไลน์การจอง (สไตล์ AzHotel ที่พนักงานคุ้นมือ) ── -->
       <section id="secTimeline" class="section">
-        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = แก้ไข · แถบเริ่มบ่ายวันเข้า จบเที่ยงวันออก</small></div>
+        <!-- มือถือ: งานวันนี้ขึ้นก่อนเสมอ — เปิดแอปแล้วทำงานได้เลย (desktop มีอยู่แล้วในแท็บผังห้อง) -->
+        <div class="card mobile-only" id="todayTopCard" style="margin-bottom:1.2rem">
+          <div class="sec-title sub"><span class="ic" data-icon="check"></span> งานวันนี้</div>
+          <div id="todayBodyTop"></div>
+        </div>
+        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = เมนูด่วน · แถบเริ่มบ่ายวันเข้า จบเที่ยงวันออก</small></div>
         <div class="card">
           <div class="cal-head">
             <button class="cal-nav" id="tlPrev" aria-label="ย้อน 7 วัน">‹</button>
@@ -605,6 +627,7 @@ const KEY_STORE = "hoh-admin-key";
 const DATA_CACHE = "hoh-admin-data";   // ข้อมูลรอบล่าสุด — เปิดหน้าใหม่โชว์ทันทีไม่ต้องรอชีต
 const LAST_IMPORT = "hoh-last-import"; // วันที่นำเข้าไฟล์ Booking ครั้งล่าสุด (เตือนให้ทำรายสัปดาห์)
 let DATA = null, calYM = null, selDay = null, expYM = null, tlStart = null, lastModalFocus = null;
+let bannersOpen = false; // แบนเนอร์รายละเอียดยุบไว้ก่อน — แตะแถบ 🔔 เพื่อขยาย
 const TL_DAYS = 14;
 const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
 
@@ -679,6 +702,13 @@ const isInhouse = (b) => /เข้าพัก/.test(String(b.status || ""));
 const activeBookings = () => (DATA.bookings || []).filter((b) => !isCancelled(b) && isYMD(b.checkin) && isYMD(b.checkout));
 const staysOn = (b, d) => b.checkin <= d && d < b.checkout;
 const bahtNum = (v) => Number(String(v == null ? "" : v).replace(/[^\d.]/g, "")) || 0;
+// คำขอพิเศษของแขก (ตัวแกะอีเมลเก็บไว้ในโน้ตรูปแบบ "คำขอแขก: ...") — โชว์เป็นป้าย ⚠ แยกจากโน้ตระบบ
+const guestReqOf = (b) => {
+  const m = String(b.note || "").match(/คำขอแขก:\s*([^|]*)/);
+  return m ? m[1].trim() : "";
+};
+const noteWithoutReq = (b) => String(b.note || "").split("|")
+  .map((s) => s.trim()).filter((s) => s && s.indexOf("คำขอแขก:") !== 0).join(" | ");
 
 function toast(msg){
   const t = $("toast");
@@ -817,8 +847,8 @@ function renderAll(){
   $("newBanner").innerHTML = `<b>🟢 คำขอจองตรงใหม่ (${newList.length})</b> — ลูกค้าจองผ่านเว็บ รอคุณยืนยันและจัดห้อง · แตะเพื่อดู`;
   $("statNew").style.display = newList.length ? "" : "none";
   $("stNew").textContent = newList.length;
-  $("icalBanner").style.display =
-    (!DATA.demo && DATA.sources && String(DATA.sources.icalError || "").indexOf("ยังไม่ได้ตั้ง") === 0) ? "block" : "none";
+  const icalOn = !DATA.demo && DATA.sources && String(DATA.sources.icalError || "").indexOf("ยังไม่ได้ตั้ง") === 0;
+  $("icalBanner").style.display = icalOn ? "block" : "none";
 
   // เตือนอายุการนำเข้าไฟล์ Booking — ข้อมูลวันที่/ยอดจะแม่นก็ต่อเมื่อนำเข้าสม่ำเสมอ
   const lastImp = localStorage.getItem(LAST_IMPORT) || "";
@@ -828,6 +858,21 @@ function renderAll(){
     : impDays > 7
       ? `⏰ นำเข้าครั้งล่าสุด ${fmtD(lastImp)} (${impDays} วันแล้ว) — ถึงรอบอัปเดตแล้ว`
       : `นำเข้าครั้งล่าสุด: ${impDays === 0 ? "วันนี้" : fmtD(lastImp)} ✓`;
+
+  // แถบแจ้งเตือนรวม: สรุปเรื่องค้างบรรทัดเดียว แบนเนอร์รายละเอียดขยายเมื่อแตะ
+  const nbItems = [];
+  if (newList.length) nbItems.push(`จองตรงรอยืนยัน ${newList.length}`);
+  if (fixList.length) nbItems.push(`รอเติมข้อมูล ${fixList.length}`);
+  if (icalOn && (impDays < 0 || impDays > 7)) nbItems.push(impDays < 0 ? "ยังไม่เคยนำเข้าไฟล์ Booking" : "ถึงรอบนำเข้าไฟล์ Booking");
+  const hasGroup = newList.length || fixList.length || icalOn;
+  const nb = $("notifyBar");
+  nb.style.display = hasGroup ? "flex" : "none";
+  nb.classList.toggle("ok", !nbItems.length);
+  nb.classList.toggle("open", bannersOpen);
+  $("notifyText").textContent = nbItems.length
+    ? `รอจัดการ ${nbItems.length} เรื่อง — ${nbItems.join(" · ")}`
+    : "ไม่มีเรื่องรอจัดการ · แตะดูเมนูนำเข้าไฟล์ Booking";
+  $("bannerGroup").style.display = hasGroup && bannersOpen ? "" : "none";
 
   const t = DATA.today;
   const act = activeBookings();
@@ -899,7 +944,8 @@ function renderTimeline(){
       if (endCol <= startCol) return;
       barCount++;
       const cls = isCheckedOut(b) ? "tl-out" : isInhouse(b) ? "tl-in" : "tl-book";
-      html += `<button class="tl-bar ${cls}" style="grid-column:${startCol} / ${endCol}" data-barid="${esc(b.id)}" title="${esc(b.name || "")} ${fmtD(b.checkin)} → ${fmtD(b.checkout)} (${nightsOf(b)} คืน)">${esc(b.name || "ไม่ระบุชื่อ")}</button>`;
+      const req = guestReqOf(b);
+      html += `<button class="tl-bar ${cls}" style="grid-column:${startCol} / ${endCol}" data-barid="${esc(b.id)}" title="${esc(b.name || "")} ${fmtD(b.checkin)} → ${fmtD(b.checkout)} (${nightsOf(b)} คืน)${req ? " · ⚠ " + esc(req) : ""}">${req ? "⚠ " : ""}${esc(b.name || "ไม่ระบุชื่อ")}</button>`;
     });
     html += `</div>`;
   }
@@ -1048,7 +1094,8 @@ function renderToday(){
         ? `<button class="btn-sm btn-in" data-act="checkin" data-id="${esc(b.id)}" data-room="${esc(room)}">เช็คอิน ห้อง ${esc(room)}</button>`
         : `<select class="ti-room">${freeRooms.length ? freeRooms.map((r) => `<option>${esc(r.room)}</option>`).join("") : `<option value="">ไม่มีห้องว่าง</option>`}</select>
            <button class="btn-sm btn-in" data-act="checkin" data-id="${esc(b.id)}">เช็คอิน</button>`;
-      return `<div class="task-item"><div class="ti-name">${esc(b.name)}</div><div class="ti-sub">${esc(b.source || "")} · ${nightsOf(b)} คืน</div><div class="ti-action">${action}</div></div>`;
+      const req = guestReqOf(b);
+      return `<div class="task-item"><div class="ti-name">${esc(b.name)}</div><div class="ti-sub">${esc(b.source || "")} · ${nightsOf(b)} คืน</div>${req ? `<div class="req-note">⚠ ${esc(req)}</div>` : ""}<div class="ti-action">${action}</div></div>`;
     }).join("");
     html += `</div>`;
   }
@@ -1064,6 +1111,10 @@ function renderToday(){
   }
   if (!html) html = `<div class="today-empty">${svg("check")}<div>ไม่มีงานค้างวันนี้</div></div>`;
   $("todayBody").innerHTML = html;
+  // สำเนาเดียวกันขึ้นบนสุดของหน้าแรกมือถือ — ไม่มีงานก็ซ่อนการ์ดไปเลย ประหยัดจอ
+  const hasTasks = arrivals.length || departures.length || dirty.length;
+  $("todayTopCard").style.display = hasTasks ? "" : "none";
+  $("todayBodyTop").innerHTML = hasTasks ? html : "";
 }
 
 async function onTodayClick(e){
@@ -1222,6 +1273,49 @@ function closeModal(){
   if (!$("overlay").classList.contains("open")) return;
   $("overlay").classList.remove("open");
   if (lastModalFocus && document.contains(lastModalFocus)) lastModalFocus.focus();
+}
+
+/* ── เมนูด่วนจากไทม์ไลน์: งานที่ทำบ่อยจบใน 1-2 แตะ ไม่ต้องผ่านฟอร์มแก้ไขเต็ม ── */
+function openQuickModal(b){
+  const staff = DATA.role === "staff";
+  const room = (DATA.rooms || []).find((r) => r.room === String(b.room_no || ""));
+  const req = guestReqOf(b);
+  const canCheckin = !isCheckedOut(b) && !isInhouse(b) && !isCancelled(b) && String(b.room_no || "").trim() && b.checkin <= DATA.today;
+  const html = `
+    <h3>${esc(b.name || "ไม่ระบุชื่อ")}</h3>
+    <div class="msub">${statusBadge(b.status)} · #${esc(b.id)}</div>
+    <div class="minfo">
+      ${fmtD(b.checkin)} → ${fmtD(b.checkout)} (${nightsOf(b)} คืน)${b.room_no ? ` · ห้อง <b>${esc(b.room_no)}</b>` : " · ยังไม่จัดห้อง"}<br>
+      ${esc(b.source || "-")}${b.phone ? " · โทร " + esc(b.phone) : ""}${staff || !b.amount ? "" : " · ฿" + esc(b.amount)}
+      ${req ? `<div class="req-note">⚠ ${esc(req)}</div>` : ""}
+    </div>
+    <div class="mact">
+      ${isDirectPending(b) ? `<button class="mbtn mbtn-in" id="qkConfirm">✓ ยืนยันคำขอจองตรง</button>` : ""}
+      ${canCheckin ? `<button class="mbtn mbtn-in" id="qkIn">เช็คอิน</button>` : ""}
+      ${isInhouse(b) ? `<button class="mbtn mbtn-out" id="qkOut">เช็คเอาต์ (ห้องขึ้นรอทำความสะอาด)</button>` : ""}
+      ${room && !isCheckedOut(b) && !isCancelled(b) ? `<button class="mbtn mbtn-ghost" id="qkMove">ย้ายห้อง</button>` : ""}
+      ${!needsFix(b) && !isCancelled(b) ? `<button class="mbtn mbtn-ghost" id="qkMsg">✉ ข้อความยืนยันส่งลูกค้า</button>` : ""}
+      <button class="mbtn mbtn-primary" id="qkEdit">แก้ไขรายละเอียด</button>
+      <button class="mbtn mbtn-ghost" id="actClose">ปิด</button>
+    </div>`;
+  openModal(html);
+  const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+  on("qkConfirm", () => openConfirmModal(b));
+  on("qkIn", async () => {
+    const r1 = await apiUpdate({ action: "update", id: b.id, fields: { status: "เข้าพักอยู่" } });
+    if (r1) await afterAction(() => { b.status = "เข้าพักอยู่"; });
+    closeModal();
+  });
+  on("qkOut", async () => {
+    const r1 = await apiUpdate({ action: "update", id: b.id, fields: { status: "เช็คเอาต์แล้ว" } });
+    if (r1 && b.room_no) await apiUpdate({ action: "roomclean", room: b.room_no, clean: "รอทำความสะอาด" });
+    if (r1) await afterAction(() => { b.status = "เช็คเอาต์แล้ว"; const rr = (DATA.rooms || []).find((x) => x.room === String(b.room_no)); if (rr) rr.clean = "รอทำความสะอาด"; });
+    closeModal();
+  });
+  on("qkMove", () => openMoveModal(b, room));
+  on("qkMsg", () => openMsgModal({ ...b }));
+  on("qkEdit", () => openEditModal(b));
+  on("actClose", closeModal);
 }
 
 /* ── ฟอร์มเติม/แก้ข้อมูลการจอง (ใช้คู่กับแอป Pulse ที่มีรายละเอียดแขก) ── */
@@ -1523,7 +1617,7 @@ function renderTable(){
       <td data-label="เช็คเอาต์">${fmtD(b.checkout)}</td>
       <td data-label="คืน">${nightsOf(b)}</td>
       <td data-label="ห้อง">${b.room_no ? `<b>${esc(b.room_no)}</b>` : `<span class="src">-</span>`}</td>
-      <td data-label="ผู้เข้าพัก"><b>${esc(b.name || "-")}</b>${isDirectPending(b) ? `<span class="tag-new">ใหม่</span>` : ""}${b.phone ? `<br><span class="src">${esc(b.phone)}</span>` : ""}${b.note ? `<br><span class="src">${esc(b.note)}</span>` : ""}</td>
+      <td data-label="ผู้เข้าพัก"><b>${esc(b.name || "-")}</b>${isDirectPending(b) ? `<span class="tag-new">ใหม่</span>` : ""}${b.phone ? `<br><span class="src">${esc(b.phone)}</span>` : ""}${guestReqOf(b) ? `<br><span class="req-badge">⚠ ${esc(guestReqOf(b))}</span>` : ""}${noteWithoutReq(b) ? `<br><span class="src">${esc(noteWithoutReq(b))}</span>` : ""}</td>
       <td data-label="ช่องทาง"><span class="src">${esc(b.source || "-")}</span>${b.id ? `<br><span class="src">#${esc(b.id)}</span>` : ""}</td>
       <td data-label="ยอด">${esc(b.amount || "-")}</td>
       <td data-label="สถานะ">${statusBadge(b.status)}</td>
@@ -1554,6 +1648,8 @@ document.querySelectorAll("[data-nav]").forEach((n) => n.addEventListener("click
 document.querySelectorAll(".act-refresh").forEach((b) => b.addEventListener("click", async () => { toast("กำลังรีเฟรช…"); await reload(); toast("อัปเดตแล้ว"); }));
 document.querySelectorAll(".act-logout").forEach((b) => b.addEventListener("click", logout));
 $("todayBody").addEventListener("click", onTodayClick);
+$("todayBodyTop").addEventListener("click", onTodayClick);
+$("notifyBar").addEventListener("click", () => { bannersOpen = !bannersOpen; renderAll(); });
 $("calPrev").addEventListener("click", () => { calYM[1]--; if (calYM[1] < 0) { calYM[1] = 11; calYM[0]--; } renderCal(); });
 $("calNext").addEventListener("click", () => { calYM[1]++; if (calYM[1] > 11) { calYM[1] = 0; calYM[0]++; } renderCal(); });
 $("q").addEventListener("input", renderTable);
@@ -1778,7 +1874,7 @@ $("tlWrap").addEventListener("click", (e) => {
   const bar = e.target.closest(".tl-bar");
   if (bar) {
     const b = (DATA.bookings || []).find((x) => String(x.id) === bar.dataset.barid);
-    if (b) openEditModal(b);
+    if (b) openQuickModal(b); // เมนูด่วน — งานประจำวันจบใน 1-2 แตะ
     return;
   }
   const chip = e.target.closest(".tl-chip");
