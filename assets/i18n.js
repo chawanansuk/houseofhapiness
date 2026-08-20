@@ -161,7 +161,7 @@ const I18N = {
   "bs.2":            { th: "เรายืนยันภายใน 24 ชม.", en: "We confirm within 24 h" },
   "bs.2.d":          { th: "เช็คห้องว่างแล้วตอบกลับทางอีเมล/LINE", en: "We check availability and reply by email/LINE" },
   "bs.3":            { th: "จ่ายที่โรงแรม", en: "Pay at the hotel" },
-  "bs.3.d":          { th: "ไม่ต้องจ่ายออนไลน์ — เงินสด โอน หรือพร้อมเพย์", en: "No online payment — cash, transfer or PromptPay" },
+  "bs.3.d":          { th: "เงินสด โอน พร้อมเพย์ หรือลิงก์ชำระเงินที่เราส่งให้", en: "Cash, transfer, PromptPay — or a payment link we send you" },
 
   /* ── ทำไมต้องจองตรง ── */
   "wbd.title":       { th: "ทำไมต้องจองตรงกับเรา", en: "Why Book Direct" },
