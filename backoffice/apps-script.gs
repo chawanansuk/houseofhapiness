@@ -321,6 +321,15 @@ function scanBookingEmails() {
 
 function processMessage_(msg) {
   var subject = msg.getSubject() || "";
+
+  // อีเมลสรุปรายวัน "Reservations with today's or tomorrow's arrival date"
+  // — มีเลขจอง + ชื่อแขก + วันเข้า-ออกครบเป็นตาราง แต่หัวข้อไม่เข้าเงื่อนไข
+  // จองใหม่/ยกเลิก/แก้ไข ทำให้รุ่นก่อนข้ามไปเฉย ๆ ทั้งที่ข้อมูลดีที่สุด
+  if (isArrivalsDigest_(subject)) {
+    importArrivalRows_(msg.getBody() || msg.getPlainBody() || "");
+    return;
+  }
+
   var parsed = parseBookingEmail_(subject, msg.getPlainBody() || "");
   if (!parsed.type) return; // โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ
 
@@ -454,6 +463,77 @@ function findByResNo_(resNo) {
     if (String(rows[i].id || "").replace(/\D/g, "") === digits) return rows[i];
   }
   return null;
+}
+
+/* ═══ อีเมลสรุปรายวัน "เช็คอินวันนี้/พรุ่งนี้" (Reservations with today's or tomorrow's arrival date) ═══ */
+
+function isArrivalsDigest_(subject) {
+  return /arrival date for|reservations? with today|เช็คอินในวันนี้และวันพรุ่งนี้|กำหนดเช็คอินใน/i.test(String(subject || ""));
+}
+
+/**
+ * อ่านตาราง HTML ในอีเมลสรุปเช็คอิน: เลขจอง | ชื่อผู้เข้าพัก | วันเช็คอิน | วันเช็คเอาท์
+ * - แถวที่มีในชีตแล้ว → เติมเฉพาะช่องที่ว่าง (backfillBooking_) ไม่ทับข้อมูลที่กรอกมือ
+ * - แถวที่ไม่พบ → เพิ่มใหม่ กันการจองตกหล่น
+ * อีเมลนี้มาทุกวัน — รันซ้ำได้ ไม่บันทึก/ไม่แก้ซ้ำ
+ */
+function importArrivalRows_(html) {
+  var byDigits = {};
+  readAll_().forEach(function (r) {
+    var d = String(r.id || "").replace(/\D/g, "");
+    if (d.length >= 6) byDigits[d] = r;
+  });
+  var strip = function (s) {
+    return String(s || "")
+      .replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div)>/gi, "\n").replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"')
+      .replace(/[ \t]+/g, " ").trim();
+  };
+  var count = 0;
+  var rowRe = /<tr[\s>][\s\S]*?<\/tr>/gi, trm;
+  while ((trm = rowRe.exec(html))) {
+    var tds = [], tdRe = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi, m;
+    while ((m = tdRe.exec(trm[0]))) tds.push(strip(m[1]));
+    if (tds.length < 4) continue;
+    var resNo = (tds[0].match(/\d{9,13}/) || [""])[0];
+    if (!resNo) continue; // แถวหัวตาราง / แถว layout อื่น ๆ
+    var name = tds[1].split("\n")[0].trim(); // บรรทัดแรก = ชื่อ (บรรทัดถัดไปอาจเป็นโน้ตเวลามาถึง)
+    var ci = parseDate_(tds[2]), co = parseDate_(tds[3]);
+    if (!name && !ci && !co) continue;
+
+    var row = byDigits[resNo];
+    if (!row) {
+      appendBooking_({
+        id: "BDC-" + resNo, source: "Booking.com", name: name,
+        checkin: ci, checkout: co, status: "ยืนยันแล้ว",
+        note: "จากอีเมลสรุปเช็คอินวันนี้/พรุ่งนี้",
+      });
+      count++;
+      continue;
+    }
+    var filled = backfillBooking_(row, { name: name, checkin: ci, checkout: co });
+    if (!filled.length) continue;
+    var status = isBookingComplete_(row) && /รอเติม/.test(row.status) ? "ยืนยันแล้ว" : (row.status || "ยืนยันแล้ว");
+    setStatus_(row._rowIndex, status, "เติมจากอีเมลสรุปเช็คอิน (เติม: " + filled.join(", ") + ")");
+    row.status = status;
+    count++;
+  }
+  return count;
+}
+
+/** รันมือ 1 ครั้งหลังอัปเดตสคริปต์: ไล่อีเมลสรุปเช็คอินย้อนหลัง 30 วันมาเติมข้อมูล
+ *  (รวมอีเมลที่ติดป้าย HOH-บันทึกแล้ว ที่สคริปต์รุ่นก่อนข้ามไปโดยไม่ได้อ่าน) */
+function importArrivalDigests() {
+  var threads = GmailApp.search('from:booking.com subject:(arrival OR "เช็คอิน") newer_than:30d', 0, 60);
+  var total = 0;
+  threads.forEach(function (thread) {
+    thread.getMessages().forEach(function (msg) {
+      if (!isArrivalsDigest_(msg.getSubject() || "")) return;
+      total += importArrivalRows_(msg.getBody() || msg.getPlainBody() || "") || 0;
+    });
+  });
+  Logger.log("เติม/เพิ่มข้อมูลจากอีเมลสรุปเช็คอิน " + total + " รายการ");
+  return total;
 }
 
 /* ═══════════════ สรุปงานส่งอีเมลทุกเช้า ═══════════════ */
