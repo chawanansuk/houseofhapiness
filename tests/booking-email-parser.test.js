@@ -157,7 +157,10 @@ assert.equal(sandbox.isArrivalsDigest_("Booking cancelled - 5566778899"), false)
   const volker = appended.find((b) => b.id === "BDC-6003254919");
   assert.deepEqual([volker.name, volker.checkin, volker.checkout, volker.status],
     ["Volker Goering", "2026-08-20", "2026-08-23", "ยืนยันแล้ว"]);
-  assert.equal(appended.find((b) => b.id === "BDC-5461969032").name, "Matthew Chopping");
+  const mat = appended.find((b) => b.id === "BDC-5461969032");
+  assert.equal(mat.name, "Matthew Chopping");
+  // คำขอพิเศษของแขก (บรรทัดถัดจากชื่อ) ต้องถูกเก็บลงโน้ต
+  assert.ok(mat.note.includes("คำขอแขก: Approximate time of arrival: 08:00"));
   // แถวเดิมถูกเติมวันที่/ชื่อ/คืน และพ้นสถานะรอเติม
   assert.equal(cellWrites["2:checkin"], "2026-08-21");
   assert.equal(cellWrites["2:checkout"], "2026-08-28");
@@ -169,11 +172,38 @@ assert.equal(sandbox.isArrivalsDigest_("Booking cancelled - 5566778899"), false)
   existing.push(
     { id: "BDC-5923801224", name: "George Glenn", checkin: "2026-08-21", checkout: "2026-08-28", nights: "7", status: "ยืนยันแล้ว", note: "", _rowIndex: 2 },
     { id: "BDC-6003254919", name: "Volker Goering", checkin: "2026-08-20", checkout: "2026-08-23", nights: "3", status: "ยืนยันแล้ว", note: "", _rowIndex: 3 },
-    { id: "BDC-5461969032", name: "Matthew Chopping", checkin: "2026-08-20", checkout: "2026-08-25", nights: "5", status: "ยืนยันแล้ว", note: "", _rowIndex: 4 }
+    { id: "BDC-5461969032", name: "Matthew Chopping", checkin: "2026-08-20", checkout: "2026-08-25", nights: "5", status: "ยืนยันแล้ว", note: "จากอีเมลสรุปเช็คอินวันนี้/พรุ่งนี้ | คำขอแขก: Approximate time of arrival: 08:00", _rowIndex: 4 }
   );
   appended.length = 0;
   assert.equal(sandbox.importArrivalRows_(html), 0);
   assert.equal(appended.length, 0);
+}
+
+/* ── เมลสรุปเช้า: หมวด "เช็คอินพรุ่งนี้" + คำขอแขก ── */
+{
+  const ymd = (d) => d.toISOString().slice(0, 10);
+  const today = ymd(new Date());
+  const tomorrow = ymd(new Date(Date.now() + 86400000));
+  sandbox.Utilities = {
+    formatDate: (d, tz, fmt) => (fmt === "yyyy-MM-dd" ? ymd(d) : d.toDateString()),
+  };
+  sandbox.Session = { getEffectiveUser: () => ({ getEmail: () => "owner@test" }) };
+  let sent = null;
+  sandbox.MailApp = { sendEmail: (to, subject, body) => { sent = { to, subject, body }; } };
+  sandbox.readRooms_ = () => [];
+  sandbox.readExpenses_ = () => [];
+  sandbox.readAll_ = () => [
+    { id: "A", name: "วันนี้ คนแรก", checkin: today, checkout: tomorrow, status: "ยืนยันแล้ว", room_no: "701", source: "Booking.com", note: "", amount: "" },
+    { id: "B", name: "Matthew Chopping", checkin: tomorrow, checkout: "2099-01-05", status: "ยืนยันแล้ว", room_no: "", source: "Booking.com", amount: "",
+      note: "จากอีเมลสรุปเช็คอินวันนี้/พรุ่งนี้ | คำขอแขก: Early check-in 08:00" },
+  ];
+
+  sandbox.dailyDigest();
+  assert.ok(sent, "dailyDigest ต้องส่งอีเมล");
+  assert.ok(sent.body.includes("== เตรียมพรุ่งนี้ =="));
+  assert.ok(sent.body.includes("เช็คอินพรุ่งนี้: 1 รายการ"));
+  assert.ok(sent.body.includes("Matthew Chopping | ยังไม่จัดห้อง | Booking.com | ⚠ คำขอแขก: Early check-in 08:00"));
+  assert.ok(sent.subject.includes("พรุ่งนี้ 1"));
 }
 
 console.log("Booking email parser tests passed");
