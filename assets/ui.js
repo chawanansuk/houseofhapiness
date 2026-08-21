@@ -17,6 +17,52 @@ document.addEventListener("DOMContentLoaded", () => {
   els.forEach((el) => io.observe(el));
 });
 
+// เมนู ☰ บนมือถือ — ฉีดจากที่นี่ที่เดียว ทุกหน้าได้เมนูครบเหมือนกัน
+// (จอเล็กเมนูลิงก์บน nav ถูกซ่อน ลูกค้ามือถือหาหน้ารูป/ที่เที่ยว/FAQ ไม่เจอ)
+document.addEventListener("DOMContentLoaded", () => {
+  const nav = document.querySelector(".topnav");
+  const right = nav && nav.querySelector(".nav-right");
+  if (!nav || !right) return;
+  const onHome = /(?:^|\/)(index\.html)?$/.test(location.pathname);
+  const pre = onHome ? "" : "index.html";
+
+  const btn = document.createElement("button");
+  btn.className = "menu-btn";
+  btn.type = "button";
+  btn.setAttribute("aria-label", "เมนู");
+  btn.setAttribute("aria-expanded", "false");
+  btn.textContent = "☰";
+  right.appendChild(btn);
+
+  const panel = document.createElement("div");
+  panel.className = "mobile-menu";
+  panel.hidden = true;
+  panel.innerHTML =
+    `<a href="${pre}#rooms" data-i18n="nav.rooms">ห้องพัก</a>` +
+    `<a href="${pre}#reviews" data-i18n="nav.reviews">รีวิว</a>` +
+    `<a href="gallery.html" data-i18n="nav.gallery">รูปภาพ</a>` +
+    `<a href="attractions.html" data-i18n="atr.title">เที่ยวอะไรใกล้ที่พัก</a>` +
+    `<a href="local.html" data-i18n="lc.title">กิน-เที่ยวรอบซอย ท่าดินแดง</a>` +
+    `<a href="${pre}#location" data-i18n="nav.location">ที่ตั้ง</a>` +
+    `<a href="${pre}#faq" data-i18n="nav.faq">คำถาม</a>` +
+    `<a class="mm-book" href="booking.html" data-i18n="nav.book">จองเลย</a>`;
+  nav.insertAdjacentElement("afterend", panel);
+  if (typeof applyLang === "function" && typeof getLang === "function") applyLang(getLang());
+
+  const setOpen = (open) => {
+    panel.hidden = !open;
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    btn.textContent = open ? "✕" : "☰";
+    if (open) panel.style.top = nav.offsetHeight + "px"; // ใต้ nav พอดี (nav เป็น sticky)
+  };
+  btn.addEventListener("click", () => setOpen(panel.hidden));
+  panel.addEventListener("click", (e) => { if (e.target.closest("a")) setOpen(false); });
+  document.addEventListener("click", (e) => {
+    if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden) setOpen(false); });
+});
+
 // Lightbox: รองรับเมาส์ คีย์บอร์ด และ screen reader
 document.addEventListener("DOMContentLoaded", () => {
   const imgs = document.querySelectorAll(".gallery img");
