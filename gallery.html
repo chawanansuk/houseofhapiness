@@ -43,7 +43,7 @@
   transition:transform .18s ease, box-shadow .18s ease;
 }
 .gl-grid figure:hover{transform:translateY(-3px); box-shadow:0 12px 26px rgba(62,47,35,0.12)}
-.gl-grid img{width:100%; aspect-ratio:4/3; object-fit:cover; display:block}
+.gl-grid img{width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; display:block} /* height:auto กัน attribute height ทับสัดส่วน */
 .gl-grid figcaption{padding:0.6rem 0.8rem 0.75rem; font-size:0.82rem; color:var(--text); line-height:1.5}
 .gl-cta{text-align:center; margin-top:2.6rem}
 /* ── ไลต์บ็อกซ์ดูรูปใหญ่ ── */
@@ -58,6 +58,11 @@
 .lb .x{top:14px; right:14px}
 .lb .prev{left:10px; top:50%; transform:translateY(-50%)}
 .lb .next{right:10px; top:50%; transform:translateY(-50%)}
+/* มือถือ: 2 คอลัมน์ ดูได้เร็วไม่ต้องเลื่อนยาว */
+@media (max-width:640px){
+  .gl-grid{grid-template-columns:1fr 1fr; gap:0.7rem}
+  .gl-grid figcaption{font-size:0.72rem; padding:0.45rem 0.55rem 0.55rem}
+}
 </style>
 </head>
 <body>
@@ -212,6 +217,19 @@ document.addEventListener("keydown", function (e) {
   else if (e.key === "ArrowLeft") show(cur - 1);
   else if (e.key === "ArrowRight") show(cur + 1);
 });
+// มือถือ: ปัดซ้าย-ขวาเปลี่ยนรูป ปัดลงปิด
+var tX = null, tY = null;
+lb.addEventListener("touchstart", function (e) {
+  tX = e.touches[0].clientX; tY = e.touches[0].clientY;
+}, { passive: true });
+lb.addEventListener("touchend", function (e) {
+  if (tX === null) return;
+  var dx = e.changedTouches[0].clientX - tX;
+  var dy = e.changedTouches[0].clientY - tY;
+  tX = tY = null;
+  if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(dx < 0 ? cur + 1 : cur - 1);
+  else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) hide();
+}, { passive: true });
 </script>
 
 </body>
