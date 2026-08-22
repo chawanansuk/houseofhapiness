@@ -23,6 +23,10 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+/* กัน attribute height ของ <img> ทับ CSS width/aspect-ratio จนรูปยืดผิดสัดส่วน
+   (class ที่ตั้ง height:100% ไว้ เช่น .gallery img ยังชนะตามลำดับ specificity) */
+img { height: auto; }
+
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
