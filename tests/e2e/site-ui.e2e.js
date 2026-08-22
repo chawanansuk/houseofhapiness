@@ -9,7 +9,7 @@ const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css
   ".jpg": "image/jpeg", ".webp": "image/webp", ".webmanifest": "application/json", ".woff2": "font/woff2" };
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
-  if (url === "/api/site") { res.setHeader("Content-Type", "application/json"); return res.end(JSON.stringify({ ok: true, price: 700, ann: { th: "", en: "" }, source: "sheet" })); }
+  if (url === "/api/site") { res.setHeader("Content-Type", "application/json"); return res.end(JSON.stringify({ ok: true, price: 720, prices: { std: 720, stu: 820, dlx: 870 }, rates: [], ann: { th: "", en: "" }, source: "sheet" })); }
   if (url.startsWith("/api/")) { res.setHeader("Content-Type", "application/json"); return res.end(JSON.stringify({ ok: true })); }
   let file = path.join(ROOT, url === "/" ? "index.html" : url);
   if (!fs.existsSync(file)) { res.statusCode = 404; return res.end("nf"); }
@@ -39,6 +39,13 @@ const server = http.createServer((req, res) => {
     links.some((t) => /จองเลย/.test(t)));
   await page.click(".menu-btn"); // ปิด
   check("กด ✕ แล้วเมนูปิด", await page.isHidden(".mobile-menu"));
+
+  /* ── ราคาจากชีต: ทุกจุดที่ติด data-price ต้องอัปเดตตาม /api/site ── */
+  await page.waitForFunction(() => document.getElementById("priceAmt")?.textContent === "฿720", null, { timeout: 3000 }).catch(() => {});
+  check("ราคาห้อง Standard อัปเดตจากชีต (data-price)", (await page.textContent("#priceAmt")) === "฿720");
+  check("ราคาห้อง Studio/Deluxe อัปเดตจากชีตด้วย",
+    (await page.textContent('.price-box .amount[data-price="stu"]')) === "฿820" &&
+    (await page.textContent('.price-box .amount[data-price="dlx"]')) === "฿870");
 
   /* ── C: ลำดับหน้าแรกใหม่ — ห้องพัก+รีวิวมาก่อน ── */
   const order = await page.evaluate(() => [...document.querySelectorAll("main > section")].map((s) => s.id));

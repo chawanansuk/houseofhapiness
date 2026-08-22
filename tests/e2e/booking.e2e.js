@@ -23,7 +23,15 @@ const bookCalls = []; // เก็บทุก POST /api/book ที่หน้
 const server = http.createServer((req, res) => {
   const p = decodeURIComponent(req.url.split("?")[0]);
   if (p === "/api/availability") { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, demo: false, total: 20, available: 9, nights: 2, full: false })); }
-  if (p === "/api/site") { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, price: 700, ann: { th: "", en: "" }, source: "default" })); }
+  if (p === "/api/site") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    // จำลองเรทเทศกาล: คืน ymd(9) ห้อง Standard คิด ฿1,200 (คืนอื่นราคาปกติ)
+    return res.end(JSON.stringify({
+      ok: true, price: 700, prices: { std: 700, stu: 800, dlx: 850 },
+      rates: [{ from: ymd(9), to: ymd(9), room: "std", price: 1200, note: "เทศกาลทดสอบ" }],
+      ann: { th: "", en: "" }, source: "sheet",
+    }));
+  }
   if (p === "/api/book") {
     let body = "";
     req.on("data", (c) => (body += c));
@@ -91,6 +99,16 @@ async function launch() {
   assert.ok(waHref.startsWith("https://wa.me/66994419465?text="), "ลิงก์ WhatsApp ถูกต้อง");
   ok("ปุ่ม LINE/WhatsApp เปิดใช้ · ลิงก์ถูกต้อง (@ ดิบ ไม่ใช่ %40)");
 
+  // ── 4.5) เรทเทศกาล: คืน ymd(9) คิด ฿1,200 → รวม 700+700+1200 = ฿2,600 ──
+  await page.waitForFunction(() => document.getElementById("stickyTotal").textContent === "฿2,600");
+  const summaryText = await page.locator("#summary").innerText();
+  assert.ok(summaryText.includes("฿1,200 × 1"), "สรุปต้องแยกคืนเรทเทศกาลให้เห็น: " + summaryText);
+  assert.ok(summaryText.includes("฿700 × 2"), "สรุปต้องโชว์คืนราคาปกติด้วย");
+  const lineMsg = decodeURIComponent(await page.getAttribute("#btnLine", "href"));
+  assert.ok(lineMsg.includes("รวมเรทช่วงเทศกาลแล้ว") || lineMsg.includes("seasonal rate included"),
+    "ข้อความจองต้องบอกว่ารวมเรทเทศกาลแล้ว");
+  ok("เรทเทศกาลจากชีตคิดราคาต่อคืนถูกต้อง (฿700×2 + ฿1,200×1 = ฿2,600)");
+
   // ── 5) กดปุ่ม LINE → ต้องยิง /api/book ครบถ้วน (กันเปิด line.me จริงด้วย preventDefault) ──
   await page.evaluate(() => document.getElementById("btnLine").addEventListener("click", (e) => e.preventDefault()));
   await page.click("#btnLine");
@@ -100,6 +118,7 @@ async function launch() {
   assert.equal(b.name, "E2E ทดสอบ");
   assert.equal(b.checkin, ymd(7));
   assert.equal(b.checkout, ymd(10));
+  assert.equal(b.total, 2600, "ยอดที่ส่งเข้าระบบต้องรวมเรทเทศกาล (700+700+1200)");
   const savedText = await page.locator("#bookingSaveStatus").innerText();
   assert.ok(savedText.includes("WEB-E2E-1"), "ต้องแสดงเลขที่จองจากระบบ");
   ok("กดจองแล้วบันทึกเข้าระบบ + โชว์เลขที่จอง WEB-E2E-1");
