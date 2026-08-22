@@ -1351,3 +1351,6 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 
 .room-detail-link { display: block; margin-top: 0.5rem; font-size: 0.82rem; font-weight: 700; color: var(--gold-dark); text-decoration: none; }
 .room-detail-link:hover { color: var(--gold); text-decoration: underline; }
+/* ในกล่องราคาพื้นน้ำตาลเข้ม ลิงก์ต้องเป็นสีครีมถึงอ่านออก */
+.price-box .room-detail-link { color: #f3e4cd; text-decoration: underline; text-underline-offset: 3px; }
+.price-box .room-detail-link:hover { color: #ffffff; }

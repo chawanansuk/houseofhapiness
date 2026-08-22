@@ -32,11 +32,11 @@ const server = http.createServer((req, res) => {
   await page.waitForTimeout(400);
   check("ปุ่ม ☰ โผล่บนมือถือ", await page.isVisible(".menu-btn"));
   await page.click(".menu-btn");
-  check("เมนูเปิด มีลิงก์ครบ 8 อัน", await page.locator(".mobile-menu a").count() === 8);
+  check("เมนูเปิด มีลิงก์ครบ 7 อัน (รวม hub ไกด์)", await page.locator(".mobile-menu a").count() === 7);
   const links = await page.locator(".mobile-menu a").allTextContents();
-  check("มีลิงก์ รูปภาพ + เที่ยว + กิน-เที่ยว + จองเลย",
-    links.some((t) => /รูปภาพ/.test(t)) && links.some((t) => /เที่ยวอะไรใกล้/.test(t)) &&
-    links.some((t) => /กิน-เที่ยว/.test(t)) && links.some((t) => /จองเลย/.test(t)));
+  check("มีลิงก์ รูปภาพ + ไกด์เที่ยว + จองเลย",
+    links.some((t) => /รูปภาพ/.test(t)) && links.some((t) => /ไกด์เที่ยว/.test(t)) &&
+    links.some((t) => /จองเลย/.test(t)));
   await page.click(".menu-btn"); // ปิด
   check("กด ✕ แล้วเมนูปิด", await page.isHidden(".mobile-menu"));
 
