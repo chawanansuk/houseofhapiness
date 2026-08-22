@@ -20,7 +20,7 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     ["airport-guide.html","วิธีเดินทางจากสนามบิน","Getting here from the airport"],
     ["room-standard.html","ห้อง Standard","Standard Double Room"],
     ["room-studio.html","ห้อง Studio","Studio Twin Room"],
-    ["room-deluxe.html","ห้อง Deluxe","Deluxe Room with Living Room"],
+    ["room-deluxe.html","ห้อง Deluxe","Deluxe Extra-Large Room"],
     ["guides.html","ไกด์เที่ยวจากคนพื้นที่","Local Travel Guides"],
     ["loy-krathong.html","ลอยกระทงริมเจ้าพระยา","Loy Krathong 2026"],
     ["new-year-countdown.html","เคาท์ดาวน์ปีใหม่ริมเจ้าพระยา","New Year's Eve on the Chao Phraya"],
