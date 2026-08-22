@@ -81,6 +81,7 @@
       </div>
       <p class="avail-badge" id="availBadge" hidden></p>
       <p class="min-note" data-i18n="bk.minnights">เข้าพักขั้นต่ำ 2 คืน</p>
+      <p class="season-note" data-i18n="bk.season.note">ช่วงเทศกาล/วันหยุดยาว ราคาอาจสูงกว่าราคาปกติ — เรายืนยันราคาสุดท้ายตอนคอนเฟิร์มการจอง</p>
       <div class="quick-row" id="quickRow">
         <span data-i18n="bk.quick">เลือกไว:</span>
         <button type="button" class="chip-btn" data-nights="2">2</button>
@@ -280,19 +281,46 @@ function applyChipLabels() {
     b.textContent = `${b.dataset.nights} ${t("bk.quick.n")}`);
 }
 
+// เรทช่วงเทศกาล/วันหยุดจากแท็บ Rates ในชีต — โหลดตอนเปิดหน้า (ดูด้านล่าง)
+let RATES = [];
+
+// ราคาคืนนั้น ๆ: เรทที่ระบุห้องเจาะจงชนะเรท all · ไม่เข้าช่วงไหนเลยใช้ราคาปกติ
+function nightlyPrice(room, ymdDate) {
+  let allRate = 0;
+  for (const rt of RATES) {
+    if (ymdDate < rt.from || ymdDate > rt.to) continue;
+    if (rt.room === room.id) return rt.price;
+    if (rt.room === "all" && !allRate) allRate = rt.price;
+  }
+  return allRate || room.price;
+}
+
 function getState() {
   const roomId = document.querySelector('input[name="room"]:checked')?.value;
   const room = CONFIG.rooms.find((r) => r.id === roomId);
   const ci = $("checkin").value, co = $("checkout").value;
   const nights = ci && co ? Math.round((new Date(co) - new Date(ci)) / 86400000) : 0;
   const numRooms = +$("rooms").value;
+  // คิดราคาทีละคืน — คืนที่ตรงช่วงเทศกาลใช้เรทจากชีต คืนอื่นใช้ราคาปกติ
+  const nightPrices = [];
+  let total = 0;
+  if (room && nights > 0 && ci) {
+    const d = new Date(ci);
+    for (let i = 0; i < nights; i++) {
+      const p = nightlyPrice(room, toYMD(d));
+      nightPrices.push(p);
+      total += p;
+      d.setDate(d.getDate() + 1);
+    }
+    total *= numRooms;
+  }
   return {
-    room, ci, co, nights, numRooms,
+    room, ci, co, nights, numRooms, nightPrices,
     guests: +$("guests").value,
     name: $("name").value.trim(),
     phone: $("phone").value.trim(),
     note: $("note").value.trim(),
-    total: room && nights > 0 ? room.price * nights * numRooms : 0,
+    total,
   };
 }
 
@@ -305,13 +333,22 @@ function update() {
   document.querySelectorAll(".room").forEach((el) =>
     el.classList.toggle("selected", el.querySelector("input").checked));
 
+  // มีคืนไหนใช้เรทเทศกาลไหม — ใช้ทั้งในสรุปและข้อความจอง
+  const hasSeason = !!(s.room && s.nightPrices.some((p) => p !== s.room.price));
+
   const summary = $("summary");
   if (s.room && s.nights >= MIN_NIGHTS) {
+    // จัดกลุ่มคืนราคาเดียวกัน: ปกติ = "฿700 × 3" · มีเทศกาล = "(฿700 × 2 + ฿1,200 × 1)"
+    const byPrice = new Map();
+    s.nightPrices.forEach((p) => byPrice.set(p, (byPrice.get(p) || 0) + 1));
+    let parts = [...byPrice].map(([p, n]) => `฿${p.toLocaleString()} × ${n}`).join(" + ");
+    if (byPrice.size > 1) parts = `(${parts})`;
     summary.innerHTML = `
       <strong>${s.room.name[lang()]}</strong><br>
       ${fmtDate(s.ci)} → ${fmtDate(s.co)} · ${s.guests} ${t("bk.guests.n")}<br>
-      <span class="breakdown">฿${s.room.price.toLocaleString()} × ${s.nights} ${t("bk.nights")} × ${s.numRooms} ${t("bk.rooms.n")}</span><br>
+      <span class="breakdown">${parts} ${t("bk.nights")} × ${s.numRooms} ${t("bk.rooms.n")}</span><br>
       <span class="total">${t("bk.total")} ฿${s.total.toLocaleString()}</span><br>
+      ${hasSeason ? `<span class="note">✦ ${t("bk.season.applied")}</span><br>` : ""}
       <span class="note">${t("bk.approx")}</span>`;
   } else if (s.room && s.ci && s.co && s.nights > 0 && s.nights < MIN_NIGHTS) {
     summary.textContent = t("bk.minnights");
@@ -337,7 +374,7 @@ function update() {
 • ${L ? "เช็คอิน" : "Check-in"}: ${s.ci || "-"}
 • ${L ? "เช็คเอาท์" : "Check-out"}: ${s.co || "-"} (${s.nights} ${t("bk.nights")})
 • ${L ? "ผู้เข้าพัก" : "Guests"}: ${s.guests}
-• ${L ? "ราคารวมโดยประมาณ" : "Estimated total"}: ฿${s.total.toLocaleString()}
+• ${L ? "ราคารวมโดยประมาณ" : "Estimated total"}: ฿${s.total.toLocaleString()}${hasSeason ? (L ? " (รวมเรทช่วงเทศกาลแล้ว)" : " (seasonal rate included)") : ""}
 • ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
 • ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}`;
   lastMsg = msg;
@@ -446,11 +483,17 @@ document.addEventListener("langchange", () => { availSig = ""; checkAvailability
 const _update = update;
 update = function () { _update(); checkAvailability(); };
 
-// ราคาจริงจากแผงตั้งค่าในชีต (แท็บ Site) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
+// ราคาจริง 3 ห้อง + เรทช่วงเทศกาล จากชีต (แท็บ Site/Rates) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
 fetch("/api/site").then((r) => r.json()).then((j) => {
-  // price จากชีต = ราคาห้อง Standard (ห้องแรก) เท่านั้น — ห้องอื่นแก้ใน CONFIG ด้านบน
-  if (!j.ok || !j.price || j.source !== "sheet" || j.price === CONFIG.rooms[0].price) return;
-  CONFIG.rooms[0].price = j.price;
+  if (!j.ok || j.source !== "sheet") return;
+  if (j.prices) {
+    CONFIG.rooms.forEach((room) => {
+      if (j.prices[room.id] > 0) room.price = j.prices[room.id];
+    });
+  } else if (j.price) {
+    CONFIG.rooms[0].price = j.price; // API เวอร์ชันเก่าส่งเฉพาะราคา Standard
+  }
+  if (Array.isArray(j.rates)) RATES = j.rates;
   renderRooms();
   update();
 }).catch(() => {});

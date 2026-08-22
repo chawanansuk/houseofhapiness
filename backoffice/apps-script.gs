@@ -29,9 +29,13 @@ var SITE_SHEET = "Site";
 // แผงตั้งค่าเว็บ — แก้คอลัมน์ value ในแท็บ Site แล้วหน้าเว็บอัปเดตเองภายใน ~2 นาที
 var SITE_DEFAULTS = [
   ["price_per_night", "700", "ราคาห้อง Standard (บาท/คืน) — หน้าเว็บใช้เป็นราคาเริ่มต้นที่โชว์"],
+  ["price_studio", "800", "ราคาห้อง Studio 2 เตียง (บาท/คืน)"],
+  ["price_deluxe", "850", "ราคาห้อง Deluxe (บาท/คืน)"],
   ["announcement_th", "", "ประกาศแถบบนหน้าแรก ภาษาไทย (เว้นว่าง = ไม่แสดง)"],
   ["announcement_en", "", "ประกาศหน้าแรก ภาษาอังกฤษ (เว้นว่าง = ไม่แสดง)"],
 ];
+// เรทช่วงเทศกาล/วันหยุด — เพิ่มแถวในแท็บ Rates แล้วหน้าจองคิดราคาตามช่วงวันเอง
+var RATES_SHEET = "Rates";
 // คอลัมน์ที่หน้า /admin แก้ไขได้ผ่าน action=update
 var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests"];
 
@@ -185,8 +189,63 @@ function getSiteSheet_() {
     sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, 3).setFontWeight("bold");
     for (var i = 0; i < SITE_DEFAULTS.length; i++) sh.appendRow(SITE_DEFAULTS[i]);
+    return sh;
+  }
+  // ชีตเก่าที่สร้างก่อนมี key ใหม่ (เช่น price_studio) — เติมแถวที่ขาดให้เอง
+  var values = sh.getDataRange().getValues();
+  var have = {};
+  for (var r = 1; r < values.length; r++) have[asText_(values[r][0])] = true;
+  for (var d = 0; d < SITE_DEFAULTS.length; d++) {
+    if (!have[SITE_DEFAULTS[d][0]]) sh.appendRow(SITE_DEFAULTS[d]);
   }
   return sh;
+}
+
+/* ── ชีต Rates: เรทช่วงเทศกาล/วันหยุด — 1 แถว = 1 ช่วงวัน ── */
+// from/to = คืนแรกถึงคืนสุดท้ายที่ใช้เรทนี้ (รวมทั้งสองวัน) · room = std/stu/dlx/all
+// ถ้าช่วงวันซ้อนกัน: เรทที่ระบุห้องเจาะจงชนะเรท all
+
+function getRatesSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(RATES_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(RATES_SHEET);
+    sh.appendRow(["from (คืนแรก)", "to (คืนสุดท้าย)", "room (std/stu/dlx/all)", "price (บาท/คืน)", "note"]);
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, 5).setFontWeight("bold");
+    sh.appendRow(["2025-12-30", "2026-01-01", "all", "1200", "ตัวอย่าง: ปีใหม่ — แก้/ลบแถวนี้ได้เลย"]);
+  }
+  return sh;
+}
+
+function readRates_() {
+  var values = getRatesSheet_().getDataRange().getValues();
+  var rates = [];
+  for (var i = 1; i < values.length; i++) {
+    var from = rateDate_(values[i][0]);
+    var to = rateDate_(values[i][1]);
+    var room = rateRoom_(values[i][2]);
+    var price = Number(String(values[i][3]).replace(/[^\d.]/g, ""));
+    if (!from || !to || !room || !(price > 0)) continue; // แถวไม่ครบ = ข้าม ไม่ทำเว็บพัง
+    if (from > to) { var t = from; from = to; to = t; }
+    rates.push({ from: from, to: to, room: room, price: price, note: asText_(values[i][4]) });
+  }
+  return rates;
+}
+
+function rateDate_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, "Asia/Bangkok", "yyyy-MM-dd");
+  return parseDate_(v);
+}
+
+// เจ้าของพิมพ์ชื่อห้องได้หลายแบบ (std / Standard / สแตนดาร์ด / ทุกห้อง) — แปลงเป็นรหัสเดียว
+function rateRoom_(v) {
+  var s = asText_(v).toLowerCase();
+  if (!s || s === "all" || s === "*" || s.indexOf("ทุก") === 0) return "all";
+  if (s.indexOf("std") === 0 || s.indexOf("standard") === 0 || s.indexOf("สแตน") >= 0) return "std";
+  if (s.indexOf("stu") === 0 || s.indexOf("สตูดิโอ") >= 0 || s.indexOf("สตู") >= 0) return "stu";
+  if (s.indexOf("dlx") === 0 || s.indexOf("deluxe") === 0 || s.indexOf("ดีลักซ") >= 0 || s.indexOf("เดอลุกซ์") >= 0) return "dlx";
+  return "";
 }
 
 function readSite_() {
@@ -229,9 +288,9 @@ function doGet(e) {
     var exps = readExpenses_().map(function (r) { delete r._rowIndex; return r; });
     return json_({ bookings: rows, rooms: rooms, expenses: exps });
   }
-  // ค่าตั้งค่าเว็บ (ราคา/ประกาศ) — /api/site เรียกด้วย token ฝั่งเซิร์ฟเวอร์
+  // ค่าตั้งค่าเว็บ (ราคา/ประกาศ) + เรทช่วงเทศกาล — /api/site เรียกด้วย token ฝั่งเซิร์ฟเวอร์
   if (p.action === "site") {
-    return json_({ site: readSite_() });
+    return json_({ site: readSite_(), rates: readRates_() });
   }
   return json_({ error: "unknown-action" });
 }

@@ -292,6 +292,8 @@ const I18N = {
   "bk.nights":       { th: "คืน", en: "night(s)" },
   "bk.total":        { th: "รวม", en: "Total" },
   "bk.approx":       { th: "ราคาโดยประมาณ ยืนยันราคาสุดท้ายเมื่อโรงแรมตอบกลับ", en: "Estimated price — final rate confirmed by the hotel." },
+  "bk.season.note":  { th: "ช่วงเทศกาล/วันหยุดยาว ราคาอาจสูงกว่าราคาปกติ — เรายืนยันราคาสุดท้ายตอนคอนเฟิร์มการจอง", en: "Festival and long-holiday dates may cost more than the standard rate — we confirm the final price with your booking." },
+  "bk.season.applied": { th: "รวมเรทช่วงเทศกาล/วันหยุดแล้ว", en: "Seasonal/holiday rate included" },
   "bk.sendline":     { th: "จองผ่าน LINE", en: "Book via LINE" },
   "bk.sendwa":       { th: "จองผ่าน WhatsApp", en: "Book via WhatsApp" },
   "bk.oralt":        { th: "หรือช่องทางอื่น", en: "or other options" },

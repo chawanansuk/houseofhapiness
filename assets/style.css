@@ -833,6 +833,12 @@ textarea { resize: vertical; min-height: 4.5rem; }
   color: var(--muted);
 }
 .min-note::before { content: "ℹ "; }
+.season-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.season-note::before { content: "✦ "; }
 .hero-min-note {
   margin: 0.6rem auto 0;
   font-size: 0.82rem;

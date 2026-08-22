@@ -144,6 +144,21 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// ราคาจริงจากชีต (แท็บ Site) — อัปเดตทุกจุดที่ติด data-price="std|stu|dlx" ในทุกหน้า
+// เจ้าของแก้ราคาในชีตที่เดียว ราคาบนหน้าแรก/หน้าห้อง/หน้า SEO เปลี่ยนตามเองใน ~2 นาที
+document.addEventListener("DOMContentLoaded", () => {
+  const els = document.querySelectorAll("[data-price]");
+  if (!els.length) return;
+  fetch("/api/site").then((r) => r.json()).then((j) => {
+    if (!j.ok || j.source !== "sheet" || !j.prices) return;
+    els.forEach((el) => {
+      const p = j.prices[el.dataset.price];
+      if (p > 0) el.textContent = "฿" + p.toLocaleString();
+    });
+  }).catch(() => {});
+});
+
+
 // Vercel Web Analytics: page views only, no custom events or booking/customer fields.
 // Vercel reports page paths without query parameters and does not use tracking cookies.
 (() => {

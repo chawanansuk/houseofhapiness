@@ -23,7 +23,8 @@ Single source of truth for the hotel-* skills in this repo. ข้อมูล�
 | Deluxe — ห้องใหญ่พร้อมมุมโซฟา (ห้องเดียว ไม่มีห้องนั่งเล่นแยก) | 850 | เตียงใหญ่ + โซฟา · พัก 2 (สูงสุด 3) |
 
 - **นโยบาย:** จองขั้นต่ำ 2 คืน · มัดจำ ฿1,000 คืนตอนเช็คเอาต์ · เช็คอิน 14:00–22:00 · เช็คเอาต์ 12:00 · จ่ายเงินสด/โอน/พร้อมเพย์ (ไม่มีจ่ายออนไลน์)
-- ราคา Standard แก้ได้จากชีตแท็บ Site (ผ่าน /api/site) — ราคาอื่นแก้ใน CONFIG ของ booking.html
+- ราคาทั้ง 3 ห้องแก้ได้จากชีตแท็บ Site (key: price_per_night / price_studio / price_deluxe ผ่าน /api/site) — อัปเดตทุกหน้าใน ~2 นาที
+- เรทช่วงเทศกาล/วันหยุด: เพิ่มแถวในชีตแท็บ Rates (from / to / room=std,stu,dlx,all / price / note) — หน้าจองคิดราคาต่อคืนตามช่วงวันเอง เรทระบุห้องเจาะจงชนะเรท all
 
 ## Channels & Systems
 - **ช่องทางขาย:** จองตรงผ่านเว็บ (LINE @060hvzok หลัก ลูกค้าไทย / WhatsApp +66 99 441 9465 ลูกค้าต่างชาติ / อีเมล houseofhapinessbangkok@gmail.com) + Booking.com (คอมมิชชั่น ~20%)

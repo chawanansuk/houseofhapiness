@@ -168,7 +168,7 @@
       </div>
       <div class="price-box">
         <div class="from" data-i18n="rooms.from">เริ่มต้น</div>
-        <div class="amount" id="priceAmt">฿700</div>
+        <div class="amount" id="priceAmt" data-price="std">฿700</div>
         <div class="unit" data-i18n="rooms.night">/ คืน</div>
         <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
         <a class="room-detail-link" href="room-standard.html" data-i18n="rooms.detail">รายละเอียดห้อง + รูป →</a>
@@ -182,7 +182,7 @@
       </div>
       <div class="price-box">
         <div class="from" data-i18n="rooms.from">เริ่มต้น</div>
-        <div class="amount">฿800</div>
+        <div class="amount" data-price="stu">฿800</div>
         <div class="unit" data-i18n="rooms.night">/ คืน</div>
         <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
         <a class="room-detail-link" href="room-studio.html" data-i18n="rooms.detail">รายละเอียดห้อง + รูป →</a>
@@ -196,7 +196,7 @@
       </div>
       <div class="price-box">
         <div class="from" data-i18n="rooms.from">เริ่มต้น</div>
-        <div class="amount">฿850</div>
+        <div class="amount" data-price="dlx">฿850</div>
         <div class="unit" data-i18n="rooms.night">/ คืน</div>
         <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
         <a class="room-detail-link" href="room-deluxe.html" data-i18n="rooms.detail">รายละเอียดห้อง + รูป →</a>
@@ -425,7 +425,7 @@
 </footer>
 
 <div class="sticky-cta">
-  <div class="price"><span data-i18n="rooms.from">เริ่มต้น</span><b>฿700 <span style="font-size:0.8rem; font-weight:400;" data-i18n="rooms.night">/ คืน</span></b></div>
+  <div class="price"><span data-i18n="rooms.from">เริ่มต้น</span><b><span data-price="std">฿700</span> <span style="font-size:0.8rem; font-weight:400;" data-i18n="rooms.night">/ คืน</span></b></div>
   <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="cta.direct">จองตรงกับเรา</a>
 </div>
 
@@ -454,14 +454,10 @@
   });
 })();
 
-// ราคา + ประกาศ จากแผงตั้งค่าในชีต (แท็บ Site) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
+// ประกาศจากแผงตั้งค่าในชีต (แท็บ Site) — ราคาอัปเดตผ่าน data-price ใน ui.js อยู่แล้ว
 (function () {
   fetch("/api/site").then(function (r) { return r.json(); }).then(function (j) {
     if (!j.ok) return;
-    if (j.price && j.source === "sheet") {
-      var el = document.getElementById("priceAmt");
-      if (el) el.textContent = "฿" + j.price.toLocaleString();
-    }
     var apply = function () {
       var txt = (j.ann && j.ann[getLang()]) || "";
       document.getElementById("siteAnnounceTxt").textContent = txt;
