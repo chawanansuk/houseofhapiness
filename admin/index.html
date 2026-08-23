@@ -151,6 +151,7 @@ html[data-theme="dark"] .minfo, html[data-theme="dark"] .task-item{background:#2
 html[data-theme="dark"] .tl-wrap, html[data-theme="dark"] .tl-roomcell{background:var(--card)}
 html[data-theme="dark"] .tl-row.tl-head, html[data-theme="dark"] .tl-head .tl-roomcell{background:#2c251d}
 html[data-theme="dark"] .tl-daycell b{color:var(--ink)}
+html[data-theme="dark"] .tl-daycell.tl-today, html[data-theme="dark"] .tl-daycell.tl-today b{color:#f87171}
 html[data-theme="dark"] .tl-we{background:#211b15}
 html[data-theme="dark"] .tl-today{background:rgba(192,138,85,.16)}
 html[data-theme="dark"] .tl-out{background:#4a4136;color:#c8bba9}
@@ -185,40 +186,59 @@ html[data-theme="dark"] .row-new td{background:#16281d}
 /* ── ไทม์ไลน์การจอง ── */
 .tl-todaybtn{width:auto;padding:0 .8rem;font-size:.78rem;font-weight:700;white-space:nowrap;font-family:"Prompt",sans-serif}
 /* tape chart แบบมือโปร: คอลัมน์ครึ่งวัน (แถบเริ่มบ่ายเช็คอิน จบเที่ยงเช็คเอาต์)
-   หัวตาราง sticky บน + คอลัมน์ห้อง sticky ซ้าย เลื่อนได้สองแกนใน .tl-wrap เดียว */
-.tl-wrap{--tlroomw:88px;--tlhalf:24px;overflow:auto;max-height:72vh;border:1px solid var(--line);border-radius:12px;background:#fff;overscroll-behavior:contain}
-.tl-row{display:grid;grid-template-columns:var(--tlcols);min-height:34px;border-top:1px solid var(--line)}
+   หัวตาราง sticky บน + คอลัมน์ห้อง sticky ซ้าย เลื่อนได้สองแกนใน .tl-wrap เดียว
+   ค่าเริ่มต้น = ตารางใหญ่อ่านง่ายแบบ AzHotel · ปุ่ม "ย่อ" สลับเป็นแบบกะทัดรัดเห็นภาพรวม */
+.tl-wrap{--tlroomw:104px;--tlhalf:34px;--tlrowh:56px;overflow:auto;max-height:76vh;border:1px solid var(--line);border-radius:12px;background:#fff;overscroll-behavior:contain}
+.tl-row{display:grid;grid-template-columns:var(--tlcols);min-height:var(--tlrowh);border-top:1px solid var(--line)}
 .tl-row.tl-head{border-top:none;position:sticky;top:0;z-index:4;background:#faf6ee;box-shadow:0 1px 0 var(--line);min-height:auto}
-.tl-roomcell{grid-row:1;grid-column:1;position:sticky;left:0;z-index:3;background:#fff;border-right:1px solid var(--line);display:flex;align-items:center;gap:.3rem;padding:.25rem .5rem;font-weight:700;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-roomcell{grid-row:1;grid-column:1;position:sticky;left:0;z-index:3;background:#fff;border-right:1px solid var(--line);display:flex;align-items:center;gap:.35rem;padding:.25rem .6rem;font-weight:700;font-size:.98rem;color:var(--gold-dark,#6b4226);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl-head .tl-roomcell{background:#faf6ee;z-index:5}
-.tl-daycell{grid-row:1;padding:.28rem .1rem .22rem;text-align:center;font-size:.62rem;color:var(--muted);border-left:1px solid var(--line);display:flex;flex-direction:column;line-height:1.25}
-.tl-daycell b{font-size:.84rem;color:#3a2f24}
-.tl-occ{font-size:.6rem;font-weight:700;color:#1e7e3a}
+.tl-daycell{grid-row:1;padding:.34rem .1rem .28rem;text-align:center;font-size:.72rem;color:var(--muted);border-left:1px solid var(--line);display:flex;flex-direction:column;line-height:1.3}
+.tl-daycell b{font-size:1.05rem;color:#3a2f24}
+.tl-daycell.tl-today, .tl-daycell.tl-today b{color:#dc2626} /* วันนี้ตัวแดง มองปุ๊บรู้เลยแบบแอปที่พนักงานคุ้น */
+.tl-occ{font-size:.68rem;font-weight:700;color:#1e7e3a}
 .tl-occ.full{color:#dc2626}
 .tl-occ.zero{color:var(--line-2)}
 .tl-cell{grid-row:1;border-left:1px solid var(--line);cursor:pointer;z-index:1}
 .tl-cell:hover{background:rgba(138,90,52,.08)}
 .tl-we{background:#faf7ef}
 .tl-today{background:rgba(240,220,174,.32)}
-.tl-bar{grid-row:1;z-index:2;margin:4px 1px;border:none;border-radius:999px;color:#fff;font-size:.72rem;font-weight:600;font-family:"Prompt",sans-serif;padding:0 .55rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer;min-width:0;display:flex;align-items:center;box-shadow:0 1px 2px rgba(60,40,20,.18)}
+.tl-bar{grid-row:1;z-index:2;margin:7px 2px;border:none;border-radius:12px;color:#fff;font-size:.9rem;font-weight:600;font-family:"Prompt",sans-serif;padding:0 .7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer;min-width:0;display:flex;align-items:center;box-shadow:0 1px 2px rgba(60,40,20,.18)}
 .tl-bar:hover{filter:brightness(1.08)}
 .tl-book{background:#3b82f6}.tl-in{background:#16a34a}.tl-out{background:#cfc5b2;color:#5f5443;box-shadow:none}
-.tl-dirtydot{width:7px;height:7px;border-radius:50%;background:var(--dirty);flex:none}
-.tl-unassigned{grid-row:1;grid-column:2 / -1;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;padding:.28rem .45rem}
-.tl-chip{background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:999px;padding:.12rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:"Prompt",sans-serif}
+.tl-dirtydot{width:8px;height:8px;border-radius:50%;background:var(--dirty);flex:none}
+.tl-unassigned{grid-row:1;grid-column:2 / -1;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;padding:.32rem .5rem}
+.tl-chip{background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:999px;padding:.28rem .75rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:"Prompt",sans-serif}
 .tl-chip:hover{filter:brightness(.97)}
 .tl-emptymsg{padding:1.1rem 1rem;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.7}
+/* โหมดย่อ (ปุ่ม "ย่อ" บนหัวตาราง) — ขนาดกะทัดรัดแบบเดิมไว้ดูภาพรวมหลายห้อง */
+.tl-wrap.tl-compact{--tlroomw:88px;--tlhalf:24px;--tlrowh:34px}
+.tl-wrap.tl-compact .tl-roomcell{font-size:.78rem;padding:.25rem .5rem}
+.tl-wrap.tl-compact .tl-daycell{font-size:.62rem;padding:.28rem .1rem .22rem}
+.tl-wrap.tl-compact .tl-daycell b{font-size:.84rem}
+.tl-wrap.tl-compact .tl-occ{font-size:.6rem}
+.tl-wrap.tl-compact .tl-bar{font-size:.72rem;margin:4px 1px;padding:0 .55rem;border-radius:999px}
+.tl-wrap.tl-compact .tl-chip{font-size:.7rem;padding:.12rem .6rem}
 @media(max-width:640px){
-  .tl-wrap{--tlroomw:60px;--tlhalf:19px;max-height:68vh}
-  .tl-roomcell{font-size:.7rem;padding:.2rem .35rem}
-  .tl-bar{font-size:.64rem;padding:0 .4rem;margin:3px 1px}
-  .tl-row{min-height:30px}
+  .tl-wrap{--tlroomw:96px;--tlhalf:27px;--tlrowh:58px;max-height:72vh}
+  .tl-roomcell{font-size:.88rem;padding:.2rem .45rem}
+  .tl-daycell b{font-size:1rem}
+  .tl-bar{font-size:.84rem;padding:0 .55rem;margin:7px 1px}
+  .tl-wrap.tl-compact{--tlroomw:60px;--tlhalf:19px;--tlrowh:30px}
+  .tl-wrap.tl-compact .tl-roomcell{font-size:.7rem;padding:.2rem .35rem}
+  .tl-wrap.tl-compact .tl-bar{font-size:.64rem;padding:0 .4rem;margin:3px 1px}
 }
 .banner code{background:rgba(0,0,0,.06);padding:.05rem .35rem;border-radius:5px;font-size:.82em}
 
 .sec-title{display:flex;align-items:center;gap:.55rem;font-size:1.15rem;margin-bottom:1rem}
 .sec-title .ic{color:var(--brand);width:1.3em;height:1.3em}
 .sec-title small{font-size:.78rem;color:var(--muted);font-weight:400;font-family:"Sarabun",sans-serif}
+/* คำแนะนำลากเมาส์ใช้ได้เฉพาะคอม — จอเล็กซ่อนไว้ หัวข้อจะได้ไม่หักบรรทัดยาว */
+@media(max-width:999px){
+  .tl-hint-desktop{display:none}
+  #secTimeline .sec-title{flex-wrap:wrap}
+  #secTimeline .sec-title small{flex-basis:100%;margin-top:.1rem}
+}
 .sec-title.sub{font-size:1rem;margin-top:.2rem}
 
 /* ── stat tiles ── */
@@ -294,6 +314,10 @@ html[data-theme="dark"] .row-new td{background:#16281d}
 
 /* ── calendar ── */
 .cal-head{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:1rem}
+@media(max-width:640px){
+  #secTimeline .cal-head{gap:.5rem}
+  #secTimeline .cal-head b{font-size:.86rem;white-space:nowrap}
+}
 .cal-head b{font-family:"Prompt",sans-serif;font-size:1rem;min-width:9.5em;text-align:center}
 .cal-nav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:border-color .15s,background .15s}
 .cal-nav:hover{border-color:var(--brand);background:var(--brand-soft)}
@@ -515,13 +539,14 @@ tbody tr:hover td{background:#faf7f2}
           <div class="sec-title sub"><span class="ic" data-icon="check"></span> งานวันนี้</div>
           <div id="todayBodyTop"></div>
         </div>
-        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = เมนูด่วน · (คอม) ลากแถบขึ้น-ลง = ย้ายห้อง · ลากขอบขวา = เลื่อนวันออก</small></div>
+        <div class="sec-title"><span class="ic" data-icon="gantt"></span> ไทม์ไลน์การจอง <small>แตะช่องว่าง = สร้างการจอง · แตะแถบชื่อ = เมนูด่วน<span class="tl-hint-desktop"> · (คอม) ลากแถบขึ้น-ลง = ย้ายห้อง · ลากขอบขวา = เลื่อนวันออก</span></small></div>
         <div class="card">
           <div class="cal-head">
             <button class="cal-nav" id="tlPrev" aria-label="ย้อน 7 วัน">‹</button>
             <b id="tlTitle"></b>
             <button class="cal-nav" id="tlNext" aria-label="ถัดไป 7 วัน">›</button>
             <button class="cal-nav tl-todaybtn" id="tlToday">วันนี้</button>
+            <button class="cal-nav tl-todaybtn" id="tlZoom" aria-label="สลับขนาดตาราง">ย่อ</button>
           </div>
           <div class="legend" style="margin:.5rem 0 .7rem">
             <span><i class="sw" style="background:#3b82f6"></i>ยังไม่เช็คอิน</span>
@@ -2010,6 +2035,21 @@ EXP_CATS.forEach((c) => { const o = document.createElement("option"); o.textCont
 $("tlPrev").addEventListener("click", () => { tlStart = shiftYMD(tlStart, -7); renderTimeline(); });
 $("tlNext").addEventListener("click", () => { tlStart = shiftYMD(tlStart, 7); renderTimeline(); });
 $("tlToday").addEventListener("click", () => { tlStart = shiftYMD(DATA.today, -1); renderTimeline(); });
+// ปุ่มย่อ/ขยายตาราง — ค่าเริ่มต้นตารางใหญ่อ่านง่าย กด "ย่อ" เพื่อเห็นภาพรวมหลายห้อง (จำค่าไว้ในเครื่อง)
+const TL_COMPACT_KEY = "hoh-tl-compact";
+function applyTlZoom(){
+  let compact = false;
+  try { compact = localStorage.getItem(TL_COMPACT_KEY) === "1"; } catch {}
+  $("tlWrap").classList.toggle("tl-compact", compact);
+  $("tlZoom").textContent = compact ? "ขยาย" : "ย่อ";
+}
+$("tlZoom").addEventListener("click", () => {
+  const compact = !$("tlWrap").classList.contains("tl-compact");
+  try { localStorage.setItem(TL_COMPACT_KEY, compact ? "1" : "0"); } catch {}
+  applyTlZoom();
+  renderTimeline(); // เลื่อนกลับให้ "วันนี้" อยู่ในสายตาหลังขนาดช่องเปลี่ยน
+});
+applyTlZoom();
 $("tlWrap").addEventListener("click", (e) => {
   if (suppressTlClick) { suppressTlClick = false; return; } // เพิ่งลากเสร็จ ไม่ใช่การแตะ
   const bar = e.target.closest(".tl-bar");
