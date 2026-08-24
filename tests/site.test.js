@@ -28,11 +28,12 @@ assert.match(gallery, /e\.key === "Enter" \|\| e\.key === " "/, "gallery must op
 assert.match(gallery, /lbTrigger.*focus/s, "gallery must restore focus after closing");
 
 const admin = read("admin/index.html");
-assert.doesNotMatch(admin, /URLSearchParams\(location\.search\).*get\("key"\)/s, "admin key must not be accepted from URL");
-assert.doesNotMatch(admin, /_vercel\/insights/, "admin must not load public analytics");
-assert.match(admin, /role="dialog" aria-modal="true"/, "admin modals must expose dialog semantics");
-assert.match(admin, /function safeCsvCell/, "CSV exports must sanitize spreadsheet formulas");
-assert.match(admin, /id="csvSummary"/, "monthly summary export must be available");
+const adminJs = read("admin/app.js");
+assert.doesNotMatch(adminJs, /URLSearchParams\(location\.search\).*get\("key"\)/s, "admin key must not be accepted from URL");
+assert.doesNotMatch(admin + adminJs, /_vercel\/insights/, "admin must not load public analytics");
+assert.match(admin, /role="dialog" aria-modal="true"/, "admin sheet must expose dialog semantics");
+assert.match(adminJs, /function safeCsvCell/, "CSV exports must sanitize spreadsheet formulas");
+assert.match(adminJs, /function exportSummaryCSV/, "monthly summary export must be available");
 
 // ── /api/site: ราคา 3 ห้อง + เรทเทศกาล ต้อง validate ก่อนส่งให้หน้าเว็บ ──
 const site = require("../api/site.js");
