@@ -148,13 +148,18 @@ html[data-theme="dark"] .tools select, html[data-theme="dark"] .search-wrap inpu
 html[data-theme="dark"] .cal-nav, html[data-theme="dark"] .cell, html[data-theme="dark"] .mbtn-ghost{background:#2c251d;border-color:var(--line-2);color:var(--ink)}
 html[data-theme="dark"] .cell.out{background:transparent;border-color:transparent}
 html[data-theme="dark"] .minfo, html[data-theme="dark"] .task-item{background:#2c251d;border-color:var(--line)}
+html[data-theme="dark"] .tl-wrap{--tlline:#332c24;border-color:#3d352b}
 html[data-theme="dark"] .tl-wrap, html[data-theme="dark"] .tl-roomcell{background:var(--card)}
-html[data-theme="dark"] .tl-row.tl-head, html[data-theme="dark"] .tl-head .tl-roomcell{background:#2c251d}
-html[data-theme="dark"] .tl-daycell b{color:var(--ink)}
-html[data-theme="dark"] .tl-daycell.tl-today, html[data-theme="dark"] .tl-daycell.tl-today b{color:#f87171}
-html[data-theme="dark"] .tl-we{background:#211b15}
-html[data-theme="dark"] .tl-today{background:rgba(192,138,85,.16)}
-html[data-theme="dark"] .tl-out{background:#4a4136;color:#c8bba9}
+html[data-theme="dark"] .tl-roomcell{border-right-color:#3d352b;color:var(--ink)}
+html[data-theme="dark"] .tl-row.tl-head, html[data-theme="dark"] .tl-head .tl-roomcell{background:#2c251d;box-shadow:0 1px 0 #3d352b}
+html[data-theme="dark"] .tl-dt{color:var(--muted)}
+html[data-theme="dark"] .tl-dt b{color:var(--ink)}
+html[data-theme="dark"] .tl-daycell.tl-today .tl-dt, html[data-theme="dark"] .tl-daycell.tl-today .tl-dt b{color:#f87171}
+html[data-theme="dark"] .tl-we{background:#251f18}
+html[data-theme="dark"] .tl-cell.tl-today, html[data-theme="dark"] .tl-daycell.tl-today{border-left-color:rgba(248,113,113,.5)}
+html[data-theme="dark"] .tl-book{background:#1e3350;color:#93c5fd;border-color:#2d4a72}
+html[data-theme="dark"] .tl-in{background:#17392c;color:#6ee7b7;border-color:#215540}
+html[data-theme="dark"] .tl-out{background:#38332a;color:#a79f8e;border-color:#48412f}
 html[data-theme="dark"] tbody tr:hover td{background:#2c251d}
 html[data-theme="dark"] .room-free{background:var(--card)}
 html[data-theme="dark"] .b-gray{background:#3a332b;color:var(--muted)}
@@ -187,46 +192,58 @@ html[data-theme="dark"] .row-new td{background:#16281d}
 .tl-todaybtn{width:auto;padding:0 .8rem;font-size:.78rem;font-weight:700;white-space:nowrap;font-family:"Prompt",sans-serif}
 /* tape chart แบบมือโปร: คอลัมน์ครึ่งวัน (แถบเริ่มบ่ายเช็คอิน จบเที่ยงเช็คเอาต์)
    หัวตาราง sticky บน + คอลัมน์ห้อง sticky ซ้าย เลื่อนได้สองแกนใน .tl-wrap เดียว
-   ค่าเริ่มต้น = ตารางใหญ่อ่านง่ายแบบ AzHotel · ปุ่ม "ย่อ" สลับเป็นแบบกะทัดรัดเห็นภาพรวม */
-.tl-wrap{--tlroomw:104px;--tlhalf:34px;--tlrowh:56px;overflow:auto;max-height:76vh;border:1px solid var(--line);border-radius:12px;background:#fff;overscroll-behavior:contain}
-.tl-row{display:grid;grid-template-columns:var(--tlcols);min-height:var(--tlrowh);border-top:1px solid var(--line)}
-.tl-row.tl-head{border-top:none;position:sticky;top:0;z-index:4;background:#faf6ee;box-shadow:0 1px 0 var(--line);min-height:auto}
-.tl-roomcell{grid-row:1;grid-column:1;position:sticky;left:0;z-index:3;background:#fff;border-right:1px solid var(--line);display:flex;align-items:center;gap:.35rem;padding:.25rem .6rem;font-weight:700;font-size:.98rem;color:var(--gold-dark,#6b4226);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tl-head .tl-roomcell{background:#faf6ee;z-index:5}
-.tl-daycell{grid-row:1;padding:.34rem .1rem .28rem;text-align:center;font-size:.72rem;color:var(--muted);border-left:1px solid var(--line);display:flex;flex-direction:column;line-height:1.3}
-.tl-daycell b{font-size:1.05rem;color:#3a2f24}
-.tl-daycell.tl-today, .tl-daycell.tl-today b{color:#dc2626} /* วันนี้ตัวแดง มองปุ๊บรู้เลยแบบแอปที่พนักงานคุ้น */
-.tl-occ{font-size:.68rem;font-weight:700;color:#1e7e3a}
+   หน้าตาอิงแอปปฏิทินจองที่พนักงานคุ้น: พื้นขาวโปร่ง เส้นบาง แถบพาสเทลตัวอักษรเข้ม
+   วันนี้ตัวแดง · ปุ่ม "ย่อ" สลับเป็นแบบกะทัดรัดเห็นภาพรวมทุกห้อง */
+.tl-wrap{--tlroomw:106px;--tlhalf:36px;--tlrowh:60px;--tlline:#efe9df;overflow:auto;max-height:76vh;border:1px solid #e5ddd0;border-radius:14px;background:#fff;overscroll-behavior:contain}
+.tl-row{display:grid;grid-template-columns:var(--tlcols);min-height:var(--tlrowh);border-top:1px solid var(--tlline)}
+.tl-row:not(.tl-head):hover .tl-roomcell{color:var(--gold-dark,#6b4226)}
+.tl-row.tl-head{border-top:none;position:sticky;top:0;z-index:4;background:#fff;box-shadow:0 1px 0 #e5ddd0;min-height:auto}
+.tl-roomcell{grid-row:1;grid-column:1;position:sticky;left:0;z-index:3;background:#fff;border-right:1px solid #e5ddd0;display:flex;align-items:center;gap:.4rem;padding:.25rem .65rem;font-weight:700;font-size:1rem;color:#4a3f35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-head .tl-roomcell{background:#fff;z-index:5}
+.tl-daycell{grid-row:1;padding:.5rem .1rem .42rem;text-align:center;border-left:1px solid var(--tlline);display:flex;flex-direction:column;justify-content:center;gap:.12rem;line-height:1.2}
+.tl-dt{font-size:.74rem;color:#8d8574;white-space:nowrap}
+.tl-dt b{font-size:.98rem;color:#3a2f24;font-weight:700;font-family:"Prompt",sans-serif}
+.tl-daycell.tl-today .tl-dt, .tl-daycell.tl-today .tl-dt b{color:#dc2626} /* วันนี้ตัวแดง มองปุ๊บรู้เลย */
+.tl-occ{font-size:.66rem;font-weight:600;color:#b3a794}
 .tl-occ.full{color:#dc2626}
-.tl-occ.zero{color:var(--line-2)}
-.tl-cell{grid-row:1;border-left:1px solid var(--line);cursor:pointer;z-index:1}
-.tl-cell:hover{background:rgba(138,90,52,.08)}
-.tl-we{background:#faf7ef}
-.tl-today{background:rgba(240,220,174,.32)}
-.tl-bar{grid-row:1;z-index:2;margin:7px 2px;border:none;border-radius:12px;color:#fff;font-size:.9rem;font-weight:600;font-family:"Prompt",sans-serif;padding:0 .7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer;min-width:0;display:flex;align-items:center;box-shadow:0 1px 2px rgba(60,40,20,.18)}
-.tl-bar:hover{filter:brightness(1.08)}
-.tl-book{background:#3b82f6}.tl-in{background:#16a34a}.tl-out{background:#cfc5b2;color:#5f5443;box-shadow:none}
+.tl-occ.zero{color:#d8cfc0}
+.tl-cell{grid-row:1;border-left:1px solid var(--tlline);cursor:pointer;z-index:1}
+.tl-cell:hover{background:rgba(138,90,52,.06)}
+.tl-we{background:#fbf9f5}                 /* เสาร์-อาทิตย์ จางแทบมองไม่เห็น ไม่แย่งสายตา */
+/* วันนี้: หัวตัวแดง + เส้นแดงบาง ๆ ที่ต้นวัน (ไม่ย้อมทั้งคอลัมน์ ตารางจะได้ขาวสะอาด) */
+.tl-cell.tl-today, .tl-daycell.tl-today{border-left:2px solid rgba(220,38,38,.45)}
+.tl-bar{grid-row:1;z-index:2;margin:8px 3px;border-radius:10px;font-size:.92rem;font-weight:600;font-family:"Prompt",sans-serif;padding:0 .6rem;white-space:nowrap;text-align:left;cursor:pointer;min-width:0;display:flex;align-items:center;gap:.35rem;overflow:hidden;box-shadow:none}
+.tl-bar:hover{filter:brightness(.965)}
+.tl-pi{width:15px;height:15px;flex:none;opacity:.7}
+.tl-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tl-book{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
+.tl-in{background:#d2f5e3;color:#047857;border:1px solid #a8ebcc}
+.tl-out{background:#f2f0ea;color:#98917f;border:1px solid #e6e2d7}
 .tl-dirtydot{width:8px;height:8px;border-radius:50%;background:var(--dirty);flex:none}
 .tl-unassigned{grid-row:1;grid-column:2 / -1;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;padding:.32rem .5rem}
 .tl-chip{background:#fdf3dc;border:1px solid #f0dcae;color:#8a5a12;border-radius:999px;padding:.28rem .75rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:"Prompt",sans-serif}
 .tl-chip:hover{filter:brightness(.97)}
 .tl-emptymsg{padding:1.1rem 1rem;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.7}
-/* โหมดย่อ (ปุ่ม "ย่อ" บนหัวตาราง) — ขนาดกะทัดรัดแบบเดิมไว้ดูภาพรวมหลายห้อง */
-.tl-wrap.tl-compact{--tlroomw:88px;--tlhalf:24px;--tlrowh:34px}
+/* โหมดย่อ (ปุ่ม "ย่อ" บนหัวตาราง) — ขนาดกะทัดรัดไว้ดูภาพรวมหลายห้อง */
+.tl-wrap.tl-compact{--tlroomw:88px;--tlhalf:24px;--tlrowh:36px}
 .tl-wrap.tl-compact .tl-roomcell{font-size:.78rem;padding:.25rem .5rem}
-.tl-wrap.tl-compact .tl-daycell{font-size:.62rem;padding:.28rem .1rem .22rem}
-.tl-wrap.tl-compact .tl-daycell b{font-size:.84rem}
-.tl-wrap.tl-compact .tl-occ{font-size:.6rem}
-.tl-wrap.tl-compact .tl-bar{font-size:.72rem;margin:4px 1px;padding:0 .55rem;border-radius:999px}
+.tl-wrap.tl-compact .tl-daycell{padding:.3rem .1rem .24rem}
+.tl-wrap.tl-compact .tl-dt{font-size:.6rem}
+.tl-wrap.tl-compact .tl-dt b{font-size:.78rem}
+.tl-wrap.tl-compact .tl-dw{display:none} /* โหมดย่อช่องแคบ โชว์แค่ "24/08" ไม่ให้ตัวหนังสือเบียดกัน */
+.tl-wrap.tl-compact .tl-occ{font-size:.58rem}
+.tl-wrap.tl-compact .tl-bar{font-size:.72rem;margin:4px 2px;padding:0 .45rem;border-radius:8px;gap:.25rem}
+.tl-wrap.tl-compact .tl-pi{width:11px;height:11px}
 .tl-wrap.tl-compact .tl-chip{font-size:.7rem;padding:.12rem .6rem}
 @media(max-width:640px){
-  .tl-wrap{--tlroomw:96px;--tlhalf:27px;--tlrowh:58px;max-height:72vh}
-  .tl-roomcell{font-size:.88rem;padding:.2rem .45rem}
-  .tl-daycell b{font-size:1rem}
-  .tl-bar{font-size:.84rem;padding:0 .55rem;margin:7px 1px}
-  .tl-wrap.tl-compact{--tlroomw:60px;--tlhalf:19px;--tlrowh:30px}
+  .tl-wrap{--tlroomw:96px;--tlhalf:28px;--tlrowh:62px;max-height:72vh}
+  .tl-roomcell{font-size:.9rem;padding:.2rem .5rem}
+  .tl-dt{font-size:.7rem}
+  .tl-dt b{font-size:.92rem}
+  .tl-bar{font-size:.86rem;padding:0 .5rem;margin:8px 2px}
+  .tl-wrap.tl-compact{--tlroomw:62px;--tlhalf:19px;--tlrowh:32px}
   .tl-wrap.tl-compact .tl-roomcell{font-size:.7rem;padding:.2rem .35rem}
-  .tl-wrap.tl-compact .tl-bar{font-size:.64rem;padding:0 .4rem;margin:3px 1px}
+  .tl-wrap.tl-compact .tl-bar{font-size:.64rem;padding:0 .35rem;margin:3px 1px}
 }
 .banner code{background:rgba(0,0,0,.06);padding:.05rem .35rem;border-radius:5px;font-size:.82em}
 
@@ -549,9 +566,9 @@ tbody tr:hover td{background:#faf7f2}
             <button class="cal-nav tl-todaybtn" id="tlZoom" aria-label="สลับขนาดตาราง">ย่อ</button>
           </div>
           <div class="legend" style="margin:.5rem 0 .7rem">
-            <span><i class="sw" style="background:#3b82f6"></i>ยังไม่เช็คอิน</span>
-            <span><i class="sw" style="background:#16a34a"></i>เข้าพักอยู่</span>
-            <span><i class="sw" style="background:#c9bda9"></i>เช็คเอาต์แล้ว</span>
+            <span><i class="sw tl-book"></i>ยังไม่เช็คอิน</span>
+            <span><i class="sw tl-in"></i>เข้าพักอยู่</span>
+            <span><i class="sw tl-out"></i>เช็คเอาต์แล้ว</span>
             <span><i class="sw" style="background:var(--dirty)"></i>· จุดแดงข้างเลขห้อง = รอทำความสะอาด</span>
           </div>
           <div class="tl-wrap" id="tlWrap"></div>
@@ -1026,9 +1043,10 @@ function renderTimeline(){
   // จำนวนผู้พักต่อคืน โชว์ใต้วันที่ (นับทุกการจองที่มีวันที่ รวมที่ยังไม่จัดห้อง)
   const occ = days.map((d) => dated.filter((b) => staysOn(b, d)).length);
 
+  // หัววันแบบ "23/08 อา." บรรทัดเดียว (รูปแบบเดียวกับแอปปฏิทินที่พนักงานคุ้นตา)
   let html = `<div class="tl-row tl-head" style="${cols}"><div class="tl-roomcell"></div>` +
     days.map((d, i) => `<div class="tl-daycell${dayClass(d)}" style="grid-column:${i * 2 + 2} / span 2">
-      <b>${Number(d.slice(8, 10))}</b><small>${THAI_MONTHS_AB[Number(d.slice(5, 7)) - 1]} ${DOW[new Date(d + "T00:00:00Z").getUTCDay()]}</small>
+      <span class="tl-dt"><b>${d.slice(8, 10)}/${d.slice(5, 7)}</b> <span class="tl-dw">${DOW[new Date(d + "T00:00:00Z").getUTCDay()]}.</span></span>
       <span class="tl-occ${occ[i] >= rooms.length && rooms.length ? " full" : occ[i] ? "" : " zero"}">${occ[i] ? occ[i] + " พัก" : "–"}</span></div>`).join("") + `</div>`;
 
   // เลน "รอจัดห้อง" — การจองมีวันที่แล้วแต่ยังไม่มีห้อง แตะเพื่อเปิดฟอร์มจัดห้อง
@@ -1054,7 +1072,7 @@ function renderTimeline(){
       barCount++;
       const cls = isCheckedOut(b) ? "tl-out" : isInhouse(b) ? "tl-in" : "tl-book";
       const req = guestReqOf(b);
-      html += `<button class="tl-bar ${cls}" style="grid-column:${startCol} / ${endCol}" data-barid="${esc(b.id)}" title="${esc(b.name || "")} ${fmtD(b.checkin)} → ${fmtD(b.checkout)} (${nightsOf(b)} คืน)${req ? " · ⚠ " + esc(req) : ""}">${req ? "⚠ " : ""}${esc(b.name || "ไม่ระบุชื่อ")}</button>`;
+      html += `<button class="tl-bar ${cls}" style="grid-column:${startCol} / ${endCol}" data-barid="${esc(b.id)}" title="${esc(b.name || "")} ${fmtD(b.checkin)} → ${fmtD(b.checkout)} (${nightsOf(b)} คืน)${req ? " · ⚠ " + esc(req) : ""}"><svg class="tl-pi" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2.2c-3.4 0-8 1.7-8 5V21h16v-1.8c0-3.3-4.6-5-8-5Z"/></svg><span class="tl-nm">${req ? "⚠ " : ""}${esc(b.name || "ไม่ระบุชื่อ")}</span></button>`;
     });
     html += `</div>`;
   }
