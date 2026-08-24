@@ -15,6 +15,23 @@
  * env เสริม: SAFETY_BUFFER = จำนวนห้องที่กันไว้ไม่ขายผ่านเว็บ (ค่าเริ่มต้น 1)
  */
 
+// ผังจริง ส.ค. 2026: เปลี่ยนชื่อห้องสองเตียง + ถอดงิ้ว1/งิ้ว4 ออกจากยอดห้องรวม
+// (ชีตอาจยังเป็นชื่อเก่า จนกว่าเจ้าของจะรัน applyRealRoomList — no-op เมื่อชีตอัปเดตแล้ว)
+const ROOM_RENAMES = { "707-สองเตียง": "707twin", "708-สองเตียง": "708twin", "715-สองเตียง": "715twin" };
+const ROOM_REMOVED = ["งิ้ว1", "งิ้ว4", "จั่ว1", "จั่ว4"];
+function normalizeRooms(rooms) {
+  const seen = new Set();
+  const out = [];
+  for (const r of rooms || []) {
+    const s = String((r && r.room) == null ? "" : r.room).trim();
+    const name = ROOM_RENAMES[s] || s;
+    if (!name || ROOM_REMOVED.includes(name) || seen.has(name)) continue;
+    seen.add(name);
+    out.push({ ...r, room: name });
+  }
+  return out;
+}
+
 module.exports = async (req, res) => {
   // error ห้ามแคช; จะตั้ง edge cache เฉพาะก่อนตอบสำเร็จ
   res.setHeader("Cache-Control", "no-store");
@@ -45,7 +62,7 @@ module.exports = async (req, res) => {
   if (demoMode) {
     const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
     bookings = demoBookings(today);
-    rooms = Array.from({ length: 20 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 20 ห้อง
+    rooms = Array.from({ length: 18 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 18 ห้อง
   } else {
     const [sheet, ic] = await Promise.all([fetchSheet(), fetchIcal()]);
     if (!sheet.ok || !ic.ok) {
@@ -57,7 +74,9 @@ module.exports = async (req, res) => {
       return res.status(503).json({ ok: false, error: "availability-unavailable", retryable: true });
     }
     bookings = sheet.rows;
-    rooms = sheet.rooms;
+    // ถอดห้องที่เลิกใช้ (งิ้ว1/งิ้ว4) ออกจากยอดรวม แม้ชีตยังไม่ได้ลบแถว
+    // และกันชื่อซ้ำกรณีชีตมีทั้งชื่อเก่า (707-สองเตียง) และชื่อใหม่ (707twin)
+    rooms = normalizeRooms(sheet.rooms);
     ical = ic.events;
   }
 
