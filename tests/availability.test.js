@@ -164,6 +164,20 @@ module.exports = (async () => {
   });
   assert.equal(missingPhone.code, 400);
 
+  // 9.5) ผังห้องใหม่: ชื่อเก่าถูกแปลง (707-สองเตียง→707twin) ชื่อซ้ำนับครั้งเดียว
+  //      และห้องที่ถอดออก (งิ้ว1/งิ้ว4) ไม่ถูกนับ แม้ชีตยังไม่ได้ลบแถว
+  global.fetch = async () => ({
+    ok: true, status: 200, text: async () => "",
+    json: async () => ({
+      bookings: [],
+      rooms: [{ room: "701" }, { room: "707-สองเตียง" }, { room: "707twin" },
+        { room: "งิ้ว1" }, { room: "งิ้ว4" }, { room: "งิ้ว2" }],
+    }),
+  });
+  r = await call(availability, { query: { checkin: "2026-09-01", checkout: "2026-09-02" } });
+  assert.equal(r.body.total, 3, "701 + 707twin (ชื่อเก่า-ใหม่รวมเป็นห้องเดียว) + งิ้ว2 = 3 ห้อง");
+  global.fetch = fetchFixture;
+
   // 10) health endpoint ต้องรายงาน dependency โดยไม่คืน URL/token/ข้อมูลลูกค้า
   global.fetch = fetchFixture;
   r = await call(health);

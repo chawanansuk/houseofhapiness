@@ -6,6 +6,10 @@ const DEMO_KEY = "demo1234";
 const DEMO_STAFF_KEY = "staff1234";
 const SHEET_TIMEOUT_MS = 12000;
 
+// ชื่อห้องใหม่ → ชื่อเดิมในชีต: ชีตที่ยังไม่ได้รัน applyRealRoomList ใช้ชื่อเก่าอยู่
+// ถ้าอัปเดตสถานะห้องด้วยชื่อใหม่ไม่เจอ จะลองชื่อเดิมให้อีกครั้งอัตโนมัติ
+const ROOM_OLD_NAMES = { "707twin": "707-สองเตียง", "708twin": "708-สองเตียง", "715twin": "715-สองเตียง" };
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") {
@@ -51,16 +55,25 @@ module.exports = async (req, res) => {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), SHEET_TIMEOUT_MS);
   try {
-    const r = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ ...b, token }),
-      redirect: "follow",
-      signal: ctrl.signal,
-    });
-    const text = await r.text();
-    let result;
-    try { result = JSON.parse(text); } catch { result = null; }
+    const send = async (payload) => {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ ...payload, token }),
+        redirect: "follow",
+        signal: ctrl.signal,
+      });
+      const text = await resp.text();
+      let parsed;
+      try { parsed = JSON.parse(text); } catch { parsed = null; }
+      return { r: resp, result: parsed };
+    };
+
+    let { r, result } = await send(b);
+    // ชีตเก่ายังไม่รู้จักชื่อห้องใหม่ (707twin ฯลฯ) — ลองชื่อเดิมอีกครั้ง
+    if (action === "roomclean" && result && result.error === "room-not-found" && ROOM_OLD_NAMES[String(b.room || "")]) {
+      ({ r, result } = await send({ ...b, room: ROOM_OLD_NAMES[String(b.room)] }));
+    }
 
     if (!r.ok || !result || result.ok !== true) {
       console.error(JSON.stringify({

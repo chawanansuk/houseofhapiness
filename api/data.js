@@ -19,6 +19,27 @@
 const DEMO_KEY = "demo1234";
 const DEMO_STAFF_KEY = "staff1234";
 
+// ผังจริง ส.ค. 2026: เปลี่ยนชื่อห้องสองเตียง + ถอดงิ้ว1/งิ้ว4 ออก
+// ชีตอาจยังใช้ชื่อเก่าอยู่ (จนกว่าเจ้าของจะรัน applyRealRoomList ในสคริปต์ใหม่)
+// — แปลงตรงนี้ให้หน้า /admin เห็นผังใหม่ทันที และเป็น no-op เมื่อชีตอัปเดตแล้ว
+const ROOM_RENAMES = { "707-สองเตียง": "707twin", "708-สองเตียง": "708twin", "715-สองเตียง": "715twin" };
+const ROOM_REMOVED = ["งิ้ว1", "งิ้ว4", "จั่ว1", "จั่ว4"];
+const roomName = (n) => {
+  const s = String(n == null ? "" : n).trim();
+  return ROOM_RENAMES[s] || s;
+};
+function normalizeRooms(rooms) {
+  const seen = new Set();
+  const out = [];
+  for (const r of rooms || []) {
+    const name = roomName(r && r.room);
+    if (!name || ROOM_REMOVED.includes(name) || seen.has(name)) continue;
+    seen.add(name);
+    out.push({ ...r, room: name });
+  }
+  return out;
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") {
@@ -57,8 +78,9 @@ module.exports = async (req, res) => {
   const [sheet, ical] = await Promise.all([fetchSheet(), fetchIcal()]);
   return res.status(200).json({
     ok: true, demo: false, today, role,
-    bookings: forRole(sheet.rows),
-    rooms: sheet.rooms,
+    // ชื่อห้องในการจองเก่าแปลงเป็นชื่อใหม่ด้วย จะได้ไม่หายจากตารางไทม์ไลน์
+    bookings: forRole(sheet.rows.map((b) => ({ ...b, room_no: roomName(b.room_no) }))),
+    rooms: normalizeRooms(sheet.rooms),
     ical: ical.events,
     // รายจ่ายเป็นเรื่องเงินล้วน ๆ — พนักงานไม่ได้รับข้อมูลเลย
     expenses: role === "staff" ? [] : sheet.expenses,
