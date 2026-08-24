@@ -21,9 +21,16 @@ var LABEL_DONE = "HOH-บันทึกแล้ว";
 var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no"];
 var ROOM_HEADERS = ["room", "clean", "note"];
 // รายชื่อห้องจริง เรียงตามผังที่พนักงานคุ้นจาก AzHotel (แก้ชื่อ/ลำดับได้ในชีต Rooms)
-var REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707-สองเตียง", "708-สองเตียง",
-  "709", "710", "713", "714-จองตรง", "715-สองเตียง", "716", "717", "718",
-  "งิ้ว2", "งิ้ว3", "งิ้ว4"];
+var REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707twin", "708twin",
+  "709", "710", "713", "714-จองตรง", "715twin", "716", "717", "718",
+  "งิ้ว2", "งิ้ว3"];
+// ชื่อห้องที่เปลี่ยน (เก่า → ใหม่) — applyRealRoomList จะย้ายสถานะห้อง
+// และแก้ชื่อห้องในการจองเก่าให้อัตโนมัติ การจองจะได้ไม่หายจากตาราง
+var ROOM_RENAMES = {
+  "707-สองเตียง": "707twin",
+  "708-สองเตียง": "708twin",
+  "715-สองเตียง": "715twin",
+};
 var EXP_HEADERS = ["id", "date", "category", "amount", "vendor", "method", "note", "created"];
 var SITE_SHEET = "Site";
 // แผงตั้งค่าเว็บ — แก้คอลัมน์ value ในแท็บ Site แล้วหน้าเว็บอัปเดตเองภายใน ~2 นาที
@@ -912,14 +919,30 @@ function applyRealRoomList() {
   var sh = getRoomsSheet_();
   var old = {};
   readRooms_().forEach(function (r) { old[r.room] = r; });
+  // ห้องที่เพิ่งเปลี่ยนชื่อ: ยกสถานะความสะอาด/โน้ตจากชื่อเก่ามาชื่อใหม่
+  var oldNameOf = {};
+  for (var k in ROOM_RENAMES) oldNameOf[ROOM_RENAMES[k]] = k;
   sh.clearContents();
   sh.appendRow(ROOM_HEADERS);
   sh.getRange(1, 1, 1, ROOM_HEADERS.length).setFontWeight("bold");
   for (var i = 0; i < REAL_ROOMS.length; i++) {
-    var prev = old[REAL_ROOMS[i]] || {};
-    sh.appendRow([REAL_ROOMS[i], prev.clean || "สะอาด", prev.note || ""]);
+    var name = REAL_ROOMS[i];
+    var prev = old[name] || old[oldNameOf[name]] || {};
+    sh.appendRow([name, prev.clean || "สะอาด", prev.note || ""]);
   }
-  Logger.log("อัปเดตรายชื่อห้องเป็นผังจริง " + REAL_ROOMS.length + " ห้องแล้ว");
+  // แก้ชื่อห้องในการจองเก่า (คอลัมน์ room_no) ให้ตรงชื่อใหม่ การจองไม่หายจากตาราง
+  var bsh = getSheet_();
+  var col = HEADERS.indexOf("room_no") + 1;
+  var vals = bsh.getDataRange().getValues();
+  var moved = 0;
+  for (var r = 1; r < vals.length; r++) {
+    var cur = asText_(vals[r][col - 1]);
+    if (ROOM_RENAMES[cur]) {
+      bsh.getRange(r + 1, col).setValue(ROOM_RENAMES[cur]);
+      moved++;
+    }
+  }
+  Logger.log("อัปเดตรายชื่อห้องเป็นผังจริง " + REAL_ROOMS.length + " ห้อง · แก้ชื่อห้องในการจองเก่า " + moved + " รายการ");
 }
 
 /** ซ่อมข้อมูลย้อนหลัง — รันด้วยมือ 1 ครั้งหลังอัปเดตสคริปต์เป็น v4:
