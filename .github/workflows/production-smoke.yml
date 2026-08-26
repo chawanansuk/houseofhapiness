@@ -91,8 +91,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          health="$(curl --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/api/health")"
-          echo "$health" | jq -e '(.ok | type == "boolean") and .checks.sheet == "ok"'
+          # Apps Script มีสะดุดสั้น ๆ เป็นครั้งคราว (หายเองใน <1 นาที) — ลองซ้ำ 3 รอบ
+          # ห่างกัน 25 วินาทีก่อนถือว่าล้มจริง จะได้ไม่เปิด issue ปลุกเจ้าของโดยไม่จำเป็น
+          for attempt in 1 2 3; do
+            health="$(curl --location --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$BASE_URL/api/health" || true)"
+            if echo "$health" | jq -e '(.ok | type == "boolean") and .checks.sheet == "ok"' > /dev/null 2>&1; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then sleep 25; fi
+          done
+          echo "$health" | jq . || echo "$health"
+          echo "Health check failed after 3 attempts (sheet not ok)." >&2
+          exit 1
 
       - name: Check availability API
         if: github.event_name != 'pull_request'
