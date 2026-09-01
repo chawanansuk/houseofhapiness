@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `<a href="${pre}#reviews" data-i18n="nav.reviews">รีวิว</a>` +
     `<a href="gallery.html" data-i18n="nav.gallery">รูปภาพ</a>` +
     `<a href="guides.html" data-i18n="nav.guides">ไกด์เที่ยว & บทความ</a>` +
+    `<a href="services.html" data-i18n="nav.services">รูมเซอร์วิส</a>` +
     `<a href="${pre}#location" data-i18n="nav.location">ที่ตั้ง</a>` +
     `<a href="${pre}#faq" data-i18n="nav.faq">คำถาม</a>` +
     `<a class="mm-book" href="booking.html" data-i18n="nav.book">จองเลย</a>`;

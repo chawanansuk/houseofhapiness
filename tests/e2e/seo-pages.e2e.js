@@ -25,6 +25,7 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     ["loy-krathong.html","ลอยกระทงริมเจ้าพระยา","Loy Krathong 2026"],
     ["new-year-countdown.html","เคาท์ดาวน์ปีใหม่ริมเจ้าพระยา","New Year's Eve on the Chao Phraya"],
     ["thonburi-one-day.html","เที่ยวฝั่งธนฯ 1 วันเต็ม","One Full Day in Thonburi"],
+    ["services.html","รูมเซอร์วิส","Room Service"],
   ];
   for (const [file, thH1, enH1] of PAGES) {
     const page=await ctx.newPage();

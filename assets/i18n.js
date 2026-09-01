@@ -285,6 +285,7 @@ const I18N = {
   "bk.baddates":     { th: "วันเช็คเอาท์ต้องอยู่หลังวันเช็คอิน", en: "Check-out must be after check-in." },
   "rooms.detail":    { th: "รายละเอียดห้อง + รูป →", en: "Room details & photos →" },
   "nav.guides":      { th: "ไกด์เที่ยว & บทความ", en: "Guides & articles" },
+  "nav.services":    { th: "รูมเซอร์วิส", en: "Room service" },
   "nav.iconsiam":    { th: "ที่พักใกล้ ICONSIAM", en: "Hotel near ICONSIAM" },
   "nav.chinatown":   { th: "ที่พักใกล้เยาวราช", en: "Hotel near Chinatown" },
   "nav.airport":     { th: "✈️ วิธีเดินทางจากสนามบิน →", en: "✈️ Getting here from the airport →" },

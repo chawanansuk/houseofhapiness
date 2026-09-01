@@ -8,7 +8,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
 
-const publicPages = ["index.html", "booking.html", "gallery.html", "attractions.html", "local.html"];
+const publicPages = ["index.html", "booking.html", "gallery.html", "attractions.html", "local.html", "services.html"];
 for (const page of publicPages) {
   const html = read(page);
   assert.match(html, /<html lang="th">/, page + " must declare Thai document language");
@@ -26,6 +26,12 @@ const gallery = read("gallery.html");
 assert.match(gallery, /role="button" tabindex="0"/, "gallery cards must be keyboard focusable");
 assert.match(gallery, /e\.key === "Enter" \|\| e\.key === " "/, "gallery must open with keyboard");
 assert.match(gallery, /lbTrigger.*focus/s, "gallery must restore focus after closing");
+
+// หน้ารูมเซอร์วิส: ปุ่มสั่งต้องใช้ oaMessage (ลิงก์ธรรมดา LINE หาบัญชีไม่เจอ) + เงื่อนไขสั่งล่วงหน้า/จ่ายเงินสดต้องแสดง
+const services = read("services.html");
+assert.match(services, /line\.me\/R\/oaMessage/, "room service order buttons must deep-link into the LINE OA chat");
+assert.match(services, /สั่งล่วงหน้าอย่างน้อย 1 วัน/, "room service page must state the 1-day advance-order rule");
+assert.match(services, /จ่ายเงินสดตอนรับอาหาร/, "room service page must state cash-on-delivery payment");
 
 const admin = read("admin/index.html");
 const adminJs = read("admin/app.js");
