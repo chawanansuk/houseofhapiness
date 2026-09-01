@@ -99,15 +99,17 @@ async function launch() {
   assert.ok(waHref.startsWith("https://wa.me/66994419465?text="), "ลิงก์ WhatsApp ถูกต้อง");
   ok("ปุ่ม LINE/WhatsApp เปิดใช้ · ลิงก์ถูกต้อง (@ ดิบ ไม่ใช่ %40)");
 
-  // ── 4.5) เรทเทศกาล: คืน ymd(9) คิด ฿1,200 → รวม 700+700+1200 = ฿2,600 ──
-  await page.waitForFunction(() => document.getElementById("stickyTotal").textContent === "฿2,600");
+  // ── 4.5) นโยบายไม่แสดงราคา (rate parity): ห้ามมีราคาห้อง/ยอดรวมโผล่ และข้อความจองต้องขอราคา ──
   const summaryText = await page.locator("#summary").innerText();
-  assert.ok(summaryText.includes("฿1,200 × 1"), "สรุปต้องแยกคืนเรทเทศกาลให้เห็น: " + summaryText);
-  assert.ok(summaryText.includes("฿700 × 2"), "สรุปต้องโชว์คืนราคาปกติด้วย");
+  assert.ok(!/฿[\d,]+/.test(summaryText), "สรุปการจองต้องไม่มีตัวเลขราคา: " + summaryText);
+  const pageText = await page.locator("body").innerText();
+  assert.ok(!pageText.includes("฿700") && !pageText.includes("฿800") && !pageText.includes("฿850"),
+    "หน้าจองต้องไม่มีราคาห้องโผล่ที่ไหนเลย");
   const lineMsg = decodeURIComponent(await page.getAttribute("#btnLine", "href"));
-  assert.ok(lineMsg.includes("รวมเรทช่วงเทศกาลแล้ว") || lineMsg.includes("seasonal rate included"),
-    "ข้อความจองต้องบอกว่ารวมเรทเทศกาลแล้ว");
-  ok("เรทเทศกาลจากชีตคิดราคาต่อคืนถูกต้อง (฿700×2 + ฿1,200×1 = ฿2,600)");
+  assert.ok(lineMsg.includes("รบกวนแจ้งราคารวม") || lineMsg.includes("total price"),
+    "ข้อความจองต้องขอให้ที่พักแจ้งราคา");
+  assert.ok(!/฿[\d,]+/.test(lineMsg), "ข้อความจองต้องไม่มีตัวเลขราคา");
+  ok("ไม่มีราคาห้องบนหน้าจอง · ข้อความจองขอราคาจากที่พักแทน");
 
   // ── 5) กดปุ่ม LINE → ต้องยิง /api/book ครบถ้วน (กันเปิด line.me จริงด้วย preventDefault) ──
   await page.evaluate(() => document.getElementById("btnLine").addEventListener("click", (e) => e.preventDefault()));
@@ -118,7 +120,7 @@ async function launch() {
   assert.equal(b.name, "E2E ทดสอบ");
   assert.equal(b.checkin, ymd(7));
   assert.equal(b.checkout, ymd(10));
-  assert.equal(b.total, 2600, "ยอดที่ส่งเข้าระบบต้องรวมเรทเทศกาล (700+700+1200)");
+  assert.equal(b.total, "", "โหมดไม่แสดงราคา: ยอดที่ส่งเข้าระบบต้องว่าง (ทีมงานใส่ราคาเองตอนคอนเฟิร์ม)");
   const savedText = await page.locator("#bookingSaveStatus").innerText();
   assert.ok(savedText.includes("WEB-E2E-1"), "ต้องแสดงเลขที่จองจากระบบ");
   ok("กดจองแล้วบันทึกเข้าระบบ + โชว์เลขที่จอง WEB-E2E-1");

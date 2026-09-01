@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>จองตรง | Book Direct — House of Happiness Bangkok</title>
-<meta name="description" content="จองห้องพักโดยตรงกับ House of Happiness คลองสาน กรุงเทพฯ ราคาดีกว่า ไม่ผ่านคนกลาง | Book directly with House of Happiness, Khlong San, Bangkok.">
+<meta name="description" content="จองห้องพักโดยตรงกับ House of Happiness คลองสาน กรุงเทพฯ สอบถามราคาและยืนยันไวทาง LINE/WhatsApp | Book directly with House of Happiness, Khlong San, Bangkok — ask rates on LINE/WhatsApp.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
-<meta property="og:description" content="จองตรงราคาดีกว่า ไม่ผ่านคนกลาง พร้อมส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
+<meta property="og:description" content="จองตรงกับเรา สอบถามราคาและส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://houseofhappinessbangkok.com/booking.html">
 <meta property="og:site_name" content="House of Happiness">
@@ -20,7 +20,7 @@
 <meta property="og:image:height" content="683">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="จองตรง | Book Direct — House of Happiness Bangkok">
-<meta name="twitter:description" content="จองตรงราคาดีกว่า ไม่ผ่านคนกลาง พร้อมส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
+<meta name="twitter:description" content="จองตรงกับเรา สอบถามราคาและส่งคำขอจองทาง LINE, WhatsApp หรืออีเมล">
 <meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
@@ -45,7 +45,7 @@
 
 <header class="hero bk-hero">
   <h1 data-i18n="bk.title">จองตรงกับ House of Happiness</h1>
-  <p class="sub" data-i18n="bk.sub">ราคาดีกว่าจองผ่านเว็บตัวกลาง · ยืนยันไวทาง LINE</p>
+  <p class="sub" data-i18n="bk.sub">สอบถามราคาและยืนยันไวทาง LINE/WhatsApp — เราตอบเร็วมาก</p>
 </header>
 
 <div class="bk-steps">
@@ -170,7 +170,7 @@
 </footer>
 
 <div class="bk-sticky">
-  <div class="lbl"><span data-i18n="bk.total">รวม</span><b id="stickyTotal">฿0</b></div>
+  <div class="lbl"><span data-i18n="bk.askline">💬 ราคา: สอบถามทาง LINE/WhatsApp ได้เลย — เราตอบไวมาก</span></div>
   <button type="button" class="btn btn-gold btn-sm" onclick="document.getElementById('summaryCard').scrollIntoView({behavior:'smooth'})" data-i18n="bk.viewsummary">ดูสรุปการจอง</button>
 </div>
 
@@ -192,7 +192,6 @@ const CONFIG = {
         th: "เตียงใหญ่ 1 เตียง · ระเบียง · ตู้เย็น · พัก 2 ท่าน",
         en: "1 double bed · balcony · fridge · sleeps 2",
       },
-      price: 700, // บาท/คืน — แก้ให้ตรงราคาปัจจุบันได้ที่นี่
     },
     {
       id: "stu",
@@ -201,7 +200,6 @@ const CONFIG = {
         th: "2 เตียงแยก เหมาะเพื่อน/พี่น้อง · ระเบียง · ตู้เย็น · พัก 2 ท่าน (สูงสุด 3)",
         en: "2 single beds · balcony · fridge · sleeps 2 (max 3)",
       },
-      price: 800,
     },
     {
       id: "dlx",
@@ -210,7 +208,6 @@ const CONFIG = {
         th: "ห้องใหญ่พิเศษ เตียงใหญ่ + มุมโซฟา · ระเบียง · ตู้เย็น · พัก 2 ท่าน (สูงสุด 3)",
         en: "Extra-large room, double bed + sofa corner · balcony · fridge · sleeps 2 (max 3)",
       },
-      price: 850,
     },
   ],
 };
@@ -230,7 +227,7 @@ function renderRooms() {
     div.innerHTML = `
       <input type="radio" name="room" value="${r.id}">
       <span><span class="name">${r.name[lang()]}</span><br><span class="desc">${r.desc[lang()]}</span></span>
-      <span class="price">฿${r.price.toLocaleString()}<small>${t("bk.night.per")}</small></span>`;
+      <span class="price" style="font-size:0.8rem">${t("bk.askprice")}</span>`;
     roomList.appendChild(div);
   });
   const keep = selected || (CONFIG.rooms.length === 1 ? CONFIG.rooms[0].id : null);
@@ -280,46 +277,18 @@ function applyChipLabels() {
     b.textContent = `${b.dataset.nights} ${t("bk.quick.n")}`);
 }
 
-// เรทช่วงเทศกาล/วันหยุดจากแท็บ Rates ในชีต — โหลดตอนเปิดหน้า (ดูด้านล่าง)
-let RATES = [];
-
-// ราคาคืนนั้น ๆ: เรทที่ระบุห้องเจาะจงชนะเรท all · ไม่เข้าช่วงไหนเลยใช้ราคาปกติ
-function nightlyPrice(room, ymdDate) {
-  let allRate = 0;
-  for (const rt of RATES) {
-    if (ymdDate < rt.from || ymdDate > rt.to) continue;
-    if (rt.room === room.id) return rt.price;
-    if (rt.room === "all" && !allRate) allRate = rt.price;
-  }
-  return allRate || room.price;
-}
-
 function getState() {
   const roomId = document.querySelector('input[name="room"]:checked')?.value;
   const room = CONFIG.rooms.find((r) => r.id === roomId);
   const ci = $("checkin").value, co = $("checkout").value;
   const nights = ci && co ? Math.round((new Date(co) - new Date(ci)) / 86400000) : 0;
   const numRooms = +$("rooms").value;
-  // คิดราคาทีละคืน — คืนที่ตรงช่วงเทศกาลใช้เรทจากชีต คืนอื่นใช้ราคาปกติ
-  const nightPrices = [];
-  let total = 0;
-  if (room && nights > 0 && ci) {
-    const d = new Date(ci);
-    for (let i = 0; i < nights; i++) {
-      const p = nightlyPrice(room, toYMD(d));
-      nightPrices.push(p);
-      total += p;
-      d.setDate(d.getDate() + 1);
-    }
-    total *= numRooms;
-  }
   return {
-    room, ci, co, nights, numRooms, nightPrices,
+    room, ci, co, nights, numRooms,
     guests: +$("guests").value,
     name: $("name").value.trim(),
     phone: $("phone").value.trim(),
     note: $("note").value.trim(),
-    total,
   };
 }
 
@@ -332,23 +301,12 @@ function update() {
   document.querySelectorAll(".room").forEach((el) =>
     el.classList.toggle("selected", el.querySelector("input").checked));
 
-  // มีคืนไหนใช้เรทเทศกาลไหม — ใช้ทั้งในสรุปและข้อความจอง
-  const hasSeason = !!(s.room && s.nightPrices.some((p) => p !== s.room.price));
-
   const summary = $("summary");
   if (s.room && s.nights >= MIN_NIGHTS) {
-    // จัดกลุ่มคืนราคาเดียวกัน: ปกติ = "฿700 × 3" · มีเทศกาล = "(฿700 × 2 + ฿1,200 × 1)"
-    const byPrice = new Map();
-    s.nightPrices.forEach((p) => byPrice.set(p, (byPrice.get(p) || 0) + 1));
-    let parts = [...byPrice].map(([p, n]) => `฿${p.toLocaleString()} × ${n}`).join(" + ");
-    if (byPrice.size > 1) parts = `(${parts})`;
     summary.innerHTML = `
       <strong>${s.room.name[lang()]}</strong><br>
-      ${fmtDate(s.ci)} → ${fmtDate(s.co)} · ${s.guests} ${t("bk.guests.n")}<br>
-      <span class="breakdown">${parts} ${t("bk.nights")} × ${s.numRooms} ${t("bk.rooms.n")}</span><br>
-      <span class="total">${t("bk.total")} ฿${s.total.toLocaleString()}</span><br>
-      ${hasSeason ? `<span class="note">✦ ${t("bk.season.applied")}</span><br>` : ""}
-      <span class="note">${t("bk.approx")}</span>`;
+      ${fmtDate(s.ci)} → ${fmtDate(s.co)} · ${s.nights} ${t("bk.nights")} · ${s.guests} ${t("bk.guests.n")} · ${s.numRooms} ${t("bk.rooms.n")}<br>
+      <span class="note">${t("bk.askline")}</span>`;
   } else if (s.room && s.ci && s.co && s.nights > 0 && s.nights < MIN_NIGHTS) {
     summary.textContent = t("bk.minnights");
   } else if (s.room && s.ci && s.co) {
@@ -356,8 +314,6 @@ function update() {
   } else {
     summary.textContent = t("bk.empty");
   }
-  $("stickyTotal").textContent = `฿${s.total.toLocaleString()}`;
-
   const badge = $("nightsBadge");
   badge.hidden = !(s.nights >= MIN_NIGHTS);
   if (s.nights >= MIN_NIGHTS) badge.textContent = `✓ ${s.nights} ${t("bk.nights")}`;
@@ -373,9 +329,9 @@ function update() {
 • ${L ? "เช็คอิน" : "Check-in"}: ${s.ci || "-"}
 • ${L ? "เช็คเอาท์" : "Check-out"}: ${s.co || "-"} (${s.nights} ${t("bk.nights")})
 • ${L ? "ผู้เข้าพัก" : "Guests"}: ${s.guests}
-• ${L ? "ราคารวมโดยประมาณ" : "Estimated total"}: ฿${s.total.toLocaleString()}${hasSeason ? (L ? " (รวมเรทช่วงเทศกาลแล้ว)" : " (seasonal rate included)") : ""}
 • ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
-• ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}`;
+• ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}
+${L ? "รบกวนแจ้งราคารวมด้วยนะครับ/ค่ะ 🙏" : "Could you let me know the total price? 🙏"}`;
   lastMsg = msg;
 
   const btnLine = $("btnLine"), btnWa = $("btnWa"), btnMail = $("btnMail");
@@ -482,25 +438,13 @@ document.addEventListener("langchange", () => { availSig = ""; checkAvailability
 const _update = update;
 update = function () { _update(); checkAvailability(); };
 
-// ราคาจริง 3 ห้อง + เรทช่วงเทศกาล จากชีต (แท็บ Site/Rates) — เจ้าของแก้ในชีตแล้วหน้านี้อัปเดตเอง
-fetch("/api/site").then((r) => r.json()).then((j) => {
-  if (!j.ok || j.source !== "sheet") return;
-  if (j.prices) {
-    CONFIG.rooms.forEach((room) => {
-      if (j.prices[room.id] > 0) room.price = j.prices[room.id];
-    });
-  } else if (j.price) {
-    CONFIG.rooms[0].price = j.price; // API เวอร์ชันเก่าส่งเฉพาะราคา Standard
-  }
-  if (Array.isArray(j.rates)) RATES = j.rates;
-  renderRooms();
-  update();
-}).catch(() => {});
+// นโยบายราคา: ไม่แสดง/ไม่คำนวณราคาห้องบนเว็บสาธารณะ (เงื่อนไข rate parity ของ OTA)
+// แขกถามราคาในแชท — ทีมงานตอบตามเรทจริง (รวมเรทเทศกาลจากชีต) ได้เอง
 
 // บันทึกคำขอจองเข้าระบบหลังบ้าน — แสดงว่าบันทึกแล้วเฉพาะเมื่อ API ส่ง id กลับมา
 let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSaveId = "";
 function bookingSignature(s) {
-  return [s.room && s.room.id, s.name, s.phone, s.ci, s.co, s.guests, s.numRooms, s.total, s.note].join("|");
+  return [s.room && s.room.id, s.name, s.phone, s.ci, s.co, s.guests, s.numRooms, s.note].join("|");
 }
 function renderBookingSaveStatus() {
   const el = $("bookingSaveStatus");
@@ -530,7 +474,7 @@ async function logBooking() {
       keepalive: true,
       body: JSON.stringify({
         name: s.name, phone: s.phone, checkin: s.ci, checkout: s.co,
-        guests: s.guests, rooms: s.numRooms, total: s.total,
+        guests: s.guests, rooms: s.numRooms, total: "",
         room: s.room.name.th, note: s.note,
       }),
       });
