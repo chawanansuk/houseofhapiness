@@ -62,6 +62,33 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     await page.close();
   }
 
+  // รูมเซอร์วิส: เลือกจำนวน → แถบตะกร้า → ชีตสรุป → ลิงก์ LINE ต้องมีออร์เดอร์ครบ ไม่มีช่องว่างให้แขกเติมเอง
+  const rs=await ctx.newPage();
+  await rs.goto("http://127.0.0.1:8899/services.html",{waitUntil:"domcontentloaded"});
+  await rs.waitForTimeout(300);
+  await rs.evaluate(()=>{ localStorage.setItem("hoh-lang","th"); applyLang(); });
+  check("services: แถบตะกร้าซ่อนตอนยังไม่เลือก", await rs.locator("#rsBar").isHidden());
+  await rs.locator(".qty .qplus").first().click();
+  await rs.locator(".qty .qplus").first().click();
+  await rs.locator(".qty .qplus").nth(1).click();
+  check("services: เลือก 3 จาน แถบตะกร้าโผล่พร้อมยอดรวม",
+    await rs.locator("#rsBar").isVisible() && /3 จาน/.test(await rs.textContent("#rsBarQty")));
+  await rs.click("#rsBarBtn");
+  check("services: ชีตสรุปเปิด มี 2 รายการ", await rs.locator("#rsSheet").isVisible() && await rs.locator(".rs-item").count()===2);
+  const minD=await rs.getAttribute("#rsDate","min");
+  check("services: วันที่ default = พรุ่งนี้ (ล่วงหน้า 1 วัน)", (await rs.inputValue("#rsDate"))===minD && !!minD);
+  await rs.click("#rsSend"); // ยังไม่กรอกห้อง/เวลา ต้องโดนกัน
+  await rs.waitForTimeout(150);
+  check("services: กดส่งโดยไม่กรอกห้อง/เวลา ต้องขึ้นเตือน", await rs.locator("#rsErr").isVisible());
+  await rs.fill("#rsRoom","701");
+  await rs.selectOption("#rsTime","12:00");
+  await rs.waitForTimeout(150);
+  const href=await rs.getAttribute("#rsSend","href");
+  check("services: ลิงก์ LINE มีออร์เดอร์ครบ (เมนู+ห้อง+เวลา)",
+    href.includes("line.me/R/oaMessage") && href.includes(encodeURIComponent("701"))
+    && href.includes(encodeURIComponent("12:00")) && href.includes(encodeURIComponent("× 2")));
+  await rs.close();
+
   // ปุ่มคัดลอกที่อยู่ (airport-guide)
   const pg=await ctx.newPage();
   await pg.goto("http://127.0.0.1:8899/airport-guide.html",{waitUntil:"domcontentloaded"});
