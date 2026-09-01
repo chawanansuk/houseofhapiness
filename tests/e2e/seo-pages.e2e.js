@@ -69,9 +69,11 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
   await rs.evaluate(()=>{ localStorage.setItem("hoh-lang","th"); applyLang(); });
   check("services: แถบตะกร้าซ่อนตอนยังไม่เลือก", await rs.locator("#rsBar").isHidden());
   check("services: เมนูครบ 21 รายการจากเล่มเมนูจริง", await rs.locator(".rs-card").count()===21);
-  await rs.locator(".qty .qplus").first().click(); // มัสมั่น ฿99 — ยังไม่ถึงขั้นต่ำ ฿100
+  await rs.locator('.rs-card[data-id="cocoa"] .qplus').click(); // โกโก้ ฿40 — ยังไม่ถึงขั้นต่ำ ฿100
   check("services: ต่ำกว่าขั้นต่ำ ฿100 ปุ่มสั่งต้องกดไม่ได้",
     await rs.locator("#rsBarBtn").isDisabled() && /ขั้นต่ำ/.test(await rs.textContent("#rsBarSum")));
+  await rs.locator('.rs-card[data-id="cocoa"] .qminus').click(); // เอาออก แล้วสั่งของจริง
+  await rs.locator(".qty .qplus").first().click(); // มัสมั่น ฿100 × 2
   await rs.locator(".qty .qplus").first().click();
   await rs.locator(".qty .qplus").nth(1).click();
   check("services: เลือก 3 รายการ แถบตะกร้าโผล่พร้อมยอดรวม และปุ่มกดได้",
