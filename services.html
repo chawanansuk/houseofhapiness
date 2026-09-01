@@ -96,6 +96,8 @@
 .rs-grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 0.7rem}
 .rs-err{color:#c0392b; font-size:0.84rem; margin-top:0.55rem; text-align:center}
 .rs-send{display:block; text-align:center; margin-top:0.8rem; width:100%; box-sizing:border-box}
+.rs-send-wa{margin-top:0.5rem; background:#25D366; color:#fff; border:0}
+.rs-send-wa:hover{background:#1fb958; color:#fff}
 .rs-sheet-note{font-size:0.76rem; color:var(--muted); text-align:center; margin-top:0.55rem; line-height:1.5}
 .rs-note{max-width:1080px; margin:0 auto; padding:0 1.2rem 0.8rem; text-align:center; color:var(--muted); font-size:0.82rem}
 /* ── ขั้นตอนสั่ง ── */
@@ -106,7 +108,6 @@
 .rs-step .n{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%;
   background:var(--gold-dark); color:#fff; font-family:"Prompt",sans-serif; font-weight:700; font-size:0.9rem; margin-bottom:0.5rem}
 .rs-step p{font-size:0.86rem; color:var(--text); line-height:1.6}
-.rs-cta{text-align:center; padding:0 1.2rem 3.2rem}
 @media (max-width:640px){ .rs-grid{grid-template-columns:1fr 1fr; gap:0.7rem}
   .rs-art svg{width:130px; height:130px}
   .rs-body{padding:0.65rem 0.7rem 0.8rem}
@@ -362,14 +363,11 @@
       <p data-th="กด “สั่งเลย” แล้วกรอกเลขห้อง เลือกวันและเวลารับ (ล่วงหน้าอย่างน้อย 1 วัน)"
          data-en="Tap “Order” then fill in your room number and pick the date &amp; time (at least 1 day ahead).">กด “สั่งเลย” แล้วกรอกเลขห้อง เลือกวันและเวลารับ (ล่วงหน้าอย่างน้อย 1 วัน)</p></div>
     <div class="rs-step"><span class="n">3</span>
-      <p data-th="ระบบเปิด LINE พร้อมข้อความออร์เดอร์ครบถ้วน — แค่กดส่ง เราคอนเฟิร์มกลับ แล้วเสิร์ฟถึงหน้าห้อง จ่ายเงินสดตอนรับ"
-         data-en="LINE opens with your complete order — just hit send. We confirm, deliver to your door, and you pay cash on delivery.">ระบบเปิด LINE พร้อมข้อความออร์เดอร์ครบถ้วน — แค่กดส่ง เราคอนเฟิร์มกลับ แล้วเสิร์ฟถึงหน้าห้อง จ่ายเงินสดตอนรับ</p></div>
+      <p data-th="เลือกส่งทาง LINE หรือ WhatsApp — ข้อความออร์เดอร์ครบถ้วน แค่กดส่ง เราคอนเฟิร์มกลับ แล้วเสิร์ฟถึงหน้าห้อง จ่ายเงินสดตอนรับ"
+         data-en="Send via LINE or WhatsApp — your complete order opens in the chat, just hit send. We confirm, deliver to your door, and you pay cash on delivery.">เลือกส่งทาง LINE หรือ WhatsApp — ข้อความออร์เดอร์ครบถ้วน แค่กดส่ง เราคอนเฟิร์มกลับ แล้วเสิร์ฟถึงหน้าห้อง จ่ายเงินสดตอนรับ</p></div>
   </div>
 </section>
 
-<div class="rs-cta">
-  <a class="btn btn-gold" href="booking.html" data-i18n="cta.direct">จองตรงกับเรา</a>
-</div>
 <div style="height:5rem"></div>
 
 <!-- แถบตะกร้า: โผล่เมื่อเลือกอย่างน้อย 1 จาน -->
@@ -403,8 +401,9 @@
   <input id="rsNote" type="text" autocomplete="off" placeholder="เช่น ไม่เผ็ด / แพ้กุ้ง">
   <div class="rs-err" id="rsErr" hidden></div>
   <a class="btn btn-gold rs-send" id="rsSend" href="#" target="_blank" rel="noopener">ส่งออร์เดอร์ใน LINE</a>
-  <p class="rs-sheet-note" data-th="ข้อความออร์เดอร์ถูกเตรียมครบแล้ว เปิด LINE แล้วแค่กดส่ง — ทีมงานคอนเฟิร์มกลับ · จ่ายเงินสดตอนรับอาหาร"
-     data-en="Your order message is fully prepared — LINE opens, just hit send. We'll confirm back · pay cash on delivery.">ข้อความออร์เดอร์ถูกเตรียมครบแล้ว เปิด LINE แล้วแค่กดส่ง — ทีมงานคอนเฟิร์มกลับ · จ่ายเงินสดตอนรับอาหาร</p>
+  <a class="btn rs-send rs-send-wa" id="rsSendWa" href="#" target="_blank" rel="noopener">ส่งทาง WhatsApp</a>
+  <p class="rs-sheet-note" data-th="ข้อความออร์เดอร์ถูกเตรียมครบแล้ว เปิดแชทแล้วแค่กดส่ง — ทีมงานคอนเฟิร์มกลับ · จ่ายเงินสดตอนรับอาหาร"
+     data-en="Your order message is fully prepared — the chat opens, just hit send. We'll confirm back · pay cash on delivery.">ข้อความออร์เดอร์ถูกเตรียมครบแล้ว เปิดแชทแล้วแค่กดส่ง — ทีมงานคอนเฟิร์มกลับ · จ่ายเงินสดตอนรับอาหาร</p>
 </div>
 
 <script src="assets/i18n.js"></script>
@@ -413,6 +412,7 @@
 // ── ตะกร้าสั่งอาหาร: เลือกจำนวนบนหน้าเว็บ → เปิด LINE ด้วยข้อความออร์เดอร์ที่ครบแล้ว ──
 // เจตนา: แขกไม่ต้องพิมพ์เติมอะไรในแชทเลย (การให้แขกแก้ข้อความใน LINE เอง คนส่วนใหญ่กดส่งทั้งช่องว่าง)
 var LINE_ID = "@060hvzok";
+var WA_NUMBER = "66994419465"; // รูปแบบสากล ไม่มี + (เบอร์เดียวกับหน้า booking)
 var CART = {};
 var DISHES = {};
 document.querySelectorAll(".rs-card[data-id]").forEach(function (c) {
@@ -492,6 +492,7 @@ function renderSheet() {
   document.getElementById("rsRoom").placeholder = t("เช่น 701", "e.g. 701");
   document.getElementById("rsNote").placeholder = t("เช่น ไม่เผ็ด / แพ้กุ้ง", "e.g. not spicy / shrimp allergy");
   document.getElementById("rsSend").textContent = t("ส่งออร์เดอร์ใน LINE", "Send order in LINE");
+  document.getElementById("rsSendWa").textContent = t("ส่งทาง WhatsApp", "Send via WhatsApp");
   updateSend();
 }
 function openSheet() {
@@ -550,8 +551,9 @@ function validate() {
   return missing.length === 0;
 }
 function updateSend() {
-  document.getElementById("rsSend").href =
-    "https://line.me/R/oaMessage/" + LINE_ID + "/?" + encodeURIComponent(buildMsg());
+  var msg = encodeURIComponent(buildMsg());
+  document.getElementById("rsSend").href = "https://line.me/R/oaMessage/" + LINE_ID + "/?" + msg;
+  document.getElementById("rsSendWa").href = "https://wa.me/" + WA_NUMBER + "?text=" + msg;
 }
 ["rsRoom", "rsDate", "rsTime", "rsNote"].forEach(function (id) {
   document.getElementById(id).addEventListener("input", function () {
@@ -560,15 +562,17 @@ function updateSend() {
     updateSend();
   });
 });
-document.getElementById("rsSend").addEventListener("click", function (e) {
-  if (!validate()) {
-    e.preventDefault();
-    var err = document.getElementById("rsErr");
-    err.textContent = t("กรุณากรอกเลขห้อง และเลือกวัน-เวลารับอาหารก่อนนะครับ", "Please fill in your room number and pick a date & time first.");
-    err.hidden = false;
-    return;
-  }
-  updateSend(); // ให้ href ตรงกับค่าล่าสุดเสมอ ณ วินาทีที่กด
+["rsSend", "rsSendWa"].forEach(function (btnId) {
+  document.getElementById(btnId).addEventListener("click", function (e) {
+    if (!validate()) {
+      e.preventDefault();
+      var err = document.getElementById("rsErr");
+      err.textContent = t("กรุณากรอกเลขห้อง และเลือกวัน-เวลารับอาหารก่อนนะครับ", "Please fill in your room number and pick a date & time first.");
+      err.hidden = false;
+      return;
+    }
+    updateSend(); // ให้ href ตรงกับค่าล่าสุดเสมอ ณ วินาทีที่กด
+  });
 });
 
 // ── สองภาษา: ทุก element ที่มี data-th/data-en สลับตามภาษา ──

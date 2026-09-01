@@ -87,6 +87,10 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
   check("services: ลิงก์ LINE มีออร์เดอร์ครบ (เมนู+ห้อง+เวลา)",
     href.includes("line.me/R/oaMessage") && href.includes(encodeURIComponent("701"))
     && href.includes(encodeURIComponent("12:00")) && href.includes(encodeURIComponent("× 2")));
+  const hrefWa=await rs.getAttribute("#rsSendWa","href");
+  check("services: ลิงก์ WhatsApp มีออร์เดอร์เดียวกัน",
+    hrefWa.includes("wa.me/66994419465") && hrefWa.includes(encodeURIComponent("701"))
+    && hrefWa.includes(encodeURIComponent("12:00")));
   await rs.close();
 
   // ปุ่มคัดลอกที่อยู่ (airport-guide)
