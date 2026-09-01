@@ -77,15 +77,17 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
   check("services: ชีตสรุปเปิด มี 2 รายการ", await rs.locator("#rsSheet").isVisible() && await rs.locator(".rs-item").count()===2);
   const minD=await rs.getAttribute("#rsDate","min");
   check("services: วันที่ default = พรุ่งนี้ (ล่วงหน้า 1 วัน)", (await rs.inputValue("#rsDate"))===minD && !!minD);
-  await rs.click("#rsSend"); // ยังไม่กรอกห้อง/เวลา ต้องโดนกัน
+  await rs.click("#rsSend"); // ยังไม่กรอกชื่อ/ห้อง/เวลา ต้องโดนกัน
   await rs.waitForTimeout(150);
-  check("services: กดส่งโดยไม่กรอกห้อง/เวลา ต้องขึ้นเตือน", await rs.locator("#rsErr").isVisible());
+  check("services: กดส่งโดยไม่กรอกชื่อ/ห้อง/เวลา ต้องขึ้นเตือน", await rs.locator("#rsErr").isVisible());
+  await rs.fill("#rsName","Somchai Test");
   await rs.fill("#rsRoom","701");
   await rs.selectOption("#rsTime","12:00");
   await rs.waitForTimeout(150);
   const href=await rs.getAttribute("#rsSend","href");
-  check("services: ลิงก์ LINE มีออร์เดอร์ครบ (เมนู+ห้อง+เวลา)",
+  check("services: ลิงก์ LINE มีออร์เดอร์ครบ (เมนู+ชื่อ+ห้อง+เวลา)",
     href.includes("line.me/R/oaMessage") && href.includes(encodeURIComponent("701"))
+    && href.includes(encodeURIComponent("Somchai Test"))
     && href.includes(encodeURIComponent("12:00")) && href.includes(encodeURIComponent("× 2")));
   const hrefWa=await rs.getAttribute("#rsSendWa","href");
   check("services: ลิงก์ WhatsApp มีออร์เดอร์เดียวกัน",

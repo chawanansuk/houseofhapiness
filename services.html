@@ -360,8 +360,8 @@
       <p data-th="กดปุ่ม + เลือกเมนูและจำนวนที่อยากกิน — สั่งหลายเมนูพร้อมกันได้"
          data-en="Tap + to pick your dishes and quantities — order several dishes at once.">กดปุ่ม + เลือกเมนูและจำนวนที่อยากกิน — สั่งหลายเมนูพร้อมกันได้</p></div>
     <div class="rs-step"><span class="n">2</span>
-      <p data-th="กด “สั่งเลย” แล้วกรอกเลขห้อง เลือกวันและเวลารับ (ล่วงหน้าอย่างน้อย 1 วัน)"
-         data-en="Tap “Order” then fill in your room number and pick the date &amp; time (at least 1 day ahead).">กด “สั่งเลย” แล้วกรอกเลขห้อง เลือกวันและเวลารับ (ล่วงหน้าอย่างน้อย 1 วัน)</p></div>
+      <p data-th="กด “สั่งเลย” แล้วกรอกชื่อ (ชื่อเดียวกับตอนจองห้อง) เลขห้อง เลือกวันและเวลารับ (ล่วงหน้าอย่างน้อย 1 วัน)"
+         data-en="Tap “Order” then fill in your name (same as your booking), room number, and pick the date &amp; time (at least 1 day ahead).">กด “สั่งเลย” แล้วกรอกชื่อ (ชื่อเดียวกับตอนจองห้อง) เลขห้อง เลือกวันและเวลารับ (ล่วงหน้าอย่างน้อย 1 วัน)</p></div>
     <div class="rs-step"><span class="n">3</span>
       <p data-th="เลือกส่งทาง LINE หรือ WhatsApp — ข้อความออร์เดอร์ครบถ้วน แค่กดส่ง เราคอนเฟิร์มกลับ แล้วเสิร์ฟถึงหน้าห้อง จ่ายเงินสดตอนรับ"
          data-en="Send via LINE or WhatsApp — your complete order opens in the chat, just hit send. We confirm, deliver to your door, and you pay cash on delivery.">เลือกส่งทาง LINE หรือ WhatsApp — ข้อความออร์เดอร์ครบถ้วน แค่กดส่ง เราคอนเฟิร์มกลับ แล้วเสิร์ฟถึงหน้าห้อง จ่ายเงินสดตอนรับ</p></div>
@@ -385,6 +385,8 @@
   </div>
   <div class="rs-items" id="rsItems"></div>
   <div class="rs-totalrow"><span data-th="รวมทั้งหมด" data-en="Total">รวมทั้งหมด</span><span id="rsTotal"></span></div>
+  <label for="rsName" data-th="ชื่อผู้สั่ง (ใช้ชื่อเดียวกับตอนจองห้องพัก กันสับสน)" data-en="Your name (same name as your room booking, to avoid confusion)">ชื่อผู้สั่ง (ใช้ชื่อเดียวกับตอนจองห้องพัก กันสับสน)</label>
+  <input id="rsName" type="text" autocomplete="name" placeholder="เช่น Somchai / ชื่อที่ใช้จอง">
   <label for="rsRoom" data-th="เลขห้อง" data-en="Room number">เลขห้อง</label>
   <input id="rsRoom" type="text" inputmode="text" autocomplete="off" placeholder="เช่น 701">
   <div class="rs-grid2">
@@ -489,6 +491,7 @@ function renderSheet() {
     return '<div class="rs-item"><span>' + (lang === "en" ? d.en : d.th) + " × " + q + "</span><b>" + baht(d.price * q) + "</b></div>";
   }).join("");
   document.getElementById("rsTotal").textContent = baht(cartTotal());
+  document.getElementById("rsName").placeholder = t("เช่น Somchai / ชื่อที่ใช้จอง", "e.g. the name on your booking");
   document.getElementById("rsRoom").placeholder = t("เช่น 701", "e.g. 701");
   document.getElementById("rsNote").placeholder = t("เช่น ไม่เผ็ด / แพ้กุ้ง", "e.g. not spicy / shrimp allergy");
   document.getElementById("rsSend").textContent = t("ส่งออร์เดอร์ใน LINE", "Send order in LINE");
@@ -513,6 +516,7 @@ document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !s
 // ── สร้างข้อความออร์เดอร์ + ลิงก์ LINE (oaMessage — ลิงก์ธรรมดา LINE หาบัญชีไม่เจอ) ──
 function buildMsg() {
   var lang = getLang();
+  var guestName = document.getElementById("rsName").value.trim();
   var room = document.getElementById("rsRoom").value.trim();
   var dateVal = document.getElementById("rsDate").value;
   var timeVal = document.getElementById("rsTime").value;
@@ -532,9 +536,11 @@ function buildMsg() {
   var lines = lang === "en"
     ? ["Hello! Room service order 🍳", items,
        "Total: " + baht(cartTotal()),
+       "Name (same as booking): " + guestName,
        "Room: " + room, "Date: " + dateTxt, "Time: " + timeVal]
     : ["สวัสดีครับ/ค่ะ สั่งรูมเซอร์วิส 🍳", items,
        "รวม: " + baht(cartTotal()),
+       "ชื่อผู้สั่ง (ชื่อเดียวกับที่จอง): " + guestName,
        "ห้อง: " + room, "รับวันที่: " + dateTxt, "เวลา: " + timeVal];
   if (note) lines.push((lang === "en" ? "Note: " : "หมายเหตุ: ") + note);
   lines.push(lang === "en" ? "(pay cash on delivery)" : "(จ่ายเงินสดตอนรับอาหาร)");
@@ -542,7 +548,7 @@ function buildMsg() {
 }
 function validate() {
   var missing = [];
-  ["rsRoom", "rsDate", "rsTime"].forEach(function (id) {
+  ["rsName", "rsRoom", "rsDate", "rsTime"].forEach(function (id) {
     var el = document.getElementById(id);
     var bad = !el.value || !el.value.trim();
     el.classList.toggle("miss", bad);
@@ -555,7 +561,7 @@ function updateSend() {
   document.getElementById("rsSend").href = "https://line.me/R/oaMessage/" + LINE_ID + "/?" + msg;
   document.getElementById("rsSendWa").href = "https://wa.me/" + WA_NUMBER + "?text=" + msg;
 }
-["rsRoom", "rsDate", "rsTime", "rsNote"].forEach(function (id) {
+["rsName", "rsRoom", "rsDate", "rsTime", "rsNote"].forEach(function (id) {
   document.getElementById(id).addEventListener("input", function () {
     this.classList.remove("miss");
     document.getElementById("rsErr").hidden = true;
@@ -567,7 +573,7 @@ function updateSend() {
     if (!validate()) {
       e.preventDefault();
       var err = document.getElementById("rsErr");
-      err.textContent = t("กรุณากรอกเลขห้อง และเลือกวัน-เวลารับอาหารก่อนนะครับ", "Please fill in your room number and pick a date & time first.");
+      err.textContent = t("กรุณากรอกชื่อ (ชื่อเดียวกับตอนจอง) เลขห้อง และเลือกวัน-เวลารับอาหารก่อนนะครับ", "Please fill in your name (same as your booking), room number, and pick a date & time first.");
       err.hidden = false;
       return;
     }
