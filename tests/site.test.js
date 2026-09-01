@@ -30,6 +30,8 @@ assert.match(gallery, /lbTrigger.*focus/s, "gallery must restore focus after clo
 // หน้ารูมเซอร์วิส: ปุ่มสั่งต้องใช้ oaMessage (ลิงก์ธรรมดา LINE หาบัญชีไม่เจอ) + เงื่อนไขสั่งล่วงหน้า/จ่ายเงินสดต้องแสดง
 const services = read("services.html");
 assert.match(services, /line\.me\/R\/oaMessage/, "room service order buttons must deep-link into the LINE OA chat");
+assert.match(services, /wa\.me/, "room service must also offer ordering via WhatsApp");
+assert.doesNotMatch(services, /จองตรงกับเรา/, "booking CTA must not appear on the room service page (confusing next to food ordering)");
 assert.match(services, /สั่งล่วงหน้าอย่างน้อย 1 วัน/, "room service page must state the 1-day advance-order rule");
 assert.match(services, /จ่ายเงินสดตอนรับอาหาร/, "room service page must state cash-on-delivery payment");
 
