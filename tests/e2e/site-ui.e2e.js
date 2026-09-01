@@ -40,12 +40,11 @@ const server = http.createServer((req, res) => {
   await page.click(".menu-btn"); // ปิด
   check("กด ✕ แล้วเมนูปิด", await page.isHidden(".mobile-menu"));
 
-  /* ── ราคาจากชีต: ทุกจุดที่ติด data-price ต้องอัปเดตตาม /api/site ── */
-  await page.waitForFunction(() => document.getElementById("priceAmt")?.textContent === "฿720", null, { timeout: 3000 }).catch(() => {});
-  check("ราคาห้อง Standard อัปเดตจากชีต (data-price)", (await page.textContent("#priceAmt")) === "฿720");
-  check("ราคาห้อง Studio/Deluxe อัปเดตจากชีตด้วย",
-    (await page.textContent('.price-box .amount[data-price="stu"]')) === "฿820" &&
-    (await page.textContent('.price-box .amount[data-price="dlx"]')) === "฿870");
+  /* ── นโยบาย rate parity: ราคาห้องต้องไม่โผล่บนหน้าแรก — โชว์ "สอบถามราคา" แทน ── */
+  const bodyTxt = await page.locator("body").innerText();
+  check("หน้าแรกไม่มีราคาห้อง (rate parity)", !/฿7\d\d|฿8\d\d/.test(bodyTxt));
+  check("การ์ดห้องแสดงป้ายสอบถามราคา", (await page.locator('.amount.ask-rate').count()) === 3);
+
 
   /* ── C: ลำดับหน้าแรกใหม่ — ห้องพัก+รีวิวมาก่อน ── */
   const order = await page.evaluate(() => [...document.querySelectorAll("main > section")].map((s) => s.id));

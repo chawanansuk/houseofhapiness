@@ -37,6 +37,16 @@ assert.doesNotMatch(services, /จองตรงกับเรา/, "booking C
 assert.match(services, /สั่งล่วงหน้าอย่างน้อย 1 วัน/, "room service page must state the 1-day advance-order rule");
 assert.match(services, /จ่ายเงินสดตอนรับอาหาร/, "room service page must state cash-on-delivery payment");
 
+// นโยบาย rate parity: หน้าสาธารณะห้ามมีราคาห้อง/ข้อความเคลมเทียบ OTA — แขกถามราคาทาง LINE/WhatsApp
+for (const page of ["index.html", "booking.html", "room-standard.html", "room-studio.html",
+  "room-deluxe.html", "near-iconsiam.html", "near-chinatown.html", "loy-krathong.html", "new-year-countdown.html"]) {
+  const html = read(page);
+  assert.doesNotMatch(html, /฿700|฿800|฿850|700 บาท|priceRange/, page + " must not show room rates (rate parity policy)");
+  assert.doesNotMatch(html, /ราคาดีที่สุด|ราคาดีกว่า|best rate|better rates/i, page + " must not claim better/best rates vs OTA");
+}
+assert.match(read("assets/i18n.js").match(/"faq\.a4":[\s\S]*?\},/)[0], /LINE\/WhatsApp/, "direct-booking FAQ must point guests to ask rates in chat");
+assert.doesNotMatch(read("assets/i18n.js"), /ราคาดีที่สุด|ราคาดีกว่า|best rate|better rates/i, "shared i18n must not carry rate-comparison claims");
+
 const admin = read("admin/index.html");
 const adminJs = read("admin/app.js");
 assert.doesNotMatch(adminJs, /URLSearchParams\(location\.search\).*get\("key"\)/s, "admin key must not be accepted from URL");
