@@ -31,14 +31,14 @@
     {
       "@type": "MenuSection", "name": "จานหลัก / Main Dish",
       "hasMenuItem": [
-      { "@type": "MenuItem", "name": "ข้าวแกงมัสมั่นไก่ (Massaman Curry with Chicken & Rice)", "offers": { "@type": "Offer", "price": "99", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ข้าวแกงเขียวหวานไก่ (Green Curry with Chicken & Rice)", "offers": { "@type": "Offer", "price": "99", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ต้มข่าไก่ + ข้าวสวย (Tom Kha Gai (Chicken in Coconut Soup) & Rice)", "offers": { "@type": "Offer", "price": "99", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ข้าวพะแนงหมู (Panang Curry with Pork & Rice)", "offers": { "@type": "Offer", "price": "99", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ข้าวผัด (Fried Rice)", "offers": { "@type": "Offer", "price": "85", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ข้าวไข่เจียว (Thai Style Omelette with Rice)", "offers": { "@type": "Offer", "price": "85", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ผัดซีอิ๊ว (Pad See Ew — Stir-fried Noodles)", "offers": { "@type": "Offer", "price": "85", "priceCurrency": "THB" } },
-      { "@type": "MenuItem", "name": "ผัดไทย (Pad Thai)", "offers": { "@type": "Offer", "price": "99", "priceCurrency": "THB" } }
+      { "@type": "MenuItem", "name": "ข้าวแกงมัสมั่นไก่ (Massaman Curry with Chicken & Rice)", "offers": { "@type": "Offer", "price": "100", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ข้าวแกงเขียวหวานไก่ (Green Curry with Chicken & Rice)", "offers": { "@type": "Offer", "price": "100", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ต้มข่าไก่ + ข้าวสวย (Tom Kha Gai (Chicken in Coconut Soup) & Rice)", "offers": { "@type": "Offer", "price": "100", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ข้าวพะแนงหมู (Panang Curry with Pork & Rice)", "offers": { "@type": "Offer", "price": "100", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ข้าวผัด (Fried Rice)", "offers": { "@type": "Offer", "price": "80", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ข้าวไข่เจียว (Thai Style Omelette with Rice)", "offers": { "@type": "Offer", "price": "80", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ผัดซีอิ๊ว (Pad See Ew — Stir-fried Noodles)", "offers": { "@type": "Offer", "price": "80", "priceCurrency": "THB" } },
+      { "@type": "MenuItem", "name": "ผัดไทย (Pad Thai)", "offers": { "@type": "Offer", "price": "100", "priceCurrency": "THB" } }
       ]
     },
     {
@@ -84,9 +84,18 @@
   box-shadow:0 4px 16px rgba(62,47,35,0.06); display:flex; flex-direction:column;
   transition:transform .18s ease, box-shadow .18s ease}
 .rs-card:hover{transform:translateY(-3px); box-shadow:0 12px 26px rgba(62,47,35,0.12)}
-.rs-art{position:relative; background:#f7f1e6; background-image:radial-gradient(rgba(138,90,52,.06) 1.2px,transparent 1.2px); background-size:20px 20px;
-  padding:0.9rem; height:185px; display:flex; align-items:center; justify-content:center}
-.rs-art img{max-height:165px; width:auto; max-width:92%; object-fit:contain; display:block; filter:drop-shadow(0 8px 12px rgba(62,47,35,.18))}
+.rs-art{position:relative; overflow:hidden;
+  background:linear-gradient(160deg,#fbf6ec 0%,#f5edde 55%,#efe3cd 100%);
+  padding:0.9rem; height:195px; display:flex; align-items:center; justify-content:center}
+/* จานรองวงกลม + สปอตไลต์นวลๆ หลังรูปอาหาร ให้ภาพดูมีเวทีมีมิติ */
+.rs-art::before{content:""; position:absolute; width:230px; height:230px; border-radius:50%;
+  background:radial-gradient(circle at 50% 42%, #fffdf8 0%, #fdf8ee 45%, rgba(253,248,238,0) 72%);
+  box-shadow:inset 0 0 0 1px rgba(138,90,52,.07)}
+.rs-art::after{content:""; position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
+  width:150px; height:26px; border-radius:50%; background:radial-gradient(ellipse at center, rgba(62,47,35,.16), rgba(62,47,35,0) 68%)}
+.rs-art img{position:relative; z-index:1; max-height:172px; width:auto; max-width:92%; object-fit:contain; display:block;
+  filter:drop-shadow(0 10px 14px rgba(62,47,35,.22)); transition:transform .28s ease}
+.rs-card:hover .rs-art img{transform:scale(1.05) translateY(-3px)}
 .rs-badge{position:absolute; top:10px; left:10px; background:var(--gold-dark); color:#fff8ef; font-family:"Prompt",sans-serif;
   font-size:0.68rem; font-weight:700; letter-spacing:0.06em; padding:0.25rem 0.6rem; border-radius:999px; box-shadow:0 3px 8px rgba(62,47,35,.25)}
 .rs-body{padding:0.9rem 1.1rem 1.1rem; display:flex; flex-direction:column; flex:1}
@@ -145,8 +154,10 @@
   background:var(--gold-dark); color:#fff; font-family:"Prompt",sans-serif; font-weight:700; font-size:0.9rem; margin-bottom:0.5rem}
 .rs-step p{font-size:0.86rem; color:var(--text); line-height:1.6}
 @media (max-width:640px){ .rs-grid{grid-template-columns:1fr 1fr; gap:0.7rem}
-  .rs-art{height:135px; padding:0.6rem}
-  .rs-art img{max-height:118px}
+  .rs-art{height:140px; padding:0.6rem}
+  .rs-art::before{width:150px; height:150px}
+  .rs-art::after{width:100px; height:18px; bottom:10px}
+  .rs-art img{max-height:122px}
   .rs-body{padding:0.65rem 0.7rem 0.8rem}
   .rs-body h3{font-size:0.92rem}
   .rs-desc{display:none}
@@ -187,86 +198,86 @@
 <div class="rs-wrap">
   <div class="rs-sec"><h2 data-th="จานหลัก · Main Dish" data-en="Main Dish · จานหลัก">จานหลัก · Main Dish</h2></div>
   <div class="rs-grid">
-    <article class="rs-card" data-id="massaman" data-price="99" data-name-th="ข้าวแกงมัสมั่นไก่" data-name-en="Massaman Curry with Chicken &amp; Rice">
-      <div class="rs-art"><img src="images/services/massaman.webp" alt="ข้าวแกงมัสมั่นไก่ — Massaman Curry with Chicken &amp; Rice" width="520" height="414" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="massaman" data-price="100" data-name-th="ข้าวแกงมัสมั่นไก่" data-name-en="Massaman Curry with Chicken &amp; Rice">
+      <div class="rs-art"><img src="images/services/massaman.webp" alt="ข้าวแกงมัสมั่นไก่ — Massaman Curry with Chicken &amp; Rice" width="640" height="510" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ข้าวแกงมัสมั่นไก่" data-en="Massaman Curry with Chicken &amp; Rice">ข้าวแกงมัสมั่นไก่</h3>
         <div class="rs-en" data-th="Massaman Curry with Chicken &amp; Rice" data-en="ข้าวแกงมัสมั่นไก่">Massaman Curry with Chicken &amp; Rice</div>
         <p class="rs-desc" data-th="แกงไทยชื่อดังระดับโลก เข้มข้นหอมมัน หวานอ่อนๆ ไก่นุ่มกับมันฝรั่ง (ไม่เผ็ด)" data-en="World-famous Thai curry. Rich, creamy, and mildly sweet with chicken and potatoes. (Non-spicy)">แกงไทยชื่อดังระดับโลก เข้มข้นหอมมัน หวานอ่อนๆ ไก่นุ่มกับมันฝรั่ง (ไม่เผ็ด)</p>
-        <div class="rs-foot"><span class="rs-price">฿99</span>
+        <div class="rs-foot"><span class="rs-price">฿100</span>
           <div class="qty" data-id="massaman"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="green-curry" data-price="99" data-name-th="ข้าวแกงเขียวหวานไก่" data-name-en="Green Curry with Chicken &amp; Rice">
-      <div class="rs-art"><img src="images/services/green-curry.webp" alt="ข้าวแกงเขียวหวานไก่ — Green Curry with Chicken &amp; Rice" width="520" height="462" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="green-curry" data-price="100" data-name-th="ข้าวแกงเขียวหวานไก่" data-name-en="Green Curry with Chicken &amp; Rice">
+      <div class="rs-art"><img src="images/services/green-curry.webp" alt="ข้าวแกงเขียวหวานไก่ — Green Curry with Chicken &amp; Rice" width="640" height="568" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ข้าวแกงเขียวหวานไก่" data-en="Green Curry with Chicken &amp; Rice">ข้าวแกงเขียวหวานไก่</h3>
         <div class="rs-en" data-th="Green Curry with Chicken &amp; Rice" data-en="ข้าวแกงเขียวหวานไก่">Green Curry with Chicken &amp; Rice</div>
         <p class="rs-desc" data-th="แกงเขียวหวานตำรับไทยแท้ กะทิหอมสมุนไพร (เผ็ดกลาง)" data-en="Authentic Thai green curry with coconut milk and aromatic herbs. (Spicy level: medium)">แกงเขียวหวานตำรับไทยแท้ กะทิหอมสมุนไพร (เผ็ดกลาง)</p>
-        <div class="rs-foot"><span class="rs-price">฿99</span>
+        <div class="rs-foot"><span class="rs-price">฿100</span>
           <div class="qty" data-id="green-curry"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="tom-kha" data-price="99" data-name-th="ต้มข่าไก่ + ข้าวสวย" data-name-en="Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice">
-      <div class="rs-art"><img src="images/services/tom-kha.webp" alt="ต้มข่าไก่ + ข้าวสวย — Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice" width="520" height="518" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="tom-kha" data-price="100" data-name-th="ต้มข่าไก่ + ข้าวสวย" data-name-en="Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice">
+      <div class="rs-art"><img src="images/services/tom-kha.webp" alt="ต้มข่าไก่ + ข้าวสวย — Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice" width="640" height="637" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ต้มข่าไก่ + ข้าวสวย" data-en="Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice">ต้มข่าไก่ + ข้าวสวย</h3>
         <div class="rs-en" data-th="Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice" data-en="ต้มข่าไก่ + ข้าวสวย">Tom Kha Gai (Chicken in Coconut Soup) &amp; Rice</div>
         <p class="rs-desc" data-th="ซุปกะทิหอมข่า ใบมะกรูด มะนาว ซดคล่องคอ สดชื่น (เผ็ดน้อย)" data-en="Aromatic coconut soup with chicken, galangal, and lime. Refreshing and comforting. (Mild)">ซุปกะทิหอมข่า ใบมะกรูด มะนาว ซดคล่องคอ สดชื่น (เผ็ดน้อย)</p>
-        <div class="rs-foot"><span class="rs-price">฿99</span>
+        <div class="rs-foot"><span class="rs-price">฿100</span>
           <div class="qty" data-id="tom-kha"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="panang" data-price="99" data-name-th="ข้าวพะแนงหมู" data-name-en="Panang Curry with Pork &amp; Rice">
-      <div class="rs-art"><img src="images/services/panang.webp" alt="ข้าวพะแนงหมู — Panang Curry with Pork &amp; Rice" width="507" height="520" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="panang" data-price="100" data-name-th="ข้าวพะแนงหมู" data-name-en="Panang Curry with Pork &amp; Rice">
+      <div class="rs-art"><img src="images/services/panang.webp" alt="ข้าวพะแนงหมู — Panang Curry with Pork &amp; Rice" width="624" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ข้าวพะแนงหมู" data-en="Panang Curry with Pork &amp; Rice">ข้าวพะแนงหมู</h3>
         <div class="rs-en" data-th="Panang Curry with Pork &amp; Rice" data-en="ข้าวพะแนงหมู">Panang Curry with Pork &amp; Rice</div>
         <p class="rs-desc" data-th="พะแนงเข้มข้น หมูนุ่ม หอมใบมะกรูด (เผ็ดกลาง)" data-en="Thick and rich red curry with tender pork and kaffir lime leaves. (Spicy level: medium)">พะแนงเข้มข้น หมูนุ่ม หอมใบมะกรูด (เผ็ดกลาง)</p>
-        <div class="rs-foot"><span class="rs-price">฿99</span>
+        <div class="rs-foot"><span class="rs-price">฿100</span>
           <div class="qty" data-id="panang"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="fried-rice" data-price="85" data-name-th="ข้าวผัด" data-name-en="Fried Rice" data-variants="หมู|Pork,ไก่|Chicken,เบคอน|Bacon">
-      <div class="rs-art"><img src="images/services/fried-rice.webp" alt="ข้าวผัด — Fried Rice" width="520" height="334" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="fried-rice" data-price="80" data-name-th="ข้าวผัด" data-name-en="Fried Rice" data-variants="หมู|Pork,ไก่|Chicken,เบคอน|Bacon">
+      <div class="rs-art"><img src="images/services/fried-rice.webp" alt="ข้าวผัด — Fried Rice" width="640" height="411" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ข้าวผัด" data-en="Fried Rice">ข้าวผัด</h3>
         <div class="rs-en" data-th="Fried Rice" data-en="ข้าวผัด">Fried Rice</div>
         <p class="rs-desc" data-th="ข้าวผัดไข่สไตล์ไทย หอมกระทะ เลือกหมู ไก่ หรือเบคอน (ไม่เผ็ด)" data-en="Thai style fried rice with egg. Choose pork, chicken, or bacon. (Non-spicy)">ข้าวผัดไข่สไตล์ไทย หอมกระทะ เลือกหมู ไก่ หรือเบคอน (ไม่เผ็ด)</p>
         <select class="rs-var" data-id="fried-rice" aria-label="เลือกแบบ"></select>
-        <div class="rs-foot"><span class="rs-price">฿85</span>
+        <div class="rs-foot"><span class="rs-price">฿80</span>
           <div class="qty" data-id="fried-rice"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="omelette" data-price="85" data-name-th="ข้าวไข่เจียว" data-name-en="Thai Style Omelette with Rice">
-      <div class="rs-art"><img src="images/services/omelette.webp" alt="ข้าวไข่เจียว — Thai Style Omelette with Rice" width="520" height="386" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="omelette" data-price="80" data-name-th="ข้าวไข่เจียว" data-name-en="Thai Style Omelette with Rice">
+      <div class="rs-art"><img src="images/services/omelette.webp" alt="ข้าวไข่เจียว — Thai Style Omelette with Rice" width="640" height="475" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ข้าวไข่เจียว" data-en="Thai Style Omelette with Rice">ข้าวไข่เจียว</h3>
         <div class="rs-en" data-th="Thai Style Omelette with Rice" data-en="ข้าวไข่เจียว">Thai Style Omelette with Rice</div>
         <p class="rs-desc" data-th="ไข่เจียวฟูขอบกรอบ ราดข้าวสวยร้อนๆ (ไม่เผ็ด)" data-en="Crispy and fluffy Thai omelette over steamed rice. (Non-spicy)">ไข่เจียวฟูขอบกรอบ ราดข้าวสวยร้อนๆ (ไม่เผ็ด)</p>
-        <div class="rs-foot"><span class="rs-price">฿85</span>
+        <div class="rs-foot"><span class="rs-price">฿80</span>
           <div class="qty" data-id="omelette"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="pad-see-ew" data-price="85" data-name-th="ผัดซีอิ๊ว" data-name-en="Pad See Ew — Stir-fried Noodles" data-variants="หมู|Pork,ไก่|Chicken,ผัก|Veggie">
-      <div class="rs-art"><img src="images/services/pad-see-ew.webp" alt="ผัดซีอิ๊ว — Pad See Ew — Stir-fried Noodles" width="520" height="336" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="pad-see-ew" data-price="80" data-name-th="ผัดซีอิ๊ว" data-name-en="Pad See Ew — Stir-fried Noodles" data-variants="หมู|Pork,ไก่|Chicken,ผัก|Veggie">
+      <div class="rs-art"><img src="images/services/pad-see-ew.webp" alt="ผัดซีอิ๊ว — Pad See Ew — Stir-fried Noodles" width="640" height="413" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ผัดซีอิ๊ว" data-en="Pad See Ew — Stir-fried Noodles">ผัดซีอิ๊ว</h3>
         <div class="rs-en" data-th="Pad See Ew — Stir-fried Noodles" data-en="ผัดซีอิ๊ว">Pad See Ew — Stir-fried Noodles</div>
         <p class="rs-desc" data-th="เส้นใหญ่ผัดซีอิ๊วกับไข่ หอมกระทะ เลือกหมู ไก่ หรือผัก" data-en="Stir-fried flat noodles with egg and sweet soy sauce. Choose pork, chicken, or veggie.">เส้นใหญ่ผัดซีอิ๊วกับไข่ หอมกระทะ เลือกหมู ไก่ หรือผัก</p>
         <select class="rs-var" data-id="pad-see-ew" aria-label="เลือกแบบ"></select>
-        <div class="rs-foot"><span class="rs-price">฿85</span>
+        <div class="rs-foot"><span class="rs-price">฿80</span>
           <div class="qty" data-id="pad-see-ew"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
-    <article class="rs-card" data-id="pad-thai" data-price="99" data-name-th="ผัดไทย" data-name-en="Pad Thai" data-variants="กุ้ง|Prawn,หมู|Pork,ไก่|Chicken">
-      <div class="rs-art"><span class="rs-badge">⭐ MUST TRY</span><img src="images/services/pad-thai.webp" alt="ผัดไทย — Pad Thai" width="516" height="520" loading="lazy" decoding="async"></div>
+    <article class="rs-card" data-id="pad-thai" data-price="100" data-name-th="ผัดไทย" data-name-en="Pad Thai" data-variants="กุ้ง|Prawn,หมู|Pork,ไก่|Chicken">
+      <div class="rs-art"><span class="rs-badge">⭐ MUST TRY</span><img src="images/services/pad-thai.webp" alt="ผัดไทย — Pad Thai" width="635" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ผัดไทย" data-en="Pad Thai">ผัดไทย</h3>
         <div class="rs-en" data-th="Pad Thai" data-en="ผัดไทย">Pad Thai</div>
         <p class="rs-desc" data-th="ผัดไทยซอสมะขาม ถั่วลิสงคั่ว จานเด็ดประจำบ้าน เลือกกุ้ง หมู หรือไก่" data-en="Signature Thai stir-fried noodles with tamarind sauce and peanuts. Choose prawn, pork, or chicken.">ผัดไทยซอสมะขาม ถั่วลิสงคั่ว จานเด็ดประจำบ้าน เลือกกุ้ง หมู หรือไก่</p>
         <select class="rs-var" data-id="pad-thai" aria-label="เลือกแบบ"></select>
-        <div class="rs-foot"><span class="rs-price">฿99</span>
+        <div class="rs-foot"><span class="rs-price">฿100</span>
           <div class="qty" data-id="pad-thai"><button type="button" class="qminus" aria-label="ลดจำนวน">−</button><b class="qn">0</b><button type="button" class="qplus" aria-label="เพิ่มจำนวน">+</button></div></div>
       </div>
     </article>
@@ -274,7 +285,7 @@
   <div class="rs-sec"><h2 data-th="ของหวาน · Siam Sweets" data-en="Desserts · Siam Sweets">ของหวาน · Siam Sweets</h2></div>
   <div class="rs-grid">
     <article class="rs-card" data-id="bua-loy" data-price="50" data-name-th="บัวลอยเผือกมะพร้าวอ่อน" data-name-en="Taro Bua Loy in Coconut Milk">
-      <div class="rs-art"><img src="images/services/bua-loy.webp" alt="บัวลอยเผือกมะพร้าวอ่อน — Taro Bua Loy in Coconut Milk" width="520" height="411" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/bua-loy.webp" alt="บัวลอยเผือกมะพร้าวอ่อน — Taro Bua Loy in Coconut Milk" width="593" height="469" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="บัวลอยเผือกมะพร้าวอ่อน" data-en="Taro Bua Loy in Coconut Milk">บัวลอยเผือกมะพร้าวอ่อน</h3>
         <div class="rs-en" data-th="Taro Bua Loy in Coconut Milk" data-en="บัวลอยเผือกมะพร้าวอ่อน">Taro Bua Loy in Coconut Milk</div>
@@ -284,7 +295,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="banana-coconut" data-price="50" data-name-th="กล้วยบวชชี" data-name-en="Bananas in Coconut Milk">
-      <div class="rs-art"><img src="images/services/banana-coconut.webp" alt="กล้วยบวชชี — Bananas in Coconut Milk" width="520" height="444" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/banana-coconut.webp" alt="กล้วยบวชชี — Bananas in Coconut Milk" width="640" height="547" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="กล้วยบวชชี" data-en="Bananas in Coconut Milk">กล้วยบวชชี</h3>
         <div class="rs-en" data-th="Bananas in Coconut Milk" data-en="กล้วยบวชชี">Bananas in Coconut Milk</div>
@@ -294,7 +305,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="ba-bin" data-price="50" data-name-th="ขนมบ้าบิ่น" data-name-en="Ba Bin (Thai Coconut Pancake)">
-      <div class="rs-art"><img src="images/services/ba-bin.webp" alt="ขนมบ้าบิ่น — Ba Bin (Thai Coconut Pancake)" width="470" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/ba-bin.webp" alt="ขนมบ้าบิ่น — Ba Bin (Thai Coconut Pancake)" width="579" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ขนมบ้าบิ่น" data-en="Ba Bin (Thai Coconut Pancake)">ขนมบ้าบิ่น</h3>
         <div class="rs-en" data-th="Ba Bin (Thai Coconut Pancake)" data-en="ขนมบ้าบิ่น">Ba Bin (Thai Coconut Pancake)</div>
@@ -304,7 +315,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="coconut-jelly" data-price="50" data-name-th="วุ้นมะพร้าว" data-name-en="Coconut Jelly">
-      <div class="rs-art"><img src="images/services/coconut-jelly.webp" alt="วุ้นมะพร้าว — Coconut Jelly" width="520" height="405" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/coconut-jelly.webp" alt="วุ้นมะพร้าว — Coconut Jelly" width="640" height="498" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="วุ้นมะพร้าว" data-en="Coconut Jelly">วุ้นมะพร้าว</h3>
         <div class="rs-en" data-th="Coconut Jelly" data-en="วุ้นมะพร้าว">Coconut Jelly</div>
@@ -317,7 +328,7 @@
   <div class="rs-sec"><h2 data-th="เครื่องดื่ม · House-blend" data-en="Drinks · House-blend">เครื่องดื่ม · House-blend</h2></div>
   <div class="rs-grid">
     <article class="rs-card" data-id="americano" data-price="40" data-name-th="อเมริกาโน่เย็น" data-name-en="Iced Americano">
-      <div class="rs-art"><img src="images/services/americano.webp" alt="อเมริกาโน่เย็น — Iced Americano" width="431" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/americano.webp" alt="อเมริกาโน่เย็น — Iced Americano" width="531" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="อเมริกาโน่เย็น" data-en="Iced Americano">อเมริกาโน่เย็น</h3>
         <div class="rs-en" data-th="Iced Americano" data-en="อเมริกาโน่เย็น">Iced Americano</div>
@@ -337,7 +348,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="orange-americano" data-price="40" data-name-th="อเมริกาโน่ส้ม" data-name-en="Iced Orange Americano">
-      <div class="rs-art"><img src="images/services/orange-americano.webp" alt="อเมริกาโน่ส้ม — Iced Orange Americano" width="396" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/orange-americano.webp" alt="อเมริกาโน่ส้ม — Iced Orange Americano" width="488" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="อเมริกาโน่ส้ม" data-en="Iced Orange Americano">อเมริกาโน่ส้ม</h3>
         <div class="rs-en" data-th="Iced Orange Americano" data-en="อเมริกาโน่ส้ม">Iced Orange Americano</div>
@@ -357,7 +368,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="cappuccino" data-price="40" data-name-th="คาปูชิโน่เย็น" data-name-en="Iced Cappuccino">
-      <div class="rs-art"><img src="images/services/cappuccino.webp" alt="คาปูชิโน่เย็น — Iced Cappuccino" width="331" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/cappuccino.webp" alt="คาปูชิโน่เย็น — Iced Cappuccino" width="407" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="คาปูชิโน่เย็น" data-en="Iced Cappuccino">คาปูชิโน่เย็น</h3>
         <div class="rs-en" data-th="Iced Cappuccino" data-en="คาปูชิโน่เย็น">Iced Cappuccino</div>
@@ -367,7 +378,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="caramel-macchiato" data-price="40" data-name-th="คาราเมลมัคคิอาโต้เย็น" data-name-en="Iced Caramel Macchiato">
-      <div class="rs-art"><img src="images/services/caramel-macchiato.webp" alt="คาราเมลมัคคิอาโต้เย็น — Iced Caramel Macchiato" width="370" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/caramel-macchiato.webp" alt="คาราเมลมัคคิอาโต้เย็น — Iced Caramel Macchiato" width="404" height="568" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="คาราเมลมัคคิอาโต้เย็น" data-en="Iced Caramel Macchiato">คาราเมลมัคคิอาโต้เย็น</h3>
         <div class="rs-en" data-th="Iced Caramel Macchiato" data-en="คาราเมลมัคคิอาโต้เย็น">Iced Caramel Macchiato</div>
@@ -377,7 +388,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="thai-tea" data-price="40" data-name-th="ชาไทยเย็น" data-name-en="Thai Iced Tea">
-      <div class="rs-art"><span class="rs-badge">⭐ MUST TRY</span><img src="images/services/thai-tea.webp" alt="ชาไทยเย็น — Thai Iced Tea" width="411" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><span class="rs-badge">⭐ MUST TRY</span><img src="images/services/thai-tea.webp" alt="ชาไทยเย็น — Thai Iced Tea" width="465" height="589" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ชาไทยเย็น" data-en="Thai Iced Tea">ชาไทยเย็น</h3>
         <div class="rs-en" data-th="Thai Iced Tea" data-en="ชาไทยเย็น">Thai Iced Tea</div>
@@ -387,7 +398,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="green-tea" data-price="40" data-name-th="ชาเขียวเย็น" data-name-en="Iced Green Tea">
-      <div class="rs-art"><img src="images/services/green-tea.webp" alt="ชาเขียวเย็น — Iced Green Tea" width="488" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/green-tea.webp" alt="ชาเขียวเย็น — Iced Green Tea" width="540" height="575" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="ชาเขียวเย็น" data-en="Iced Green Tea">ชาเขียวเย็น</h3>
         <div class="rs-en" data-th="Iced Green Tea" data-en="ชาเขียวเย็น">Iced Green Tea</div>
@@ -397,7 +408,7 @@
       </div>
     </article>
     <article class="rs-card" data-id="cocoa" data-price="40" data-name-th="โกโก้เย็น" data-name-en="Iced Cocoa">
-      <div class="rs-art"><img src="images/services/cocoa.webp" alt="โกโก้เย็น — Iced Cocoa" width="332" height="520" loading="lazy" decoding="async"></div>
+      <div class="rs-art"><img src="images/services/cocoa.webp" alt="โกโก้เย็น — Iced Cocoa" width="409" height="640" loading="lazy" decoding="async"></div>
       <div class="rs-body">
         <h3 data-th="โกโก้เย็น" data-en="Iced Cocoa">โกโก้เย็น</h3>
         <div class="rs-en" data-th="Iced Cocoa" data-en="โกโก้เย็น">Iced Cocoa</div>
