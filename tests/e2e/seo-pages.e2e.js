@@ -68,31 +68,38 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
   await rs.waitForTimeout(300);
   await rs.evaluate(()=>{ localStorage.setItem("hoh-lang","th"); applyLang(); });
   check("services: แถบตะกร้าซ่อนตอนยังไม่เลือก", await rs.locator("#rsBar").isHidden());
-  await rs.locator(".qty .qplus").first().click();
+  check("services: เมนูครบ 21 รายการจากเล่มเมนูจริง", await rs.locator(".rs-card").count()===21);
+  await rs.locator(".qty .qplus").first().click(); // มัสมั่น ฿99 — ยังไม่ถึงขั้นต่ำ ฿100
+  check("services: ต่ำกว่าขั้นต่ำ ฿100 ปุ่มสั่งต้องกดไม่ได้",
+    await rs.locator("#rsBarBtn").isDisabled() && /ขั้นต่ำ/.test(await rs.textContent("#rsBarSum")));
   await rs.locator(".qty .qplus").first().click();
   await rs.locator(".qty .qplus").nth(1).click();
-  check("services: เลือก 3 จาน แถบตะกร้าโผล่พร้อมยอดรวม",
-    await rs.locator("#rsBar").isVisible() && /3 จาน/.test(await rs.textContent("#rsBarQty")));
+  check("services: เลือก 3 รายการ แถบตะกร้าโผล่พร้อมยอดรวม และปุ่มกดได้",
+    await rs.locator("#rsBar").isVisible() && /3 รายการ/.test(await rs.textContent("#rsBarQty"))
+    && !(await rs.locator("#rsBarBtn").isDisabled()));
   await rs.click("#rsBarBtn");
   check("services: ชีตสรุปเปิด มี 2 รายการ", await rs.locator("#rsSheet").isVisible() && await rs.locator(".rs-item").count()===2);
   const minD=await rs.getAttribute("#rsDate","min");
   check("services: วันที่ default = พรุ่งนี้ (ล่วงหน้า 1 วัน)", (await rs.inputValue("#rsDate"))===minD && !!minD);
+  const slots=await rs.locator("#rsTime option").allTextContents();
+  check("services: เวลาจำกัดตามรอบส่ง 9:00-11:30/13:30-15:30",
+    slots.includes("09:00") && slots.includes("15:30") && !slots.includes("12:00") && !slots.includes("18:00"));
   await rs.click("#rsSend"); // ยังไม่กรอกชื่อ/ห้อง/เวลา ต้องโดนกัน
   await rs.waitForTimeout(150);
   check("services: กดส่งโดยไม่กรอกชื่อ/ห้อง/เวลา ต้องขึ้นเตือน", await rs.locator("#rsErr").isVisible());
   await rs.fill("#rsName","Somchai Test");
   await rs.fill("#rsRoom","701");
-  await rs.selectOption("#rsTime","12:00");
+  await rs.selectOption("#rsTime","09:30");
   await rs.waitForTimeout(150);
   const href=await rs.getAttribute("#rsSend","href");
   check("services: ลิงก์ LINE มีออร์เดอร์ครบ (เมนู+ชื่อ+ห้อง+เวลา)",
     href.includes("line.me/R/oaMessage") && href.includes(encodeURIComponent("701"))
-    && href.includes(encodeURIComponent("Somchai Test"))
-    && href.includes(encodeURIComponent("12:00")) && href.includes(encodeURIComponent("× 2")));
+    && href.includes(encodeURIComponent("Somchai Test")) && href.includes(encodeURIComponent("มัสมั่น"))
+    && href.includes(encodeURIComponent("09:30")) && href.includes(encodeURIComponent("× 2")));
   const hrefWa=await rs.getAttribute("#rsSendWa","href");
   check("services: ลิงก์ WhatsApp มีออร์เดอร์เดียวกัน",
     hrefWa.includes("wa.me/66994419465") && hrefWa.includes(encodeURIComponent("701"))
-    && hrefWa.includes(encodeURIComponent("12:00")));
+    && hrefWa.includes(encodeURIComponent("09:30")));
   await rs.close();
 
   // ปุ่มคัดลอกที่อยู่ (airport-guide)
