@@ -200,6 +200,10 @@ const I18N = {
   "fab.map":         { th: "เปิดแผนที่", en: "Open map" },
 
   /* ── หน้าแหล่งท่องเที่ยว ── */
+  "atr.kicker": { th: "Things to Do · รอบที่พัก", en: "Things to Do · around the hotel" },
+  "atr.f1": { th: "🚶 4 จุด เดินถึง / BTS สายสีทอง", en: "🚶 4 sights on foot / Gold Line" },
+  "atr.f2": { th: "🚕 5 จุด เมืองเก่า ~10–15 นาที", en: "🚕 5 old-town sights ~10–15 min" },
+  "atr.f3": { th: "📍 ทุกจุดมีปุ่มนำทางจากที่พัก", en: "📍 Directions from the hotel for every spot" },
   "atr.title":       { th: "เที่ยวอะไรใกล้ House of Happiness", en: "Things to Do near House of Happiness" },
   "atr.sub":         { th: "ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์", en: "Khlong San location — on the Chao Phraya riverside near the BTS Gold Line, easy access to both Thonburi and the Old Town" },
   "atr.g1":          { th: "ใกล้ที่พัก · เดินถึง / BTS สายสีทอง", en: "Near the hotel · walkable / BTS Gold Line" },

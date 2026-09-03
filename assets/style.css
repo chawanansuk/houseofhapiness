@@ -1384,3 +1384,55 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 /* ในกล่องราคาพื้นน้ำตาลเข้ม ลิงก์ต้องเป็นสีครีมถึงอ่านออก */
 .price-box .room-detail-link { color: #f3e4cd; text-decoration: underline; text-underline-offset: 3px; }
 .price-box .room-detail-link:hover { color: #ffffff; }
+
+/* ═══════════ Editorial luxury layer — หน้าไกด์/บทความ (.ld-*) ═══════════ */
+/* hero แบบรูปเต็มความกว้าง ไล่เฉดเข้มด้านล่าง ตัวอักษรครีม — ใช้กับ <header class="ld-hero cover"> */
+.ld-hero.cover { position: relative; padding: 0; text-align: left; overflow: hidden; border-radius: 0 0 28px 28px;
+  min-height: clamp(340px, 46vw, 520px); display: flex; align-items: flex-end; color: #fff8ef; background: var(--dark); }
+.ld-hero.cover img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.ld-hero.cover::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(62,47,35,.12) 0%, rgba(62,47,35,.32) 40%, rgba(46,33,22,.93) 100%); }
+.ld-hero.cover .in { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; width: 100%; padding: 2.6rem 1.4rem 2.2rem; }
+.ld-hero.cover .kicker { font-family: "Prompt", sans-serif; font-size: .74rem; letter-spacing: .3em; text-transform: uppercase;
+  color: #e9cfa8; font-weight: 600; margin-bottom: .7rem; display: flex; align-items: center; gap: .6rem; }
+.ld-hero.cover .kicker::before { content: ""; width: 26px; height: 1px; background: #e9cfa8; }
+.ld-hero.cover h1 { color: #fff8ef; text-shadow: 0 2px 18px rgba(0,0,0,.35); margin-bottom: .7rem; font-size: clamp(1.9rem, 4.8vw, 3rem); }
+.ld-hero.cover .sub { color: rgba(255,248,239,.9); margin: 0; max-width: 46em; }
+.ld-hero.cover .ld-facts { justify-content: flex-start; margin-top: 1.1rem; }
+.ld-hero.cover .ld-facts span { background: rgba(255,248,239,.14); border-color: rgba(255,248,239,.38); color: #fff8ef; backdrop-filter: blur(6px); }
+.ld-hero.cover .credit { position: absolute; right: 12px; bottom: 8px; z-index: 1; font-size: .64rem; color: rgba(255,248,239,.62); }
+.ld-hero.cover .credit a { color: inherit; }
+/* เนื้อหา */
+.ld-sec { margin-top: 2.8rem; }
+.ld-sec h2 { font-size: 1.32rem; color: var(--dark); gap: .8rem; }
+.ld-sec h2::before { content: "✦"; color: var(--gold); font-size: .78rem; }
+.ld-list li { border-left: 4px solid var(--gold); border-radius: 14px; padding: .95rem 1.1rem; box-shadow: 0 4px 14px rgba(62,47,35,.05); }
+.ld-steps li { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: .95rem 1.05rem .95rem 3.35rem;
+  margin-bottom: .7rem; box-shadow: 0 4px 14px rgba(62,47,35,.05); }
+.ld-steps li::before { left: .8rem; top: .95rem; width: 1.85rem; height: 1.85rem; border: 0; color: #fff8ef;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark)); box-shadow: 0 4px 10px rgba(107,66,38,.3);
+  font-family: "Prompt", sans-serif; font-size: .9rem; }
+.ld-steps li b { color: var(--dark); font-family: "Prompt", sans-serif; }
+.ld-p { line-height: 1.85; color: var(--text); }
+.ld-cta { margin-top: 3rem; background: linear-gradient(135deg, var(--gold-dark), var(--gold)); border-radius: 22px; padding: 1.5rem 1.4rem;
+  box-shadow: 0 12px 30px rgba(107,66,38,.25); }
+.ld-cta .btn-gold { background: #fff8ef; color: var(--gold-dark); box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.ld-cta .btn-gold:hover { background: #fff; }
+.ld-cta .btn-outline { color: #fff8ef !important; border-color: rgba(255,248,239,.65) !important; background: transparent !important; }
+.ld-cta .btn-outline:hover { background: rgba(255,248,239,.12) !important; }
+.ld-note { margin-top: 1.2rem; }
+.ld-room .pr { color: var(--muted); font-weight: 600; font-size: .85rem; }
+/* ที่อยู่สำหรับคนขับ (หน้าสนามบิน) — การ์ดตั๋ว */
+.copy-box { border: 0; background: var(--card); border-radius: 18px; padding: 1.3rem 1.4rem; margin-top: .8rem; position: relative;
+  box-shadow: 0 8px 24px rgba(62,47,35,.08); }
+.copy-box::before { content: ""; position: absolute; inset: 0; border-radius: 18px; padding: 2px; pointer-events: none;
+  background: linear-gradient(135deg, var(--gold), #e9cfa8, var(--gold-dark)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.copy-box .addr { font-size: 1.12rem; line-height: 1.85; }
+.copy-box .addr b { font-family: "Prompt", sans-serif; font-size: 1.2rem; color: var(--gold-dark); }
+@media (max-width: 640px) {
+  .ld-hero.cover { border-radius: 0 0 20px 20px; min-height: 320px; }
+  .ld-hero.cover .in { padding: 1.6rem 1.1rem 1.5rem; }
+  .ld-hero.cover h1 { font-size: 1.7rem; }
+  .ld-steps li { padding: .85rem .9rem .85rem 3.1rem; }
+  .ld-cta { padding: 1.2rem 1rem; }
+}

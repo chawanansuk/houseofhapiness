@@ -30,12 +30,10 @@
 <link rel="preload" as="image" href="images/attractions/skypark.jpg" type="image/jpeg" fetchpriority="high">
 <style>
 /* ── สไตล์เฉพาะหน้านี้ ── */
-.atr-hero{padding:4.2rem 1.2rem 2.6rem; text-align:center}
-.atr-hero h1{font-family:var(--font-display); font-size:clamp(1.7rem,4.5vw,2.6rem); color:var(--dark); margin-bottom:0.6rem}
-.atr-hero p{color:var(--muted); max-width:44em; margin:0 auto; line-height:1.7}
-.atr-wrap{max-width:1080px; margin:0 auto; padding:0 1.2rem 3.5rem}
+.atr-wrap{max-width:1080px; margin:0 auto; padding:0.6rem 1.2rem 3.5rem}
 .atr-group{margin:2.2rem 0 1rem; display:flex; align-items:center; gap:0.7rem}
-.atr-group h2{font-family:"Prompt",sans-serif; font-size:1.05rem; color:var(--gold-dark); white-space:nowrap}
+.atr-group h2{font-family:"Prompt",sans-serif; font-size:1.15rem; color:var(--dark); white-space:nowrap}
+.atr-group h2::before{content:"✦ "; color:var(--gold); font-size:0.78rem}
 .atr-group::after{content:""; flex:1; height:1px; background:var(--line)}
 .atr-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.1rem}
 .atr-card{
@@ -45,12 +43,14 @@
 }
 .atr-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(62,47,35,0.12)}
 .atr-img{aspect-ratio:16/10; background:linear-gradient(135deg,var(--gold-soft),#e8d9c3); position:relative; overflow:hidden}
-.atr-img img{width:100%; height:100%; object-fit:cover; display:block}
+.atr-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+.atr-card:hover .atr-img img{transform:scale(1.06)}
+.atr-img::after{content:""; position:absolute; inset:auto 0 0 0; height:45%; background:linear-gradient(180deg, rgba(62,47,35,0), rgba(62,47,35,.35)); pointer-events:none}
 .atr-img .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--gold); opacity:.55}
 .atr-body{padding:0.95rem 1.05rem 1.1rem; display:flex; flex-direction:column; gap:0.4rem; flex:1}
 .atr-body h3{font-family:"Prompt",sans-serif; font-size:1rem; color:var(--dark)}
 .atr-body .desc{font-size:0.86rem; color:var(--text); line-height:1.6; flex:1}
-.atr-body .go{font-size:0.8rem; color:var(--muted)}
+.atr-body .go{font-size:0.8rem; color:var(--gold-dark); background:var(--gold-soft); border-radius:999px; padding:0.3rem 0.7rem; align-self:flex-start}
 .atr-body .go b{color:var(--gold-dark)}
 .atr-link{
   margin-top:0.5rem; align-self:flex-start; font-size:0.82rem; font-weight:700;
@@ -63,7 +63,9 @@
 .atr-credits h4{font-family:"Prompt",sans-serif; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem}
 .atr-credits ul{list-style:none; padding:0; font-size:0.72rem; color:var(--muted); line-height:1.8}
 .atr-credits a{color:var(--muted)}
-.atr-cta{text-align:center; margin-top:2.6rem}
+.atr-cta{text-align:center; margin-top:2.8rem; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); border-radius:22px; padding:1.5rem 1.2rem; box-shadow:0 12px 30px rgba(107,66,38,.25); display:flex; gap:0.7rem; justify-content:center; flex-wrap:wrap}
+.atr-cta .btn-gold{background:#fff8ef; color:var(--gold-dark)}
+.atr-cta .btn-outline{color:#fff8ef !important; border-color:rgba(255,248,239,.65) !important; background:transparent !important; margin:0 !important}
 </style>
 </head>
 <body>
@@ -82,9 +84,19 @@
   </div>
 </nav>
 
-<header class="atr-hero">
-  <h1 data-i18n="atr.title">เที่ยวอะไรใกล้ House of Happiness</h1>
-  <p data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p>
+<header class="ld-hero cover">
+  <img class="bg" src="images/attractions/skypark.jpg" alt="" width="960" height="720" fetchpriority="high" decoding="async">
+  <div class="in">
+    <div class="kicker" data-i18n="atr.kicker">Things to Do · รอบที่พัก</div>
+    <h1 data-i18n="atr.title">เที่ยวอะไรใกล้ House of Happiness</h1>
+    <p class="sub" data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p>
+    <div class="ld-facts">
+      <span data-i18n="atr.f1">🚶 4 จุด เดินถึง / BTS สายสีทอง</span>
+      <span data-i18n="atr.f2">🚕 5 จุด เมืองเก่า ~10–15 นาที</span>
+      <span data-i18n="atr.f3">📍 ทุกจุดมีปุ่มนำทางจากที่พัก</span>
+    </div>
+  </div>
+  <span class="credit">Photo: Wikimedia Commons · <a href="attractions.html#creditsBox">credits</a></span>
 </header>
 
 <div class="atr-wrap">
