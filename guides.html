@@ -19,14 +19,78 @@
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <style>
-.gd-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1rem}
-.gd-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:1.15rem 1.2rem; text-decoration:none; color:var(--text); display:flex; flex-direction:column; gap:0.45rem; transition:transform .18s ease, box-shadow .18s ease}
-.gd-card:hover{transform:translateY(-3px); box-shadow:0 12px 26px rgba(62,47,35,.12)}
-.gd-card .em{font-size:1.7rem; line-height:1}
-.gd-card h2{font-family:"Prompt",sans-serif; font-size:1.02rem; color:var(--dark)}
+/* ── หน้ารวมไกด์: สไตล์แมกกาซีน การ์ดมีรูปปก ── */
+.gd-hero{padding:3.4rem 1.2rem 1.4rem; text-align:center}
+.gd-hero .kicker{font-family:"Prompt",sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.28em; color:var(--gold-dark); text-transform:uppercase}
+.gd-hero h1{font-family:var(--font-display); font-size:clamp(1.7rem,4.6vw,2.7rem); color:var(--dark); margin:0.5rem 0 0.6rem; line-height:1.2}
+.gd-hero .sub{color:var(--muted); max-width:44em; margin:0 auto; line-height:1.75}
+.gd-stats{display:flex; flex-wrap:wrap; justify-content:center; gap:0.5rem; margin-top:1rem}
+.gd-stats span{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:0.38rem 0.9rem; font-size:0.83rem; color:var(--text)}
+.gd-wrap{max-width:1080px; margin:0 auto; padding:0.4rem 1.2rem 3.5rem}
+/* ไกด์เด่น */
+.gd-feat{position:relative; display:grid; grid-template-columns:1.15fr 1fr; background:var(--card); border:1px solid var(--line); border-radius:22px; overflow:hidden;
+  box-shadow:0 10px 30px rgba(62,47,35,.10); text-decoration:none; color:var(--text); margin-top:1.4rem; transition:transform .22s ease, box-shadow .22s ease}
+.gd-feat:hover{transform:translateY(-3px); box-shadow:0 18px 40px rgba(62,47,35,.16)}
+.gd-feat .pic{position:relative; min-height:300px; overflow:hidden}
+.gd-feat .pic img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+.gd-feat:hover .pic img{transform:scale(1.04)}
+.gd-feat .pic::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(62,47,35,0) 60%, rgba(255,252,246,.55) 100%)}
+.gd-feat .body{padding:1.6rem 1.7rem 1.5rem; display:flex; flex-direction:column; gap:0.6rem; justify-content:center}
+.gd-feat .tags{display:flex; gap:0.4rem; flex-wrap:wrap}
+.gd-feat h2{font-family:var(--font-display); font-size:clamp(1.35rem,2.6vw,1.9rem); color:var(--dark); line-height:1.25}
+.gd-feat p{color:var(--text); line-height:1.7; font-size:0.95rem}
+.gd-meta{display:flex; flex-wrap:wrap; gap:0.45rem; margin-top:0.2rem}
+.gd-meta span{font-size:0.8rem; color:var(--gold-dark); background:var(--gold-soft); border-radius:999px; padding:0.28rem 0.7rem; font-weight:600}
+.gd-feat .go,.gd-card .go{font-family:"Prompt",sans-serif; font-size:0.88rem; font-weight:700; color:var(--gold-dark); display:inline-flex; align-items:center; gap:0.35rem; margin-top:auto}
+.gd-feat .go::after,.gd-card .go::after{content:"→"; transition:transform .2s ease}
+.gd-feat:hover .go::after,.gd-card:hover .go::after{transform:translateX(4px)}
+/* หัวหมวด */
+.gd-sec{margin-top:2.6rem}
+.gd-sec-h{display:flex; align-items:center; gap:0.7rem; margin-bottom:1rem}
+.gd-sec-h h2{font-family:"Prompt",sans-serif; font-size:1.15rem; color:var(--dark); white-space:nowrap}
+.gd-sec-h .cnt{font-size:0.75rem; font-weight:700; color:var(--gold-dark); background:var(--gold-soft); border-radius:999px; padding:0.15rem 0.6rem}
+.gd-sec-h::after{content:""; flex:1; height:1px; background:var(--line)}
+/* การ์ด */
+.gd-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.1rem}
+.gd-card{background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; box-shadow:0 4px 16px rgba(62,47,35,.06); transition:transform .2s ease, box-shadow .2s ease}
+.gd-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(62,47,35,.14)}
+.gd-card .pic{position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--gold-soft)}
+.gd-card .pic img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+.gd-card:hover .pic img{transform:scale(1.06)}
+.gd-card .em{position:absolute; left:10px; bottom:10px; width:38px; height:38px; border-radius:12px; background:rgba(255,252,246,.94); display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow:0 4px 10px rgba(62,47,35,.18)}
+.gd-tag{position:absolute; top:10px; left:10px; font-size:0.7rem; font-weight:700; background:var(--gold-dark); color:#fff8ef; border-radius:999px; padding:0.22rem 0.65rem; box-shadow:0 3px 8px rgba(62,47,35,.25)}
+.gd-card .body{padding:0.95rem 1.05rem 1.05rem; display:flex; flex-direction:column; gap:0.4rem; flex:1}
+.gd-card h2{font-family:"Prompt",sans-serif; font-size:1.02rem; color:var(--dark); line-height:1.35}
 .gd-card p{font-size:0.85rem; line-height:1.65; color:var(--muted); flex:1}
-.gd-card .go{font-size:0.82rem; font-weight:700; color:var(--gold-dark)}
-.gd-tag{align-self:flex-start; font-size:0.68rem; font-weight:700; background:var(--gold-soft); color:var(--gold-dark); border-radius:999px; padding:0.18rem 0.6rem}
+/* แถบถามเรา */
+.gd-ask{margin-top:2.8rem; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#fff8ef; border-radius:22px; padding:1.6rem 1.6rem; display:flex; align-items:center; justify-content:space-between; gap:1.2rem; flex-wrap:wrap; box-shadow:0 12px 30px rgba(107,66,38,.25)}
+.gd-ask h3{font-family:"Prompt",sans-serif; font-size:1.2rem; margin-bottom:0.25rem}
+.gd-ask p{opacity:.92; font-size:0.92rem; line-height:1.6; max-width:34em}
+.gd-ask .btns{display:flex; gap:0.6rem; flex-wrap:wrap}
+.gd-ask .btn{border:0}
+.gd-ask .b-line{background:#06C755; color:#fff}
+.gd-ask .b-wa{background:#25D366; color:#fff}
+.gd-ask .btn:hover{filter:brightness(1.06)}
+.gd-credit{text-align:center; font-size:0.78rem; color:var(--muted); margin-top:1.4rem}
+.gd-credit a{color:var(--gold-dark)}
+@media (max-width:760px){
+  .gd-feat{grid-template-columns:1fr}
+  .gd-feat .pic{min-height:200px; aspect-ratio:16/9}
+  .gd-feat .pic::after{background:linear-gradient(180deg, rgba(62,47,35,0) 55%, rgba(255,252,246,.6) 100%)}
+  .gd-feat .body{padding:1.2rem 1.2rem 1.3rem}
+}
+@media (max-width:640px){
+  .gd-grid{grid-template-columns:1fr; gap:0.8rem}
+  .gd-card{flex-direction:row; align-items:stretch}
+  .gd-card .pic{aspect-ratio:auto; width:36%; min-width:120px; flex:none}
+  .gd-card .em{width:30px; height:30px; font-size:0.95rem; left:7px; bottom:7px; border-radius:9px}
+  .gd-tag{top:7px; left:7px; font-size:0.64rem}
+  .gd-card .body{padding:0.75rem 0.85rem 0.8rem}
+  .gd-card h2{font-size:0.95rem}
+  .gd-card p{font-size:0.8rem; line-height:1.5}
+  .gd-ask{padding:1.3rem 1.2rem}
+}
 </style>
 </head>
 <body>
@@ -46,88 +110,129 @@
   </div>
 </nav>
 
-<header class="ld-hero">
+<header class="gd-hero">
+  <div class="kicker" data-i18n="gd.kicker">Guides &amp; Stories · คลองสาน–ฝั่งธนฯ</div>
   <h1 data-i18n="gd.h1">ไกด์เที่ยวจากคนพื้นที่</h1>
   <p class="sub" data-i18n="gd.sub">เราอยู่คลองสานมาทั้งชีวิต — นี่คือทุกไกด์ที่เราเขียนเองเพื่อให้แขกเที่ยวย่านนี้ได้แบบคนท้องถิ่น ไม่ใช่ตามรีวิวซ้ำ ๆ</p>
+  <div class="gd-stats">
+    <span data-i18n="gd.st1">✍️ 9 ไกด์ เขียนเองทั้งหมด</span>
+    <span data-i18n="gd.st2">🚶 ทุกจุดเดิน/เรือ/รถไฟฟ้าจากที่พักไม่เกิน 15 นาที</span>
+    <span data-i18n="gd.st3">🌐 ไทย · English</span>
+  </div>
 </header>
 
-<div class="ld-wrap">
+<div class="gd-wrap">
 
-  <section class="ld-sec">
-    <h2 data-i18n="gd.season.t">ตามเทศกาล</h2>
-    <div class="gd-grid">
-      <a class="gd-card" href="loy-krathong.html">
-        <span class="em">🏮</span><span class="gd-tag" data-i18n="gd.tag.nov">25 พ.ย. 2569</span>
-        <h2 data-i18n="gd.c1.t">ลอยกระทงริมเจ้าพระยา ฝั่งธนฯ</h2>
-        <p data-i18n="gd.c1.d">จุดลอยกระทงใกล้ที่พัก ทั้งท่าน้ำชุมชนและงานใหญ่ริมน้ำ พร้อมทริคเลี่ยงคนแน่น</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
-      </a>
-      <a class="gd-card" href="new-year-countdown.html">
-        <span class="em">🎆</span><span class="gd-tag" data-i18n="gd.tag.dec">31 ธ.ค.</span>
-        <h2 data-i18n="gd.c2.t">เคาท์ดาวน์ปีใหม่ — ดูพลุ ICONSIAM</h2>
-        <p data-i18n="gd.c2.d">จุดดูพลุฟรีฝั่งคลองสาน เดินกลับที่พักได้หลังเที่ยงคืน ไม่ต้องรอรถเป็นชั่วโมง</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
-      </a>
+  <a class="gd-feat" href="heritage-walk.html">
+    <div class="pic"><img src="images/attractions/riverboat.jpg" alt="เรือข้ามฟากแม่น้ำเจ้าพระยา — จุดเริ่มต้นเส้นทางเดินเที่ยวมรดกไชน่าทาวน์" width="960" height="720" loading="eager" decoding="async"></div>
+    <div class="body">
+      <div class="tags"><span class="gd-meta"><span data-i18n="gd.feat.tag">✨ ไกด์ใหม่ล่าสุด</span></span></div>
+      <h2 data-i18n="gd.hw.t">เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท</h2>
+      <p data-i18n="gd.hw.d">เส้นทางครึ่งวัน 8 จุด: ศาลเจ้ากวนอูฝั่งเรา → เรือข้ามฟาก → สำเพ็ง → เล่งเน่ยยี่ → ทรงวาด → ตลาดน้อย → มื้อค่ำเยาวราช พร้อมของกินมรดกและมารยาท 4 ศาสนา</p>
+      <div class="gd-meta">
+        <span data-i18n="gd.feat.m1">🚤 เรือ 5 บาท</span><span data-i18n="gd.feat.m2">🚶 ~4 กม. · 3–4 ชม.</span><span data-i18n="gd.feat.m3">🕒 ดีสุด 15:00–20:00</span>
+      </div>
+      <span class="go" data-i18n="gd.read.feat">อ่านไกด์ฉบับเต็ม</span>
     </div>
-  </section>
+  </a>
 
-  <section class="ld-sec">
-    <h2 data-i18n="gd.area.t">เที่ยวย่านนี้</h2>
+  <section class="gd-sec">
+    <div class="gd-sec-h"><h2 data-i18n="gd.area.t">เที่ยวย่านนี้</h2><span class="cnt">4</span></div>
     <div class="gd-grid">
-      <a class="gd-card" href="heritage-walk.html">
-        <span class="em">🏮</span><span class="gd-tag" data-i18n="gd.tag.new">ใหม่</span>
-        <h2 data-i18n="gd.hw.t">เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท</h2>
-        <p data-i18n="gd.hw.d">เส้นทางครึ่งวัน 8 จุด: ศาลเจ้ากวนอูฝั่งเรา → เรือข้ามฟาก → สำเพ็ง → เล่งเน่ยยี่ → ทรงวาด → ตลาดน้อย → มื้อค่ำเยาวราช พร้อมของกินมรดกและมารยาท 4 ศาสนา</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
-      </a>
       <a class="gd-card" href="thonburi-one-day.html">
-        <span class="em">🗺️</span>
-        <h2 data-i18n="gd.c3.t">เที่ยวฝั่งธนฯ 1 วันเต็ม</h2>
-        <p data-i18n="gd.c3.d">เส้นทางเช้าจรดค่ำ: ตลาดเช้า → วัดอรุณ → กุฎีจีน → สวนลอยฟ้า → ICONSIAM → เยาวราช</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
+        <div class="pic"><img src="images/attractions/watarun.jpg" alt="วัดอรุณราชวราราม" width="960" height="640" loading="lazy" decoding="async"><span class="em">🗺️</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c3.t">เที่ยวฝั่งธนฯ 1 วันเต็ม</h2>
+          <p data-i18n="gd.c3.d">เส้นทางเช้าจรดค่ำ: ตลาดเช้า → วัดอรุณ → กุฎีจีน → สวนลอยฟ้า → ICONSIAM → เยาวราช</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
       </a>
       <a class="gd-card" href="local.html">
-        <span class="em">🍜</span>
-        <h2 data-i18n="gd.c4.t">กิน-เที่ยวรอบซอยท่าดินแดง</h2>
-        <p data-i18n="gd.c4.d">13 ร้านที่คนพื้นที่กินจริง + เส้นทางเดิน 10 จุดที่นักท่องเที่ยวส่วนใหญ่หาไม่เจอ</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
+        <div class="pic"><img src="images/local/krua.webp" alt="ร้านอาหารรอบซอยท่าดินแดง" width="800" height="824" loading="lazy" decoding="async"><span class="em">🍜</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c4.t">กิน-เที่ยวรอบซอยท่าดินแดง</h2>
+          <p data-i18n="gd.c4.d">13 ร้านที่คนพื้นที่กินจริง + เส้นทางเดิน 10 จุดที่นักท่องเที่ยวส่วนใหญ่หาไม่เจอ</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
       </a>
       <a class="gd-card" href="attractions.html">
-        <span class="em">🛕</span>
-        <h2 data-i18n="gd.c5.t">เที่ยวอะไรใกล้ที่พัก</h2>
-        <p data-i18n="gd.c5.d">9 จุดเที่ยวหลัก — สวนลอยฟ้า ICONSIAM วัดอรุณ เยาวราช พร้อมปุ่มนำทางจากที่พัก</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="ld-sec">
-    <h2 data-i18n="gd.prac.t">ข้อมูลก่อนมาพัก</h2>
-    <div class="gd-grid">
-      <a class="gd-card" href="airport-guide.html">
-        <span class="em">✈️</span>
-        <h2 data-i18n="gd.c6.t">วิธีเดินทางจากสนามบิน</h2>
-        <p data-i18n="gd.c6.d">สุวรรณภูมิ/ดอนเมือง: แท็กซี่ราคาจริง รถไฟฟ้าทีละขั้น + ที่อยู่ภาษาไทยให้คนขับ</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
-      </a>
-      <a class="gd-card" href="near-iconsiam.html">
-        <span class="em">🛍️</span>
-        <h2 data-i18n="gd.c7.t">ที่พักใกล้ ICONSIAM</h2>
-        <p data-i18n="gd.c7.d">ห่าง ~2 กม. รถ 5 นาที Gold Line สถานีเดียว — จ่ายไม่ถึง 1 ใน 3 ของโรงแรมริมน้ำ</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
+        <div class="pic"><img src="images/attractions/watpho.jpg" alt="วัดโพธิ์" width="960" height="720" loading="lazy" decoding="async"><span class="em">🛕</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c5.t">เที่ยวอะไรใกล้ที่พัก</h2>
+          <p data-i18n="gd.c5.d">9 จุดเที่ยวหลัก — สวนลอยฟ้า ICONSIAM วัดอรุณ เยาวราช พร้อมปุ่มนำทางจากที่พัก</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
       </a>
       <a class="gd-card" href="near-chinatown.html">
-        <span class="em">🐉</span>
-        <h2 data-i18n="gd.c8.t">ที่พักใกล้เยาวราช</h2>
-        <p data-i18n="gd.c8.d">ข้ามสะพานเดียวถึงไชน่าทาวน์ กินตอนค่ำกลับดึกสะดวก ย่านเราเงียบนอนสบาย</p>
-        <span class="go" data-i18n="gd.read">อ่านไกด์ →</span>
+        <div class="pic"><img src="images/attractions/yaowarat.jpg" alt="ถนนเยาวราชตอนค่ำ" width="960" height="721" loading="lazy" decoding="async"><span class="em">🐉</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c8.t">ที่พักใกล้เยาวราช</h2>
+          <p data-i18n="gd.c8.d">ข้ามสะพานเดียวถึงไชน่าทาวน์ กินตอนค่ำกลับดึกสะดวก ย่านเราเงียบนอนสบาย</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
       </a>
     </div>
   </section>
 
-  <div class="ld-cta">
+  <section class="gd-sec">
+    <div class="gd-sec-h"><h2 data-i18n="gd.season.t">ตามเทศกาล</h2><span class="cnt">2</span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="loy-krathong.html">
+        <div class="pic"><img src="images/attractions/kudichin.jpg" alt="ริมแม่น้ำเจ้าพระยาฝั่งธนบุรี" width="960" height="1344" loading="lazy" decoding="async"><span class="gd-tag" data-i18n="gd.tag.nov">25 พ.ย. 2569</span><span class="em">🏮</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c1.t">ลอยกระทงริมเจ้าพระยา ฝั่งธนฯ</h2>
+          <p data-i18n="gd.c1.d">จุดลอยกระทงใกล้ที่พัก ทั้งท่าน้ำชุมชนและงานใหญ่ริมน้ำ พร้อมทริคเลี่ยงคนแน่น</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
+      </a>
+      <a class="gd-card" href="new-year-countdown.html">
+        <div class="pic"><img src="images/attractions/skypark.jpg" alt="สวนลอยฟ้าเจ้าพระยา จุดชมพลุปีใหม่" width="960" height="720" loading="lazy" decoding="async"><span class="gd-tag" data-i18n="gd.tag.dec">31 ธ.ค.</span><span class="em">🎆</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c2.t">เคาท์ดาวน์ปีใหม่ — ดูพลุ ICONSIAM</h2>
+          <p data-i18n="gd.c2.d">จุดดูพลุฟรีฝั่งคลองสาน เดินกลับที่พักได้หลังเที่ยงคืน ไม่ต้องรอรถเป็นชั่วโมง</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="gd-sec">
+    <div class="gd-sec-h"><h2 data-i18n="gd.prac.t">ข้อมูลก่อนมาพัก</h2><span class="cnt">2</span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="airport-guide.html">
+        <div class="pic"><img src="images/entrance.jpg" alt="ทางเข้าที่พัก House of Happiness" width="1024" height="683" loading="lazy" decoding="async"><span class="em">✈️</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c6.t">วิธีเดินทางจากสนามบิน</h2>
+          <p data-i18n="gd.c6.d">สุวรรณภูมิ/ดอนเมือง: แท็กซี่ราคาจริง รถไฟฟ้าทีละขั้น + ที่อยู่ภาษาไทยให้คนขับ</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
+      </a>
+      <a class="gd-card" href="near-iconsiam.html">
+        <div class="pic"><img src="images/attractions/iconsiam.jpg" alt="ICONSIAM ริมแม่น้ำเจ้าพระยา" width="960" height="720" loading="lazy" decoding="async"><span class="em">🛍️</span></div>
+        <div class="body">
+          <h2 data-i18n="gd.c7.t">ที่พักใกล้ ICONSIAM</h2>
+          <p data-i18n="gd.c7.d">ห่าง ~2 กม. รถ 5 นาที Gold Line สถานีเดียว — เดินห้างเสร็จกลับมานอนใกล้ ๆ</p>
+          <span class="go" data-i18n="gd.read">อ่านไกด์</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <div class="gd-ask">
+    <div>
+      <h3 data-i18n="gd.ask.t">ไม่เจอเรื่องที่อยากรู้?</h3>
+      <p data-i18n="gd.ask.d">ทักถามเราได้เลย — ร้านที่เปิดวันนี้ วิธีไปที่ไหนก็ได้ เวลาเรือ หรือขอให้วงแผนที่วาดมือให้ เราคนพื้นที่ ตอบไวมาก</p>
+    </div>
+    <div class="btns">
+      <a class="btn b-line" href="https://line.me/R/ti/p/@060hvzok" target="_blank" rel="noopener" data-i18n="gd.ask.line">💬 ถามทาง LINE</a>
+      <a class="btn b-wa" href="https://wa.me/66994419465" target="_blank" rel="noopener" data-i18n="gd.ask.wa">📱 WhatsApp</a>
+    </div>
+  </div>
+
+  <div class="ld-cta" style="margin-top:2rem">
     <a class="btn btn-gold" href="booking.html" data-i18n="gd.cta">เช็คห้องว่างและจองเลย</a>
   </div>
+  <p class="gd-credit"><a href="attractions.html#creditsBox" data-i18n="foot.credit">รูปสถานที่ท่องเที่ยวจาก Wikimedia Commons — ดูเครดิต</a></p>
 </div>
 
 <footer class="site">
@@ -155,6 +260,19 @@
 <script src="assets/i18n.js"></script>
 <script>
 Object.assign(I18N, {
+  "gd.kicker": { th: "Guides & Stories · คลองสาน–ฝั่งธนฯ", en: "Guides & Stories · Khlong San – Thonburi" },
+  "gd.st1": { th: "✍️ 9 ไกด์ เขียนเองทั้งหมด", en: "✍️ 9 guides, all written by us" },
+  "gd.st2": { th: "🚶 ทุกจุดเดิน/เรือ/รถไฟฟ้าจากที่พักไม่เกิน 15 นาที", en: "🚶 Everything within 15 min by foot, boat or train" },
+  "gd.st3": { th: "🌐 ไทย · English", en: "🌐 ไทย · English" },
+  "gd.feat.tag": { th: "✨ ไกด์ใหม่ล่าสุด", en: "✨ Newest guide" },
+  "gd.feat.m1": { th: "🚤 เรือ 5 บาท", en: "🚤 ฿5 ferry" },
+  "gd.feat.m2": { th: "🚶 ~4 กม. · 3–4 ชม.", en: "🚶 ~4 km · 3–4 h" },
+  "gd.feat.m3": { th: "🕒 ดีสุด 15:00–20:00", en: "🕒 Best 3–8 PM" },
+  "gd.read.feat": { th: "อ่านไกด์ฉบับเต็ม", en: "Read the full guide" },
+  "gd.ask.t": { th: "ไม่เจอเรื่องที่อยากรู้?", en: "Can't find what you need?" },
+  "gd.ask.d": { th: "ทักถามเราได้เลย — ร้านที่เปิดวันนี้ วิธีไปที่ไหนก็ได้ เวลาเรือ หรือขอให้วงแผนที่วาดมือให้ เราคนพื้นที่ ตอบไวมาก", en: "Just message us — which places are open today, how to get anywhere, boat times, or a hand-drawn map marked up for you. We're locals and we reply fast." },
+  "gd.ask.line": { th: "💬 ถามทาง LINE", en: "💬 Ask on LINE" },
+  "gd.ask.wa": { th: "📱 WhatsApp", en: "📱 WhatsApp" },
   "gd.tag.new": { th: "ใหม่", en: "New" },
   "gd.hw.t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท", en: "Chinatown Heritage Walk — a ฿5 ferry away" },
   "gd.hw.d": { th: "เส้นทางครึ่งวัน 8 จุด: ศาลเจ้ากวนอูฝั่งเรา → เรือข้ามฟาก → สำเพ็ง → เล่งเน่ยยี่ → ทรงวาด → ตลาดน้อย → มื้อค่ำเยาวราช พร้อมของกินมรดกและมารยาท 4 ศาสนา",
@@ -165,7 +283,7 @@ Object.assign(I18N, {
   "gd.season.t": { th: "ตามเทศกาล", en: "Festival guides" },
   "gd.area.t":   { th: "เที่ยวย่านนี้", en: "Exploring the neighbourhood" },
   "gd.prac.t":   { th: "ข้อมูลก่อนมาพัก", en: "Before you arrive" },
-  "gd.read": { th: "อ่านไกด์ →", en: "Read the guide →" },
+  "gd.read": { th: "อ่านไกด์", en: "Read the guide" },
   "gd.tag.nov": { th: "25 พ.ย. 2569", en: "25 Nov 2026" },
   "gd.tag.dec": { th: "31 ธ.ค.", en: "31 Dec" },
   "gd.c1.t": { th: "ลอยกระทงริมเจ้าพระยา ฝั่งธนฯ", en: "Loy Krathong on the Chao Phraya" },
@@ -181,7 +299,7 @@ Object.assign(I18N, {
   "gd.c6.t": { th: "วิธีเดินทางจากสนามบิน", en: "Getting Here from the Airport" },
   "gd.c6.d": { th: "สุวรรณภูมิ/ดอนเมือง: แท็กซี่ราคาจริง รถไฟฟ้าทีละขั้น + ที่อยู่ภาษาไทยให้คนขับ", en: "BKK & DMK: real taxi fares, step-by-step trains, and a Thai address to show your driver." },
   "gd.c7.t": { th: "ที่พักใกล้ ICONSIAM", en: "Hotel near ICONSIAM" },
-  "gd.c7.d": { th: "ห่าง ~2 กม. รถ 5 นาที Gold Line สถานีเดียว — จ่ายไม่ถึง 1 ใน 3 ของโรงแรมริมน้ำ", en: "~2 km, 5 minutes by car, one Gold Line stop — a third of riverside hotel prices." },
+  "gd.c7.d": { th: "ห่าง ~2 กม. รถ 5 นาที Gold Line สถานีเดียว — เดินห้างเสร็จกลับมานอนใกล้ ๆ", en: "~2 km, 5 minutes by car, one Gold Line stop — shop all day, sleep close by." },
   "gd.c8.t": { th: "ที่พักใกล้เยาวราช", en: "Hotel near Chinatown" },
   "gd.c8.d": { th: "ข้ามสะพานเดียวถึงไชน่าทาวน์ กินตอนค่ำกลับดึกสะดวก ย่านเราเงียบนอนสบาย", en: "One bridge from Yaowarat — easy late-night returns, and our side sleeps quiet." },
   "gd.cta": { th: "เช็คห้องว่างและจองเลย", en: "Check availability & book" },
