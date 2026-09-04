@@ -23,8 +23,8 @@ const I18N = {
   "loc.open":        { th: "เปิดใน Google Maps →", en: "Open in Google Maps →" },
 
   /* ── หน้าหลัก ── */
-  "hero.tagline":    { th: "อพาร์ตโฮเทลอบอุ่นใจกลางคลองสาน ใกล้แม่น้ำเจ้าพระยา สำเพ็ง วัดโพธิ์ และ ICONSIAM",
-                       en: "A cozy aparthotel in the heart of Khlong San — minutes from the Chao Phraya River, Sampeng Market, Wat Pho, and ICONSIAM." },
+  "hero.tagline":    { th: "อพาร์ตโฮเทล 15 ห้อง 3 แบบ ในคลองสาน ฝั่งธนบุรี · BTS สายสีทองสถานีคลองสาน · ~2 กม. ถึง ICONSIAM · ข้ามเรือ 5 บาทถึงเยาวราชและวัดโพธิ์",
+                       en: "15 apartments in 3 layouts in Khlong San, Thonburi side · Gold Line BTS at Khlong San station · ~2 km to ICONSIAM · a ฿5 ferry to Chinatown and Wat Pho" },
   "hero.direct":     { th: "จองตรงกับเรา — คุยกับเราโดยตรง", en: "Book Direct — Talk to Us Directly" },
   "hero.booking":    { th: "จองผ่าน Booking.com", en: "Book on Booking.com" },
   "hero.rating":     { th: "คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com",
@@ -136,6 +136,11 @@ const I18N = {
   "nb.l2":           { th: "คะแนนจากผู้เข้าพักจริง", en: "verified guest score" },
   "nb.l3":           { th: "รีวิวบน Booking.com", en: "reviews on Booking.com" },
   "nb.l4":           { th: "ถึง ICONSIAM", en: "to ICONSIAM" },
+  "nb.km":           { th: "กม.", en: "km" },
+  "nb.hr":           { th: "ชม.", en: "h" },
+  "nb.l5":           { th: "ยืนยันการจองภายใน", en: "booking confirmed within" },
+  "prov.real":       { th: "ภาพถ่ายจริงจากที่พัก", en: "Photographed on site" },
+  "prov.stock":      { th: "ภาพประกอบ · Wikimedia Commons", en: "Illustration · Wikimedia Commons" },
 
   /* ── จุดเด่นห้องพัก (about) ── */
   "ab.f1":           { th: "ห้อง 3 แบบ: เตียงใหญ่ / 2 เตียง / ห้องใหญ่มีโซฟา", en: "3 room styles: double / twin / extra-large with sofa" },

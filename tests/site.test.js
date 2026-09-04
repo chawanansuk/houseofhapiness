@@ -52,6 +52,19 @@ assert.doesNotMatch(read("assets/i18n.js"), /"wbd\.|\bOTA\b|คอมมิช�
 assert.match(read("assets/i18n.js").match(/"faq\.a4":[\s\S]*?\},/)[0], /LINE\/WhatsApp/, "direct-booking FAQ must point guests to ask rates in chat");
 assert.doesNotMatch(read("assets/i18n.js"), /ราคาดีที่สุด|ราคาดีกว่า|best rate|better rates/i, "shared i18n must not carry rate-comparison claims");
 
+// Prom Design pass 1: ไอคอนเส้นแทนอีโมจิ · hero ขายด้วยตัวเลข · ป้ายที่มาของรูป · เมนูไม่ล้นบน iPad
+const home = read("index.html");
+assert.doesNotMatch(home, /class="ico">[^<\s]/, "homepage icons must be line icons (data-icon), not emoji");
+assert.ok((home.match(/data-icon="/g) || []).length >= 20, "homepage must paint icons via data-icon");
+assert.match(read("assets/i18n.js").match(/"hero\.tagline":[\s\S]*?\},/)[0], /15 ห้อง[\s\S]*15 apartments/, "hero tagline must lead with real numbers, not adjectives");
+assert.ok(home.indexOf('id="numbers"') < home.indexOf('id="rooms"'), "proof strip (numbers) must sit right under the hero, before rooms");
+assert.match(home, /class="prov real"/, "own photos must carry the gold provenance chip");
+assert.match(read("room-deluxe.html"), /class="credit real"/, "room hero (own photo) must carry the gold provenance chip");
+assert.match(read("near-iconsiam.html"), /data-i18n="prov\.stock"/, "stock hero must be labelled as illustration");
+assert.match(read("assets/style.css"), /@media \(max-width: 860px\) \{\n  \.navlinks \{ display: none; \}/, "nav links must collapse to the menu button below 860px (iPad portrait overflowed at 768)");
+assert.match(read("assets/ui.js"), /const sweep = /, "reveal animation must have a failsafe so no section can stay blank");
+assert.ok(fs.existsSync(path.join(__dirname, "..", ".claude", "skills", "prom-design", "SKILL.md")), "prom-design skill must be installed for future design work");
+
 const admin = read("admin/index.html");
 const adminJs = read("admin/app.js");
 assert.doesNotMatch(adminJs, /URLSearchParams\(location\.search\).*get\("key"\)/s, "admin key must not be accepted from URL");

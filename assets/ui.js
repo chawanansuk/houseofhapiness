@@ -13,8 +13,49 @@ document.addEventListener("DOMContentLoaded", () => {
         io.unobserve(e.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.05 });
   els.forEach((el) => io.observe(el));
+  // ตัวกันพลาด: ถ้า observer ไม่ยิง (เลื่อนเร็วมาก / เบราว์เซอร์แปลก) ทุกส่วนที่เลื่อนผ่านมาแล้วต้องโชว์เสมอ
+  // หน้าเว็บห้ามมีแถบว่างเพราะแอนิเมชันไม่ทำงาน
+  const sweep = () => {
+    const limit = window.innerHeight * 1.15;
+    els.forEach((el) => { if (!el.classList.contains("visible") && el.getBoundingClientRect().top < limit) el.classList.add("visible"); });
+  };
+  let t;
+  window.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(sweep, 120); }, { passive: true });
+  setTimeout(sweep, 2500);
+  window.addEventListener("beforeprint", () => els.forEach((el) => el.classList.add("visible")));
+});
+
+// ไอคอนเส้นบาง (แทนอีโมจิ — อีโมจิหน้าตาต่างกันทุกเครื่องและดูเป็นเทมเพลต) วาดจาก data-icon
+const LINE_ICONS = {
+  star: '<path d="M12 2.5l3 6.2 6.8 1-4.9 4.8 1.2 6.8L12 18l-6.1 3.3 1.2-6.8-4.9-4.8 6.8-1z"/>',
+  chat: '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 0 1 3 11.5a8.4 8.4 0 0 1 9-8.4 8.4 8.4 0 0 1 9 8.4z"/>',
+  river: '<path d="M2 7c.6.5 1.2 1 2.5 1C7 8 7 6 9.5 6c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12.5c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1C7 19 7 17 9.5 17c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+  bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+  wifi: '<path d="M5 12.6a11 11 0 0 1 14 0M1.4 9a16 16 0 0 1 21.2 0M8.5 16.1a6 6 0 0 1 7 0M12 20h.01"/>',
+  snow: '<path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"/>',
+  city: '<path d="M3 21h18M5 21V8l7-4 7 4v13M9 10h1M14 10h1M9 14h1M14 14h1M9 18h1M14 18h1"/>',
+  fridge: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 10h14M9 6v2M9 14v3"/>',
+  tv: '<rect x="2" y="7" width="20" height="13" rx="2"/><path d="M17 2l-5 5-5-5"/>',
+  laundry: '<rect x="3" y="2" width="18" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M7 6h.01M11 6h2"/>',
+  bottle: '<path d="M9 2h6v3H9zM8 5h8l1 3v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8z"/>',
+  drop: '<path d="M12 2.7s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>',
+  shower: '<path d="M4 4a4 4 0 0 1 8 0v2M12 6h6M6 10h12M8 14v2M12 14v3M16 14v2"/>',
+  lantern: '<path d="M9 2h6M12 2v3M8 5h8l2 8-2 8H8l-2-8zM10 21h4"/>',
+  tree: '<path d="M12 22v-5M6 17h12l-3-5h2l-5-9-5 9h2z"/>',
+  temple: '<path d="M3 22h18M5 22V10M19 22V10M9 22v-8M15 22v-8M3 10h18L12 3z"/>',
+  bag: '<path d="M6 2 4 7v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7l-2-5zM4 7h16M16 11a4 4 0 0 1-8 0"/>',
+  image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+  plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+  train: '<rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16M12 3v8M8 19l-2 3M16 19l2 3M8 15h.01M16 15h.01"/>',
+  pin: '<path d="M12 22s7-7.2 7-12a7 7 0 0 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+};
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".ico[data-icon]").forEach((el) => {
+    const d = LINE_ICONS[el.dataset.icon];
+    if (d) el.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
+  });
 });
 
 // เมนู ☰ บนมือถือ — ฉีดจากที่นี่ที่เดียว ทุกหน้าได้เมนูครบเหมือนกัน

@@ -167,6 +167,7 @@ function render() {
       return '<figure data-idx="' + i + '" role="button" tabindex="0" aria-label="' +
         (lang === "en" ? "Open photo: " : "เปิดรูป: ") + caption + '"><img src="' + it.f + '" alt="' + caption +
         '" width="1024" height="768" loading="lazy" decoding="async" onerror="this.parentElement.remove()">' +
+        '<span class="prov real">' + (lang === "en" ? "Photographed on site" : "ภาพถ่ายจริงจากที่พัก") + '</span>' +
         '<figcaption>' + caption + '</figcaption></figure>';
     }).join("");
     return '<div class="gl-group"><h2>' + (lang === "en" ? g.en : g.th) + '</h2></div><div class="gl-grid">' + cards + '</div>';
