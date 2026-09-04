@@ -686,6 +686,32 @@ function updateSend() {
     updateSend();
   });
 });
+// ── บันทึกออเดอร์เข้าหลังบ้าน (แท็บ Orders) แบบเงียบ ๆ ก่อนเปิดแชท ──
+// ข้อความในแชทยังเป็นช่องทางยืนยันกับแขก แต่ทีมครัวจะเห็นออเดอร์ในหลังบ้านทันที ไม่ต้องเลื่อนหาในแชท
+// กดทั้ง LINE และ WhatsApp ด้วยออเดอร์เดิม = บันทึกครั้งเดียว
+var lastOrderKey = "";
+function submitOrder(channel) {
+  var items = Object.keys(CART).map(function (id) {
+    var dsh = DISHES[id], v = variantOf(id);
+    return { id: id, th: dsh.th, en: dsh.en, variant: v ? v.th : "", qty: CART[id], price: dsh.price };
+  });
+  var payload = {
+    name: document.getElementById("rsName").value.trim(),
+    room: document.getElementById("rsRoom").value.trim(),
+    date: document.getElementById("rsDate").value,
+    time: document.getElementById("rsTime").value,
+    note: document.getElementById("rsNote").value.trim(),
+    lang: getLang(), items: items,
+  };
+  var key = JSON.stringify(payload);
+  if (key === lastOrderKey) return;
+  lastOrderKey = key;
+  payload.channel = channel;
+  try {
+    fetch("/api/order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), keepalive: true })
+      .catch(function () { lastOrderKey = ""; });
+  } catch (_) { lastOrderKey = ""; }
+}
 ["rsSend", "rsSendWa"].forEach(function (btnId) {
   document.getElementById(btnId).addEventListener("click", function (e) {
     if (!validate()) {
@@ -696,6 +722,7 @@ function updateSend() {
       return;
     }
     updateSend(); // ให้ href ตรงกับค่าล่าสุดเสมอ ณ วินาทีที่กด
+    submitOrder(btnId === "rsSendWa" ? "whatsapp" : "line");
   });
 });
 

@@ -71,6 +71,7 @@ module.exports = async (req, res) => {
       rooms: demoRooms(),
       ical: demoIcal(today),
       expenses: role === "staff" ? [] : demoExpenses(today),
+      orders: demoOrders(today),
       sources: { sheet: false, ical: false },
     });
   }
@@ -84,6 +85,8 @@ module.exports = async (req, res) => {
     ical: ical.events,
     // รายจ่ายเป็นเรื่องเงินล้วน ๆ — พนักงานไม่ได้รับข้อมูลเลย
     expenses: role === "staff" ? [] : sheet.expenses,
+    // ออเดอร์รูมเซอร์วิส (ยอดอาหารเป็นราคาหน้าเมนู ไม่ใช่ความลับ — พนักงานต้องเห็นเพื่อส่งของ/รับเงินสด)
+    orders: sheet.orders,
     sources: { sheet: sheet.ok, ical: ical.ok, sheetError: sheet.error, icalError: ical.error },
   });
 };
@@ -99,23 +102,24 @@ function bangkokToday() {
 async function fetchSheet() {
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url) return { ok: false, rows: [], rooms: [], expenses: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
+  if (!url) return { ok: false, rows: [], rooms: [], expenses: [], orders: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
   try {
     const sep = url.includes("?") ? "&" : "?";
     const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, {
       redirect: "follow",
     });
-    if (!r.ok) return { ok: false, rows: [], rooms: [], expenses: [], error: `ชีตตอบ HTTP ${r.status}` };
+    if (!r.ok) return { ok: false, rows: [], rooms: [], expenses: [], orders: [], error: `ชีตตอบ HTTP ${r.status}` };
     const j = await r.json();
-    if (j && j.error) return { ok: false, rows: [], rooms: [], expenses: [], error: String(j.error) };
+    if (j && j.error) return { ok: false, rows: [], rooms: [], expenses: [], orders: [], error: String(j.error) };
     return {
       ok: true,
       rows: Array.isArray(j && j.bookings) ? j.bookings : [],
       rooms: Array.isArray(j && j.rooms) ? j.rooms : [],
       expenses: Array.isArray(j && j.expenses) ? j.expenses : [],
+      orders: Array.isArray(j && j.orders) ? j.orders : [],
     };
   } catch (e) {
-    return { ok: false, rows: [], rooms: [], expenses: [], error: String((e && e.message) || e) };
+    return { ok: false, rows: [], rooms: [], expenses: [], orders: [], error: String((e && e.message) || e) };
   }
 }
 
@@ -226,6 +230,14 @@ function demoExpenses(today) {
     { id: "EXP-D3", date: ym + "-05", category: "แม่บ้าน/ของใช้", amount: "1,200", vendor: "แม็คโคร", method: "เงินสด", note: "น้ำยา+ผ้าปู" },
     { id: "EXP-D4", date: ym + "-10", category: "ซ่อมบำรุง", amount: "650", vendor: "ช่างแอร์", method: "เงินสด", note: "ล้างแอร์ 108" },
     { id: "EXP-D5", date: ym + "-15", category: "เน็ต/เคเบิล", amount: "1,070", vendor: "AIS Fibre", method: "โอน", note: "" },
+  ];
+}
+
+function demoOrders(today) {
+  const tomorrow = new Date(Date.parse(today) + 86400000).toISOString().slice(0, 10);
+  return [
+    { id: "RS-D1", created: today + " 08:10", name: "Emma Wilson", room: "701", date: today, time: "09:30", items: "ผัดไทย (กุ้ง) × 2 — ฿200; ชาไทย × 2 — ฿80", total: "280", note: "", status: "ยืนยันแล้ว", paid: "", lang: "en", channel: "line" },
+    { id: "RS-D2", created: today + " 19:40", name: "สมชาย ใจดี", room: "705", date: tomorrow, time: "10:00", items: "มัสมั่น (ไก่) × 1 — ฿100; ข้าวผัด (หมู) × 1 — ฿80", total: "180", note: "ไม่เผ็ด", status: "รอยืนยัน", paid: "", lang: "th", channel: "whatsapp" },
   ];
 }
 
