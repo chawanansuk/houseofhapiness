@@ -82,9 +82,9 @@ const I18N = {
   "faq.q3":          { th: "ชำระเงินอย่างไรได้บ้าง?", en: "How can I pay?" },
   "faq.a3":          { th: "รับเงินสดและโอนผ่านธนาคาร/พร้อมเพย์ รายละเอียดจะแจ้งตอนยืนยันการจอง",
                        en: "We accept cash and Thai bank transfer / PromptPay. Details are provided when we confirm your booking." },
-  "faq.q4":          { th: "จองตรงต่างจากจองผ่าน Booking.com อย่างไร?", en: "Why book direct instead of Booking.com?" },
-  "faq.a4":          { th: "จองตรงได้คุยกับเราโดยตรง ยืดหยุ่นเรื่องเวลาเช็คอินและคำขอพิเศษมากกว่า และมีสิทธิพิเศษสำหรับแขกจองตรง — สอบถามราคาได้ทาง LINE/WhatsApp เราตอบไวมาก",
-                       en: "Booking direct you talk to us personally — more flexibility on check-in times and special requests, plus perks for direct guests. Ask for rates on LINE/WhatsApp; we reply fast." },
+  "faq.q4":          { th: "จองตรงกับเราได้อย่างไร?", en: "How do I book directly with you?" },
+  "faq.a4":          { th: "ทัก LINE/WhatsApp หรือกรอกฟอร์มหน้าจองบนเว็บได้เลย เรายืนยันภายใน 24 ชั่วโมง เพราะคุยกับเราโดยตรง จึงนัดเวลาเช็คอินและแจ้งคำขอพิเศษได้สะดวก — สอบถามราคาได้ในแชท",
+                       en: "Message us on LINE/WhatsApp or use the booking form on this site — we confirm within 24 hours. Since you talk to us personally, check-in times and special requests are easy to arrange. Ask for rates in chat." },
   "faq.q5":          { th: "มีที่จอดรถไหม?", en: "Is there parking?" },
   "faq.a5":          { th: "ที่พักไม่มีที่จอดรถ แนะนำเดินทางด้วยแท็กซี่/Grab, รถไฟฟ้าสายสีทอง (สถานีคลองสาน) หรือเรือข้ามฟากมาลงท่าดินแดงจะสะดวกที่สุด",
                        en: "There is no on-site parking. We recommend taxi/Grab, the Gold Line (Khlong San station), or the cross-river ferry to Tha Din Daeng pier." },
@@ -96,7 +96,7 @@ const I18N = {
 
   /* ── แถบจุดเด่นใต้ hero ── */
   "hl.1":            { th: "คะแนนรีวิว 8.8/10", en: "Rated 8.8/10" },
-  "hl.2":            { th: "จองตรงถูกกว่า", en: "Cheaper booked direct" },
+  "hl.2":            { th: "คุยกับเจ้าของที่พักโดยตรง", en: "Talk to the host directly" },
   "hl.3":            { th: "ใกล้แม่น้ำเจ้าพระยา", en: "Near the Chao Phraya" },
   "hl.4":            { th: "ยืนยันภายใน 24 ชม.", en: "Confirmed within 24 h" },
 
@@ -166,23 +166,6 @@ const I18N = {
   "bs.3":            { th: "จ่ายที่โรงแรม", en: "Pay at the hotel" },
   "bs.3.d":          { th: "เงินสด โอน พร้อมเพย์ หรือลิงก์ชำระเงินที่เราส่งให้", en: "Cash, transfer, PromptPay — or a payment link we send you" },
 
-  /* ── ทำไมต้องจองตรง ── */
-  "wbd.title":       { th: "ทำไมต้องจองตรงกับเรา", en: "Why Book Direct" },
-  "wbd.direct":      { th: "จองตรงกับเรา", en: "Book direct" },
-  "wbd.ota":         { th: "จองผ่านเว็บตัวกลาง", en: "Via OTA sites" },
-  "wbd.r1":          { th: "ราคา", en: "Price" },
-  "wbd.r1.a":        { th: "คุยกับเจ้าของที่พักโดยตรง — ยืดหยุ่นทุกคำขอ", en: "Talk directly to the host — flexible with every request" },
-  "wbd.r1.b":        { th: "รวมค่าคอมมิชชั่น ~15-18%", en: "Includes ~15-18% commission" },
-  "wbd.r2":          { th: "การติดต่อ", en: "Communication" },
-  "wbd.r2.a":        { th: "คุยกับเราตรง ตอบไว แก้ไขการจองง่าย", en: "Talk to us directly — fast replies, easy changes" },
-  "wbd.r2.b":        { th: "ผ่านระบบกลาง ตอบช้ากว่า", en: "Through a middle platform" },
-  "wbd.r3":          { th: "เวลาเช็คอิน", en: "Check-in time" },
-  "wbd.r3.a":        { th: "ยืดหยุ่นได้ตามห้องว่าง แจ้งล่วงหน้าได้เลย", en: "Flexible when rooms allow — just ask" },
-  "wbd.r3.b":        { th: "ตามเงื่อนไขมาตรฐาน", en: "Standard policy only" },
-  "wbd.r4":          { th: "คำขอพิเศษ", en: "Special requests" },
-  "wbd.r4.a":        { th: "แจ้งกับเราโดยตรง ไม่ตกหล่น", en: "Sent straight to us — never lost" },
-  "wbd.r4.b":        { th: "ส่งผ่านระบบ อาจตกหล่น", en: "Relayed via system, can get lost" },
-  "wbd.cta":         { th: "จองตรงเลย — ดีกว่าแน่นอน", en: "Book direct now" },
 
   /* ── การเดินทางมาที่พัก ── */
   "gh.title":        { th: "การเดินทางมาที่พัก", en: "Getting Here" },

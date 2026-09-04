@@ -52,6 +52,15 @@ const ICONS = {
   broom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 3-9 9"/><path d="M11 12 7.5 8.5a2 2 0 0 0-2.8 0L3 10.2a1 1 0 0 0 0 1.4L12.4 21a1 1 0 0 0 1.4 0l1.7-1.7a2 2 0 0 0 0-2.8z"/></svg>',
   file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>',
 };
+Object.assign(ICONS, {
+  printer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.2A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2"/><path d="M6.6 6.6C3.8 8.6 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.3-1"/></svg>',
+  wifiOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.5a10 10 0 0 1 5.2-2.7"/><path d="M19 12.5a10 10 0 0 0-2.4-1.7"/><path d="M2 8.8a15 15 0 0 1 4.4-2.6"/><path d="M22 8.8a15 15 0 0 0-11.3-3.6"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>',
+  keyboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9 13h6"/></svg>',
+  whatsapp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.6-4.7A9 9 0 1 1 8 19.6L3 21z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.4-1.9-1-1 .8a4 4 0 0 1-2.2-2.2l.8-1-1-1.9L9 9.5z"/></svg>',
+});
 const ic = n => `<span class="ic">${ICONS[n]||''}</span>`;
 function paintIcons(root){ (root||document).querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = ICONS[el.dataset.ic] || ''; el.removeAttribute('data-ic'); }); }
 
@@ -89,6 +98,7 @@ let ROOMS = [];           // [{no,label,type,twin,tag}]
 let CLEAN = {};           // {no:'dirty'}
 let ROOM_NOTES = {};      // {no: note}
 let SYNC_AT = '';
+let SYNC_TS = 0;          // เวลาซิงก์ล่าสุด (ms) — ใช้ตัดสินว่าข้อมูลเก่าพอจะดึงใหม่ไหม
 
 function roomMeta(no){
   const twin = /twin$/i.test(no);
@@ -108,6 +118,7 @@ function adopt(j){
     if (String(r.note || '').trim()) ROOM_NOTES[no] = String(r.note).trim();
   });
   SYNC_AT = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  SYNC_TS = Date.now();
 }
 
 const relDay = ymd => { if(!isYMD(ymd)) return ''; const n = diffDays(TODAY, ymd); if(n===0) return 'วันนี้'; if(n===1) return 'พรุ่งนี้'; if(n===-1) return 'เมื่อวาน'; if(n>1) return `อีก ${n} วัน`; return `${-n} วันก่อน`; };
@@ -216,6 +227,7 @@ function closeSheet(){ $('sheet').classList.remove('on'); $('backdrop').classLis
 /* ---------- api ---------- */
 async function apiUpdate(body){
   const key = sessionStorage.getItem(KEY_STORE) || '';
+  if (navigator.onLine === false) { toast('ออฟไลน์อยู่ — บันทึกไม่ได้ รอเน็ตกลับมาแล้วลองใหม่', true); return null; }
   try {
     const r = await fetch('/api/update', {
       method: 'POST',
@@ -277,6 +289,7 @@ function renderHead(){
   if(state.view==='today') ctx = `${fmtLong(TODAY)}<span class="sync"> · <i></i>ซิงก์ล่าสุด ${esc(SYNC_AT)} · ${esc(lastImportLabel())}</span>`;
   if(state.view==='bookings') ctx = `${BOOKINGS.filter(active).length} รายการที่ไม่ยกเลิก · ${BOOKINGS.filter(b=>!active(b)).length} ยกเลิก`;
   $('vCtx').innerHTML = ctx;
+  const chip = $('syncChip'); if(chip){ chip.innerHTML = `<i></i>${esc(SYNC_AT||'—')}`; chip.title = `ซิงก์ล่าสุด ${SYNC_AT} · แตะเพื่อรีเฟรช`; }
 }
 function render(){
   if (!DATA) return;
@@ -336,7 +349,7 @@ function renderToday(){
   g('g-un','รอจัดห้อง (ยืนยันแล้ว · วันถัดไป)', q.unassigned.map(b => bookingRow(b, `<span class="faint" style="font-size:12px">${relDay(b.checkin)}</span><button class="btn sm" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`)), 'จัดห้องครบทุกรายการ');
   g('g-info','รอเติมข้อมูลจาก Pulse', q.needsInfo.map(b => bookingRow(b, `<button class="btn sm soft" data-act="edit" data-id="${esc(b.id)}">${ic('edit')}เติมข้อมูล</button>`, {note:true, pill:true})), 'ข้อมูลครบทุกรายการ');
   g('g-dirty','รอทำความสะอาด', q.dirty.slice().sort((a,b)=> (roomState(b.no).arriving?1:0) - (roomState(a.no).arriving?1:0)).map(r => { const rs = roomState(r.no); return `<div class="q-row" data-act="open-room" data-no="${esc(r.no)}"><div class="q-room">${esc(roomLabel(r.no))}</div><div><div class="q-name">${rs.arriving ? `<span class="pill dirty">ด่วน — แขกเข้าวันนี้</span>` : `<span class="pill dirty">รอทำความสะอาด</span>`}</div><div class="q-meta">${rs.arriving ? `<span>${esc(displayName(rs.arriving))} เช็คอินวันนี้</span>` : (rs.next ? `<span>แขกถัดไป ${fmtD(rs.next.checkin)} (${relDay(rs.next.checkin)})</span>` : '<span>ยังไม่มีแขกถัดไป</span>')}</div></div><div class="q-acts"><button class="btn sm good" data-act="clean-done" data-no="${esc(r.no)}">${ic('check')}สะอาดแล้ว</button></div></div>`; }), 'ทุกห้องสะอาดแล้ว');
-  $('queue').innerHTML = `<div class="card-h" style="padding-bottom:6px"><h2>คิวงานวันนี้</h2><span class="sub">เรียงตามความเร่งด่วน</span></div>` + groups.join('');
+  $('queue').innerHTML = `<div class="card-h" style="padding-bottom:6px"><h2>คิวงานวันนี้</h2><span class="sub">เรียงตามความเร่งด่วน</span><span class="grow"></span><button class="btn ghost sm" data-act="summary" title="สรุปงานวันนี้เป็นข้อความ — คัดลอกไปวางในกลุ่ม LINE ทีมงาน">${ic('copy')}สรุปส่ง LINE</button></div>` + groups.join('');
 
   // สถานะบ้าน
   const counts = { free:0, occ:0, arr:0, dep:0, dirty:0 }; ROOMS.forEach(r => counts[roomState(r.no).state]++);
@@ -651,7 +664,7 @@ function openBooking(id){
     body: `<div class="stay"><div><div class="l">เช็คอิน</div><div class="v">${fmtDY(b.checkin)}</div><div class="faint" style="font-size:12px">${isYMD(b.checkin)?TH_DOW[dow(b.checkin)]+(relDay(b.checkin)?' · '+relDay(b.checkin):''):'ต้องเติมข้อมูล'}</div></div><div class="arrow"><b>${isYMD(b.checkout)?nightsOf(b):'?'}</b>คืน</div><div style="text-align:right"><div class="l">เช็คเอาต์</div><div class="v">${isYMD(b.checkout)?fmtDY(b.checkout):'ไม่ทราบ'}</div><div class="faint" style="font-size:12px">${isYMD(b.checkout)?TH_DOW[dow(b.checkout)]+(relDay(b.checkout)?' · '+relDay(b.checkout):''):'ต้องเติมข้อมูล'}</div></div></div>
       <dl class="kv"><dt>ห้อง</dt><dd>${String(b.room_no||'').trim() ? `${esc(roomLabel(b.room_no))} <span class="faint" style="font-weight:400">· ${esc(r?r.type:'')}${CLEAN[b.room_no]==='dirty'?' · <span class="pill dirty">รอทำความสะอาด</span>':''}</span>` : (active(b)&&!isCheckedOut(b)?`<span class="pill arr">ยังไม่จัดห้อง</span>`:'—')}</dd>
       <dt>ผู้เข้าพัก</dt><dd>${String(b.guests||'').trim()?esc(b.guests)+' คน':'<span class="faint">ไม่ระบุ</span>'}${roomsCount(b)>1?` · ${roomsCount(b)} ห้อง`:''}</dd>
-      <dt>เบอร์โทร</dt><dd>${String(b.phone||'').trim()?`<a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a>`:'<span class="faint">—</span>'}</dd>
+      <dt>เบอร์โทร</dt><dd>${String(b.phone||'').trim()?`<a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a><div class="contact-row"><a class="btn sm" href="tel:${esc(b.phone)}">${ic('phone')}โทร</a><a class="btn sm wa" href="https://wa.me/${waNum(b.phone)}" target="_blank" rel="noopener">${ic('whatsapp')}WhatsApp</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(b.phone)}">${ic('copy')}คัดลอกเบอร์</button></div>`:'<span class="faint">—</span>'}</dd>
       ${isStaff()?'':`<dt>ยอด</dt><dd class="num">${hasAmt(b)?'฿'+baht(bahtNum(b.amount))+(isYMD(b.checkout)?` <span class="faint">(฿${baht(Math.round(bahtNum(b.amount)/nightsOf(b)))}/คืน)</span>`:''):'<span class="faint">ไม่ระบุ</span>'}</dd>`}
       <dt>ช่องทาง</dt><dd>${esc(b.source||'—')}</dd></dl>
       ${req?`<div class="notebox" style="border-color:var(--arr-line);background:var(--arr-bg);color:var(--arr-ink)">⚠ คำขอแขก: ${esc(req)}</div>`:''}
@@ -803,6 +816,49 @@ function buildConfirmMsg(b, lang, payLink){
   return lines.join('\n');
 }
 let msgCtx = null;
+/* ---------- ติดต่อแขก / คัดลอก ---------- */
+// เบอร์ไทย 08x → 668x สำหรับลิงก์ wa.me (ตัดทุกอย่างที่ไม่ใช่ตัวเลข)
+function waNum(p){ let d = String(p||'').replace(/\D/g,''); if (d.startsWith('00')) d = d.slice(2); if (d.startsWith('0')) d = '66' + d.slice(1); return d; }
+function copyText(t, okMsg, fallbackEl){
+  return (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject())
+    .then(() => toast(okMsg || 'คัดลอกแล้ว'))
+    .catch(() => { try { if (fallbackEl) { fallbackEl.select(); document.execCommand('copy'); toast(okMsg || 'คัดลอกแล้ว'); } else throw 0; } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } });
+}
+
+/* ---------- สรุปงานวันนี้ (ส่งกลุ่ม LINE ทีมงาน/แม่บ้าน) ---------- */
+function buildDailySummary(){
+  const q = todayQueue();
+  const tonight = Math.min(ROOMS.length, occupiedOn(TODAY)), free = ROOMS.length - tonight;
+  const L = [`🏠 House of Happiness — สรุปงาน ${fmtLong(TODAY)}`, ''];
+  const row = b => { const rm = String(b.room_no||'').trim() ? `ห้อง ${roomLabel(b.room_no)}` : 'ยังไม่จัดห้อง'; const req = guestReqOf(b); return `• ${rm} — ${displayName(b)} (${isYMD(b.checkout)?nightsOf(b):'?'} คืน · ${isDirect(b)?'จองตรง':'Booking.com'})${req?` ⚠ ${req}`:''}`; };
+  const sec = (title, items, mapFn, empty) => { L.push(`${title} ${items.length}`); if (items.length) items.forEach(x => L.push(mapFn(x))); else if (empty) L.push(`• ${empty}`); L.push(''); };
+  if (q.overdue.length) sec('🔴 เลยวันเช็คเอาต์ ยังไม่ได้กดออก', q.overdue, row);
+  sec('📥 เช็คอินวันนี้', q.arrivals, row, 'ไม่มีแขกเข้า');
+  sec('📤 เช็คเอาต์วันนี้', q.departures, row, 'ไม่มีแขกออก');
+  sec('🧹 รอทำความสะอาด', q.dirty, r => `• ห้อง ${roomLabel(r.no)}${roomState(r.no).arriving ? ' — ด่วน แขกเข้าวันนี้' : ''}`, 'สะอาดหมดทุกห้อง');
+  if (q.pending.length) sec('⏳ จองตรงรอยืนยัน', q.pending, b => `• ${displayName(b)} — ${fmtRange(b.checkin, b.checkout)}${String(b.phone||'').trim()?` · ${b.phone}`:''}`);
+  if (q.unassigned.length) sec('🗂 รอจัดห้อง (วันถัดไป)', q.unassigned, b => `• ${displayName(b)} — เข้า ${fmtDY(b.checkin)} (${relDay(b.checkin)})`);
+  L.push(`🛏 พักคืนนี้ ${tonight}/${ROOMS.length} ห้อง · ว่าง ${free}`);
+  return L.join('\n');
+}
+function openSummary(){
+  const t = buildDailySummary();
+  openSheet({
+    title: 'สรุปงานวันนี้',
+    sub: '<span class="faint">คัดลอกไปวางในกลุ่ม LINE ทีมงาน / แม่บ้าน — แก้ข้อความก่อนส่งได้</span>',
+    body: `<div class="f"><textarea id="sumBox" rows="14" style="min-height:280px;font-family:var(--mono);font-size:12.5px;line-height:1.5">${esc(t)}</textarea></div>`,
+    foot: `<button class="btn primary" data-act="copy-sum">${ic('copy')}คัดลอก</button>${navigator.share ? `<button class="btn" data-act="share-sum">${ic('share')}แชร์</button>` : ''}<button class="btn" data-act="print-today">${ic('printer')}พิมพ์</button><button class="btn" data-act="close-sheet">ปิด</button>`,
+  });
+}
+
+/* ---------- คีย์ลัด (คอม) ---------- */
+const SHORTCUTS = [['/', 'ค้นหา'], ['N', 'จองใหม่'], ['T', 'ไปหน้า "วันนี้"'], ['R', 'รีเฟรชข้อมูล'], ['[  ]', 'เลื่อนช่วงก่อนหน้า / ถัดไป (ไทม์ไลน์ · ปฏิทิน · รายรับ-รายจ่าย)'], ['Esc', 'ปิดแผง / ยกเลิกโหมดจัดห้อง'], ['?', 'เปิดรายการคีย์ลัดนี้']];
+function openShortcuts(){
+  openSheet({ title: 'คีย์ลัด', sub: '<span class="faint">ใช้ได้เมื่อไม่ได้พิมพ์อยู่ในช่องกรอก</span>',
+    body: `<div class="kbd-list">${SHORTCUTS.map(([k, d]) => `<div><kbd>${esc(k)}</kbd><span>${esc(d)}</span></div>`).join('')}</div>`,
+    foot: `<button class="btn" data-act="close-sheet">ปิด</button>` });
+}
+
 function openMsg(id, snap){
   const b = snap || bookingById(id); if(!b) return;
   msgCtx = { b, lang: 'th' };
@@ -841,7 +897,7 @@ async function deleteExpense(id){
 }
 function openMore(){
   const items = [['calendar','ปฏิทิน','calendar'],['bookings','รายการจอง','list']].concat(isStaff()?[]:[['money','รายรับ-รายจ่าย','wallet']]);
-  openSheet({ title:'เพิ่มเติม', body:`<div class="more-menu" style="display:block">${items.map(([v,l,i]) => `<button class="item" data-act="go" data-v="${v}">${ic(i)}${l}${ic('chevR')}</button>`).join('')}<button class="item" data-act="theme">${ic('moon')}สลับโหมดสว่าง/มืด</button><button class="item" data-act="refresh">${ic('refresh')}รีเฟรชข้อมูล</button><button class="item" data-act="logout">${ic('logout')}ออกจากระบบ</button></div>` });
+  openSheet({ title:'เพิ่มเติม', body:`<div class="more-menu" style="display:block">${items.map(([v,l,i]) => `<button class="item" data-act="go" data-v="${v}">${ic(i)}${l}${ic('chevR')}</button>`).join('')}<button class="item" data-act="summary">${ic('copy')}สรุปงานวันนี้ (ส่ง LINE)</button><button class="item" data-act="theme">${ic('moon')}สลับโหมดสว่าง/มืด</button><button class="item" data-act="refresh">${ic('refresh')}รีเฟรชข้อมูล</button><button class="item" data-act="logout">${ic('logout')}ออกจากระบบ</button></div>` });
 }
 
 /* ---------- Export CSV (มี BOM เปิดใน Excel ภาษาไทยไม่เพี้ยน + กัน formula injection) ---------- */
@@ -1142,6 +1198,12 @@ document.addEventListener('click', e => {
   else if(act==='msg-lang'){ document.querySelectorAll('[data-act="msg-lang"]').forEach(b => b.classList.toggle('on', b===el)); if(msgCtx){ msgCtx.lang = el.dataset.l; msgCtx.refresh(); } }
   else if(act==='copy-msg'){ const t = $('msgBox').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย')).catch(()=>{ try { $('msgBox').select(); document.execCommand('copy'); toast('คัดลอกแล้ว'); } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } }); }
   else if(act==='close-sheet') closeSheet();
+  else if(act==='summary'){ e.stopPropagation(); openSummary(); }
+  else if(act==='copy-sum'){ copyText($('sumBox').value, 'คัดลอกแล้ว — ไปวางในกลุ่ม LINE ได้เลย', $('sumBox')); }
+  else if(act==='share-sum'){ const t = $('sumBox').value; if(navigator.share) navigator.share({ text: t }).catch(()=>{}); else copyText(t, null, $('sumBox')); }
+  else if(act==='print-today'){ closeSheet(); if(state.view!=='today') go('today'); setTimeout(() => window.print(), 150); }
+  else if(act==='copy-text'){ e.stopPropagation(); copyText(el.dataset.text || ''); }
+  else if(act==='shortcuts'){ openShortcuts(); }
   else if(act==='save-room-note') saveRoomNote(no);
   else if(act==='scroll'){ const t = document.querySelector(el.dataset.to); if(t){ t.scrollIntoView({behavior:'smooth', block:'start'}); t.style.background='var(--brand-tint)'; setTimeout(()=>t.style.background='',900); } }
   else if(act==='toggle-tray'){ state.trayOpen = !state.trayOpen; renderTimeline(); paintIcons($('view-timeline')); }
@@ -1165,8 +1227,44 @@ $('sheetClose').addEventListener('click', closeSheet);
 $('backdrop').addEventListener('click', closeSheet);
 document.addEventListener('keydown', e => {
   if(e.key==='Escape'){ if($('sheet').classList.contains('on')) closeSheet(); else if(state.assign) cancelAssign(); }
-  if(e.key==='/' && DATA && !/input|textarea|select/i.test(document.activeElement.tagName)){ e.preventDefault(); $('q').focus(); }
+  const typing = /input|textarea|select/i.test(document.activeElement.tagName);
+  if(e.key==='/' && DATA && !typing){ e.preventDefault(); $('q').focus(); }
+  if(!DATA || typing || e.metaKey || e.ctrlKey || e.altKey) return;
+  if($('sheet').classList.contains('on') && e.key!=='?') return;
+  const k = e.key.toLowerCase();
+  if(k==='n'){ e.preventDefault(); openNew('', TODAY); }
+  else if(k==='t'){ e.preventDefault(); go('today'); }
+  else if(k==='r'){ e.preventDefault(); doRefresh(); }
+  else if(e.key==='?'){ e.preventDefault(); if($('sheet').classList.contains('on')) closeSheet(); else openShortcuts(); }
+  else if(e.key==='[' || e.key===']'){
+    const dir = e.key==='[' ? 'Prev' : 'Next';
+    const btn = { timeline:'tl', calendar:'cal', money:'exp' }[state.view];
+    if(btn){ e.preventDefault(); $(btn+dir).click(); }
+  }
 });
+$('shortcutsBtn') && $('shortcutsBtn').addEventListener('click', openShortcuts);
+$('syncChip') && $('syncChip').addEventListener('click', doRefresh);
+$('pwEye') && $('pwEye').addEventListener('click', () => {
+  const p = $('passInput'), show = p.type === 'password';
+  p.type = show ? 'text' : 'password';
+  $('pwEye').innerHTML = ICONS[show ? 'eyeOff' : 'eye'];
+  $('pwEye').setAttribute('aria-label', show ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน');
+  p.focus();
+});
+
+/* ---------- ข้อมูลสดอัตโนมัติ + สถานะออฟไลน์ ----------
+   หลังบ้านมักเปิดค้างบนแท็บเล็ตหน้าเคาน์เตอร์ทั้งวัน — กลับมาดูทีไรต้องเป็นข้อมูลล่าสุด */
+const STALE_MS = 90 * 1000, AUTO_MS = 5 * 60 * 1000;
+function maybeReload(force){
+  if (!DATA || !sessionStorage.getItem(KEY_STORE) || document.hidden || navigator.onLine === false) return;
+  if (force || Date.now() - SYNC_TS > STALE_MS) reload();
+}
+function paintOnline(){ const off = navigator.onLine === false; document.body.classList.toggle('offline', off); const bar = $('offlineBar'); if (bar) bar.hidden = !off; }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) maybeReload(false); });
+setInterval(() => maybeReload(false), AUTO_MS);
+window.addEventListener('online', () => { paintOnline(); if (DATA) { toast('กลับมาออนไลน์ — กำลังดึงข้อมูลล่าสุด'); maybeReload(true); } });
+window.addEventListener('offline', paintOnline);
+paintOnline();
 $('q').addEventListener('input', e => { state.q = e.target.value; if(state.view!=='bookings' && state.q.trim()){ go('bookings'); } else if(state.view==='bookings'){ renderBookings(); paintIcons($('view-bookings')); } });
 $('newBtn').addEventListener('click', () => openNew('', TODAY));
 $('refreshBtn').addEventListener('click', doRefresh);

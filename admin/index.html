@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/assets/fonts.css">
-<link rel="stylesheet" href="app.css?v=20">
+<link rel="stylesheet" href="app.css?v=21">
 </head>
 <body>
 
@@ -32,11 +32,15 @@
     <form id="loginForm">
       <div class="f-stack">
         <label class="sr-only" for="passInput">รหัสผ่าน</label>
-        <input type="password" id="passInput" placeholder="รหัสผ่าน" autocomplete="current-password" autofocus>
+        <div class="pw-wrap">
+          <input type="password" id="passInput" placeholder="รหัสผ่าน" autocomplete="current-password" enterkeyhint="go" autofocus>
+          <button type="button" class="pw-eye" id="pwEye" aria-label="แสดงรหัสผ่าน"><span class="ic" data-ic="eye"></span></button>
+        </div>
         <button class="btn primary lg" id="loginBtn" type="submit">เข้าสู่ระบบ</button>
       </div>
     </form>
     <div class="login-err" id="loginErr"></div>
+    <div class="login-foot">เฉพาะทีมงาน · ข้อมูลแขกเป็นความลับ · ติดตั้งเป็นแอปได้จากเมนูเบราว์เซอร์</div>
     <div class="notebox demo-note" id="demoHint">โหมดตัวอย่าง — ยังไม่ได้ตั้งรหัสจริง<br>เจ้าของ: <b>demo1234</b> · พนักงาน: <b>staff1234</b></div>
   </div>
 </div>
@@ -76,7 +80,8 @@
       </div>
       <div class="side-acts">
         <button class="side-act" id="themeBtn" title="สลับโหมดสว่าง/มืด"><span class="ic" data-ic="moon"></span><span id="themeLbl">ธีม</span></button>
-        <button class="side-act" id="refreshBtn" title="โหลดข้อมูลใหม่"><span class="ic" data-ic="refresh"></span>รีเฟรช</button>
+        <button class="side-act" id="refreshBtn" title="โหลดข้อมูลใหม่ (R)"><span class="ic" data-ic="refresh"></span>รีเฟรช</button>
+        <button class="side-act" id="shortcutsBtn" title="คีย์ลัด (?)"><span class="ic" data-ic="keyboard"></span>คีย์</button>
         <button class="side-act" id="logoutBtn" title="ออกจากระบบ"><span class="ic" data-ic="logout"></span>ออก</button>
       </div>
     </div>
@@ -89,13 +94,15 @@
         <div class="ctx" id="vCtx"></div>
       </div>
       <div class="grow"></div>
+      <button class="sync-chip" id="syncChip" type="button" title="ซิงก์ล่าสุด · แตะเพื่อรีเฟรช"></button>
       <label class="search" aria-label="ค้นหาการจอง">
         <span class="ic" data-ic="search"></span>
         <input id="q" type="search" placeholder="ค้นหาชื่อ / เบอร์ / ห้อง / เลขจอง" autocomplete="off">
         <span class="kbd">/</span>
       </label>
-      <button class="btn primary" id="newBtn"><span class="ic" data-ic="plus"></span><span class="lbl">จองใหม่</span></button>
+      <button class="btn primary" id="newBtn" title="จองใหม่ (N)"><span class="ic" data-ic="plus"></span><span class="lbl">จองใหม่</span></button>
     </header>
+    <div class="offline-bar" id="offlineBar" hidden><span class="ic" data-ic="wifiOff"></span>ออฟไลน์ — แสดงข้อมูลล่าสุดที่โหลดไว้ · การแก้ไขจะบันทึกไม่ได้จนกว่าเน็ตกลับมา</div>
 
     <div class="vbody">
       <!-- ================= TODAY ================= -->
@@ -282,6 +289,6 @@
 <div class="assign-bar" id="assignBar"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=20"></script>
+<script src="app.js?v=21"></script>
 </body>
 </html>

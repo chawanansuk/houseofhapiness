@@ -438,7 +438,7 @@ document.addEventListener("langchange", () => { availSig = ""; checkAvailability
 const _update = update;
 update = function () { _update(); checkAvailability(); };
 
-// นโยบายราคา: ไม่แสดง/ไม่คำนวณราคาห้องบนเว็บสาธารณะ (เงื่อนไข rate parity ของ OTA)
+// นโยบายราคา: ไม่แสดง/ไม่คำนวณราคาห้องบนเว็บสาธารณะ (นโยบาย rate parity)
 // แขกถามราคาในแชท — ทีมงานตอบตามเรทจริง (รวมเรทเทศกาลจากชีต) ได้เอง
 
 // บันทึกคำขอจองเข้าระบบหลังบ้าน — แสดงว่าบันทึกแล้วเฉพาะเมื่อ API ส่ง id กลับมา
