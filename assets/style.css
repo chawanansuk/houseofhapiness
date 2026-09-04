@@ -1004,25 +1004,6 @@ textarea { resize: vertical; min-height: 4.5rem; }
   .hero-book .btn { width: 100%; }
 }
 
-/* ── ทำไมต้องจองตรง ── */
-.wbd-table { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--card); }
-.wbd-row { display: grid; grid-template-columns: 130px 1fr 1fr; border-top: 1px solid var(--line); }
-.wbd-row:first-child { border-top: none; background: var(--gold-soft); }
-.wbd-row > div { padding: 0.85rem 1rem; font-size: 0.9rem; line-height: 1.55; }
-.wbd-row .lbl { font-family: "Prompt", sans-serif; font-weight: 600; color: var(--gold-dark); font-size: 0.84rem; }
-.wbd-row .good { border-left: 1px solid var(--line); background: #f6faf3; }
-.wbd-row .good::before { content: "✓ "; color: #3e7d4f; font-weight: 700; }
-.wbd-row .meh { border-left: 1px solid var(--line); color: var(--muted); }
-.wbd-row .meh::before { content: "✕ "; color: #b9a08c; font-weight: 700; }
-.wbd-head .good, .wbd-head .meh { font-family: "Prompt", sans-serif; font-weight: 700; color: var(--dark); background: none; }
-.wbd-head .good::before, .wbd-head .meh::before { content: ""; }
-.wbd-cta { text-align: center; margin-top: 1.6rem; }
-@media (max-width: 640px) {
-  .wbd-row { grid-template-columns: 1fr; }
-  .wbd-row .lbl { background: var(--gold-soft); padding-bottom: 0.5rem; }
-  .wbd-row .good, .wbd-row .meh { border-left: none; }
-  .wbd-head { display: none; }
-}
 
 /* ── การเดินทางมาที่พัก ── */
 .gh-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }

@@ -43,7 +43,11 @@ for (const page of ["index.html", "booking.html", "room-standard.html", "room-st
   const html = read(page);
   assert.doesNotMatch(html, /฿700|฿800|฿850|700 บาท|priceRange/, page + " must not show room rates (rate parity policy)");
   assert.doesNotMatch(html, /ราคาดีที่สุด|ราคาดีกว่า|best rate|better rates/i, page + " must not claim better/best rates vs OTA");
+  assert.doesNotMatch(html, /\bOTA\b|commission|คอมมิชชั่น|เว็บตัวกลาง|middleman|จองตรงถูกกว่า|cheaper booked direct/i, page + " must not compare against OTA / Booking.com");
 }
+assert.doesNotMatch(read("index.html"), /id="whydirect"|wbd-table/, "homepage must not carry the direct-vs-OTA comparison table");
+assert.doesNotMatch(read("index.html"), /instead of Booking\.com/i, "homepage FAQ must not frame itself against Booking.com");
+assert.doesNotMatch(read("assets/i18n.js"), /"wbd\.|\bOTA\b|คอมมิชชั่น|commission|ตัวกลาง/i, "shared i18n must not carry OTA comparison copy");
 assert.match(read("assets/i18n.js").match(/"faq\.a4":[\s\S]*?\},/)[0], /LINE\/WhatsApp/, "direct-booking FAQ must point guests to ask rates in chat");
 assert.doesNotMatch(read("assets/i18n.js"), /ราคาดีที่สุด|ราคาดีกว่า|best rate|better rates/i, "shared i18n must not carry rate-comparison claims");
 
@@ -54,6 +58,11 @@ assert.doesNotMatch(admin + adminJs, /_vercel\/insights/, "admin must not load p
 assert.match(admin, /role="dialog" aria-modal="true"/, "admin sheet must expose dialog semantics");
 assert.match(adminJs, /function safeCsvCell/, "CSV exports must sanitize spreadsheet formulas");
 assert.match(adminJs, /function exportSummaryCSV/, "monthly summary export must be available");
+assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becomes visible again (front-desk tablet stays open all day)");
+assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
+assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
+assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
+assert.match(admin, /app\.js\?v=21/, "admin cache-bust version must be bumped with app changes");
 
 // ── /api/site: ราคา 3 ห้อง + เรทเทศกาล ต้อง validate ก่อนส่งให้หน้าเว็บ ──
 const site = require("../api/site.js");
