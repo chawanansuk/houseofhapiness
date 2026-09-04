@@ -17,8 +17,10 @@ var TOKEN = "เปลี่ยนรหัสลับตรงนี้";
 var SHEET_NAME = "Bookings";
 var ROOMS_SHEET = "Rooms";
 var EXPENSES_SHEET = "Expenses";
+var ORDERS_SHEET = "Orders";
 var LABEL_DONE = "HOH-บันทึกแล้ว";
-var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no"];
+// paid = ยอดที่รับแล้ว (บาท) · pay_status = ค้างชำระ / มัดจำแล้ว / จ่ายครบ / จ่ายผ่าน Booking (v8 — ชีตเก่าจะเติมหัวคอลัมน์ให้เอง)
+var HEADERS = ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no", "paid", "pay_status"];
 var ROOM_HEADERS = ["room", "clean", "note"];
 // รายชื่อห้องจริง เรียงตามผังที่พนักงานคุ้นจาก AzHotel (แก้ชื่อ/ลำดับได้ในชีต Rooms)
 var REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707twin", "708twin",
@@ -32,6 +34,9 @@ var ROOM_RENAMES = {
   "715-สองเตียง": "715twin",
 };
 var EXP_HEADERS = ["id", "date", "category", "amount", "vendor", "method", "note", "created"];
+// ออเดอร์รูมเซอร์วิสจากหน้า services.html (ผ่าน /api/order) — สถานะ: รอยืนยัน → ยืนยันแล้ว → ส่งแล้ว / ยกเลิก
+var ORDER_HEADERS = ["id", "created", "name", "room", "date", "time", "items", "total", "note", "status", "paid", "lang", "channel"];
+var ORDER_EDITABLE = ["status", "paid", "note", "room", "date", "time", "name"];
 var SITE_SHEET = "Site";
 // แผงตั้งค่าเว็บ — แก้คอลัมน์ value ในแท็บ Site แล้วหน้าเว็บอัปเดตเองภายใน ~2 นาที
 var SITE_DEFAULTS = [
@@ -44,7 +49,7 @@ var SITE_DEFAULTS = [
 // เรทช่วงเทศกาล/วันหยุด — เพิ่มแถวในแท็บ Rates แล้วหน้าจองคิดราคาตามช่วงวันเอง
 var RATES_SHEET = "Rates";
 // คอลัมน์ที่หน้า /admin แก้ไขได้ผ่าน action=update
-var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests"];
+var EDITABLE = ["status", "room_no", "note", "checkin", "checkout", "amount", "name", "phone", "guests", "paid", "pay_status"];
 
 /* ═══════════════ ชีต ═══════════════ */
 
@@ -57,7 +62,16 @@ function getSheet_() {
     sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
   }
+  ensureHeaders_(sh, HEADERS);
   return sh;
+}
+
+// ชีตที่สร้างก่อนมีคอลัมน์ใหม่ (paid / pay_status) — เติมหัวคอลัมน์ที่ขาดต่อท้ายให้เอง ข้อมูลเดิมไม่ขยับ
+function ensureHeaders_(sh, headers) {
+  var have = sh.getLastColumn();
+  if (have >= headers.length) return;
+  for (var c = have; c < headers.length; c++) sh.getRange(1, c + 1).setValue(headers[c]);
+  sh.getRange(1, 1, 1, headers.length).setFontWeight("bold");
 }
 
 function readAll_() {
@@ -91,7 +105,7 @@ function appendBooking_(b) {
     nights, b.guests || "", b.rooms || "", b.phone || "", b.amount || "",
     b.status || "", b.note || "",
     Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd HH:mm"),
-    b.room_no || "",
+    b.room_no || "", b.paid || "", b.pay_status || "",
   ]);
 }
 
@@ -181,6 +195,59 @@ function deleteExpense_(id) {
       getExpensesSheet_().deleteRow(rows[i]._rowIndex);
       return true;
     }
+  }
+  return false;
+}
+
+/* ── ชีต Orders: ออเดอร์รูมเซอร์วิสจากเว็บ (แขกสั่งล่วงหน้า 1 วัน จ่ายเงินสดตอนรับ) ── */
+
+function getOrdersSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(ORDERS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(ORDERS_SHEET);
+    sh.appendRow(ORDER_HEADERS);
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, ORDER_HEADERS.length).setFontWeight("bold");
+  }
+  return sh;
+}
+
+function readOrders_() {
+  var sh = getOrdersSheet_();
+  var values = sh.getDataRange().getValues();
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    if (!asText_(values[i][0])) continue;
+    var row = {};
+    for (var c = 0; c < ORDER_HEADERS.length; c++) row[ORDER_HEADERS[c]] = asText_(values[i][c]);
+    row._rowIndex = i + 1;
+    rows.push(row);
+  }
+  return rows;
+}
+
+function appendOrder_(o) {
+  var sh = getOrdersSheet_();
+  var id = "RS-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyMMddHHmmss");
+  sh.appendRow([
+    id, Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd HH:mm"),
+    o.name || "", o.room || "", o.date || "", o.time || "", o.items || "", o.total || "",
+    o.note || "", o.status || "รอยืนยัน", "", o.lang || "th", o.channel || "",
+  ]);
+  return id;
+}
+
+function updateOrder_(id, fields) {
+  var rows = readOrders_();
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].id !== String(id)) continue;
+    var sh = getOrdersSheet_();
+    for (var k in fields) {
+      if (ORDER_EDITABLE.indexOf(k) < 0) continue;
+      sh.getRange(rows[i]._rowIndex, ORDER_HEADERS.indexOf(k) + 1).setValue(String(fields[k]));
+    }
+    return true;
   }
   return false;
 }
@@ -293,7 +360,8 @@ function doGet(e) {
     var rows = readAll_().map(function (r) { delete r._rowIndex; return r; });
     var rooms = readRooms_().map(function (r) { delete r._rowIndex; return r; });
     var exps = readExpenses_().map(function (r) { delete r._rowIndex; return r; });
-    return json_({ bookings: rows, rooms: rooms, expenses: exps });
+    var orders = readOrders_().map(function (r) { delete r._rowIndex; return r; });
+    return json_({ bookings: rows, rooms: rooms, expenses: exps, orders: orders });
   }
   // ค่าตั้งค่าเว็บ (ราคา/ประกาศ) + เรทช่วงเทศกาล — /api/site เรียกด้วย token ฝั่งเซิร์ฟเวอร์
   if (p.action === "site") {
@@ -347,6 +415,15 @@ function doPost(e) {
   }
   if (b.action === "expdel") {
     return json_(deleteExpense_(b.id) ? { ok: true } : { error: "not-found" });
+  }
+  // ออเดอร์รูมเซอร์วิส: เว็บส่งเข้ามา (orderadd) / หลังบ้านเปลี่ยนสถานะ-รับเงิน (orderupdate)
+  if (b.action === "orderadd") {
+    if (!b.name || !b.room || !b.date || !b.items) return json_({ error: "missing-fields" });
+    var orderId = appendOrder_(b);
+    return json_({ ok: true, id: orderId });
+  }
+  if (b.action === "orderupdate") {
+    return json_(updateOrder_(b.id, b.fields || {}) ? { ok: true } : { error: "not-found" });
   }
   return json_({ error: "unknown-action" });
 }

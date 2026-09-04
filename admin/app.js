@@ -97,6 +97,7 @@ let BOOKINGS = [];        // อ้าง object เดียวกับ DATA.b
 let ROOMS = [];           // [{no,label,type,twin,tag}]
 let CLEAN = {};           // {no:'dirty'}
 let ROOM_NOTES = {};      // {no: note}
+let ORDERS = [];          // ออเดอร์รูมเซอร์วิสจากเว็บ (แท็บ Orders)
 let SYNC_AT = '';
 let SYNC_TS = 0;          // เวลาซิงก์ล่าสุด (ms) — ใช้ตัดสินว่าข้อมูลเก่าพอจะดึงใหม่ไหม
 
@@ -110,6 +111,7 @@ function adopt(j){
   DATA = j;
   TODAY = j.today || toYMD(new Date());
   BOOKINGS = j.bookings || [];
+  ORDERS = j.orders || [];
   ROOMS = (j.rooms || []).map(r => roomMeta(String(r.room || '').trim())).filter(r => r.no);
   CLEAN = {}; ROOM_NOTES = {};
   (j.rooms || []).forEach(r => {
@@ -200,6 +202,139 @@ function monthStats(ym){
   return { nights, occ: Math.round(nights/(totalRooms*dim)*100), count, perDay, income };
 }
 
+/* ---------- การชำระเงิน (paid = รับแล้ว · pay_status = ค้างชำระ/มัดจำแล้ว/จ่ายครบ/จ่ายผ่าน Booking) ---------- */
+const PAY_LABEL = { unpaid:'ค้างชำระ', deposit:'มัดจำแล้ว', full:'จ่ายครบ', ota:'จ่ายผ่าน Booking', none:'ไม่ระบุยอด' };
+const PAY_OPTIONS = ['', 'ค้างชำระ', 'มัดจำแล้ว', 'จ่ายครบ', 'จ่ายผ่าน Booking'];
+function payState(b){
+  const st = String(b.pay_status||'');
+  if (/booking/i.test(st)) return 'ota';
+  if (/ครบ/.test(st)) return 'full';
+  if (/มัดจำ/.test(st)) return 'deposit';
+  if (/ค้าง/.test(st)) return 'unpaid';
+  if (!hasAmt(b)) return 'none';
+  const paid = bahtNum(b.paid);
+  if (paid >= bahtNum(b.amount)) return paid > 0 ? 'full' : 'unpaid';
+  return paid > 0 ? 'deposit' : 'unpaid';
+}
+const payPill = b => { const k = payState(b); return k==='none' ? '' : `<span class="pill pay ${k}">${PAY_LABEL[k]}${k==='deposit'&&bahtNum(b.paid)?` ฿${baht(bahtNum(b.paid))}`:''}</span>`; };
+// ค้างชำระที่ต้องตาม: ยังไม่เช็คเอาต์ มียอด และเข้าพักภายใน 7 วัน (รวมที่พักอยู่)
+function unpaidList(){
+  if (isStaff()) return [];
+  return BOOKINGS.filter(b => active(b) && !isCheckedOut(b) && hasAmt(b) && ['unpaid','deposit'].includes(payState(b)) && isYMD(b.checkin) && b.checkin <= addDays(TODAY, 7))
+    .sort((a,b) => String(a.checkin) < String(b.checkin) ? -1 : 1);
+}
+
+/* ---------- รูมเซอร์วิส (แท็บ Orders) ---------- */
+const orderCancelled = o => /ยกเลิก|cancel/i.test(String(o.status||''));
+const orderDone = o => /ส่งแล้ว|done|deliver/i.test(String(o.status||''));
+const orderConfirmed = o => !orderCancelled(o) && !orderDone(o) && /ยืนยันแล้ว|confirm/i.test(String(o.status||''));
+const orderPending = o => !orderCancelled(o) && !orderDone(o) && !orderConfirmed(o);
+const orderKey = o => orderCancelled(o) ? 'cancel' : orderDone(o) ? 'done' : orderConfirmed(o) ? 'confirmed' : 'pending';
+const ORDER_LABEL = { pending:'รอยืนยันในแชท', confirmed:'ยืนยันแล้ว · รอส่ง', done:'ส่งแล้ว · รับเงินสด', cancel:'ยกเลิก' };
+const ORDER_PILL = { pending:'pend', confirmed:'arr', done:'free', cancel:'dirty' };
+const orderById = id => ORDERS.find(o => String(o.id)===String(id));
+const ordersOn = d => ORDERS.filter(o => !orderCancelled(o) && String(o.date||'')===d).sort((a,b) => String(a.time) < String(b.time) ? -1 : 1);
+const ordersPending = () => ORDERS.filter(o => orderPending(o) && String(o.date||'') >= TODAY);
+const orderSlot = o => String(o.time||'') < '12:30' ? 'รอบเช้า 9:00–11:30' : 'รอบบ่าย 13:30–15:30';
+const orderItems = o => String(o.items||'').split(/;\s*/).filter(Boolean);
+// เช็คว่าห้อง+ชื่อที่แขกกรอกตรงกับการจองที่พักอยู่คืนนั้นไหม (กันส่งผิดห้อง/คนนอกสั่ง)
+const normName = n => String(n||'').toLowerCase().replace(/[^a-z0-9฀-๿]+/g,' ').trim();
+function orderMatch(o){
+  const no = ROOMS.find(r => r.label === String(o.room||'').trim() || r.no === String(o.room||'').trim());
+  if (!no) return { ok:false, reason:'ไม่มีห้องนี้', b:null };
+  const d = isYMD(o.date) ? o.date : TODAY;
+  const b = roomBookings(no.no).find(x => !isCheckedOut(x) && isYMD(x.checkin) && x.checkin <= d && effCheckout(x) >= d) || null;
+  if (!b) return { ok:false, reason:'ไม่มีแขกพักห้องนี้วันนั้น', b:null };
+  const a = normName(o.name), g = normName(b.name);
+  const tok = a.split(' ').filter(t => t.length >= 3);
+  const ok = !!a && !!g && (g.includes(a) || a.includes(g) || tok.some(t => g.includes(t)));
+  return { ok, reason: ok ? '' : `ชื่อไม่ตรงกับผู้จอง (${displayName(b)})`, b };
+}
+function orderRow(o, opts={}){
+  const k = orderKey(o), m = orderMatch(o), items = orderItems(o);
+  const acts = [];
+  if (k==='pending') acts.push(`<button class="btn sm good" data-act="order-confirm" data-id="${esc(o.id)}">${ic('check')}ยืนยัน</button>`);
+  if (k==='confirmed') acts.push(`<button class="btn sm primary" data-act="order-done" data-id="${esc(o.id)}">${ic('check')}ส่งแล้ว · รับ ฿${baht(bahtNum(o.total))}</button>`);
+  return `<div class="od-row ${k}" data-act="open-order" data-id="${esc(o.id)}">
+    <div class="od-time"><b>${esc(o.time||'—')}</b>${opts.date?`<small>${fmtD(o.date)}</small>`:''}</div>
+    <div class="q-room ${m.b?'':'none'}" style="width:48px;height:40px;font-size:14px">${esc(o.room||'?')}</div>
+    <div style="min-width:0">
+      <div class="q-name"><span class="nm">${esc(o.name||'ไม่มีชื่อ')}</span><span class="src ${o.channel==='whatsapp'?'wa':'direct'}">${o.channel==='whatsapp'?'WhatsApp':'LINE'}</span>${m.ok?'':`<span class="pill dirty" title="${esc(m.reason)}">⚠ ${esc(m.reason)}</span>`}</div>
+      <div class="od-items">${esc(items.join(' · ')) || '<span class="faint">—</span>'}</div>
+      ${String(o.note||'').trim()?`<div class="q-meta"><span>${ic('note')}${esc(o.note)}</span></div>`:''}
+    </div>
+    <div class="od-right"><div class="num od-total">฿${baht(bahtNum(o.total))}</div><span class="pill ${ORDER_PILL[k]}">${ORDER_LABEL[k]}</span></div>
+    <div class="q-acts">${acts.join('')}</div></div>`;
+}
+function renderOrders(){
+  const el = $('ordersCard'); if(!el) return;
+  const today = ordersOn(TODAY), tmr = ordersOn(addDays(TODAY,1));
+  const future = ORDERS.filter(o => !orderCancelled(o) && String(o.date||'') > addDays(TODAY,1)).length;
+  const sec = (title, list, empty) => `<div class="q-group"><div class="q-head">${title}<span class="n">${list.length}</span></div>${list.length ? list.map(o => orderRow(o)).join('') : `<div class="q-empty">${ic('checkCircle')}${empty}</div>`}</div>`;
+  const slots = list => { const am = list.filter(o => String(o.time||'') < '12:30'), pm = list.filter(o => String(o.time||'') >= '12:30'); return (am.length&&pm.length) ? `${sec('วันนี้ · รอบเช้า 9:00–11:30', am, '')}${sec('วันนี้ · รอบบ่าย 13:30–15:30', pm, '')}` : sec('วันนี้', list, 'ไม่มีออเดอร์วันนี้'); };
+  el.innerHTML = `<div class="card-h" style="padding-bottom:6px"><h2>รูมเซอร์วิส</h2><span class="sub">สั่งล่วงหน้าจากเว็บ · จ่ายเงินสดตอนส่ง</span><span class="grow"></span>${future?`<button class="btn ghost sm" data-act="orders-all">ถัดไปอีก ${future} ${ic('arrow')}</button>`:''}</div>
+    ${slots(today)}${sec('พรุ่งนี้ · เตรียมของ', tmr, 'ยังไม่มีออเดอร์พรุ่งนี้')}`;
+}
+function openOrder(id){
+  const o = orderById(id); if(!o) return;
+  const k = orderKey(o), m = orderMatch(o);
+  const acts = [];
+  if (k==='pending') acts.push(`<button class="btn good" data-act="order-confirm" data-id="${esc(o.id)}">${ic('check')}ยืนยันออเดอร์</button>`);
+  if (k==='confirmed') acts.push(`<button class="btn primary" data-act="order-done" data-id="${esc(o.id)}">${ic('check')}ส่งแล้ว · รับเงินสด ฿${baht(bahtNum(o.total))}</button>`);
+  if (k!=='cancel' && k!=='done') acts.push(`<button class="btn danger" data-act="order-cancel" data-id="${esc(o.id)}">ยกเลิกออเดอร์</button>`);
+  if (k==='cancel') acts.push(`<button class="btn soft" data-act="order-restore" data-id="${esc(o.id)}">กู้คืนเป็นยืนยันแล้ว</button>`);
+  const kitchen = [`🍽 ห้อง ${o.room} · ${fmtDY(o.date)} ${o.time}`, `ชื่อ: ${o.name}`].concat(orderItems(o).map(x => '• ' + x)).concat([`รวม ฿${baht(bahtNum(o.total))} (เงินสดตอนส่ง)`, String(o.note||'').trim() ? `หมายเหตุ: ${o.note}` : '']).filter(Boolean).join('\n');
+  openSheet({
+    title: `ออเดอร์ห้อง ${esc(o.room||'?')}`,
+    sub: `<span class="mono">#${esc(o.id)}</span> <span class="pill ${ORDER_PILL[k]}">${ORDER_LABEL[k]}</span> <span class="faint">สั่งเมื่อ ${esc(String(o.created||'').slice(0,16))} ทาง ${o.channel==='whatsapp'?'WhatsApp':'LINE'}</span>`,
+    body: `<div class="stay"><div><div class="l">รับอาหาร</div><div class="v">${fmtDY(o.date)}</div><div class="faint" style="font-size:12px">${isYMD(o.date)?TH_DOW[dow(o.date)]+(relDay(o.date)?' · '+relDay(o.date):''):''}</div></div><div class="arrow"><b>${esc(o.time||'—')}</b>${esc(orderSlot(o))}</div><div style="text-align:right"><div class="l">ยอดรวม</div><div class="v num">฿${baht(bahtNum(o.total))}</div><div class="faint" style="font-size:12px">เงินสดตอนส่ง</div></div></div>
+      <dl class="kv"><dt>ผู้สั่ง</dt><dd>${esc(o.name||'—')}</dd>
+      <dt>ห้อง</dt><dd>${esc(o.room||'—')}${m.b?` <span class="faint" style="font-weight:400">· ผู้จอง ${esc(displayName(m.b))} ${statusPill(m.b.status)}</span>`:''}</dd>
+      <dt>ตรวจสอบ</dt><dd>${m.ok?'<span class="pill free">✓ ชื่อ/ห้องตรงกับการจอง</span>':`<span class="pill dirty">⚠ ${esc(m.reason)}</span><div class="faint" style="font-size:12px;margin-top:4px">ทักถามในแชทก่อนยืนยัน</div>`}</dd>
+      <dt>รายการ</dt><dd><ul class="od-list">${orderItems(o).map(x => `<li>${esc(x)}</li>`).join('') || '<li class="faint">—</li>'}</ul></dd>
+      ${String(o.note||'').trim()?`<dt>หมายเหตุ</dt><dd>${esc(o.note)}</dd>`:''}
+      ${k==='done'?`<dt>รับเงินแล้ว</dt><dd class="num">฿${baht(bahtNum(o.paid||o.total))}</dd>`:''}</dl>
+      <div class="acts-grid">${acts.join('')}<button class="btn" data-act="copy-text" data-text="${esc(kitchen)}">${ic('copy')}คัดลอกส่งครัว</button></div>`,
+  });
+}
+function openOrdersAll(){
+  const list = ORDERS.filter(o => !orderCancelled(o) && String(o.date||'') >= TODAY).sort((a,b) => (a.date+a.time) < (b.date+b.time) ? -1 : 1);
+  openSheet({ title:'ออเดอร์รูมเซอร์วิสทั้งหมด', sub:`<span class="faint">${list.length} รายการที่ยังไม่ส่ง · เรียงตามวันรับอาหาร</span>`,
+    body: list.length ? list.map(o => orderRow(o, {date:true})).join('') : `<div class="q-empty">${ic('checkCircle')}ไม่มีออเดอร์ค้าง</div>`,
+    foot: `<button class="btn" data-act="close-sheet">ปิด</button>` });
+}
+async function setOrder(id, fields, msg){
+  const o = orderById(id); if(!o) return;
+  const r1 = await apiUpdate({ action:'orderupdate', id: o.id, fields });
+  if(!r1) return;
+  closeSheet();
+  await afterAction(() => Object.assign(o, fields), msg);
+}
+function openUnpaid(){
+  const list = unpaidList();
+  openSheet({ title:'ค้างชำระ', sub:'<span class="faint">การจองที่มียอดแต่ยังไม่ได้รับเงินครบ · เข้าพักภายใน 7 วัน — ถ้าแขก Booking.com จ่ายออนไลน์แล้ว ตั้งสถานะ "จ่ายผ่าน Booking" ในหน้าแก้ไข</span>',
+    body: list.length ? list.map(b => bookingRow(b, `${payPill(b)}<button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับครบ ฿${baht(bahtNum(b.amount))}</button>`, {amount:true})).join('') : `<div class="q-empty">${ic('checkCircle')}ไม่มีรายการค้างชำระ</div>`,
+    foot: `<button class="btn" data-act="close-sheet">ปิด</button>` });
+}
+async function payFull(id){
+  const b = bookingById(id); if(!b) return;
+  const fields = { paid: String(bahtNum(b.amount)), pay_status: 'จ่ายครบ' };
+  const r1 = await apiUpdate({ action:'update', id: b.id, fields });
+  if(!r1) return;
+  closeSheet();
+  await afterAction(() => Object.assign(b, fields), `บันทึกรับเงิน ${displayName(b)} ครบแล้ว`);
+}
+/* ---------- แม่บ้าน (การ์ดข้างในหน้าวันนี้ — แทนหน้าแยกเดิม) ---------- */
+function renderHK(){
+  const list = $('hkList'); if(!list) return;
+  const dirty = ROOMS.filter(r => CLEAN[r.no]==='dirty').map(r => ({r, rs: roomState(r.no)})).sort((a,b) => (b.rs.arriving?2:b.rs.next?1:0) - (a.rs.arriving?2:a.rs.next?1:0));
+  $('hkSub').textContent = dirty.length ? `${dirty.length} ห้องรอทำความสะอาด` : 'สะอาดหมดทุกห้อง';
+  list.innerHTML = dirty.length ? dirty.map(({r, rs}) => `<div class="hk-card ${rs.arriving?'urgent':''}" data-act="open-room" data-no="${esc(r.no)}"><div class="hk-no">${esc(roomLabel(r.no))}</div><div><div class="hk-title">${rs.arriving ? `ด่วน — ${esc(displayName(rs.arriving))} เช็คอินวันนี้` : (rs.next ? `แขกถัดไป ${relDay(rs.next.checkin)}` : 'ยังไม่มีแขกถัดไป')}</div><div class="hk-sub">${esc(r.type)}${guestReqOf(rs.arriving||{})?` · <b>⚠ ${esc(guestReqOf(rs.arriving))}</b>`:''}</div></div><button class="btn good sm" data-act="clean-done" data-no="${esc(r.no)}">${ic('check')}สะอาดแล้ว</button></div>`).join('')
+    : `<div class="q-empty">${ic('checkCircle')}ไม่มีห้องค้างทำความสะอาด</div>`;
+  $('hkFlag').innerHTML = `<div class="faint" style="font-size:12px;margin-bottom:8px">แตะห้องเพื่อแจ้ง "รอทำความสะอาด" (แตะสองครั้ง)</div><div class="hk-clean">${ROOMS.filter(r => CLEAN[r.no]!=='dirty').map(r => { const rs = roomState(r.no); return `<button class="${rs.inHouse?'occ-now':''}" data-act="clean-flag" data-no="${esc(r.no)}">${esc(roomLabel(r.no))}<small>${rs.inHouse ? 'มีแขกพัก' : (rs.arriving ? 'เข้าวันนี้' : 'ว่าง')}</small></button>`; }).join('')}</div>`;
+  $('hkFlag').classList.toggle('hide', !state.hkFlag);
+}
+
 /* ---------- state ---------- */
 const state = {
   view:'today', q:'',
@@ -207,7 +342,7 @@ const state = {
   assign:null, roomFilter:'all',
   calMonth: null, calDay: null,
   bkStatus:'all', bkSource:'', bkRange:'upcoming', bkCancel:false,
-  expMonth: null,
+  expMonth: null, hkFlag: false,
 };
 const role = () => (DATA && DATA.role) || 'admin';
 const isStaff = () => role() === 'staff';
@@ -254,22 +389,21 @@ async function afterAction(localMutate, msg){
 }
 
 /* ---------- navigation ---------- */
-const VIEWS = { today:['วันนี้',''], timeline:['ไทม์ไลน์','ผังการเข้าพักรายห้อง'], rooms:['ผังห้อง','สถานะห้องตอนนี้ · แตะห้องเพื่อจัดการ'], clean:['แม่บ้าน','คิวทำความสะอาดวันนี้'], calendar:['ปฏิทิน','ความหนาแน่นผู้เข้าพักรายเดือน'], bookings:['รายการจอง',''], money:['รายรับ-รายจ่าย','เฉพาะเจ้าของ'] };
-function go(v){ if(v==='money' && isStaff()) v='today'; state.view = v; try { if(location.hash !== '#'+v) history.replaceState(null,'','#'+v); } catch(e){} render(); window.scrollTo({top:0}); }
+const VIEWS = { today:['วันนี้',''], timeline:['ไทม์ไลน์','ผังการเข้าพักรายห้อง'], rooms:['ผังห้อง','สถานะห้องตอนนี้ · แตะห้องเพื่อจัดการ'], calendar:['ปฏิทิน','ความหนาแน่นผู้เข้าพักรายเดือน'], bookings:['รายการจอง',''], money:['รายรับ-รายจ่าย','เฉพาะเจ้าของ'] };
+function go(v){ if(v==='money' && isStaff()) v='today'; if(v==='clean') v='today'; /* หน้าแม่บ้านยุบเข้าหน้าวันนี้แล้ว */ state.view = v; try { if(location.hash !== '#'+v) history.replaceState(null,'','#'+v); } catch(e){} render(); window.scrollTo({top:0}); }
 function renderNav(){
   const q = todayQueue();
   document.querySelectorAll('.nav a, .tabbar button').forEach(a => a.classList.toggle('on', a.dataset.view===state.view));
   document.body.classList.toggle('staff-mode', isStaff());
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hide', isStaff()));
-  const tasks = q.arrivals.length + q.departures.length + q.pending.length + q.needsInfo.length + q.dirty.length + q.overdue.length;
+  const tasks = q.arrivals.length + q.departures.length + q.pending.length + q.needsInfo.length + q.dirty.length + q.overdue.length + ordersPending().length;
   const set = (id, n, hot) => { const el = $(id); if(!el) return; el.textContent = n||''; el.classList.toggle('hot', !!hot && !!n); };
   set('navTodayCnt', tasks, true);
-  set('navCleanCnt', q.dirty.length, q.dirty.some(r => roomState(r.no).arriving));
   set('navBookCnt', q.pending.length + q.needsInfo.length, false);
   const freeN = ROOMS.length - Math.min(ROOMS.length, occupiedOn(TODAY));
   set('navRoomsCnt', `${freeN} ว่าง`, false);
   const tb = $('tabTodayB'); tb.textContent = tasks; tb.classList.toggle('hide', !tasks);
-  const cb = $('tabCleanB'); cb.textContent = q.dirty.length; cb.classList.toggle('hide', !q.dirty.length);
+  const cb = $('tabBookB'); if(cb){ const n = q.pending.length + q.needsInfo.length; cb.textContent = n; cb.classList.toggle('hide', !n); }
   $('userRole').textContent = isStaff() ? 'พนักงาน · ไม่เห็นการเงิน' : 'เจ้าของ · เห็นทุกเมนู';
   $('userAvatar').textContent = isStaff() ? 'S' : 'H';
   const dark = document.documentElement.dataset.theme==='dark';
@@ -295,7 +429,7 @@ function render(){
   if (!DATA) return;
   renderNav(); renderHead();
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id==='view-'+state.view));
-  ({ today:renderToday, timeline:renderTimeline, rooms:renderRooms, clean:renderClean, calendar:renderCalendar, bookings:renderBookings, money:renderMoney })[state.view]();
+  ({ today:renderToday, timeline:renderTimeline, rooms:renderRooms, calendar:renderCalendar, bookings:renderBookings, money:renderMoney })[state.view]();
   paintIcons($('appView'));
 }
 
@@ -327,8 +461,9 @@ function renderToday(){
     ['pend','จองตรงรอยืนยัน', q.pending.length, q.pending.length ? `ใกล้สุด ${relDay(q.pending.map(b=>b.checkin).filter(isYMD).sort()[0]) || '—'}` : 'ไม่มีค้าง', '#g-pend'],
     ['info','รอเติมข้อมูล / รอจัดห้อง', q.needsInfo.length + q.unassigned.length, q.needsInfo.length ? `${q.needsInfo.length} รอเติมจาก Pulse` : (q.unassigned.length?`ใกล้สุด ${relDay(q.unassigned[0].checkin)}`:'ครบแล้ว'), q.needsInfo.length ? '#g-info' : '#g-un'],
     ['dirty','รอทำความสะอาด', q.dirty.length, q.dirty.some(r=>roomState(r.no).arriving) ? 'มีห้องที่แขกจะเข้าวันนี้' : (q.dirty.length?'ยังไม่ด่วน':'สะอาดหมด'), '#g-dirty'],
+    ...(isStaff() ? [] : [['pay','ค้างชำระ', unpaidList().length, unpaidList().length ? `รวม ฿${baht(unpaidList().reduce((s,b)=>s+Math.max(0,bahtNum(b.amount)-bahtNum(b.paid)),0))}` : 'รับครบทุกราย', 'unpaid']]),
   ];
-  $('tiles').innerHTML = tiles.map(([cls,lbl,n,hint,anchor]) => `<button class="tile ${n?'hot':'zero'}" data-act="scroll" data-to="${anchor}"><span class="lbl"><i class="dot ${cls}"></i>${lbl}</span><span class="val">${n}</span><span class="hint">${hint}</span><span class="go">${ic('arrow')}</span></button>`).join('');
+  $('tiles').innerHTML = tiles.map(([cls,lbl,n,hint,anchor]) => `<button class="tile ${n?'hot':'zero'}" ${anchor==='unpaid' ? 'data-act="unpaid"' : `data-act="scroll" data-to="${anchor}"`}><span class="lbl"><i class="dot ${cls}"></i>${lbl}</span><span class="val">${n}</span><span class="hint">${hint}</span><span class="go">${ic('arrow')}</span></button>`).join('');
 
   // แบนเนอร์สั้น ๆ: โหมดตัวอย่าง / เตือนนำเข้าไฟล์ Booking รายสัปดาห์
   const notes = [];
@@ -348,8 +483,10 @@ function renderToday(){
   g('g-pend','จองตรงรอยืนยัน', q.pending.slice().sort((a,b)=>String(a.checkin)<String(b.checkin)?-1:1).map(b => bookingRow(b, `<button class="btn sm ghost" data-act="msg" data-id="${esc(b.id)}" aria-label="ข้อความยืนยัน">${ic('message')}</button><button class="btn sm good" data-act="confirm-open" data-id="${esc(b.id)}">${ic('check')}ยืนยัน</button>`, {amount:true, note:true})), 'ไม่มีรายการรอยืนยัน');
   g('g-un','รอจัดห้อง (ยืนยันแล้ว · วันถัดไป)', q.unassigned.map(b => bookingRow(b, `<span class="faint" style="font-size:12px">${relDay(b.checkin)}</span><button class="btn sm" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`)), 'จัดห้องครบทุกรายการ');
   g('g-info','รอเติมข้อมูลจาก Pulse', q.needsInfo.map(b => bookingRow(b, `<button class="btn sm soft" data-act="edit" data-id="${esc(b.id)}">${ic('edit')}เติมข้อมูล</button>`, {note:true, pill:true})), 'ข้อมูลครบทุกรายการ');
-  g('g-dirty','รอทำความสะอาด', q.dirty.slice().sort((a,b)=> (roomState(b.no).arriving?1:0) - (roomState(a.no).arriving?1:0)).map(r => { const rs = roomState(r.no); return `<div class="q-row" data-act="open-room" data-no="${esc(r.no)}"><div class="q-room">${esc(roomLabel(r.no))}</div><div><div class="q-name">${rs.arriving ? `<span class="pill dirty">ด่วน — แขกเข้าวันนี้</span>` : `<span class="pill dirty">รอทำความสะอาด</span>`}</div><div class="q-meta">${rs.arriving ? `<span>${esc(displayName(rs.arriving))} เช็คอินวันนี้</span>` : (rs.next ? `<span>แขกถัดไป ${fmtD(rs.next.checkin)} (${relDay(rs.next.checkin)})</span>` : '<span>ยังไม่มีแขกถัดไป</span>')}</div></div><div class="q-acts"><button class="btn sm good" data-act="clean-done" data-no="${esc(r.no)}">${ic('check')}สะอาดแล้ว</button></div></div>`; }), 'ทุกห้องสะอาดแล้ว');
   $('queue').innerHTML = `<div class="card-h" style="padding-bottom:6px"><h2>คิวงานวันนี้</h2><span class="sub">เรียงตามความเร่งด่วน</span><span class="grow"></span><button class="btn ghost sm" data-act="summary" title="สรุปงานวันนี้เป็นข้อความ — คัดลอกไปวางในกลุ่ม LINE ทีมงาน">${ic('copy')}สรุปส่ง LINE</button></div>` + groups.join('');
+
+  renderOrders();
+  renderHK();
 
   // สถานะบ้าน
   const counts = { free:0, occ:0, arr:0, dep:0, dirty:0 }; ROOMS.forEach(r => counts[roomState(r.no).state]++);
@@ -444,16 +581,6 @@ function renderRooms(){
   $('roomLegend').innerHTML = ['free','occ','arr','dep','dirty'].map(k => `<span><i class="dot ${k}"></i>${ST_LABEL[k]}<b>${counts[k]||0}</b></span>`).join('');
 }
 
-/* ---------- CLEAN ---------- */
-function renderClean(){
-  const dirty = ROOMS.filter(r => CLEAN[r.no]==='dirty').map(r => ({r, rs: roomState(r.no)})).sort((a,b) => (b.rs.arriving?2:b.rs.next?1:0) - (a.rs.arriving?2:a.rs.next?1:0));
-  $('dirtySub').textContent = dirty.length ? `${dirty.length} ห้อง · ห้องที่แขกจะเข้าวันนี้ขึ้นก่อน` : 'ไม่มีห้องค้าง';
-  $('dirtyList').innerHTML = dirty.length ? dirty.map(({r, rs}) => `<div class="hk-card ${rs.arriving?'urgent':''}"><div class="hk-no">${esc(roomLabel(r.no))}</div><div><div class="hk-title">${rs.arriving ? `ด่วน — ${esc(displayName(rs.arriving))} เช็คอินวันนี้` : (rs.next ? `แขกถัดไป ${fmtD(rs.next.checkin)} (${relDay(rs.next.checkin)})` : 'ยังไม่มีแขกถัดไป')}</div><div class="hk-sub">${esc(r.type)}${r.twin?' · 2 เตียง':''} · แขกก่อนหน้าออก ${(() => { const last = roomBookings(r.no).filter(b => isCheckedOut(b) && isYMD(b.checkout)).sort((a,b)=>a.checkout<b.checkout?1:-1)[0]; return last ? (relDay(last.checkout)||fmtD(last.checkout)) : '—'; })()}${rs.arriving && guestReqOf(rs.arriving) ? ` · <b>⚠ ${esc(guestReqOf(rs.arriving))}</b>`:''}</div></div><button class="btn good lg" data-act="clean-done" data-no="${esc(r.no)}">${ic('check')}สะอาดแล้ว</button></div>`).join('') : `<div class="empty">${ic('checkCircle')}<b>ทุกห้องสะอาดแล้ว</b><span>เมื่อแขกเช็คเอาต์ ห้องจะเข้าคิวที่นี่อัตโนมัติ</span></div>`;
-  const q = todayQueue();
-  $('departList').innerHTML = q.departures.length ? q.departures.map(b => `<div><span class="rm">${esc(roomLabel(b.room_no))}</span><span>${esc(displayName(b))}</span>${statusPill(b.status)}<span class="tm">${/สาย|late/i.test(String(b.note||'')) ? 'ขอออกสาย' : 'ออกก่อน 12:00'}</span></div>`).join('') : `<div class="faint" style="padding:10px 16px 14px;font-size:13px">ไม่มีแขกเช็คเอาต์วันนี้</div>`;
-  $('cleanGrid').innerHTML = ROOMS.filter(r => CLEAN[r.no]!=='dirty').map(r => { const rs = roomState(r.no); return `<button class="${rs.inHouse?'occ-now':''}" data-act="clean-flag" data-no="${esc(r.no)}">${esc(roomLabel(r.no))}<small>${rs.inHouse ? 'มีแขกพัก' : rs.arriving ? 'เข้าวันนี้' : 'ว่าง'}</small></button>`; }).join('');
-}
-
 /* ---------- CALENDAR ---------- */
 function renderCalendar(){
   if (!state.calMonth) { state.calMonth = TODAY.slice(0,7); state.calDay = TODAY; }
@@ -519,7 +646,7 @@ function renderBookings(){
       <div class="bk-date"><span class="d">${fmtD(b.checkin)} → ${isYMD(b.checkout)?fmtD(b.checkout):'?'}</span><br><span class="n">${isYMD(b.checkout)?nightsOf(b)+' คืน':'ไม่ทราบวันออก'}${relDay(b.checkin)?' · '+relDay(b.checkin):''}</span></div>
       ${nameCell}
       <div class="bk-room ${String(b.room_no||'').trim()?'':'none'}">${String(b.room_no||'').trim()?esc(roomLabel(b.room_no)):(active(b)&&!isCheckedOut(b)?'ยังไม่จัดห้อง':'—')}</div>
-      <div class="bk-amt ${hasAmt(b)?'':'none'}">${hasAmt(b)?baht(bahtNum(b.amount)):'—'}</div>
+      <div class="bk-amt ${hasAmt(b)?'':'none'}">${hasAmt(b)?baht(bahtNum(b.amount)):'—'}${!isStaff()&&hasAmt(b)&&payState(b)!=='none'?`<small class="pay ${payState(b)}">${PAY_LABEL[payState(b)]}</small>`:''}</div>
       <div class="bk-status">${statusPill(b.status)}</div>
       <div class="bk-more">${ic('chevR')}</div></button>`);
   });
@@ -537,10 +664,11 @@ function monthlySeries(){
   for(let i=5;i>=0;i--){ const d = new Date(y0, m0-1-i, 1); months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
   return months.map(m => ({
     m,
-    income: BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(m)).reduce((s,b)=>s+bahtNum(b.amount),0),
+    income: BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(m)).reduce((s,b)=>s+bahtNum(b.amount),0) + rsIncome(m),
     expense: (DATA.expenses||[]).filter(e => String(e.date||'').startsWith(m)).reduce((s,e)=>s+bahtNum(e.amount),0),
   }));
 }
+const rsIncome = ym => ORDERS.filter(o => orderDone(o) && String(o.date||'').startsWith(ym)).reduce((s,o)=>s+(bahtNum(o.paid)||bahtNum(o.total)),0);
 function renderMoney(){
   if (isStaff()) { go('today'); return; }
   if (!state.expMonth) state.expMonth = TODAY.slice(0,7);
@@ -548,9 +676,10 @@ function renderMoney(){
   $('expMonthLbl').textContent = fmtMonth(ym);
   const exp = (DATA.expenses||[]).filter(e => String(e.date||'').startsWith(ym));
   const expSum = exp.reduce((s,e)=>s+bahtNum(e.amount),0);
-  const income = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
+  const roomInc = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
+  const rsInc = rsIncome(ym), income = roomInc + rsInc;
   $('moneyTiles').innerHTML = [
-    ['รายรับ', income, `${fmtMonth(ym)} · จากการจองที่บันทึกยอด (ตามเดือนเช็คอิน)`],
+    ['รายรับ', income, `ห้องพัก ฿${baht(roomInc)} (ตามเดือนเช็คอิน) · รูมเซอร์วิส ฿${baht(rsInc)}`],
     ['รายจ่าย', expSum, `${exp.length} รายการ`],
     ['คงเหลือ', income-expSum, `กำไรขั้นต้น ${income?Math.round((income-expSum)/income*100):0}%`],
   ].map(([l,v,h]) => `<div class="tile"><span class="lbl">${l}</span><span class="val num">฿${baht(v)}</span><span class="hint">${h}</span></div>`).join('');
@@ -666,6 +795,7 @@ function openBooking(id){
       <dt>ผู้เข้าพัก</dt><dd>${String(b.guests||'').trim()?esc(b.guests)+' คน':'<span class="faint">ไม่ระบุ</span>'}${roomsCount(b)>1?` · ${roomsCount(b)} ห้อง`:''}</dd>
       <dt>เบอร์โทร</dt><dd>${String(b.phone||'').trim()?`<a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a><div class="contact-row"><a class="btn sm" href="tel:${esc(b.phone)}">${ic('phone')}โทร</a><a class="btn sm wa" href="https://wa.me/${waNum(b.phone)}" target="_blank" rel="noopener">${ic('whatsapp')}WhatsApp</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(b.phone)}">${ic('copy')}คัดลอกเบอร์</button></div>`:'<span class="faint">—</span>'}</dd>
       ${isStaff()?'':`<dt>ยอด</dt><dd class="num">${hasAmt(b)?'฿'+baht(bahtNum(b.amount))+(isYMD(b.checkout)?` <span class="faint">(฿${baht(Math.round(bahtNum(b.amount)/nightsOf(b)))}/คืน)</span>`:''):'<span class="faint">ไม่ระบุ</span>'}</dd>`}
+      ${isStaff()||!hasAmt(b)?'':`<dt>ชำระ</dt><dd>${payPill(b)}${bahtNum(b.paid)?` <span class="faint" style="font-weight:400">รับแล้ว ฿${baht(bahtNum(b.paid))}${bahtNum(b.amount)>bahtNum(b.paid)?` · ค้าง ฿${baht(bahtNum(b.amount)-bahtNum(b.paid))}`:''}</span>`:''}${['unpaid','deposit'].includes(payState(b))?`<div class="contact-row"><button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับเงินครบแล้ว</button></div>`:''}</dd>`}
       <dt>ช่องทาง</dt><dd>${esc(b.source||'—')}</dd></dl>
       ${req?`<div class="notebox" style="border-color:var(--arr-line);background:var(--arr-bg);color:var(--arr-ink)">⚠ คำขอแขก: ${esc(req)}</div>`:''}
       ${nt?`<div class="notebox" style="margin-top:${req?'8px':'0'}">${esc(nt)}</div>`:''}
@@ -708,13 +838,14 @@ function formHTML(b){
     <div class="f"><label for="fRoom">ห้อง</label><select id="fRoom">${roomOpts}</select><span class="help">ระบบจะเตือนถ้าห้องไม่ว่างในช่วงวันที่เลือก</span></div>
     <div class="f-grid"><div class="f"><label for="fGuests">จำนวนผู้เข้าพัก</label><input id="fGuests" inputmode="numeric" value="${esc(b.guests||'')}" placeholder="2"></div>${isStaff()?'<div></div>':`<div class="f"><label for="fAmt">ยอด (฿)</label><input id="fAmt" inputmode="decimal" value="${esc(b.amount||'')}" placeholder="เช่น 2,700"></div>`}</div>
     <div class="f"><label for="fPhone">เบอร์โทร</label><input id="fPhone" value="${esc(b.phone||'')}" placeholder="ถ้ามี"></div>
+    ${isStaff()?'':`<div class="f-grid"><div class="f"><label for="fPaid">รับเงินแล้ว (฿)</label><input id="fPaid" inputmode="decimal" value="${esc(b.paid||'')}" placeholder="0 = ยังไม่รับ"></div><div class="f"><label for="fPay">สถานะชำระ</label><select id="fPay">${PAY_OPTIONS.map(o => `<option value="${esc(o)}" ${String(b.pay_status||'')===o?'selected':''}>${o||'อัตโนมัติ (ดูจากยอดที่รับ)'}</option>`).join('')}</select></div></div>`}
     <div class="f"><label for="fNote">หมายเหตุ</label><textarea id="fNote" placeholder="คำขอพิเศษ เวลาถึง ฯลฯ">${esc(b.note||'')}</textarea></div></div>`;
 }
 function openEdit(id){
   const b = bookingById(id); if(!b) return;
   openSheet({ title: needsFix(b) ? 'เติมข้อมูลจาก Pulse' : 'แก้ไขการจอง', sub: `${srcMark(b)} <span class="mono">#${esc(b.id)}</span>${needsFix(b)?' <span class="faint">เปิดแอป Pulse → ค้นเลขจองนี้ → คัดลอกชื่อและวันจริงมาใส่</span>':''}`, body: formHTML(b), foot: `<button class="btn primary" data-act="save-edit" data-id="${esc(b.id)}">บันทึก</button><button class="btn" data-act="close-sheet">ยกเลิก</button>` });
 }
-function readForm(){ const v = id => { const el = $(id); return el ? el.value.trim() : ''; }; return { name:v('fName'), checkin:v('fIn'), checkout:v('fOut'), room_no:v('fRoom'), guests:v('fGuests'), amount:v('fAmt'), phone:v('fPhone'), note:v('fNote') }; }
+function readForm(){ const v = id => { const el = $(id); return el ? el.value.trim() : ''; }; return { name:v('fName'), checkin:v('fIn'), checkout:v('fOut'), room_no:v('fRoom'), guests:v('fGuests'), amount:v('fAmt'), phone:v('fPhone'), note:v('fNote'), paid:v('fPaid'), pay_status:v('fPay') }; }
 function validateForm(f, excludeId){
   if(!f.checkin) return 'กรุณาใส่วันเช็คอิน';
   if(f.checkout && f.checkout <= f.checkin) return 'วันเช็คเอาต์ต้องหลังวันเช็คอิน';
@@ -725,7 +856,7 @@ async function saveEdit(id){
   const b = bookingById(id); if(!b) return;
   const f = readForm(); const err = validateForm(f, id); if(err){ toast(err, true); return; }
   const fields = { name: f.name, checkin: f.checkin, checkout: f.checkout, room_no: f.room_no, phone: f.phone, guests: f.guests, note: f.note };
-  if(!isStaff()) fields.amount = f.amount;
+  if(!isStaff()){ fields.amount = f.amount; fields.paid = f.paid; fields.pay_status = f.pay_status; }
   // เติมครบแล้ว: ล้างโน้ตเตือนของตัวแกะอีเมล + เปลี่ยนสถานะจาก "รอเติมชื่อ" เป็นยืนยันแล้ว
   if(fields.name && f.checkin && f.checkout && /อ่านวันที่จากอีเมลไม่ได้|รอเติมชื่อจาก Pulse|ยืนยันวันจริง|เปิดแอป Pulse/.test(String(b.note||''))) fields.note = '';
   if(needsFix(b) && fields.name && f.checkin && f.checkout && /รอเติม/.test(String(b.status||''))) fields.status = 'ยืนยันแล้ว';
@@ -751,7 +882,7 @@ async function saveNew(){
   const err = validateForm(f); if(err){ toast(err, true); return; }
   const body = { action: 'add', name: f.name, checkin: f.checkin, checkout: f.checkout, room_no: f.room_no,
     phone: f.phone, guests: f.guests, source: $('fSrc').value, status: $('fStatus').value,
-    amount: isStaff() ? '' : f.amount, note: f.note };
+    amount: isStaff() ? '' : f.amount, note: f.note, paid: isStaff() ? '' : f.paid, pay_status: isStaff() ? '' : f.pay_status };
   const r1 = await apiUpdate(body);
   if(!r1) return;
   closeSheet();
@@ -838,6 +969,8 @@ function buildDailySummary(){
   sec('🧹 รอทำความสะอาด', q.dirty, r => `• ห้อง ${roomLabel(r.no)}${roomState(r.no).arriving ? ' — ด่วน แขกเข้าวันนี้' : ''}`, 'สะอาดหมดทุกห้อง');
   if (q.pending.length) sec('⏳ จองตรงรอยืนยัน', q.pending, b => `• ${displayName(b)} — ${fmtRange(b.checkin, b.checkout)}${String(b.phone||'').trim()?` · ${b.phone}`:''}`);
   if (q.unassigned.length) sec('🗂 รอจัดห้อง (วันถัดไป)', q.unassigned, b => `• ${displayName(b)} — เข้า ${fmtDY(b.checkin)} (${relDay(b.checkin)})`);
+  const od = ordersOn(TODAY);
+  if (od.length) sec('🍽 รูมเซอร์วิสวันนี้ (เงินสดตอนส่ง)', od, o => `• ${o.time} ห้อง ${o.room} — ${o.name}: ${orderItems(o).join(', ')} = ฿${baht(bahtNum(o.total))}${orderPending(o)?' (ยังไม่ยืนยันในแชท)':''}`);
   L.push(`🛏 พักคืนนี้ ${tonight}/${ROOMS.length} ห้อง · ว่าง ${free}`);
   return L.join('\n');
 }
@@ -1199,6 +1332,15 @@ document.addEventListener('click', e => {
   else if(act==='copy-msg'){ const t = $('msgBox').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย')).catch(()=>{ try { $('msgBox').select(); document.execCommand('copy'); toast('คัดลอกแล้ว'); } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } }); }
   else if(act==='close-sheet') closeSheet();
   else if(act==='summary'){ e.stopPropagation(); openSummary(); }
+  else if(act==='open-order'){ e.stopPropagation(); openOrder(id); }
+  else if(act==='orders-all'){ e.stopPropagation(); openOrdersAll(); }
+  else if(act==='order-confirm'){ e.stopPropagation(); setOrder(id, { status:'ยืนยันแล้ว' }, 'ยืนยันออเดอร์แล้ว — อย่าลืมตอบแขกในแชท'); }
+  else if(act==='order-done'){ e.stopPropagation(); const o = orderById(id); if(o) setOrder(id, { status:'ส่งแล้ว', paid: String(bahtNum(o.total)) }, `ส่งแล้ว · รับเงินสด ฿${baht(bahtNum(o.total))}`); }
+  else if(act==='order-cancel'){ e.stopPropagation(); if(el.dataset.armed){ setOrder(id, { status:'ยกเลิก' }, 'ยกเลิกออเดอร์แล้ว'); } else { el.dataset.armed='1'; el.textContent='แตะอีกครั้งเพื่อยืนยันการยกเลิก'; } }
+  else if(act==='order-restore'){ e.stopPropagation(); setOrder(id, { status:'ยืนยันแล้ว' }, 'กู้คืนออเดอร์แล้ว'); }
+  else if(act==='unpaid'){ openUnpaid(); }
+  else if(act==='pay-full'){ e.stopPropagation(); payFull(id); }
+  else if(act==='hk-toggle'){ state.hkFlag = !state.hkFlag; $('hkFlag').classList.toggle('hide', !state.hkFlag); }
   else if(act==='copy-sum'){ copyText($('sumBox').value, 'คัดลอกแล้ว — ไปวางในกลุ่ม LINE ได้เลย', $('sumBox')); }
   else if(act==='share-sum'){ const t = $('sumBox').value; if(navigator.share) navigator.share({ text: t }).catch(()=>{}); else copyText(t, null, $('sumBox')); }
   else if(act==='print-today'){ closeSheet(); if(state.view!=='today') go('today'); setTimeout(() => window.print(), 150); }
@@ -1287,7 +1429,7 @@ $('expCsv').addEventListener('click', exportExpensesCSV);
 $('sumCsv').addEventListener('click', exportSummaryCSV);
 $('expPrev').addEventListener('click', () => { const [y,m] = (state.expMonth||TODAY.slice(0,7)).split('-').map(Number); const d = new Date(y, m-2, 1); state.expMonth = toYMD(d).slice(0,7); renderMoney(); paintIcons($('view-money')); });
 $('expNext').addEventListener('click', () => { const [y,m] = (state.expMonth||TODAY.slice(0,7)).split('-').map(Number); const d = new Date(y, m, 1); state.expMonth = toYMD(d).slice(0,7); renderMoney(); paintIcons($('view-money')); });
-window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if(VIEWS[v] && v!==state.view && DATA) go(v); });
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if(v==='clean' && DATA){ go('today'); return; } if(VIEWS[v] && v!==state.view && DATA) go(v); });
 let resizeT;
 window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if(state.view==='timeline' && DATA){ renderTimeline(); paintIcons($('view-timeline')); } }, 150); });
 initTlDrag();

@@ -32,6 +32,10 @@ function resetDB(){
       mkB("BDC-2008", "", 4, null, "Booking.com", "รอเติมชื่อจาก Pulse", { amount: "" }),
     ],
     expenses: [],
+    orders: [
+      { id: "RS-1", created: today + " 08:00", name: "Mei-Lin Chao", room: "703", date: today, time: "09:30", items: "ผัดไทย (กุ้ง) × 2 — ฿200; ชาไทย × 1 — ฿40", total: "240", note: "", status: "ยืนยันแล้ว", paid: "", lang: "en", channel: "line" },
+      { id: "RS-2", created: today + " 19:00", name: "Somchai Nobody", room: "709", date: d(1), time: "10:00", items: "มัสมั่น (ไก่) × 1 — ฿100", total: "100", note: "ไม่เผ็ด", status: "รอยืนยัน", paid: "", lang: "th", channel: "whatsapp" },
+    ],
   };
 }
 resetDB();
@@ -45,7 +49,7 @@ const server = http.createServer((req, res) => {
     if (key !== "x" && key !== "staffpass") { res.statusCode = 401; return res.end(JSON.stringify({ ok: false, error: "unauthorized", demo: false })); }
     const role = key === "staffpass" ? "staff" : "admin";
     const bookings = DB.bookings.map((b) => role === "staff" ? { ...b, amount: "" } : b);
-    return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, sources: { sheet: true, ical: false } }));
+    return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, orders: DB.orders, sources: { sheet: true, ical: false } }));
   }
   if (url === "/api/update") {
     let body = ""; req.on("data", (c) => body += c);
@@ -56,6 +60,7 @@ const server = http.createServer((req, res) => {
       if (j.action === "roomclean") { const r = DB.rooms.find((x) => x.room === j.room); if (r) { r.clean = j.clean; if (j.note !== undefined) r.note = j.note; } }
       if (j.action === "add") DB.bookings.push({ ...j, id: "WEB-E2E-NEW", rooms: 1 });
       if (j.action === "expadd") DB.expenses.push({ ...j, id: "EXP-E2E-1" });
+      if (j.action === "orderupdate") { const o = DB.orders.find((x) => x.id === j.id); if (o && j.fields) Object.assign(o, j.fields); }
       res.setHeader("Content-Type", "application/json");
       res.end(JSON.stringify({ ok: true, saved: true, id: "WEB-E2E-NEW" }));
     });
@@ -88,7 +93,7 @@ const server = http.createServer((req, res) => {
   const pageErrors = [];
   dt.on("pageerror", (e) => pageErrors.push(String(e)));
   await login(dt, "x");
-  check("ล็อกอินแล้วเห็นหน้า 'วันนี้' พร้อม tiles 5 ใบ", await dt.locator("#tiles .tile").count() === 5);
+  check("ล็อกอินแล้วเห็นหน้า 'วันนี้' พร้อม tiles 6 ใบ (รวมค้างชำระสำหรับเจ้าของ)", await dt.locator("#tiles .tile").count() === 6);
   check("คิวงานวันนี้มีแขกมาถึง (Amara)", (await dt.locator("#queue").innerText()).includes("Amara Okafor"));
 
   // 1) เช็คอินห้องสกปรกต้องถูกบล็อก (716 รอทำความสะอาด)
@@ -250,6 +255,47 @@ const server = http.createServer((req, res) => {
   await dt.waitForTimeout(600);
   check("เน็ตกลับมาแล้วแถบออฟไลน์หาย", await dt.locator("#offlineBar[hidden]").count() === 1);
 
+  /* ── รูมเซอร์วิส (ออเดอร์จากเว็บ) + ชำระเงิน + แม่บ้านเป็นการ์ดข้าง ── */
+  await dt.evaluate(() => { location.hash = "#today"; });
+  await dt.waitForTimeout(300);
+  check("หน้าวันนี้: การ์ดรูมเซอร์วิสแสดงออเดอร์วันนี้ (Mei-Lin ห้อง 703 ผัดไทย)", (await dt.locator("#ordersCard").innerText()).includes("ผัดไทย") && await dt.locator('#ordersCard .od-row[data-id="RS-1"]').count() === 1);
+  check("ออเดอร์พรุ่งนี้ที่ชื่อไม่ตรงกับผู้จองห้อง 709 (Kenji) ขึ้นป้ายเตือน", (await dt.locator('#ordersCard .od-row[data-id="RS-2"]').innerText()).includes("ชื่อไม่ตรง"));
+  check("ไม่มีหน้าแม่บ้านแยกแล้ว แต่มีการ์ดแม่บ้านในหน้าวันนี้ (ห้องงิ้ว3 รอทำความสะอาด)", await dt.locator('.nav a[data-view="clean"]').count() === 0 && (await dt.locator("#g-dirty").innerText()).includes("งิ้ว3"));
+  await dt.locator('#ordersCard [data-act="order-done"][data-id="RS-1"]').click();
+  await dt.waitForTimeout(700);
+  const od1 = updates.find((u) => u.action === "orderupdate" && u.id === "RS-1");
+  check("กด 'ส่งแล้ว · รับเงินสด' → {action:'orderupdate', fields:{status:'ส่งแล้ว', paid:'240'}}", !!od1 && od1.fields.status === "ส่งแล้ว" && od1.fields.paid === "240");
+  await dt.locator('#ordersCard .od-row[data-id="RS-2"]').click();
+  await dt.waitForTimeout(300);
+  check("แตะออเดอร์เปิด sheet รายละเอียด + ปุ่มยืนยัน", (await dt.locator("#sheetTitle").innerText()).includes("709") && await dt.locator('#sheet [data-act="order-confirm"]').count() === 1);
+  await dt.locator('#sheet [data-act="order-confirm"]').click();
+  await dt.waitForTimeout(700);
+  const od2 = updates.find((u) => u.action === "orderupdate" && u.id === "RS-2");
+  check("ยืนยันออเดอร์ → {action:'orderupdate', fields:{status:'ยืนยันแล้ว'}}", !!od2 && od2.fields.status === "ยืนยันแล้ว");
+  await dt.locator('#queue [data-act="summary"]').click();
+  await dt.waitForTimeout(300);
+  check("สรุปส่ง LINE มีรายการรูมเซอร์วิสวันนี้", (await dt.inputValue("#sumBox")).includes("รูมเซอร์วิสวันนี้"));
+  await dt.keyboard.press("Escape");
+  await dt.waitForTimeout(200);
+  // ชำระเงิน: ธนากร (จองตรง ฿2,700 ยังไม่จ่าย) ต้องอยู่ในค้างชำระ → กดรับครบ
+  check("tile ค้างชำระนับการจองที่มียอดแต่ยังไม่รับเงิน", (await dt.locator('#tiles [data-act="unpaid"]').innerText()).includes("ค้างชำระ"));
+  await dt.locator('#tiles [data-act="unpaid"]').click();
+  await dt.waitForTimeout(300);
+  check("แผงค้างชำระมีธนากร ฿2,700", (await dt.locator("#sheetBody").innerText()).includes("ธนากร"));
+  await dt.locator('#sheet [data-act="pay-full"][data-id="WEB-2005"]').click();
+  await dt.waitForTimeout(700);
+  const pay = updates.find((u) => u.action === "update" && u.id === "WEB-2005" && u.fields && u.fields.pay_status);
+  check("รับเงินครบ → {action:'update', fields:{paid:'2700', pay_status:'จ่ายครบ'}}", !!pay && pay.fields.paid === "2700" && pay.fields.pay_status === "จ่ายครบ");
+  await dt.evaluate(() => { location.hash = "#bookings"; });
+  await dt.waitForTimeout(400);
+  check("รายการจองแสดงป้ายสถานะชำระใต้ยอด", (await dt.locator('#bkList [data-id="WEB-2005"] .bk-amt').innerText()).includes("จ่ายครบ"));
+  await dt.evaluate(() => { location.hash = "#money"; });
+  await dt.waitForTimeout(400);
+  check("รายรับเดือนนี้รวมรูมเซอร์วิสที่ส่งแล้ว (฿240)", (await dt.locator("#moneyTiles").innerText()).includes("รูมเซอร์วิส ฿240"));
+  await dt.evaluate(() => { location.hash = "#clean"; });
+  await dt.waitForTimeout(300);
+  check("ลิงก์เก่า #clean เด้งไปหน้าวันนี้", await dt.locator("#view-today.on").count() === 1);
+
   /* ── พนักงาน: เมนูการเงินต้องหาย ── */
   resetDB();
   const stf = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "th-TH" })).newPage();
@@ -260,6 +306,7 @@ const server = http.createServer((req, res) => {
   check("หน้าล็อกอิน: ปุ่มตาสลับแสดง/ซ่อนรหัสผ่าน", (await stf.getAttribute("#passInput", "type")) === "text");
   await login(stf, "staffpass");
   check("พนักงาน: เมนูรายรับ-รายจ่ายถูกซ่อน", await stf.locator('.nav a[data-view="money"].hide').count() === 1);
+  check("พนักงาน: ไม่เห็น tile ค้างชำระ แต่เห็นออเดอร์รูมเซอร์วิส (ต้องส่งของ/รับเงินสด)", await stf.locator('#tiles [data-act="unpaid"]').count() === 0 && await stf.locator("#ordersCard .od-row").count() >= 1);
   await stf.evaluate(() => { location.hash = "#money"; });
   await stf.waitForTimeout(400);
   check("พนักงานเข้า #money แล้วเด้งกลับหน้า 'วันนี้'", await stf.evaluate(() => location.hash) === "#today");
@@ -270,16 +317,16 @@ const server = http.createServer((req, res) => {
   const mob = await (await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "th-TH", hasTouch: true })).newPage();
   await login(mob, "x");
   check("มือถือ: เห็น tabbar 5 ปุ่ม", await mob.locator("#tabbar button").count() === 5);
-  await mob.locator('#tabbar button[data-view="clean"]').click();
+  await mob.locator('#tabbar button[data-view="bookings"]').click();
   await mob.waitForTimeout(400);
-  check("แตะแท็บแม่บ้านแล้วเปิดหน้าแม่บ้าน", await mob.locator("#view-clean.on").count() === 1);
+  check("แตะแท็บรายการจอง (แทนแม่บ้านเดิม) แล้วเปิดหน้ารายการจอง", await mob.locator("#view-bookings.on").count() === 1);
   await mob.locator('#tabbar button[data-view="more"]').click();
   await mob.waitForTimeout(300);
   check("แท็บ 'เพิ่มเติม' เปิด sheet เมนู (มีรายรับ-รายจ่ายสำหรับเจ้าของ)", (await mob.locator("#sheetBody").innerText()).includes("รายรับ-รายจ่าย"));
   await mob.keyboard.press("Escape");
   await mob.waitForTimeout(200);
   let overflow = 0;
-  for (const v of ["today", "timeline", "rooms", "clean", "calendar", "bookings"]) {
+  for (const v of ["today", "timeline", "rooms", "calendar", "bookings"]) {
     await mob.evaluate((vv) => { location.hash = "#" + vv; }, v);
     await mob.waitForTimeout(300);
     overflow += await mob.evaluate(() => Math.max(0, document.documentElement.scrollWidth - (window.innerWidth + 1)));

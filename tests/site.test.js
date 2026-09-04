@@ -36,6 +36,7 @@ assert.match(services, /ขั้นต่ำ ฿100/, "room service must state 
 assert.doesNotMatch(services, /จองตรงกับเรา/, "booking CTA must not appear on the room service page (confusing next to food ordering)");
 assert.match(services, /สั่งล่วงหน้าอย่างน้อย 1 วัน/, "room service page must state the 1-day advance-order rule");
 assert.match(services, /จ่ายเงินสดตอนรับอาหาร/, "room service page must state cash-on-delivery payment");
+assert.match(services, /fetch\("\/api\/order"/, "room service orders must also be recorded to the back office (/api/order)");
 
 // นโยบาย rate parity: หน้าสาธารณะห้ามมีราคาห้อง/ข้อความเคลมเทียบ OTA — แขกถามราคาทาง LINE/WhatsApp
 for (const page of ["index.html", "booking.html", "room-standard.html", "room-studio.html",
@@ -62,7 +63,15 @@ assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becom
 assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
 assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
 assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
-assert.match(admin, /app\.js\?v=21/, "admin cache-bust version must be bumped with app changes");
+assert.match(admin, /app\.js\?v=22/, "admin cache-bust version must be bumped with app changes");
+assert.doesNotMatch(admin, /id="view-clean"|data-view="clean"/, "housekeeping is a side card on the today view now, not a separate view");
+assert.match(admin, /id="ordersCard"/, "today view must have the room-service orders card");
+assert.match(adminJs, /function renderOrders/, "admin must render room-service orders");
+assert.match(adminJs, /function payState/, "admin must track booking payment state");
+assert.match(read("backoffice/apps-script.gs"), /ORDERS_SHEET = "Orders"/, "Apps Script must have the Orders tab");
+assert.match(read("backoffice/apps-script.gs"), /"paid", "pay_status"\]/, "Apps Script bookings must carry payment columns");
+assert.match(read("backoffice/apps-script.gs"), /action === "orderadd"|action === "orderupdate"/, "Apps Script must accept order actions");
+assert.match(read("api/update.js"), /"orderupdate"/, "update API must allow order status changes");
 
 // ── /api/site: ราคา 3 ห้อง + เรทเทศกาล ต้อง validate ก่อนส่งให้หน้าเว็บ ──
 const site = require("../api/site.js");

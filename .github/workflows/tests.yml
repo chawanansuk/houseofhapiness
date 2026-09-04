@@ -43,6 +43,9 @@ jobs:
       - name: Test admin update API
         run: node tests/update.test.js
 
+      - name: Test room-service order API
+        run: node tests/order.test.js
+
       - name: Test Booking.com email parser
         run: node tests/booking-email-parser.test.js
 

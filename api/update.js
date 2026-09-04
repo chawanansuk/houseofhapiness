@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
 
   const b = (req.body && typeof req.body === "object") ? req.body : {};
   const action = String(b.action || "");
-  if (!["update", "roomclean", "add", "expadd", "expdel"].includes(action)) {
+  if (!["update", "roomclean", "add", "expadd", "expdel", "orderupdate"].includes(action)) {
     return res.status(400).json({ ok: false, error: "unknown-action" });
   }
 

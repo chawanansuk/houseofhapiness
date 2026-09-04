@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/assets/fonts.css">
-<link rel="stylesheet" href="app.css?v=21">
+<link rel="stylesheet" href="app.css?v=22">
 </head>
 <body>
 
@@ -61,7 +61,6 @@
         <a href="#today" data-view="today"><span class="ic" data-ic="sun"></span>วันนี้<span class="cnt" id="navTodayCnt"></span></a>
         <a href="#timeline" data-view="timeline"><span class="ic" data-ic="timeline"></span>ไทม์ไลน์</a>
         <a href="#rooms" data-view="rooms"><span class="ic" data-ic="grid"></span>ผังห้อง<span class="cnt" id="navRoomsCnt"></span></a>
-        <a href="#clean" data-view="clean"><span class="ic" data-ic="sparkle"></span>แม่บ้าน<span class="cnt" id="navCleanCnt"></span></a>
       </div>
       <div class="nav-group">
         <div class="nav-label">ข้อมูล</div>
@@ -110,11 +109,19 @@
         <div class="tiles" id="tiles"></div>
         <div id="todayNotes"></div>
         <div class="grid-2" style="margin-top:20px">
-          <div class="card" id="queue"></div>
+          <div class="stack">
+            <div class="card" id="queue"></div>
+            <div class="card" id="ordersCard"></div>
+          </div>
           <div class="stack">
             <div class="card">
               <div class="card-h"><h2>สถานะบ้านตอนนี้</h2><span class="sub" id="houseSub"></span><span class="grow"></span><button class="btn ghost sm" data-go="rooms">ผังห้อง <span class="ic" data-ic="arrow"></span></button></div>
               <div class="card-b" id="house"></div>
+            </div>
+            <div class="card" id="g-dirty">
+              <div class="card-h"><h2>แม่บ้าน</h2><span class="sub" id="hkSub"></span><span class="grow"></span><button class="btn ghost sm" data-act="hk-toggle" id="hkToggle" title="แจ้งห้องที่ต้องทำความสะอาดเพิ่ม"><span class="ic" data-ic="broom"></span>แจ้งห้อง</button></div>
+              <div id="hkList"></div>
+              <div class="card-b hide" id="hkFlag"></div>
             </div>
             <div class="card">
               <div class="card-h"><h2>7 วันข้างหน้า</h2><span class="sub">เข้า / ออก / พักคืนนั้น</span><span class="grow"></span><button class="btn ghost sm" data-go="timeline">ไทม์ไลน์ <span class="ic" data-ic="arrow"></span></button></div>
@@ -175,25 +182,6 @@
         </div>
       </section>
 
-      <!-- ================= CLEAN ================= -->
-      <section class="view" id="view-clean">
-        <div class="hk">
-          <div class="stack">
-            <div class="card">
-              <div class="card-h"><h2>ต้องทำความสะอาด</h2><span class="sub" id="dirtySub"></span></div>
-              <div id="dirtyList" style="padding-top:8px"></div>
-            </div>
-            <div class="card">
-              <div class="card-h"><h2>จะว่างวันนี้</h2><span class="sub">แขกเช็คเอาต์แล้วห้องจะเข้าคิวอัตโนมัติ</span></div>
-              <div class="upcoming" id="departList" style="padding-top:6px"></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-h"><h2>ห้องสะอาดแล้ว</h2><span class="sub">แตะห้องเพื่อแจ้ง "รอทำความสะอาด"</span></div>
-            <div class="card-b"><div class="hk-clean" id="cleanGrid"></div></div>
-          </div>
-        </div>
-      </section>
 
       <!-- ================= CALENDAR ================= -->
       <section class="view" id="view-calendar">
@@ -270,7 +258,7 @@
   <button data-view="today"><span class="ic" data-ic="sun"></span>วันนี้<span class="b hide" id="tabTodayB"></span></button>
   <button data-view="timeline"><span class="ic" data-ic="timeline"></span>ไทม์ไลน์</button>
   <button data-view="rooms"><span class="ic" data-ic="grid"></span>ห้อง</button>
-  <button data-view="clean"><span class="ic" data-ic="sparkle"></span>แม่บ้าน<span class="b hide" id="tabCleanB"></span></button>
+  <button data-view="bookings"><span class="ic" data-ic="list"></span>รายการจอง<span class="b hide" id="tabBookB"></span></button>
   <button data-view="more"><span class="ic" data-ic="more"></span>เพิ่มเติม</button>
 </nav>
 
@@ -289,6 +277,6 @@
 <div class="assign-bar" id="assignBar"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=21"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>

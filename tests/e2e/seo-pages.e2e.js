@@ -99,6 +99,17 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     href.includes("line.me/R/oaMessage") && href.includes(encodeURIComponent("701"))
     && href.includes(encodeURIComponent("Somchai Test")) && href.includes(encodeURIComponent("มัสมั่น"))
     && href.includes(encodeURIComponent("09:30")) && href.includes(encodeURIComponent("× 2")));
+  // กดส่งแล้วต้องบันทึกออเดอร์เข้าหลังบ้าน (/api/order) ครั้งเดียว แม้กดทั้ง LINE และ WhatsApp
+  // (fetch keepalive ไม่ผ่าน page.route ของ Chromium — ดักที่ window.fetch แทน)
+  await rs.evaluate(()=>{ window.__orders=[]; window.fetch=(u,o)=>{ if(String(u).includes("/api/order")) window.__orders.push(JSON.parse(o.body)); return Promise.resolve(new Response('{"ok":true,"id":"RS-E2E"}',{status:201})); };
+    document.querySelectorAll(".rs-send").forEach(a=>a.addEventListener("click",e=>e.preventDefault())); });
+  await rs.click("#rsSend");
+  await rs.click("#rsSendWa");
+  await rs.waitForTimeout(300);
+  const orderPosts=await rs.evaluate(()=>window.__orders);
+  check("services: กดส่งแล้ว POST /api/order ครั้งเดียว พร้อมชื่อ/ห้อง/เวลา/รายการ",
+    orderPosts.length===1 && orderPosts[0].name==="Somchai Test" && orderPosts[0].room==="701" && orderPosts[0].time==="09:30"
+    && Array.isArray(orderPosts[0].items) && orderPosts[0].items.some(i=>i.id==="massaman" && i.qty===2 && i.price===100));
   const hrefWa=await rs.getAttribute("#rsSendWa","href");
   check("services: ลิงก์ WhatsApp มีออร์เดอร์เดียวกัน",
     hrefWa.includes("wa.me/66994419465") && hrefWa.includes(encodeURIComponent("701"))
