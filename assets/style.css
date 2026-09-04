@@ -1391,7 +1391,7 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
   min-height: clamp(340px, 46vw, 520px); display: flex; align-items: flex-end; color: #fff8ef; background: var(--dark); }
 .ld-hero.cover img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .ld-hero.cover::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(62,47,35,.12) 0%, rgba(62,47,35,.32) 40%, rgba(46,33,22,.93) 100%); }
+  background: linear-gradient(180deg, rgba(62,47,35,.34) 0%, rgba(62,47,35,.42) 40%, rgba(46,33,22,.94) 100%); }
 .ld-hero.cover .in { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; width: 100%; padding: 2.6rem 1.4rem 2.2rem; }
 .ld-hero.cover .kicker { font-family: "Prompt", sans-serif; font-size: .74rem; letter-spacing: .3em; text-transform: uppercase;
   color: #e9cfa8; font-weight: 600; margin-bottom: .7rem; display: flex; align-items: center; gap: .6rem; }
@@ -1436,3 +1436,15 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
   .ld-steps li { padding: .85rem .9rem .85rem 3.1rem; }
   .ld-cta { padding: 1.2rem 1rem; }
 }
+
+/* ═══ Luxury pass 2 — หน้าที่เหลือ ═══ */
+.ld-room .pr { display: block; margin-top: .25rem; }
+.ld-hero.cover .ld-price { color: #e9cfa8; font-family: "Prompt", sans-serif; font-size: .95rem; margin: .1rem 0 .55rem; }
+/* หน้าจอง: hero มืดหรูแบบเดียวกับหน้าบทความ */
+.hero.bk-hero { color: #fff8ef; border-bottom: 0; border-radius: 0 0 28px 28px; overflow: hidden;
+  padding: clamp(3.4rem, 8vw, 5rem) 1.5rem clamp(2.4rem, 6vw, 3.4rem);
+  background:
+    linear-gradient(180deg, rgba(62,47,35,.22) 0%, rgba(62,47,35,.42) 45%, rgba(46,33,22,.92) 100%),
+    url("../images/attractions/riverboat.jpg") center 60% / cover no-repeat, var(--dark); }
+.hero.bk-hero h1 { color: #fff8ef; text-shadow: 0 2px 18px rgba(0,0,0,.35); font-size: clamp(2rem, 5.5vw, 3.4rem); }
+.hero.bk-hero .sub { color: #e9cfa8; }

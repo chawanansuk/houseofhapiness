@@ -31,13 +31,14 @@
 <link rel="preload" as="image" href="images/local/satay.webp" type="image/webp" fetchpriority="high">
 <style>
 /* ── สไตล์เฉพาะหน้า "กิน-เที่ยวรอบซอย" ── */
-.lc-hero{position:relative; padding:4.6rem 1.2rem 3rem; text-align:center; overflow:hidden}
+.lc-hero{position:relative; padding:5.4rem 1.2rem 2.8rem; text-align:center; overflow:hidden; color:#fff8ef; border-radius:0 0 28px 28px}
 .lc-hero::before{content:""; position:absolute; inset:0; background:url("images/local/satay.webp") center 40%/cover; z-index:-2}
-.lc-hero::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(247,241,230,0.93),rgba(247,241,230,0.88) 55%,var(--bg,#f7f1e6)); z-index:-1}
-.lc-hero h1{font-family:var(--font-display); font-size:clamp(1.7rem,4.6vw,2.7rem); color:var(--dark); margin-bottom:0.6rem}
-.lc-hero p{color:var(--muted); max-width:46em; margin:0 auto; line-height:1.75}
+.lc-hero::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(62,47,35,.28),rgba(62,47,35,.45) 45%,rgba(46,33,22,.93)); z-index:-1}
+.lc-kicker{font-family:"Prompt",sans-serif; font-size:.74rem; letter-spacing:.3em; text-transform:uppercase; color:#e9cfa8; font-weight:600; margin-bottom:.7rem}
+.lc-hero h1{font-family:var(--font-display); font-size:clamp(1.8rem,4.8vw,3rem); color:#fff8ef; margin-bottom:0.6rem; text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.lc-hero p{color:rgba(255,248,239,.9); max-width:46em; margin:0 auto; line-height:1.75}
 .lc-stats{display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap; margin-top:1.2rem}
-.lc-stats span{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:0.35rem 0.95rem; font-size:0.82rem; font-weight:700; color:var(--gold-dark); font-family:"Prompt",sans-serif}
+.lc-stats span{background:rgba(255,248,239,.14); border:1.5px solid rgba(255,248,239,.38); border-radius:999px; padding:0.4rem 0.95rem; font-size:0.84rem; font-weight:600; color:#fff8ef; font-family:"Prompt",sans-serif; backdrop-filter:blur(6px)}
 .lc-wrap{max-width:1080px; margin:0 auto; padding:0 1.2rem 3.5rem}
 .lc-group{margin:2.6rem 0 1.1rem; display:flex; align-items:center; gap:0.7rem}
 .lc-group h2{font-family:"Prompt",sans-serif; font-size:1.12rem; color:var(--gold-dark); white-space:nowrap}
@@ -114,6 +115,7 @@
 </nav>
 
 <header class="lc-hero">
+  <div class="lc-kicker">Neighbourhood Guide · ท่าดินแดง คลองสาน</div>
   <h1 data-i18n="lc.title">กิน-เที่ยวรอบซอย ท่าดินแดง</h1>
   <p data-i18n="lc.sub">ไกด์ลับฉบับเจ้าของที่พัก — ร้านอร่อยหน้าปากซอยที่คนท้องถิ่นกินจริง และเส้นทางเดินเที่ยวคลองสานที่นักท่องเที่ยวส่วนใหญ่ไม่รู้จัก</p>
   <div class="lc-stats">
