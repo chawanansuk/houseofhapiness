@@ -148,18 +148,28 @@
     <span data-i18n="hero.rating">คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com</span>
   </div>
   <ul class="highlights">
-    <li><span class="ico">⭐</span><span data-i18n="hl.1">คะแนนรีวิว 8.8/10</span></li>
-    <li><span class="ico">🤝</span><span data-i18n="hl.2">คุยกับเจ้าของที่พักโดยตรง</span></li>
-    <li><span class="ico">🛶</span><span data-i18n="hl.3">ใกล้แม่น้ำเจ้าพระยา</span></li>
-    <li><span class="ico">⚡</span><span data-i18n="hl.4">ยืนยันภายใน 24 ชม.</span></li>
+    <li><span class="ico" data-icon="star" aria-hidden="true"></span><span data-i18n="hl.1">คะแนนรีวิว 8.8/10</span></li>
+    <li><span class="ico" data-icon="chat" aria-hidden="true"></span><span data-i18n="hl.2">คุยกับเจ้าของที่พักโดยตรง</span></li>
+    <li><span class="ico" data-icon="river" aria-hidden="true"></span><span data-i18n="hl.3">ใกล้แม่น้ำเจ้าพระยา</span></li>
+    <li><span class="ico" data-icon="bolt" aria-hidden="true"></span><span data-i18n="hl.4">ยืนยันภายใน 24 ชม.</span></li>
   </ul>
 </header>
 
 <main class="site" id="main">
+  <section id="numbers" class="reveal proof" aria-label="ตัวเลขของเรา">
+    <div class="numband">
+      <div><div class="n">15</div><div class="l" data-i18n="nb.l1">ยูนิตทั้งหมด</div></div>
+      <div><div class="n">8.8<span style="font-size:0.55em">/10</span></div><div class="l" data-i18n="nb.l2">คะแนนจากผู้เข้าพักจริง</div></div>
+      <div><div class="n">770+</div><div class="l" data-i18n="nb.l3">รีวิวบน Booking.com</div></div>
+      <div><div class="n">~2 <span style="font-size:0.55em" data-i18n="nb.km">กม.</span></div><div class="l" data-i18n="nb.l4">ถึง ICONSIAM</div></div>
+      <div><div class="n">24<span style="font-size:0.55em" data-i18n="nb.hr">ชม.</span></div><div class="l" data-i18n="nb.l5">ยืนยันการจองภายใน</div></div>
+    </div>
+  </section>
+
   <section id="rooms" class="reveal">
     <div class="sec-head"><h2 data-i18n="rooms.title">ห้องพักและราคา</h2></div>
     <div class="room-card">
-      <img class="room-thumb" src="images/standard.jpg" alt="Standard Apartment" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()">
+      <span class="room-pic"><img class="room-thumb" src="images/standard.jpg" alt="Standard Apartment" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span></span>
       <div class="info">
         <h3 data-i18n="rooms.std.name">ห้อง Standard — เตียงใหญ่</h3>
         <p data-i18n="rooms.std.desc"></p>
@@ -171,7 +181,7 @@
       </div>
     </div>
     <div class="room-card" style="margin-top:1.2rem">
-      <img class="room-thumb" src="images/studio.jpg" alt="Studio Apartment twin beds" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()">
+      <span class="room-pic"><img class="room-thumb" src="images/studio.jpg" alt="Studio Apartment twin beds" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span></span>
       <div class="info">
         <h3 data-i18n="rooms.stu.name">ห้อง Studio — 2 เตียงแยก</h3>
         <p data-i18n="rooms.stu.desc"></p>
@@ -183,7 +193,7 @@
       </div>
     </div>
     <div class="room-card" style="margin-top:1.2rem">
-      <img class="room-thumb" src="images/deluxe.jpg" alt="Deluxe extra-large room with double bed and sofa corner" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()">
+      <span class="room-pic"><img class="room-thumb" src="images/deluxe.jpg" alt="Deluxe extra-large room with double bed and sofa corner" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span></span>
       <div class="info">
         <h3 data-i18n="rooms.dlx.name">ห้อง Deluxe — ห้องใหญ่ พร้อมโซฟา</h3>
         <p data-i18n="rooms.dlx.desc"></p>
@@ -230,28 +240,20 @@
     </ul>
   </section>
 
-  <section id="numbers" class="reveal" aria-label="ตัวเลขของเรา">
-    <div class="numband">
-      <div><div class="n">15</div><div class="l" data-i18n="nb.l1">ยูนิตทั้งหมด</div></div>
-      <div><div class="n">8.8<span style="font-size:0.55em">/10</span></div><div class="l" data-i18n="nb.l2">คะแนนจากผู้เข้าพักจริง</div></div>
-      <div><div class="n">770+</div><div class="l" data-i18n="nb.l3">รีวิวบน Booking.com</div></div>
-      <div><div class="n">~2 <span style="font-size:0.55em">กม.</span></div><div class="l" data-i18n="nb.l4">ถึง ICONSIAM</div></div>
-    </div>
-  </section>
 
 
 
   <section id="gallery" class="reveal">
     <div class="sec-head"><h2 data-i18n="gallery.title">รูปห้องพัก</h2></div>
     <div class="gallery">
-      <figure data-icon="🛏️"><img src="images/bedroom.jpg" alt="Bedroom with balcony" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.bedroom">ห้องนอน</figcaption></figure>
-      <figure data-icon="🛏️"><img src="images/twin.jpg" alt="Twin bed room" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.twin">ห้องเตียงคู่ (2 เตียงแยก)</figcaption></figure>
-      <figure data-icon="🛋️"><img src="images/living.jpg" alt="Living area" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.living">มุมโซฟานั่งเล่น</figcaption></figure>
-      <figure data-icon="🚿"><img src="images/bathroom.jpg" alt="Bathroom" width="512" height="768" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.bath">ห้องน้ำ</figcaption></figure>
-      <figure data-icon="🌆"><img src="images/balcony.jpg" alt="Private balcony" width="512" height="768" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.balcony">ระเบียงส่วนตัว</figcaption></figure>
-      <figure data-icon="🚪"><img src="images/entrance.jpg" alt="Entrance" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.entrance">ทางเข้าที่พัก</figcaption></figure>
-      <figure data-icon="🛎️"><img src="images/reception.jpg" alt="Reception area" width="1024" height="625" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.reception">จุดต้อนรับ / เช็คอิน</figcaption></figure>
-      <figure data-icon="🏢"><img src="images/building.jpg" alt="Building exterior" width="598" height="768" loading="lazy" decoding="async" onerror="this.remove()"><figcaption data-i18n="gallery.building">ตัวอาคาร</figcaption></figure>
+      <figure data-icon="🛏️"><img src="images/bedroom.jpg" alt="Bedroom with balcony" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.bedroom">ห้องนอน</figcaption></figure>
+      <figure data-icon="🛏️"><img src="images/twin.jpg" alt="Twin bed room" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.twin">ห้องเตียงคู่ (2 เตียงแยก)</figcaption></figure>
+      <figure data-icon="🛋️"><img src="images/living.jpg" alt="Living area" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.living">มุมโซฟานั่งเล่น</figcaption></figure>
+      <figure data-icon="🚿"><img src="images/bathroom.jpg" alt="Bathroom" width="512" height="768" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.bath">ห้องน้ำ</figcaption></figure>
+      <figure data-icon="🌆"><img src="images/balcony.jpg" alt="Private balcony" width="512" height="768" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.balcony">ระเบียงส่วนตัว</figcaption></figure>
+      <figure data-icon="🚪"><img src="images/entrance.jpg" alt="Entrance" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.entrance">ทางเข้าที่พัก</figcaption></figure>
+      <figure data-icon="🛎️"><img src="images/reception.jpg" alt="Reception area" width="1024" height="625" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.reception">จุดต้อนรับ / เช็คอิน</figcaption></figure>
+      <figure data-icon="🏢"><img src="images/building.jpg" alt="Building exterior" width="598" height="768" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.building">ตัวอาคาร</figcaption></figure>
     </div>
     <p style="text-align:center; margin-top:1.4rem">
       <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent" href="gallery.html" data-i18n="gallery.all">ดูรูปทั้งหมด (30+ รูป) →</a>
@@ -261,15 +263,15 @@
   <section id="amenities" class="reveal">
     <div class="sec-head"><h2 data-i18n="amen.title">สิ่งอำนวยความสะดวก</h2></div>
     <ul class="amenities">
-      <li><span class="ico">📶</span><span data-i18n="amen.1"></span></li>
-      <li><span class="ico">❄️</span><span data-i18n="amen.2"></span></li>
-      <li><span class="ico">🌆</span><span data-i18n="amen.3"></span></li>
-      <li><span class="ico">🧊</span><span data-i18n="amen.4"></span></li>
-      <li><span class="ico">📺</span><span data-i18n="amen.5"></span></li>
-      <li><span class="ico">🧺</span><span data-i18n="amen.6"></span></li>
-      <li><span class="ico">🧴</span><span data-i18n="amen.7"></span></li>
-      <li><span class="ico">💧</span><span data-i18n="amen.8"></span></li>
-      <li><span class="ico">🚿</span><span data-i18n="amen.9"></span></li>
+      <li><span class="ico" data-icon="wifi" aria-hidden="true"></span><span data-i18n="amen.1"></span></li>
+      <li><span class="ico" data-icon="snow" aria-hidden="true"></span><span data-i18n="amen.2"></span></li>
+      <li><span class="ico" data-icon="city" aria-hidden="true"></span><span data-i18n="amen.3"></span></li>
+      <li><span class="ico" data-icon="fridge" aria-hidden="true"></span><span data-i18n="amen.4"></span></li>
+      <li><span class="ico" data-icon="tv" aria-hidden="true"></span><span data-i18n="amen.5"></span></li>
+      <li><span class="ico" data-icon="laundry" aria-hidden="true"></span><span data-i18n="amen.6"></span></li>
+      <li><span class="ico" data-icon="bottle" aria-hidden="true"></span><span data-i18n="amen.7"></span></li>
+      <li><span class="ico" data-icon="drop" aria-hidden="true"></span><span data-i18n="amen.8"></span></li>
+      <li><span class="ico" data-icon="shower" aria-hidden="true"></span><span data-i18n="amen.9"></span></li>
     </ul>
   </section>
 
@@ -294,12 +296,12 @@
       <a href="attractions.html"><img src="images/attractions/yaowarat.jpg" alt="Yaowarat Chinatown" width="960" height="721" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.yaowarat.n">เยาวราช (ไชน่าทาวน์)</span></a>
     </div>
     <ul class="nearby">
-      <li><span class="ico">🏮</span><span class="nm" data-i18n="near.1">ตลาดสำเพ็ง</span><span class="dist" data-i18n="near.1.d">~900 ม.</span></li>
-      <li><span class="ico">🌉</span><span class="nm" data-i18n="near.2">สวนลอยฟ้าเจ้าพระยา</span><span class="dist" data-i18n="near.2.d">~1.3 กม.</span></li>
-      <li><span class="ico">🛕</span><span class="nm" data-i18n="near.3">วัดโพธิ์</span><span class="dist" data-i18n="near.3.d">~1.8 กม.</span></li>
-      <li><span class="ico">🐉</span><span class="nm" data-i18n="near.4">เยาวราช (ไชน่าทาวน์)</span><span class="dist" data-i18n="near.4.d">~2 กม.</span></li>
-      <li><span class="ico">🛍️</span><span class="nm" data-i18n="near.5">ICONSIAM</span><span class="dist" data-i18n="near.5.d">รถ ~5 นาที</span></li>
-      <li><span class="ico">🖼️</span><span class="nm" data-i18n="near.6">River City Bangkok</span><span class="dist" data-i18n="near.6.d">รถ ~5 นาที</span></li>
+      <li><span class="ico" data-icon="lantern" aria-hidden="true"></span><span class="nm" data-i18n="near.1">ตลาดสำเพ็ง</span><span class="dist" data-i18n="near.1.d">~900 ม.</span></li>
+      <li><span class="ico" data-icon="tree" aria-hidden="true"></span><span class="nm" data-i18n="near.2">สวนลอยฟ้าเจ้าพระยา</span><span class="dist" data-i18n="near.2.d">~1.3 กม.</span></li>
+      <li><span class="ico" data-icon="temple" aria-hidden="true"></span><span class="nm" data-i18n="near.3">วัดโพธิ์</span><span class="dist" data-i18n="near.3.d">~1.8 กม.</span></li>
+      <li><span class="ico" data-icon="lantern" aria-hidden="true"></span><span class="nm" data-i18n="near.4">เยาวราช (ไชน่าทาวน์)</span><span class="dist" data-i18n="near.4.d">~2 กม.</span></li>
+      <li><span class="ico" data-icon="bag" aria-hidden="true"></span><span class="nm" data-i18n="near.5">ICONSIAM</span><span class="dist" data-i18n="near.5.d">รถ ~5 นาที</span></li>
+      <li><span class="ico" data-icon="image" aria-hidden="true"></span><span class="nm" data-i18n="near.6">River City Bangkok</span><span class="dist" data-i18n="near.6.d">รถ ~5 นาที</span></li>
     </ul>
     <p style="text-align:center; margin-top:1.4rem">
       <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent" href="attractions.html" data-i18n="near.more">ดูแหล่งท่องเที่ยวใกล้ที่พักทั้งหมด →</a>
@@ -312,17 +314,17 @@
     <div class="sec-head"><h2 data-i18n="gh.title">การเดินทางมาที่พัก</h2></div>
     <div class="gh-grid">
       <div class="gh-card">
-        <span class="ico">✈️</span>
+        <span class="ico" data-icon="plane" aria-hidden="true"></span>
         <h3 data-i18n="gh.1.t">จากสนามบินสุวรรณภูมิ</h3>
         <p data-i18n="gh.1.d">แท็กซี่ ~45-60 นาที (~350-450 บาท รวมทางด่วน) หรือ Airport Rail Link → BTS มาลงสถานีคลองสาน</p>
       </div>
       <div class="gh-card">
-        <span class="ico">🛬</span>
+        <span class="ico" data-icon="plane" aria-hidden="true"></span>
         <h3 data-i18n="gh.2.t">จากสนามบินดอนเมือง</h3>
         <p data-i18n="gh.2.d">แท็กซี่ ~40-60 นาที (~250-350 บาท) แนะนำใช้ทางด่วนช่วงเย็น</p>
       </div>
       <div class="gh-card">
-        <span class="ico">🚆</span>
+        <span class="ico" data-icon="train" aria-hidden="true"></span>
         <h3 data-i18n="gh.3.t">โดยรถไฟฟ้า BTS</h3>
         <p data-i18n="gh.3.d">สายสีลม ลงสถานีกรุงธนบุรี → ต่อสายสีทอง ลงสถานีคลองสาน → เดิน/วินมอเตอร์ไซค์ถึงที่พัก</p>
       </div>

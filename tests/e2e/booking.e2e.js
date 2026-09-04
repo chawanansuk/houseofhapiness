@@ -114,7 +114,8 @@ async function launch() {
   // ── 5) กดปุ่ม LINE → ต้องยิง /api/book ครบถ้วน (กันเปิด line.me จริงด้วย preventDefault) ──
   await page.evaluate(() => document.getElementById("btnLine").addEventListener("click", (e) => e.preventDefault()));
   await page.click("#btnLine");
-  await page.waitForFunction(() => !document.getElementById("bookingSaveStatus").hidden);
+  // รอจนระบบตอบกลับจริง (สถานะ "กำลังบันทึก" โผล่ก่อน แล้วค่อยเปลี่ยนเป็นเลขที่จอง — อ่านเร็วไปจะได้ข้อความกลาง ๆ)
+  await page.waitForFunction(() => /WEB-E2E-1/.test(document.getElementById("bookingSaveStatus").textContent));
   assert.equal(bookCalls.length, 1, "ต้องยิง /api/book 1 ครั้ง");
   const b = bookCalls[0];
   assert.equal(b.name, "E2E ทดสอบ");

@@ -48,7 +48,7 @@ const server = http.createServer((req, res) => {
 
   /* ── C: ลำดับหน้าแรกใหม่ — ห้องพัก+รีวิวมาก่อน ── */
   const order = await page.evaluate(() => [...document.querySelectorAll("main > section")].map((s) => s.id));
-  check("ห้องพักขึ้นก่อน (rooms → reviews → about)", order[0] === "rooms" && order[1] === "reviews" && order[2] === "about");
+  check("แถบตัวเลขจริงใต้ hero แล้วห้องพักขึ้นก่อน (numbers → rooms → reviews → about)", order[0] === "numbers" && order[1] === "rooms" && order[2] === "reviews" && order[3] === "about");
 
   /* ── B1: แกลเลอรีหน้าแรก 2 คอลัมน์บนมือถือ ── */
   const cols = await page.evaluate(() => getComputedStyle(document.querySelector(".gallery")).gridTemplateColumns.split(" ").length);
