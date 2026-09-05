@@ -64,6 +64,12 @@ assert.match(read("near-iconsiam.html"), /data-i18n="prov\.stock"/, "stock hero 
 assert.match(read("assets/style.css"), /@media \(max-width: 860px\) \{\n  \.navlinks \{ display: none; \}/, "nav links must collapse to the menu button below 860px (iPad portrait overflowed at 768)");
 assert.match(read("assets/ui.js"), /const sweep = /, "reveal animation must have a failsafe so no section can stay blank");
 assert.ok(fs.existsSync(path.join(__dirname, "..", ".claude", "skills", "prom-design", "SKILL.md")), "prom-design skill must be installed for future design work");
+for (const sk of ["hoh-analyze-guest-reviews", "hoh-reply-review", "hoh-reply-guest-chat", "hoh-weekly-owner-digest", "hoh-write-area-guide"]) {
+  const md = fs.readFileSync(path.join(__dirname, "..", ".claude", "skills", sk, "SKILL.md"), "utf8");
+  assert.match(md, new RegExp("^---\\nname: " + sk + "\\ndescription: "), sk + " must have skill frontmatter");
+  assert.match(md, /hoh-property-brief/, sk + " must load the property brief first");
+  assert.match(md, /# RULES/, sk + " must carry the property rules section");
+}
 
 const admin = read("admin/index.html");
 const adminJs = read("admin/app.js");
