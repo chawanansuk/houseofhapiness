@@ -66,6 +66,7 @@ module.exports = async (req, res) => {
     rooms = Array.from({ length: 18 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 18 ห้อง
   } else if (dbEnabled()) {
     try {
+      await getStore().bootstrapFromSheet();
       const d = await getStore().listAll();
       bookings = d.bookings; rooms = normalizeRooms(d.rooms);
     } catch (e) {

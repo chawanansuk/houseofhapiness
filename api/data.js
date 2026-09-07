@@ -80,6 +80,7 @@ module.exports = async (req, res) => {
   // ฐานข้อมูล Postgres (Supabase) เมื่อตั้ง DATABASE_URL — เร็วและอ่านได้ค่าล่าสุดเสมอ
   if (dbEnabled()) {
     try {
+      await getStore().bootstrapFromSheet(); // ครั้งแรกเท่านั้น (ฐานข้อมูลว่าง) — ดึงข้อมูลเดิมจากชีตมาให้เอง
       const d = await getStore().listAll();
       return res.status(200).json({
         ok: true, demo: false, today, role,

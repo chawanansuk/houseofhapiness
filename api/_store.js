@@ -65,9 +65,43 @@ function createStore(query) {
 
   const pick = (cols, row) => cols.map((c) => str(row[c]));
 
+  let bootstrapTried = false;
   return {
     ensureSchema,
     async ping() { await query("SELECT 1"); return true; },
+
+    // ครั้งแรกที่ฐานข้อมูลยังว่างและมีชีตตั้งค่าอยู่ → ดึงทุกแท็บจากชีตมาให้เองอัตโนมัติ (ไม่ต้องกด /api/migrate)
+    // พยายามครั้งเดียวต่ออินสแตนซ์ ถ้าชีตล่มจะลองใหม่ในอินสแตนซ์ถัดไป
+    async bootstrapFromSheet(opts = {}) {
+      if (bootstrapTried) return null;
+      const url = (opts.url != null ? opts.url : (process.env.SHEET_WEBAPP_URL || "")).trim();
+      const token = (opts.token != null ? opts.token : (process.env.SHEET_TOKEN || "")).trim();
+      if (!url || !token) return null;
+      await ensureSchema();
+      const n = await query("SELECT count(*)::int AS n FROM bookings");
+      if (n.rows[0].n > 0) { bootstrapTried = true; return null; }
+      bootstrapTried = true;
+      const f = opts.fetchImpl || fetch;
+      const sep = url.includes("?") ? "&" : "?";
+      const get = async (action) => {
+        const r = await f(`${url}${sep}action=${action}&token=${encodeURIComponent(token)}&_ts=${Date.now()}`, { redirect: "follow" });
+        if (!r.ok) throw new Error(`sheet ${action} http-${r.status}`);
+        const j = await r.json();
+        if (j && j.error) throw new Error(`sheet ${action}: ${j.error}`);
+        return j;
+      };
+      try {
+        const [list, site] = await Promise.all([get("list"), get("site").catch(() => null)]);
+        if (!Array.isArray(list && list.bookings)) throw new Error("sheet list invalid");
+        const counts = await this.importFromSheet(list, site);
+        console.info(JSON.stringify({ event: "db_bootstrap_from_sheet", counts }));
+        return counts;
+      } catch (e) {
+        bootstrapTried = false; // ให้ลองใหม่รอบหน้า
+        console.error(JSON.stringify({ event: "db_bootstrap_failed", reason: String((e && e.message) || e).slice(0, 160) }));
+        return null;
+      }
+    },
 
     async listAll() {
       await ensureSchema();

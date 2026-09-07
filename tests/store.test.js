@@ -97,5 +97,19 @@ const { createStore } = require("../api/_store.js");
   assert.ok(log.rows.length >= 10);
   assert.ok(log.rows.some((x) => x.action === "update" && x.actor === "staff" && x.target === id));
 
+  // 11) bootstrap อัตโนมัติ: ฐานข้อมูลใหม่ที่ว่าง + มีชีต → ดึงมาให้เอง · ฐานข้อมูลที่มีข้อมูลแล้ว → ไม่ทำ
+  const db2 = new PGlite();
+  const store2 = createStore(async (sql, params) => { const r = await db2.query(sql, params); return { rows: r.rows, rowCount: r.affectedRows != null ? r.affectedRows : r.rows.length }; });
+  let calls = 0;
+  const fakeFetch = async (u) => { calls++; return { ok: true, json: async () => u.includes("action=site") ? sheetSite : sheetList }; };
+  let bc = await store2.bootstrapFromSheet({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: fakeFetch });
+  assert.equal(bc.bookings, 2, "ฐานข้อมูลว่าง → ดึงจากชีต");
+  assert.equal((await store2.listAll()).bookings.length, 2);
+  bc = await store2.bootstrapFromSheet({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: fakeFetch });
+  assert.equal(bc, null, "ครั้งที่สองไม่ทำซ้ำ");
+  assert.equal(calls, 2);
+  assert.equal(await store.bootstrapFromSheet({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: fakeFetch }), null, "ฐานข้อมูลที่มีข้อมูลแล้วไม่ดึงทับ");
+  assert.equal(await store2.bootstrapFromSheet({ url: "", token: "", fetchImpl: fakeFetch }), null, "ไม่มีชีต → ข้าม");
+
   console.log("STORE TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });
