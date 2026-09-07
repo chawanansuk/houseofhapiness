@@ -121,5 +121,34 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   assert.equal(parseDbUrl("not a url").error, "invalid-url");
   assert.equal(parseDbUrl("").error, "missing");
 
+  // 13) ซิงก์จากชีตช่วงเปลี่ยนผ่าน: แถวใหม่เข้า · เติมช่องว่าง · รับยกเลิก · ไม่ทับค่าที่หลังบ้านแก้
+  const syncList = {
+    bookings: [
+      { id: "BDC-NEW", source: "Booking.com", name: "", checkin: "", checkout: "", status: "รอเติมชื่อจาก Pulse", note: "", created: "2026-09-07 10:00", room_no: "" },
+      { id: "BDC-1", source: "Booking.com", name: "Amara Okafor", checkin: "2026-10-10", checkout: "2026-10-13", nights: "3", guests: "2", rooms: "1", amount: "3,600", status: "ยืนยันแล้ว", note: "", created: "2026-09-01 10:00", room_no: "" },
+      { id: id, name: "ชื่อจากชีต", status: "ยกเลิก", note: "ยกเลิกตามอีเมล 7 ก.ย.", room_no: "" },
+    ],
+    rooms: [{ room: "701", clean: "รอทำความสะอาด" }],
+    expenses: [], orders: [{ id: "RS-SHEET", created: "", name: "X", room: "702", date: "2026-10-01", time: "09:00", items: "ชาไทย × 1 — ฿40", total: "40", note: "", status: "รอยืนยัน", paid: "", lang: "th", channel: "line" }],
+  };
+  await store.updateBooking("BDC-1", { room_no: "716", guests: "" }, "staff"); // หลังบ้านจัดห้องแล้ว และ guests ว่างรอเติม
+  const sy = await store.syncFromSheet(syncList);
+  assert.deepEqual([sy.added, sy.backfilled, sy.cancelled, sy.orders], [1, 1, 1, 1]);
+  all = await store.listAll();
+  assert.ok(all.bookings.find((x) => x.id === "BDC-NEW"), "แถวใหม่จากอีเมลเข้าฐานข้อมูล");
+  const amara = all.bookings.find((x) => x.id === "BDC-1");
+  assert.equal(amara.room_no, "716", "ห้องที่หลังบ้านจัดต้องไม่ถูกทับ");
+  assert.equal(amara.guests, "2", "ช่องว่างถูกเติมจากชีต");
+  assert.equal(amara.checkout, "2026-10-12", "วันที่ที่มีอยู่แล้วไม่ถูกทับด้วยค่าชีต");
+  const cancelled = all.bookings.find((x) => x.id === id);
+  assert.equal(cancelled.status, "ยกเลิก"); assert.equal(cancelled.room_no, "704"); assert.notEqual(cancelled.name, "ชื่อจากชีต", "ชื่อที่มีอยู่ไม่ถูกทับ");
+  assert.equal(all.rooms.find((x) => x.room === "701").clean, "สะอาด", "สถานะห้องจากชีตไม่ทับ (หลังบ้านเป็นตัวจริง)");
+  assert.ok(all.orders.find((x) => x.id === "RS-SHEET"));
+  let syncCalls = 0;
+  const syncFetch = async () => { syncCalls++; return { ok: true, json: async () => syncList }; };
+  await store.syncFromSheetIfStale({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: syncFetch, minIntervalMs: 0 });
+  await store.syncFromSheetIfStale({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: syncFetch });
+  assert.equal(syncCalls, 1, "ภายใน 2 นาทีไม่ซิงก์ซ้ำ");
+
   console.log("STORE TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });
