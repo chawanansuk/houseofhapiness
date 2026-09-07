@@ -7,6 +7,10 @@
 
 /* ---------- ค่าคงที่ (ชื่อ storage คงจากเวอร์ชันเดิม — ล็อกอิน/ธีมเดิมใช้ต่อได้) ---------- */
 const KEY_STORE = "hoh-admin-key";
+// รหัสเก็บใน localStorage เมื่อติ๊ก "จำเครื่องนี้ไว้" (ค่าเริ่มต้น) — มือถือปิดแท็บแล้วเปิดใหม่ไม่ต้องล็อกอินซ้ำ
+const getKey = () => { try { return localStorage.getItem(KEY_STORE) || sessionStorage.getItem(KEY_STORE) || ''; } catch(_) { return sessionStorage.getItem(KEY_STORE) || ''; } };
+const saveKey = (k, remember) => { try { if (remember) { localStorage.setItem(KEY_STORE, k); sessionStorage.removeItem(KEY_STORE); } else { sessionStorage.setItem(KEY_STORE, k); localStorage.removeItem(KEY_STORE); } } catch(_) { sessionStorage.setItem(KEY_STORE, k); } };
+const clearKey = () => { try { localStorage.removeItem(KEY_STORE); } catch(_){} sessionStorage.removeItem(KEY_STORE); };
 const DATA_CACHE = "hoh-admin-data";   // ข้อมูลรอบล่าสุด — เปิดหน้าใหม่โชว์ทันทีไม่ต้องรอชีต
 const LAST_IMPORT = "hoh-last-import"; // วันที่นำเข้าไฟล์ Booking ครั้งล่าสุด (เตือนให้ทำรายสัปดาห์)
 const THEME_KEY = "hoh-admin-theme";
@@ -119,6 +123,7 @@ function adopt(j){
     if (String(r.clean || '') === 'รอทำความสะอาด') CLEAN[no] = 'dirty';
     if (String(r.note || '').trim()) ROOM_NOTES[no] = String(r.note).trim();
   });
+  applyPending();
   SYNC_AT = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
   SYNC_TS = Date.now();
 }
@@ -360,9 +365,49 @@ function openSheet({title, sub, body, foot}){
 function closeSheet(){ $('sheet').classList.remove('on'); $('backdrop').classList.remove('on'); }
 
 /* ---------- api ---------- */
+/* ---------- ความเสถียรของการบันทึก ----------
+   ปัญหาที่ทีมเจอ: กดจัดห้องแล้วหน้าจอไม่เปลี่ยนทันที (รอชีต 1-3 วิ) เลยกดซ้ำ และบางครั้งชีตส่งค่าเก่ากลับมา
+   ในรอบอ่านถัดจากเขียน ทำให้ห้องที่จัดแล้ว "เด้ง" กลับ — แก้ 3 ชั้น:
+   1) INFLIGHT: คำสั่งเดิมที่ยังบันทึกไม่เสร็จ กดซ้ำจะถูกเมิน (ไม่ยิงซ้ำ)
+   2) PENDING: จำสิ่งที่เพิ่งบันทึกสำเร็จไว้ 2 นาที ถ้าชีตยังส่งค่าเก่ามา ให้ยึดค่าที่บันทึกแล้วก่อน
+   3) หน้าจอเปลี่ยนทันทีหลังบันทึกสำเร็จ แล้วค่อยดึงชีตตามหลัง (ไม่รอ) */
+const INFLIGHT = new Set();
+const PENDING = [];
+const PENDING_TTL = 120 * 1000;
+let LAST_ACTION = 0;
+function notePending(body){
+  const ts = Date.now();
+  if (body.action === 'update' && body.fields) PENDING.push({ kind:'booking', id:String(body.id), fields:{ ...body.fields }, ts });
+  else if (body.action === 'roomclean') PENDING.push({ kind:'room', id:String(body.room), fields: Object.assign({ clean: body.clean }, body.note !== undefined ? { note: body.note } : {}), ts });
+  else if (body.action === 'orderupdate' && body.fields) PENDING.push({ kind:'order', id:String(body.id), fields:{ ...body.fields }, ts });
+}
+function applyPending(){
+  const now = Date.now();
+  for (let i = PENDING.length - 1; i >= 0; i--) {
+    const p = PENDING[i];
+    if (now - p.ts > PENDING_TTL) { PENDING.splice(i, 1); continue; }
+    let target = null;
+    if (p.kind === 'booking') target = BOOKINGS.find(b => String(b.id) === p.id);
+    else if (p.kind === 'order') target = ORDERS.find(o => String(o.id) === p.id);
+    else if (p.kind === 'room') target = (DATA.rooms || []).find(r => String(r.room || '').trim() === p.id);
+    if (!target) continue;
+    const same = Object.keys(p.fields).every(k => String(target[k] == null ? '' : target[k]) === String(p.fields[k]));
+    if (same) { PENDING.splice(i, 1); continue; } // ชีตตามทันแล้ว
+    Object.assign(target, p.fields); // ชีตยังส่งค่าเก่า — คงค่าที่บันทึกแล้วไว้ก่อน
+    if (p.kind === 'room') {
+      if (String(target.clean || '') === 'รอทำความสะอาด') CLEAN[p.id] = 'dirty'; else delete CLEAN[p.id];
+      if (target.note !== undefined) { if (String(target.note).trim()) ROOM_NOTES[p.id] = String(target.note).trim(); else delete ROOM_NOTES[p.id]; }
+    }
+  }
+}
 async function apiUpdate(body){
-  const key = sessionStorage.getItem(KEY_STORE) || '';
+  const key = getKey();
   if (navigator.onLine === false) { toast('ออฟไลน์อยู่ — บันทึกไม่ได้ รอเน็ตกลับมาแล้วลองใหม่', true); return null; }
+  const fkey = `${body.action}:${body.id || body.room || ''}`;
+  if (INFLIGHT.has(fkey)) { toast('กำลังบันทึกอยู่ รอสักครู่…'); return null; }
+  INFLIGHT.add(fkey);
+  LAST_ACTION = Date.now();
+  toast('กำลังบันทึก…');
   try {
     const r = await fetch('/api/update', {
       method: 'POST',
@@ -371,9 +416,13 @@ async function apiUpdate(body){
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.ok) { toast(j.error || 'บันทึกไม่สำเร็จ', true); return null; }
+    notePending(body);
     return j;
   } catch {
     toast('เชื่อมต่อไม่ได้', true); return null;
+  } finally {
+    INFLIGHT.delete(fkey);
+    LAST_ACTION = Date.now();
   }
 }
 // โหมดตัวอย่าง: แก้ในเครื่องให้เห็นผลทันที / โหมดจริง: ดึงข้อมูลใหม่จากชีต
@@ -383,8 +432,11 @@ async function afterAction(localMutate, msg){
     render();
     toast(msg ? msg + ' (โหมดตัวอย่าง — ไม่ได้บันทึกจริง)' : 'โหมดตัวอย่าง — เห็นผลชั่วคราว ไม่ได้บันทึกจริง');
   } else {
-    await reload();
+    // เปลี่ยนหน้าจอทันทีจากค่าที่บันทึกสำเร็จ แล้วดึงชีตตามหลังโดยไม่รอ (PENDING กันค่าเก่าทับ)
+    try { localMutate(); } catch(_){}
+    render();
     toast(msg || 'บันทึกแล้ว');
+    reload();
   }
 }
 
@@ -760,11 +812,13 @@ async function doAssign(no){
   const b = bookingById(state.assign); if(!b) return;
   if(!roomFreeFor(no, b.checkin, effCheckout(b), b.id)){ toast(`ห้อง ${roomLabel(no)} ไม่ว่างช่วง ${fmtD(b.checkin)}–${fmtD(effCheckout(b))}`, true); return; }
   const from = String(b.room_no||'').trim();
+  // ออกจากโหมดจัดห้องและโชว์ผลทันที (กันกดซ้ำ) — ถ้าชีตปฏิเสธจะย้อนกลับให้
+  state.assign = null; renderAssignBar();
+  b.room_no = no; render();
   const r1 = await apiUpdate({ action: 'update', id: b.id, fields: { room_no: no } });
-  if(!r1) return;
+  if(!r1){ b.room_no = from; render(); toast(`จัดห้อง ${roomLabel(no)} ไม่สำเร็จ — ลองใหม่อีกครั้ง`, true); return; }
   // ย้ายแขกที่พักอยู่ = ห้องเดิมต้องเข้าคิวทำความสะอาด
   if(from && isInhouse(b)) await apiUpdate({ action: 'roomclean', room: from, clean: 'รอทำความสะอาด' });
-  state.assign = null; renderAssignBar();
   await afterAction(() => { b.room_no = no; if(from && isInhouse(b)) CLEAN[from] = 'dirty'; },
     from ? `ย้าย ${displayName(b)} จากห้อง ${roomLabel(from)} ไป ${roomLabel(no)} แล้ว` : `จัด ${displayName(b)} เข้าห้อง ${roomLabel(no)} แล้ว`);
 }
@@ -1398,7 +1452,9 @@ $('pwEye') && $('pwEye').addEventListener('click', () => {
    หลังบ้านมักเปิดค้างบนแท็บเล็ตหน้าเคาน์เตอร์ทั้งวัน — กลับมาดูทีไรต้องเป็นข้อมูลล่าสุด */
 const STALE_MS = 90 * 1000, AUTO_MS = 5 * 60 * 1000;
 function maybeReload(force){
-  if (!DATA || !sessionStorage.getItem(KEY_STORE) || document.hidden || navigator.onLine === false) return;
+  if (!DATA || !getKey() || document.hidden || navigator.onLine === false) return;
+  // ไม่รีเฟรชทับมือคนใช้: กำลังจัดห้อง / เปิดแผงอยู่ / เพิ่งกดบันทึกไม่ถึง 15 วิ
+  if (state.assign || $('sheet').classList.contains('on') || Date.now() - LAST_ACTION < 15000) return;
   if (force || Date.now() - SYNC_TS > STALE_MS) reload();
 }
 function paintOnline(){ const off = navigator.onLine === false; document.body.classList.toggle('offline', off); const bar = $('offlineBar'); if (bar) bar.hidden = !off; }
@@ -1474,7 +1530,7 @@ async function tryLogin(key, silent){
     const r = await fetch('/api/data', { headers: { 'x-admin-key': key }, cache: 'no-store' });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.ok) {
-      sessionStorage.setItem(KEY_STORE, key);
+      saveKey(key, !$('rememberMe') || $('rememberMe').checked);
       adopt(j);
       try { sessionStorage.setItem(DATA_CACHE, JSON.stringify(j)); } catch(_){}
       showApp();
@@ -1488,7 +1544,7 @@ async function tryLogin(key, silent){
   return false;
 }
 async function reload(){
-  const key = sessionStorage.getItem(KEY_STORE) || '';
+  const key = getKey();
   try {
     const r = await fetch('/api/data', { headers: { 'x-admin-key': key }, cache: 'no-store' });
     const j = await r.json().catch(() => ({}));
@@ -1503,7 +1559,7 @@ async function reload(){
 }
 async function doRefresh(){ toast('กำลังรีเฟรช…'); await reload(); toast('อัปเดตแล้ว'); }
 function logout(){
-  sessionStorage.removeItem(KEY_STORE);
+  clearKey();
   sessionStorage.removeItem(DATA_CACHE);
   DATA = null;
   showLogin();
@@ -1520,7 +1576,7 @@ $('loginForm').addEventListener('submit', async ev => {
 });
 (async function init(){
   paintIcons(document.body);
-  const key = sessionStorage.getItem(KEY_STORE);
+  const key = getKey();
   // เปิดจากแคชก่อน (เข้าได้ทันทีแม้เน็ตช้า) แล้วค่อยดึงข้อมูลสดมาทับ
   const cached = sessionStorage.getItem(DATA_CACHE);
   if (key && cached) {

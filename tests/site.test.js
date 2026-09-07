@@ -82,7 +82,11 @@ assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becom
 assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
 assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
 assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
-assert.match(admin, /app\.js\?v=22/, "admin cache-bust version must be bumped with app changes");
+assert.match(admin, /app\.js\?v=23/, "admin cache-bust version must be bumped with app changes");
+assert.match(adminJs, /function applyPending/, "admin must keep just-saved values when the sheet returns a stale read");
+assert.match(adminJs, /INFLIGHT\.has\(fkey\)/, "admin must ignore repeated taps while a save is in flight");
+assert.match(read("backoffice/apps-script.gs"), /SpreadsheetApp\.flush\(\);/, "Apps Script must flush writes before replying");
+assert.match(read("api/data.js"), /&_ts=\$\{Date\.now\(\)\}/, "sheet reads must carry a cache-buster");
 assert.doesNotMatch(admin, /id="view-clean"|data-view="clean"/, "housekeeping is a side card on the today view now, not a separate view");
 assert.match(admin, /id="ordersCard"/, "today view must have the room-service orders card");
 assert.match(adminJs, /function renderOrders/, "admin must render room-service orders");

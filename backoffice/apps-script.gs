@@ -378,6 +378,13 @@ function doPost(e) {
     return json_({ error: "bad-json" });
   }
   if (b.token !== TOKEN) return json_({ error: "unauthorized" });
+  var out = handlePost_(b);
+  // บังคับเขียนลงชีตให้เสร็จก่อนตอบกลับ — หน้า /admin อ่านข้อมูลใหม่ทันทีหลังบันทึก (กันอ่านเจอค่าเก่า)
+  SpreadsheetApp.flush();
+  return json_(out);
+}
+
+function handlePost_(b) {
   if (b.action === "add") {
     var id = "WEB-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyMMddHHmmss");
     appendBooking_({
@@ -388,44 +395,44 @@ function doPost(e) {
       amount: b.amount, status: b.status || "รอยืนยัน", note: b.note,
       room_no: b.room_no,
     });
-    return json_({ ok: true, id: id });
+    return { ok: true, id: id };
   }
   // แก้ไขการจองเดิมจากหน้า /admin เช่น เช็คอิน/เช็คเอาต์/ย้ายห้อง/เปลี่ยนสถานะ
   if (b.action === "update") {
     var row = findById_(b.id);
-    if (!row) return json_({ error: "not-found" });
+    if (!row) return { error: "not-found" };
     var sh = getSheet_();
     var fields = b.fields || {};
     for (var k in fields) {
       if (EDITABLE.indexOf(k) < 0) continue;
       sh.getRange(row._rowIndex, HEADERS.indexOf(k) + 1).setValue(String(fields[k]));
     }
-    return json_({ ok: true });
+    return { ok: true };
   }
   // อัปเดตสถานะความสะอาดของห้อง
   if (b.action === "roomclean") {
     var done = setRoomClean_(b.room, b.clean || "สะอาด", b.note);
-    return json_(done ? { ok: true } : { error: "room-not-found" });
+    return done ? { ok: true } : { error: "room-not-found" };
   }
   // บันทึก/ลบรายจ่าย (จากหน้า /admin แท็บ "รายจ่าย")
   if (b.action === "expadd") {
-    if (!b.amount || !b.date) return json_({ error: "missing-fields" });
+    if (!b.amount || !b.date) return { error: "missing-fields" };
     var expId = appendExpense_(b);
-    return json_({ ok: true, id: expId });
+    return { ok: true, id: expId };
   }
   if (b.action === "expdel") {
-    return json_(deleteExpense_(b.id) ? { ok: true } : { error: "not-found" });
+    return deleteExpense_(b.id) ? { ok: true } : { error: "not-found" };
   }
   // ออเดอร์รูมเซอร์วิส: เว็บส่งเข้ามา (orderadd) / หลังบ้านเปลี่ยนสถานะ-รับเงิน (orderupdate)
   if (b.action === "orderadd") {
-    if (!b.name || !b.room || !b.date || !b.items) return json_({ error: "missing-fields" });
+    if (!b.name || !b.room || !b.date || !b.items) return { error: "missing-fields" };
     var orderId = appendOrder_(b);
-    return json_({ ok: true, id: orderId });
+    return { ok: true, id: orderId };
   }
   if (b.action === "orderupdate") {
-    return json_(updateOrder_(b.id, b.fields || {}) ? { ok: true } : { error: "not-found" });
+    return updateOrder_(b.id, b.fields || {}) ? { ok: true } : { error: "not-found" };
   }
-  return json_({ error: "unknown-action" });
+  return { error: "unknown-action" };
 }
 
 function json_(obj) {
