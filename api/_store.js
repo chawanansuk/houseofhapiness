@@ -90,6 +90,8 @@ function createStore(query) {
   const pick = (cols, row) => cols.map((c) => str(row[c]));
 
   let bootstrapTried = false;
+  let lastSyncAt = 0;
+  const SYNC_INTERVAL_MS = 120 * 1000;
   return {
     ensureSchema,
     async ping() { await query("SELECT 1"); return true; },
@@ -219,6 +221,77 @@ function createStore(query) {
       return { site, rates: r.rows };
     },
 
+    // ซิงก์จากชีตระหว่างช่วงเปลี่ยนผ่าน: Apps Script ยังเขียนอีเมลจอง Booking.com ลงชีตอยู่
+    // - แถวใหม่ (id ยังไม่มีในฐานข้อมูล) → เพิ่ม
+    // - แถวเดิม → เติมเฉพาะช่องที่ฐานข้อมูลยังว่างและชีตมีค่า (ชื่อ/วัน/ผู้พัก/ยอด ที่สแกนเนอร์เติมทีหลัง)
+    //           และรับสถานะ "ยกเลิก" จากอีเมลยกเลิก (ฐานข้อมูลยังไม่ยกเลิก)
+    // - ค่าที่แก้ในหลังบ้าน (ห้อง/สถานะเช็คอิน/ชำระ) ไม่ถูกทับ
+    async syncFromSheet(list) {
+      await ensureSchema();
+      const out = { added: 0, backfilled: 0, cancelled: 0, rooms: 0, expenses: 0, orders: 0 };
+      const existing = new Map((await query("SELECT id, name, checkin, checkout, guests, rooms, amount, status, note FROM bookings")).rows.map((r) => [r.id, r]));
+      for (const b of (list && list.bookings) || []) {
+        const id = str(b.id); if (!id) continue;
+        const cur = existing.get(id);
+        if (!cur) {
+          await query(`INSERT INTO bookings (${BOOKING_COLS.join(",")}) VALUES (${BOOKING_COLS.map((_, i) => `$${i + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING`, pick(BOOKING_COLS, b));
+          out.added++; continue;
+        }
+        const fields = {};
+        for (const k of ["name", "checkin", "checkout", "guests", "rooms", "amount"]) if (!str(cur[k]) && str(b[k])) fields[k] = str(b[k]);
+        if (/ยกเลิก|cancel/i.test(str(b.status)) && !/ยกเลิก|cancel/i.test(str(cur.status))) { fields.status = "ยกเลิก"; if (str(b.note) && str(b.note) !== str(cur.note)) fields.note = str(b.note); out.cancelled++; }
+        if (Object.keys(fields).length) {
+          const keys = Object.keys(fields), vals = keys.map((k) => fields[k]);
+          const ci = fields.checkin || cur.checkin, co = fields.checkout || cur.checkout;
+          const sets = keys.map((k, i) => `${k} = $${i + 2}`);
+          if (fields.checkin || fields.checkout) { sets.push(`nights = $${keys.length + 2}`); vals.push(nightsOf(ci, co)); }
+          await query(`UPDATE bookings SET ${sets.join(", ")}, updated_at = now() WHERE id = $1`, [id, ...vals]);
+          if (!fields.status) out.backfilled++;
+          await audit("script", "sync", id, fields);
+        }
+      }
+      for (const rm of (list && list.rooms) || []) {
+        if (!str(rm.room)) continue;
+        const r = await query("INSERT INTO rooms (room, clean, note, sort) VALUES ($1, $2, $3, 99) ON CONFLICT (room) DO NOTHING", [str(rm.room), str(rm.clean) || "สะอาด", str(rm.note)]);
+        out.rooms += r.rowCount == null ? 1 : r.rowCount;
+      }
+      for (const e of (list && list.expenses) || []) {
+        if (!str(e.id)) continue;
+        const r = await query(`INSERT INTO expenses (${EXP_COLS.join(",")}) VALUES (${EXP_COLS.map((_, j) => `$${j + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING`, pick(EXP_COLS, e));
+        out.expenses += r.rowCount == null ? 1 : r.rowCount;
+      }
+      for (const o of (list && list.orders) || []) {
+        if (!str(o.id)) continue;
+        const r = await query(`INSERT INTO orders (${ORDER_COLS.join(",")}) VALUES (${ORDER_COLS.map((_, j) => `$${j + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING`, pick(ORDER_COLS, o));
+        out.orders += r.rowCount == null ? 1 : r.rowCount;
+      }
+      return out;
+    },
+
+    // เรียกจาก /api/data: ซิงก์จากชีตอย่างมากทุก 2 นาที (อีเมลจองใหม่จาก Apps Script ถึงฐานข้อมูลภายใน ~2 นาทีหลังสแกน)
+    async syncFromSheetIfStale(opts = {}) {
+      const url = (opts.url != null ? opts.url : (process.env.SHEET_WEBAPP_URL || "")).trim();
+      const token = (opts.token != null ? opts.token : (process.env.SHEET_TOKEN || "")).trim();
+      if (!url || !token) return null;
+      const now = Date.now();
+      if (now - lastSyncAt < (opts.minIntervalMs != null ? opts.minIntervalMs : SYNC_INTERVAL_MS)) return null;
+      lastSyncAt = now;
+      const f = opts.fetchImpl || fetch;
+      try {
+        const sep = url.includes("?") ? "&" : "?";
+        const r = await f(`${url}${sep}action=list&token=${encodeURIComponent(token)}&_ts=${now}`, { redirect: "follow" });
+        if (!r.ok) throw new Error(`sheet http-${r.status}`);
+        const list = await r.json();
+        if (!Array.isArray(list && list.bookings)) throw new Error("sheet list invalid");
+        const out = await this.syncFromSheet(list);
+        if (out.added || out.backfilled || out.cancelled || out.orders) console.info(JSON.stringify({ event: "db_sync_from_sheet", ...out }));
+        return out;
+      } catch (e) {
+        lastSyncAt = now - SYNC_INTERVAL_MS + 30000; // ล้มเหลว → ลองใหม่ใน 30 วิ
+        console.error(JSON.stringify({ event: "db_sync_failed", reason: String((e && e.message) || e).slice(0, 160) }));
+        return null;
+      }
+    },
     // ย้ายข้อมูลจากชีต (payload ของ Apps Script action=list + action=site) — รันซ้ำได้ ไม่ทับค่าที่แก้ในฐานข้อมูลแล้ว
     async importFromSheet(list, site) {
       await ensureSchema();

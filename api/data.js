@@ -81,6 +81,7 @@ module.exports = async (req, res) => {
   if (dbEnabled()) {
     try {
       await getStore().bootstrapFromSheet(); // ครั้งแรกเท่านั้น (ฐานข้อมูลว่าง) — ดึงข้อมูลเดิมจากชีตมาให้เอง
+      await getStore().syncFromSheetIfStale(); // อีเมลจอง Booking.com ที่ Apps Script เขียนลงชีต → เข้าฐานข้อมูลภายใน ~2 นาที
       const d = await getStore().listAll();
       return res.status(200).json({
         ok: true, demo: false, today, role,
