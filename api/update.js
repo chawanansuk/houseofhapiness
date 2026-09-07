@@ -38,8 +38,11 @@ module.exports = async (req, res) => {
     if (action === "expadd" || action === "expdel") {
       return res.status(403).json({ ok: false, error: "staff-not-allowed" });
     }
-    delete b.amount;
-    if (b.fields && typeof b.fields === "object") delete b.fields.amount;
+    // เงินทุกช่อง ไม่ใช่แค่ยอดรวม — พนักงานแก้สถานะการชำระ/ยอดที่รับแล้วไม่ได้
+    for (const k of ["amount", "paid", "pay_status"]) {
+      delete b[k];
+      if (b.fields && typeof b.fields === "object") delete b.fields[k];
+    }
   }
 
   if (demoMode) {

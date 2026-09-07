@@ -6,7 +6,8 @@
  * ยอดคำนวณใหม่ฝั่งเซิร์ฟเวอร์จากรายการ (ไม่เชื่อ total ที่ส่งมา)
  */
 
-const RATE_MAX = 10, RATE_WINDOW_MS = 60 * 60 * 1000;
+// แขกทุกห้องใช้ไวไฟของที่พัก = IP เดียวกันทั้งตึก ลิมิตจึงต้องรองรับทั้ง 15 ห้องในรอบส่งเดียว
+const RATE_MAX = 40, RATE_WINDOW_MS = 60 * 60 * 1000;
 const SHEET_TIMEOUT_MS = 12000;
 const hits = new Map();
 const { dbEnabled, getStore } = require("./_store.js");

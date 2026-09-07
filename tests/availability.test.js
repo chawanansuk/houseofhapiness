@@ -91,19 +91,21 @@ module.exports = (async () => {
   assert.equal(r.body.retryable, true);
   global.fetch = fetchFixture;
 
-  // 7) rate limit /api/book: ครั้งที่ 6 จาก IP เดิมใน 1 ชม. ต้องโดน 429
+  // 7) rate limit /api/book: เกินลิมิตต่อ IP ใน 1 ชม. ต้องโดน 429 (อ่านลิมิตจากซอร์สจริง)
+  const BOOK_MAX = Number(require("fs").readFileSync(require("path").join(__dirname, "..", "api", "book.js"), "utf8").match(/const RATE_MAX = (\d+)/)[1]);
   process.env.SHEET_WEBAPP_URL = ""; // ให้ book ตอบ not-configured ไม่ยิงออกจริง
   const mkBook = () => call(book, {
     method: "POST",
     headers: { "x-forwarded-for": "203.0.113.9" },
     body: { name: "ทดสอบ", checkin: "2026-09-01", checkout: "2026-09-03" },
   });
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < BOOK_MAX; i++) {
     const b = await mkBook();
-    assert.equal(b.code, 503, "5 ครั้งแรกต้องผ่าน rate limit และแจ้งว่า service ยังไม่ได้ตั้งค่า (ครั้งที่ " + (i + 1) + ")");
+    assert.equal(b.code, 503, "ทุกครั้งก่อนถึงลิมิตต้องผ่าน rate limit และแจ้งว่า service ยังไม่ได้ตั้งค่า (ไม่ยิงออกจริง)");
   }
   const blocked = await mkBook();
-  assert.equal(blocked.code, 429, "ครั้งที่ 6 ต้องโดน rate limit");
+  assert.equal(blocked.code, 429, "เกินลิมิตต่อ IP แล้วต้องโดน 429");
+  assert.ok(BOOK_MAX >= 10, "ลิมิตต้องรองรับหลายคนที่ใช้ไวไฟเดียวกัน");
   // IP อื่นต้องไม่โดนหางเลข
   const other = await call(book, {
     method: "POST",

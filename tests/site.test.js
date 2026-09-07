@@ -82,7 +82,14 @@ assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becom
 assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
 assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
 assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
-assert.match(admin, /app\.js\?v=23/, "admin cache-bust version must be bumped with app changes");
+assert.match(admin, /app\.js\?v=24/, "admin cache-bust version must be bumped with app changes");
+// บั๊กที่เคยเจอ: พนักงานแก้/เห็นข้อมูลการชำระเงินได้ · การจองหายเมื่อ id ชนกัน · ซิงก์ชีตหน่วง /api/data
+assert.match(read("api/update.js"), /for \(const k of \["amount", "paid", "pay_status"\]\)/, "staff must not write any money field");
+assert.match(read("api/data.js"), /amount: "", paid: "", pay_status: ""/, "staff must not read any money field");
+assert.match(read("api/_store.js"), /insertWithFreshId/, "new rows must be inserted atomically (no silent drop on id collision)");
+assert.doesNotMatch(read("api/data.js"), /await getStore\(\)\.syncFromSheetIfStale/, "sheet sync must not block /api/data");
+assert.match(read("api/_store.js"), /to_regclass/, "schema check must short-circuit on warm databases");
+assert.match(read("vercel.json"), /"regions": \["sin1"\]/, "functions must run next to the database and guests (Singapore)");
 assert.match(adminJs, /function applyPending/, "admin must keep just-saved values when the sheet returns a stale read");
 assert.match(adminJs, /INFLIGHT\.has\(fkey\)/, "admin must ignore repeated taps while a save is in flight");
 assert.match(read("backoffice/apps-script.gs"), /SpreadsheetApp\.flush\(\);/, "Apps Script must flush writes before replying");

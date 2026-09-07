@@ -62,6 +62,13 @@ function createStore(query) {
   const ensureSchema = () => {
     if (!schemaReady) {
       schemaReady = (async () => {
+        // ทางลัด 1 คำสั่ง: ถ้าตารางสุดท้ายในไฟล์ (audit_log) มีแล้ว = สร้างครบแล้ว ข้ามทั้งชุด
+        // (ไม่งั้นทุกอินสแตนซ์ใหม่ต้องยิง CREATE/seed ~16 ครั้ง ครั้งละหนึ่งรอบวิ่งไป-กลับฐานข้อมูล)
+        // ⚠ เพิ่มตารางใหม่ใน schema.sql ต้องมาแก้ชื่อตารางที่เช็คตรงนี้ด้วย
+        try {
+          const have = await query("SELECT to_regclass('public.audit_log') AS t");
+          if (have.rows[0] && have.rows[0].t) return;
+        } catch (_) { /* เช็คไม่ได้ก็สร้างตามปกติ */ }
         // ตัดบรรทัดคอมเมนต์ก่อน แล้วแยกทีละคำสั่ง (ให้ error ชี้จุดได้)
         const sql = fs.readFileSync(path.join(__dirname, "..", "db", "schema.sql"), "utf8").split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
         for (const stmt of sql.split(/;\s*\n/).map((s) => s.trim()).filter(Boolean)) await query(stmt);
@@ -76,18 +83,24 @@ function createStore(query) {
   const audit = (actor, action, target, fields) =>
     query("INSERT INTO audit_log (actor, action, target, fields) VALUES ($1, $2, $3, $4)", [str(actor), str(action), str(target), fields ? JSON.stringify(fields) : null]).catch(() => {});
 
-  // id แบบเดิม (WEB-yyMMddHHmmss) + กันชนกันในวินาทีเดียว
-  async function freshId(prefix, table) {
-    const base = `${prefix}-${idStamp()}`;
-    for (let i = 0; i < 20; i++) {
-      const cand = i === 0 ? base : `${base}-${i + 1}`;
-      const r = await query(`SELECT 1 FROM ${table} WHERE id = $1`, [cand]);
-      if (!r.rows.length) return cand;
-    }
-    return `${base}-${Math.random().toString(36).slice(2, 6)}`;
-  }
-
   const pick = (cols, row) => cols.map((c) => str(row[c]));
+
+  // เพิ่มแถวใหม่แบบ atomic: id แบบเดิม (WEB-yyMMddHHmmss) แต่ถ้าชนกัน (สองคนจองวินาทีเดียวกัน)
+  // จะลองต่อท้าย -2, -3, … จน INSERT สำเร็จจริง — ห้ามคืน id ที่ไม่ได้เขียน มิฉะนั้นการจองจะหายเงียบ ๆ
+  async function insertWithFreshId(table, cols, rec, prefix) {
+    const explicit = str(rec.id);
+    const base = explicit || `${prefix}-${idStamp()}`;
+    for (let i = 0; i < 25; i++) {
+      const id = i === 0 ? base : (explicit ? `${base}-${i + 1}` : `${base}-${i + 1}`);
+      const r = await query(
+        `INSERT INTO ${table} (${cols.join(",")}) VALUES (${cols.map((_, j) => `$${j + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING RETURNING id`,
+        pick(cols, { ...rec, id }),
+      );
+      if (r.rows.length) return id;
+      if (explicit) return id; // ระบุ id มาเองและมีอยู่แล้ว = ตั้งใจให้ idempotent (นำเข้าจากชีต)
+    }
+    throw new Error(`${table}: could not allocate id`);
+  }
 
   let bootstrapTried = false;
   let lastSyncAt = 0;
@@ -142,9 +155,8 @@ function createStore(query) {
 
     async addBooking(row, actor) {
       await ensureSchema();
-      const id = str(row.id) || await freshId("WEB", "bookings");
-      const rec = { ...row, id, nights: nightsOf(str(row.checkin), str(row.checkout)) || str(row.nights), created: str(row.created) || stamp(), rooms: str(row.rooms) || "1", status: str(row.status) || "รอยืนยัน" };
-      await query(`INSERT INTO bookings (${BOOKING_COLS.join(",")}) VALUES (${BOOKING_COLS.map((_, i) => `$${i + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING`, pick(BOOKING_COLS, rec));
+      const rec = { ...row, nights: nightsOf(str(row.checkin), str(row.checkout)) || str(row.nights), created: str(row.created) || stamp(), rooms: str(row.rooms) || "1", status: str(row.status) || "รอยืนยัน" };
+      const id = await insertWithFreshId("bookings", BOOKING_COLS, rec, "WEB");
       await audit(actor || "web", "add", id, { source: rec.source, checkin: rec.checkin, checkout: rec.checkout });
       return id;
     },
@@ -179,9 +191,8 @@ function createStore(query) {
 
     async addExpense(x, actor) {
       await ensureSchema();
-      const id = str(x.id) || await freshId("EXP", "expenses");
-      const rec = { ...x, id, date: str(x.date) || stamp().slice(0, 10), category: str(x.category) || "อื่นๆ", created: str(x.created) || stamp() };
-      await query(`INSERT INTO expenses (${EXP_COLS.join(",")}) VALUES (${EXP_COLS.map((_, i) => `$${i + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING`, pick(EXP_COLS, rec));
+      const rec = { ...x, date: str(x.date) || stamp().slice(0, 10), category: str(x.category) || "อื่นๆ", created: str(x.created) || stamp() };
+      const id = await insertWithFreshId("expenses", EXP_COLS, rec, "EXP");
       await audit(actor || "admin", "expadd", id, { amount: rec.amount, category: rec.category });
       return id;
     },
@@ -196,9 +207,8 @@ function createStore(query) {
 
     async addOrder(o) {
       await ensureSchema();
-      const id = str(o.id) || await freshId("RS", "orders");
-      const rec = { ...o, id, created: str(o.created) || stamp(), status: str(o.status) || "รอยืนยัน", lang: str(o.lang) || "th" };
-      await query(`INSERT INTO orders (${ORDER_COLS.join(",")}) VALUES (${ORDER_COLS.map((_, i) => `$${i + 1}`).join(",")}) ON CONFLICT (id) DO NOTHING`, pick(ORDER_COLS, rec));
+      const rec = { ...o, created: str(o.created) || stamp(), status: str(o.status) || "รอยืนยัน", lang: str(o.lang) || "th" };
+      const id = await insertWithFreshId("orders", ORDER_COLS, rec, "RS");
       await audit("web", "orderadd", id, { room: rec.room, total: rec.total });
       return id;
     },
@@ -268,6 +278,25 @@ function createStore(query) {
       return out;
     },
 
+    // ค่าตั้งค่าเว็บ + เรทเทศกาล: เจ้าของยังแก้ในชีต (แท็บ Site/Rates) เป็นหลัก → ชีตเป็นตัวจริงของสองตารางนี้
+    async syncSiteFromSheet(site) {
+      if (!site) return { site: 0, rates: 0 };
+      const out = { site: 0, rates: 0 };
+      for (const [k, v] of Object.entries(site.site || {})) {
+        await query("INSERT INTO site_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [str(k), str(v)]);
+        out.site++;
+      }
+      if (Array.isArray(site.rates)) {
+        await query("DELETE FROM rates");
+        for (const rt of site.rates) {
+          if (!str(rt.from) || !str(rt.to) || !str(rt.price)) continue;
+          await query('INSERT INTO rates ("from", "to", room, price, note) VALUES ($1, $2, $3, $4, $5)', [str(rt.from), str(rt.to), str(rt.room) || "all", str(rt.price), str(rt.note)]);
+          out.rates++;
+        }
+      }
+      return out;
+    },
+
     // เรียกจาก /api/data: ซิงก์จากชีตอย่างมากทุก 2 นาที (อีเมลจองใหม่จาก Apps Script ถึงฐานข้อมูลภายใน ~2 นาทีหลังสแกน)
     async syncFromSheetIfStale(opts = {}) {
       const url = (opts.url != null ? opts.url : (process.env.SHEET_WEBAPP_URL || "")).trim();
@@ -279,11 +308,16 @@ function createStore(query) {
       const f = opts.fetchImpl || fetch;
       try {
         const sep = url.includes("?") ? "&" : "?";
-        const r = await f(`${url}${sep}action=list&token=${encodeURIComponent(token)}&_ts=${now}`, { redirect: "follow" });
-        if (!r.ok) throw new Error(`sheet http-${r.status}`);
-        const list = await r.json();
+        const get = async (action) => {
+          const r = await f(`${url}${sep}action=${action}&token=${encodeURIComponent(token)}&_ts=${now}`, { redirect: "follow" });
+          if (!r.ok) throw new Error(`sheet ${action} http-${r.status}`);
+          return r.json();
+        };
+        const [list, site] = await Promise.all([get("list"), get("site").catch(() => null)]);
         if (!Array.isArray(list && list.bookings)) throw new Error("sheet list invalid");
         const out = await this.syncFromSheet(list);
+        // แท็บ Site/Rates: เจ้าของแก้ในชีตแล้วเว็บต้องอัปเดตตาม (ประกาศหน้าแรก/ราคา/เรทเทศกาล)
+        if (site && !site.error) Object.assign(out, await this.syncSiteFromSheet(site));
         if (out.added || out.backfilled || out.cancelled || out.orders) console.info(JSON.stringify({ event: "db_sync_from_sheet", ...out }));
         return out;
       } catch (e) {
