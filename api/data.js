@@ -18,6 +18,7 @@
 
 const DEMO_KEY = "demo1234";
 const DEMO_STAFF_KEY = "staff1234";
+const { dbEnabled, getStore } = require("./_store.js");
 
 // ผังจริง ส.ค. 2026: เปลี่ยนชื่อห้องสองเตียง + ถอดงิ้ว1/งิ้ว4 ออก
 // ชีตอาจยังใช้ชื่อเก่าอยู่ (จนกว่าเจ้าของจะรัน applyRealRoomList ในสคริปต์ใหม่)
@@ -76,6 +77,25 @@ module.exports = async (req, res) => {
     });
   }
 
+  // ฐานข้อมูล Postgres (Supabase) เมื่อตั้ง DATABASE_URL — เร็วและอ่านได้ค่าล่าสุดเสมอ
+  if (dbEnabled()) {
+    try {
+      await getStore().bootstrapFromSheet(); // ครั้งแรกเท่านั้น (ฐานข้อมูลว่าง) — ดึงข้อมูลเดิมจากชีตมาให้เอง
+      const d = await getStore().listAll();
+      return res.status(200).json({
+        ok: true, demo: false, today, role,
+        bookings: forRole(d.bookings.map((b) => ({ ...b, room_no: roomName(b.room_no) }))),
+        rooms: normalizeRooms(d.rooms),
+        ical: [],
+        expenses: role === "staff" ? [] : d.expenses,
+        orders: d.orders,
+        sources: { db: true, sheet: true, ical: false },
+      });
+    } catch (e) {
+      console.error(JSON.stringify({ event: "db_read_failed", reason: String((e && e.message) || e).slice(0, 120) }));
+      return res.status(503).json({ ok: false, error: "db-unavailable" });
+    }
+  }
   const [sheet, ical] = await Promise.all([fetchSheet(), fetchIcal()]);
   return res.status(200).json({
     ok: true, demo: false, today, role,

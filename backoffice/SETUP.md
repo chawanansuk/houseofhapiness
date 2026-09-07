@@ -82,6 +82,18 @@
 
 ---
 
+## ฐานข้อมูล Postgres (Supabase) — ทางเลือกที่เร็วและนิ่งกว่าชีต
+
+ตั้งแต่ v10 หลังบ้านเก็บข้อมูลใน Postgres ได้โดยตรง (ชีตกลายเป็นสำเนา) เมื่อตั้งตัวแปร `DATABASE_URL` บน Vercel:
+
+1. สมัคร https://supabase.com → New project (Region: Southeast Asia / Singapore) → จด Database password
+2. ปุ่ม **Connect** บนหัวโปรเจกต์ → Connection String → Method: **Transaction pooler** (พอร์ต 6543) → คัดลอก แล้วแทน `[YOUR-PASSWORD]` ด้วยรหัส
+3. Vercel → Settings → Environment Variables → `DATABASE_URL` = บรรทัดนั้น → Redeploy
+4. ตารางถูกสร้างให้เองตอนเรียกครั้งแรก (`db/schema.sql`) — ย้ายข้อมูลเดิมจากชีตด้วยการเรียก `POST /api/migrate` พร้อม header `x-admin-key` (รันซ้ำได้ ไม่ทับค่าที่แก้ในฐานข้อมูลแล้ว)
+5. หลังสลับแล้ว **แก้ข้อมูลผ่านหน้า /admin เท่านั้น** — แก้ในชีตจะไม่มีผล
+
+ถ้าไม่ตั้ง `DATABASE_URL` ทุกอย่างทำงานผ่าน Apps Script + ชีตเหมือนเดิม
+
 ## ขั้นที่ 2 — ตั้งค่าบน Vercel (ประมาณ 5 นาที)
 
 เข้า [vercel.com](https://vercel.com) → โปรเจกต์ **houseofhapiness** → **Settings → Environment Variables**

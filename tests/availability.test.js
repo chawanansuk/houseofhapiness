@@ -183,7 +183,7 @@ module.exports = (async () => {
   r = await call(health);
   assert.equal(r.code, 200);
   assert.equal(r.body.ok, true);
-  assert.deepEqual(r.body.checks, { sheet: "ok", ical: "not-configured" });
+  assert.deepEqual(r.body.checks, { db: "not-configured", sheet: "ok", ical: "not-configured" });
   assert.equal(JSON.stringify(r.body).includes(process.env.SHEET_TOKEN), false);
 
   // รองรับ Apps Script deployment รุ่นเก่าที่ยังไม่ส่ง rooms

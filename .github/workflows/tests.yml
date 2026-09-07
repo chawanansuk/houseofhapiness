@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install dependencies (pg + PGlite for store tests)
+        run: npm install --no-audit --no-fund
+
       - name: Check JavaScript syntax
         shell: bash
         run: |
@@ -54,3 +57,6 @@ jobs:
 
       - name: Test public site and admin regressions
         run: node tests/site.test.js
+
+      - name: Test Postgres store (PGlite)
+        run: node tests/store.test.js

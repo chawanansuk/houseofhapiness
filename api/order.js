@@ -9,6 +9,7 @@
 const RATE_MAX = 10, RATE_WINDOW_MS = 60 * 60 * 1000;
 const SHEET_TIMEOUT_MS = 12000;
 const hits = new Map();
+const { dbEnabled, getStore } = require("./_store.js");
 
 function rateLimited(ip) {
   const now = Date.now();
@@ -72,6 +73,17 @@ module.exports = async (req, res) => {
   }
   row.items = items.text;
   row.total = String(items.total);
+
+  if (dbEnabled()) {
+    try {
+      const id = await getStore().addOrder(row);
+      console.info(JSON.stringify({ event: "order_saved", orderId: String(id), total: items.total }));
+      return res.status(201).json({ ok: true, saved: true, id: String(id) });
+    } catch (e) {
+      console.error(JSON.stringify({ event: "order_storage_unavailable", reason: String((e && e.message) || "db").slice(0, 120) }));
+      return res.status(502).json({ ok: false, saved: false, error: "order-storage-unavailable" });
+    }
+  }
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();

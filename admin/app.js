@@ -522,7 +522,7 @@ function renderToday(){
   if (DATA.demo) notes.push(`<div class="notebox2">โหมดตัวอย่าง — ข้อมูลจำลอง แก้อะไรจะเห็นผลชั่วคราวแต่ไม่บันทึกจริง</div>`);
   const li = localStorage.getItem(LAST_IMPORT);
   if (!DATA.demo && (!isYMD(li) || diffDays(li, TODAY) >= 7)) notes.push(`<div class="notebox2 plain">📄 ${esc(lastImportLabel())} — แนะนำนำเข้าไฟล์จาก Booking.com Extranet สัปดาห์ละครั้ง เพื่อเติมชื่อ/วันที่/ยอดที่อีเมลไม่บอก <button data-act="open-import">นำเข้าเลย</button></div>`);
-  if (DATA.sources && DATA.sources.sheet === false) notes.push(`<div class="notebox2">เชื่อมต่อชีตไม่ได้ (${esc(DATA.sources.sheetError||'')}) — ข้อมูลที่เห็นอาจไม่ใช่ล่าสุด</div>`);
+  if (DATA.sources && DATA.sources.sheet === false && !DATA.sources.db) notes.push(`<div class="notebox2">เชื่อมต่อชีตไม่ได้ (${esc(DATA.sources.sheetError||'')}) — ข้อมูลที่เห็นอาจไม่ใช่ล่าสุด</div>`);
   $('todayNotes').innerHTML = notes.join('');
 
   const groups = [];

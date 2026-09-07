@@ -5,6 +5,7 @@
 const DEMO_KEY = "demo1234";
 const DEMO_STAFF_KEY = "staff1234";
 const SHEET_TIMEOUT_MS = 12000;
+const { dbEnabled, getStore } = require("./_store.js");
 
 // ชื่อห้องใหม่ → ชื่อเดิมในชีต: ชีตที่ยังไม่ได้รัน applyRealRoomList ใช้ชื่อเก่าอยู่
 // ถ้าอัปเดตสถานะห้องด้วยชื่อใหม่ไม่เจอ จะลองชื่อเดิมให้อีกครั้งอัตโนมัติ
@@ -43,6 +44,25 @@ module.exports = async (req, res) => {
 
   if (demoMode) {
     return res.status(200).json({ ok: true, demo: true, saved: false });
+  }
+
+  // ฐานข้อมูล Postgres เมื่อตั้ง DATABASE_URL — เขียนตรง ไม่ผ่าน Apps Script
+  if (dbEnabled()) {
+    try {
+      const st = getStore();
+      let out;
+      if (action === "update") out = await st.updateBooking(b.id, b.fields || {}, role);
+      else if (action === "roomclean") out = await st.setRoomClean(b.room, b.clean, b.note, role);
+      else if (action === "add") out = { ok: true, id: await st.addBooking({ ...b, source: b.source || "เว็บไซต์ (จองตรง)" }, role) };
+      else if (action === "expadd") out = (!b.amount || !b.date) ? { ok: false, error: "missing-fields" } : { ok: true, id: await st.addExpense(b, role) };
+      else if (action === "expdel") out = await st.deleteExpense(b.id, role);
+      else if (action === "orderupdate") out = await st.updateOrder(b.id, b.fields || {}, role);
+      if (!out || out.ok !== true) return res.status(502).json({ ok: false, saved: false, error: (out && out.error) || "update-storage-failed" });
+      return res.status(200).json({ ok: true, saved: true, id: out.id });
+    } catch (e) {
+      console.error(JSON.stringify({ event: "db_write_failed", action, reason: String((e && e.message) || e).slice(0, 120) }));
+      return res.status(502).json({ ok: false, saved: false, error: "update-storage-unavailable" });
+    }
   }
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();

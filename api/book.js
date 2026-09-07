@@ -9,6 +9,7 @@
 const RATE_MAX = 5, RATE_WINDOW_MS = 60 * 60 * 1000;
 const SHEET_TIMEOUT_MS = 12000;
 const hits = new Map();
+const { dbEnabled, getStore } = require("./_store.js");
 
 function rateLimited(ip) {
   const now = Date.now();
@@ -35,7 +36,7 @@ module.exports = async (req, res) => {
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url || !token) {
+  if (!dbEnabled() && (!url || !token)) {
     console.error(JSON.stringify({ event: "booking_storage_not_configured" }));
     return res.status(503).json({ ok: false, saved: false, error: "booking-service-not-configured" });
   }
@@ -65,6 +66,17 @@ module.exports = async (req, res) => {
     ? Math.round((Date.parse(row.checkout) - Date.parse(row.checkin)) / 86400000) : 0;
   if (!row.name || !row.phone || !isYMD(row.checkin) || !isYMD(row.checkout) || nights < 2) {
     return res.status(400).json({ ok: false, error: "invalid-input" });
+  }
+
+  if (dbEnabled()) {
+    try {
+      const id = await getStore().addBooking(row, "web");
+      console.info(JSON.stringify({ event: "booking_saved", bookingId: String(id) }));
+      return res.status(201).json({ ok: true, saved: true, id: String(id) });
+    } catch (e) {
+      console.error(JSON.stringify({ event: "booking_storage_unavailable", reason: String((e && e.message) || "db").slice(0, 120) }));
+      return res.status(502).json({ ok: false, saved: false, error: "booking-storage-unavailable" });
+    }
   }
 
   const ctrl = new AbortController();
