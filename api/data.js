@@ -92,8 +92,8 @@ module.exports = async (req, res) => {
         sources: { db: true, sheet: true, ical: false },
       });
     } catch (e) {
-      console.error(JSON.stringify({ event: "db_read_failed", reason: String((e && e.message) || e).slice(0, 120) }));
-      return res.status(503).json({ ok: false, error: "db-unavailable" });
+      // ฐานข้อมูลต่อไม่ได้ → ใช้ชีตต่อไปก่อน (หลังบ้านต้องไม่ล่ม) — ข้อมูลที่เขียนลงชีตช่วงนี้จะถูกดึงเข้าฐานข้อมูลตอน bootstrap
+      console.error(JSON.stringify({ event: "db_read_failed_fallback_sheet", reason: String((e && e.message) || e).slice(0, 160) }));
     }
   }
   const [sheet, ical] = await Promise.all([fetchSheet(), fetchIcal()]);

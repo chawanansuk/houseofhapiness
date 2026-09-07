@@ -60,8 +60,8 @@ module.exports = async (req, res) => {
       if (!out || out.ok !== true) return res.status(502).json({ ok: false, saved: false, error: (out && out.error) || "update-storage-failed" });
       return res.status(200).json({ ok: true, saved: true, id: out.id });
     } catch (e) {
-      console.error(JSON.stringify({ event: "db_write_failed", action, reason: String((e && e.message) || e).slice(0, 120) }));
-      return res.status(502).json({ ok: false, saved: false, error: "update-storage-unavailable" });
+      // ฐานข้อมูลต่อไม่ได้ → เขียนลงชีตแทนชั่วคราว (จะถูกดึงเข้าฐานข้อมูลตอน bootstrap ครั้งแรก)
+      console.error(JSON.stringify({ event: "db_write_failed_fallback_sheet", action, reason: String((e && e.message) || e).slice(0, 160) }));
     }
   }
 

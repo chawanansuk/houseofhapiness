@@ -4,7 +4,7 @@
  */
 const assert = require("assert");
 const { PGlite } = require("@electric-sql/pglite");
-const { createStore } = require("../api/_store.js");
+const { createStore, parseDbUrl } = require("../api/_store.js");
 
 (async () => {
   const db = new PGlite();
@@ -110,6 +110,16 @@ const { createStore } = require("../api/_store.js");
   assert.equal(calls, 2);
   assert.equal(await store.bootstrapFromSheet({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: fakeFetch }), null, "ฐานข้อมูลที่มีข้อมูลแล้วไม่ดึงทับ");
   assert.equal(await store2.bootstrapFromSheet({ url: "", token: "", fetchImpl: fakeFetch }), null, "ไม่มีชีต → ข้าม");
+
+  // 12) DATABASE_URL ที่คัดลอกมาผิดรูปต้องซ่อมได้/บอกสาเหตุได้ โดยไม่หลุดค่าจริง
+  assert.equal(parseDbUrl("postgresql://postgres.abc:pass@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres").connectionString, "postgresql://postgres.abc:pass@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres");
+  assert.equal(parseDbUrl("  \"postgresql://postgres.abc:pass@host:6543/postgres\" ").connectionString, "postgresql://postgres.abc:pass@host:6543/postgres", "ตัดช่องว่างและเครื่องหมายคำพูด");
+  const fixed = parseDbUrl("postgresql://postgres.abc:P@ss#w/rd%1@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres");
+  assert.equal(fixed.repaired, true); assert.equal(fixed.connectionString, "postgresql://postgres.abc:P%40ss%23w%2Frd%251@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres", "รหัสที่มี @ # / % ถูก encode ให้เอง");
+  assert.equal(new URL(fixed.connectionString).password, "P%40ss%23w%2Frd%251");
+  assert.equal(parseDbUrl("postgresql://postgres.abc:[YOUR-PASSWORD]@host:6543/postgres").error, "placeholder");
+  assert.equal(parseDbUrl("not a url").error, "invalid-url");
+  assert.equal(parseDbUrl("").error, "missing");
 
   console.log("STORE TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });

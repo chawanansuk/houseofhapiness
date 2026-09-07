@@ -35,13 +35,15 @@ module.exports = async (req, res) => {
   try {
     let j;
     if (dbEnabled()) {
-      j = await getStore().getSite();
-    } else {
+      try { j = await getStore().getSite(); } catch (e) { console.error(JSON.stringify({ event: "site_db_failed_fallback_sheet", reason: String((e && e.message) || e).slice(0, 120) })); }
+    }
+    if (!j && url) {
       const sep = url.includes("?") ? "&" : "?";
       const r = await fetch(`${url}${sep}action=site&token=${encodeURIComponent(token)}`, { redirect: "follow" });
       if (!r.ok) throw new Error("HTTP " + r.status);
       j = await r.json();
       if (j && j.error) throw new Error(String(j.error)); // สคริปต์เก่ายังไม่รู้จัก action=site
+      j.__sheet = true;
     }
     const s = (j && j.site) || {};
     const prices = {
@@ -70,7 +72,7 @@ module.exports = async (req, res) => {
         th: String(s.announcement_th || "").trim().slice(0, 300),
         en: String(s.announcement_en || "").trim().slice(0, 300),
       },
-      source: dbEnabled() ? "db" : "sheet",
+      source: (dbEnabled() && j && !j.__sheet) ? "db" : "sheet",
     });
   } catch {
     return res.status(200).json({ ok: true, ...DEFAULTS, source: "default" });

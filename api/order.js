@@ -80,8 +80,7 @@ module.exports = async (req, res) => {
       console.info(JSON.stringify({ event: "order_saved", orderId: String(id), total: items.total }));
       return res.status(201).json({ ok: true, saved: true, id: String(id) });
     } catch (e) {
-      console.error(JSON.stringify({ event: "order_storage_unavailable", reason: String((e && e.message) || "db").slice(0, 120) }));
-      return res.status(502).json({ ok: false, saved: false, error: "order-storage-unavailable" });
+      console.error(JSON.stringify({ event: "order_db_failed_fallback_sheet", reason: String((e && e.message) || "db").slice(0, 120) }));
     }
   }
 

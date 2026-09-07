@@ -33,6 +33,30 @@ const nightsOf = (ci, co) => (/^\d{4}-\d{2}-\d{2}$/.test(ci) && /^\d{4}-\d{2}-\d
 
 function dbEnabled() { return Boolean((process.env.DATABASE_URL || "").trim()); }
 
+// ทำความสะอาด DATABASE_URL ที่คัดลอกมาจาก Supabase: ตัดช่องว่าง/เครื่องหมายคำพูด และ encode รหัสผ่านที่มีอักขระพิเศษ (@ # / % ฯลฯ)
+// คืน { connectionString } หรือ { error: "placeholder" | "invalid-url" } — ไม่เคยพิมพ์ค่าจริงลง log
+function parseDbUrl(raw) {
+  let s = String(raw == null ? "" : raw).trim().replace(/^["']|["']$/g, "").trim();
+  if (!s) return { error: "missing" };
+  if (/\[YOUR-PASSWORD\]|YOUR-PASSWORD|\[password\]/i.test(s)) return { error: "placeholder" };
+  // แยกด้วย @ ตัวสุดท้าย (รหัสผ่านอาจมี @ เอง) แล้ว encode รหัสผ่านถ้ามีอักขระที่ URL ไม่รับ
+  const m = s.match(/^(postgres(?:ql)?:\/\/)(.*)$/i);
+  if (!m) return { error: "invalid-url" };
+  const at = m[2].lastIndexOf("@");
+  if (at < 0) { try { new URL(s); return { connectionString: s }; } catch (_) { return { error: "invalid-url" }; } }
+  const cred = m[2].slice(0, at), host = m[2].slice(at + 1);
+  const c = cred.indexOf(":");
+  const user = c < 0 ? cred : cred.slice(0, c);
+  let pass = c < 0 ? "" : cred.slice(c + 1);
+  let repaired = false;
+  const badEncoding = /%/.test(pass) && !/^(?:[^%]|%[0-9A-Fa-f]{2})*$/.test(pass);
+  if (/[@#\/?\s\[\]]/.test(pass) || badEncoding) { pass = encodeURIComponent(pass); repaired = true; }
+  const fixed = `${m[1]}${user}${c < 0 ? "" : ":" + pass}@${host}`;
+  try { const u = new URL(fixed); if (!u.hostname) throw 0; return repaired ? { connectionString: fixed, repaired: true } : { connectionString: fixed }; }
+  catch (_) { return { error: "invalid-url" }; }
+}
+function dbConfigError() { const p = parseDbUrl(process.env.DATABASE_URL); return p.error || null; }
+
 function createStore(query) {
   let schemaReady = null;
   const ensureSchema = () => {
@@ -246,8 +270,11 @@ function getStore() {
   if (!dbEnabled()) return null;
   if (!pgStore) {
     const { Pool } = require("pg");
+    const parsed = parseDbUrl(process.env.DATABASE_URL);
+    if (parsed.error) throw new Error(`database-url-${parsed.error}`);
+    if (parsed.repaired) console.info(JSON.stringify({ event: "db_url_repaired", note: "password url-encoded automatically" }));
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL.trim(),
+      connectionString: parsed.connectionString,
       ssl: { rejectUnauthorized: false },
       max: 3,
       idleTimeoutMillis: 10000,
@@ -262,4 +289,4 @@ function getStore() {
 // สำหรับเทส: ฉีด store ที่ต่อ PGlite แทน pool จริง (ต้องตั้ง DATABASE_URL เป็นค่าอะไรก็ได้ให้ dbEnabled() เป็นจริง)
 function __setStore(s) { pgStore = s; }
 
-module.exports = { dbEnabled, getStore, createStore, __setStore, BOOKING_EDITABLE, ORDER_EDITABLE };
+module.exports = { dbEnabled, dbConfigError, parseDbUrl, getStore, createStore, __setStore, BOOKING_EDITABLE, ORDER_EDITABLE };
