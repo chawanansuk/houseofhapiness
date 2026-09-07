@@ -82,7 +82,11 @@ assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becom
 assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
 assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
 assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
-assert.match(admin, /app\.js\?v=24/, "admin cache-bust version must be bumped with app changes");
+assert.match(admin, /app\.js\?v=25/, "admin cache-bust version must be bumped with app changes");
+// เจ้าของยืนยัน (ก.ย. 2569): ไม่มีมัดจำกุญแจ ฿1,000 — ห้ามโผล่ที่ไหนอีก (เว็บ · ข้อความยืนยัน · ป้ายในห้อง · llms)
+for (const f of ["index.html", "room-standard.html", "room-studio.html", "room-deluxe.html", "booking.html", "assets/i18n.js", "admin/app.js", "llms.txt", "print/guest-board.html"]) {
+  assert.doesNotMatch(read(f), /มัดจำกุญแจ|key deposit|มัดจำ (<b>)?฿1,000|฿1,000<\/b> refundable deposit|฿1,000 (refundable )?deposit|มีมัดจำ 1,000/i, f + " must not mention the ฿1,000 key deposit (there is none)");
+}
 // บั๊กที่เคยเจอ: พนักงานแก้/เห็นข้อมูลการชำระเงินได้ · การจองหายเมื่อ id ชนกัน · ซิงก์ชีตหน่วง /api/data
 assert.match(read("api/update.js"), /for \(const k of \["amount", "paid", "pay_status"\]\)/, "staff must not write any money field");
 assert.match(read("api/data.js"), /amount: "", paid: "", pay_status: ""/, "staff must not read any money field");
