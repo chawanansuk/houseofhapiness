@@ -6,7 +6,8 @@
  */
 
 // rate limit แบบเบา ๆ ต่ออินสแตนซ์ (กัน spam bot ยิงถี่ — ไม่ใช่กำแพงเหล็ก แต่พอกันมือบอน)
-const RATE_MAX = 5, RATE_WINDOW_MS = 60 * 60 * 1000;
+// เผื่อกรณีหลายคนจองจากไวไฟเดียวกัน (แขกในที่พัก/ร้านกาแฟ) แต่ยังกันบอทยิงรัว
+const RATE_MAX = 12, RATE_WINDOW_MS = 60 * 60 * 1000;
 const SHEET_TIMEOUT_MS = 12000;
 const hits = new Map();
 const { dbEnabled, getStore } = require("./_store.js");

@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 
   const today = bangkokToday();
   // พนักงานไม่เห็นยอดเงิน — ตัดออกตั้งแต่ฝั่งเซิร์ฟเวอร์ ไม่ใช่แค่ซ่อนใน UI
-  const forRole = (rows) => role === "staff" ? rows.map((b) => ({ ...b, amount: "" })) : rows;
+  const forRole = (rows) => role === "staff" ? rows.map((b) => ({ ...b, amount: "", paid: "", pay_status: "" })) : rows;
 
   if (demoMode) {
     return res.status(200).json({
@@ -81,7 +81,8 @@ module.exports = async (req, res) => {
   if (dbEnabled()) {
     try {
       await getStore().bootstrapFromSheet(); // ครั้งแรกเท่านั้น (ฐานข้อมูลว่าง) — ดึงข้อมูลเดิมจากชีตมาให้เอง
-      await getStore().syncFromSheetIfStale(); // อีเมลจอง Booking.com ที่ Apps Script เขียนลงชีต → เข้าฐานข้อมูลภายใน ~2 นาที
+      // ซิงก์ชีตทำเบื้องหลัง ไม่ await — ไม่งั้นคำขอที่โชคร้ายทุก 2 นาทีจะช้าเท่าชีต (1-3 วิ) ซึ่งเป็นสิ่งที่เราย้ายมาเพื่อหนี
+      getStore().syncFromSheetIfStale().catch(() => {});
       const d = await getStore().listAll();
       return res.status(200).json({
         ok: true, demo: false, today, role,

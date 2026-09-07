@@ -145,10 +145,46 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   assert.equal(all.rooms.find((x) => x.room === "701").clean, "สะอาด", "สถานะห้องจากชีตไม่ทับ (หลังบ้านเป็นตัวจริง)");
   assert.ok(all.orders.find((x) => x.id === "RS-SHEET"));
   let syncCalls = 0;
-  const syncFetch = async () => { syncCalls++; return { ok: true, json: async () => syncList }; };
+  const syncFetch = async (u) => { syncCalls++; return { ok: true, json: async () => (String(u).includes("action=site") ? { site: { announcement_th: "" }, rates: [] } : syncList) }; };
   await store.syncFromSheetIfStale({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: syncFetch, minIntervalMs: 0 });
+  const afterFirst = syncCalls;
+  assert.ok(afterFirst >= 1, "ซิงก์รอบแรกต้องยิงชีต");
   await store.syncFromSheetIfStale({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: syncFetch });
-  assert.equal(syncCalls, 1, "ภายใน 2 นาทีไม่ซิงก์ซ้ำ");
+  assert.equal(syncCalls, afterFirst, "ภายใน 2 นาทีไม่ซิงก์ซ้ำ");
+
+  // 14) สองคนจอง/สั่งอาหารในวินาทีเดียวกัน — ห้ามมีรายการหาย และ id ต้องไม่ซ้ำ
+  const before = (await store.listAll()).bookings.length;
+  const twoIds = await Promise.all([
+    store.addBooking({ name: "พร้อมกัน A", checkin: "2026-11-01", checkout: "2026-11-03" }, "web"),
+    store.addBooking({ name: "พร้อมกัน B", checkin: "2026-11-05", checkout: "2026-11-07" }, "web"),
+  ]);
+  assert.notEqual(twoIds[0], twoIds[1], "id ต้องไม่ซ้ำแม้เกิดในวินาทีเดียวกัน");
+  all = await store.listAll();
+  assert.equal(all.bookings.length, before + 2, "การจองต้องไม่หายเมื่อ id ชนกัน");
+  assert.ok(all.bookings.find((x) => x.name === "พร้อมกัน B"), "รายการที่สองต้องถูกบันทึกจริง");
+  const twoOrders = await Promise.all([
+    store.addOrder({ name: "A", room: "701", date: "2026-11-01", time: "09:00", items: "x", total: "40" }),
+    store.addOrder({ name: "B", room: "702", date: "2026-11-01", time: "09:00", items: "y", total: "40" }),
+  ]);
+  assert.notEqual(twoOrders[0], twoOrders[1]);
+  assert.equal((await store.listAll()).orders.filter((o) => ["A", "B"].includes(o.name)).length, 2, "ออเดอร์พร้อมกันต้องไม่หาย");
+
+  // 15) ค่าตั้งค่าเว็บ/เรทเทศกาล: เจ้าของแก้ในชีตแล้วต้องอัปเดตตาม (ประกาศหน้าแรกยังใช้งานได้)
+  await store.syncSiteFromSheet({ site: { announcement_th: "ปิดปรับปรุงลิฟต์ 10 ต.ค.", price_per_night: "800" }, rates: [{ from: "2026-12-31", to: "2027-01-01", room: "all", price: "1500", note: "ปีใหม่" }] });
+  let sv = await store.getSite();
+  assert.equal(sv.site.announcement_th, "ปิดปรับปรุงลิฟต์ 10 ต.ค.", "ประกาศจากชีตต้องเข้าฐานข้อมูล");
+  assert.equal(sv.site.price_per_night, "800");
+  assert.equal(sv.rates.length, 1); assert.equal(sv.rates[0].price, "1500");
+  await store.syncSiteFromSheet({ site: { announcement_th: "" }, rates: [] });
+  sv = await store.getSite();
+  assert.equal(sv.site.announcement_th, "", "ลบประกาศในชีตแล้วต้องหายจากเว็บ");
+  assert.equal(sv.rates.length, 0);
+
+  // 16) cold start ต้องไม่ยิงคำสั่งสร้างตารางซ้ำ (ฐานข้อมูลอยู่คนละที่กับฟังก์ชัน ทุกคำสั่ง = 1 รอบวิ่ง)
+  let counted = 0;
+  const countingQuery = async (sql, params) => { counted++; return query(sql, params); };
+  await createStore(countingQuery).ensureSchema();
+  assert.ok(counted <= 2, `อินสแตนซ์ใหม่ที่ตารางครบแล้วต้องเช็คไม่เกิน 2 คำสั่ง (ใช้ ${counted})`);
 
   console.log("STORE TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });

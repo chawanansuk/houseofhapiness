@@ -104,5 +104,32 @@ const d = (off) => new Date(Date.now() + off * 86400000).toISOString().slice(0, 
   r = await call(data, { headers: admin });
   assert.equal(r.body.expenses.length, 0);
 
+  // 11) พนักงานห้ามแตะข้อมูลการเงินทุกช่อง (ไม่ใช่แค่ยอดรวม)
+  r = await call(update, { method: "POST", headers: staff, body: { action: "update", id: webId, fields: { room_no: "706", paid: "0", pay_status: "ค้างชำระ" } } });
+  assert.equal(r.code, 200);
+  r = await call(data, { headers: admin });
+  const afterStaff = r.body.bookings.find((x) => x.id === webId);
+  assert.equal(afterStaff.room_no, "706", "พนักงานย้ายห้องได้ตามปกติ");
+  assert.equal(afterStaff.paid, "1400", "พนักงานต้องแก้ยอดที่รับแล้วไม่ได้");
+  assert.equal(afterStaff.pay_status, "จ่ายครบ", "พนักงานต้องแก้สถานะการชำระไม่ได้");
+  r = await call(data, { headers: staff });
+  const seenByStaff = r.body.bookings.find((x) => x.id === webId);
+  assert.equal(seenByStaff.paid, "", "พนักงานต้องไม่เห็นยอดที่รับแล้ว");
+  assert.equal(seenByStaff.pay_status, "", "พนักงานต้องไม่เห็นสถานะการชำระ");
+
+  // 12) ชีตช้า/ค้าง ต้องไม่หน่วง /api/data (ซิงก์ทำเบื้องหลัง)
+  process.env.SHEET_WEBAPP_URL = "https://sheet.slow/exec";
+  process.env.SHEET_TOKEN = "t";
+  let hung = 0;
+  global.fetch = () => { hung++; return new Promise(() => {}); }; // ไม่ตอบเลย
+  const t0 = Date.now();
+  r = await call(data, { headers: admin });
+  const elapsed = Date.now() - t0;
+  assert.equal(r.code, 200, "ชีตค้างแล้วหลังบ้านต้องยังใช้ได้");
+  assert.ok(elapsed < 1000, `/api/data ต้องไม่รอชีต (ใช้เวลา ${elapsed}ms)`);
+  assert.ok(r.body.bookings.length >= 2, "ยังตอบข้อมูลจากฐานข้อมูลครบ");
+  process.env.SHEET_WEBAPP_URL = ""; process.env.SHEET_TOKEN = "";
+  global.fetch = async () => { throw new Error("fetch must not be called in db mode"); };
+
   console.log("API DB-MODE TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });

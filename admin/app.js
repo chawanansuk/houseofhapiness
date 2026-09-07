@@ -403,9 +403,10 @@ function applyPending(){
 async function apiUpdate(body){
   const key = getKey();
   if (navigator.onLine === false) { toast('ออฟไลน์อยู่ — บันทึกไม่ได้ รอเน็ตกลับมาแล้วลองใหม่', true); return null; }
-  const fkey = `${body.action}:${body.id || body.room || ''}`;
-  if (INFLIGHT.has(fkey)) { toast('กำลังบันทึกอยู่ รอสักครู่…'); return null; }
-  INFLIGHT.add(fkey);
+  // กันกดซ้ำเฉพาะคำสั่งที่ชี้รายการเดิม — คำสั่งสร้างของใหม่ (add/expadd) ต้องทำติดกันได้
+  const fkey = (body.id || body.room) ? `${body.action}:${body.id || body.room}` : '';
+  if (fkey && INFLIGHT.has(fkey)) { toast('กำลังบันทึกอยู่ รอสักครู่…'); return null; }
+  if (fkey) INFLIGHT.add(fkey);
   LAST_ACTION = Date.now();
   toast('กำลังบันทึก…');
   try {
@@ -421,7 +422,7 @@ async function apiUpdate(body){
   } catch {
     toast('เชื่อมต่อไม่ได้', true); return null;
   } finally {
-    INFLIGHT.delete(fkey);
+    if (fkey) INFLIGHT.delete(fkey);
     LAST_ACTION = Date.now();
   }
 }

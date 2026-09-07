@@ -60,8 +60,12 @@ function call(body, ip = "1.1.1.1") {
   // rate limit ต่อ IP
   global.fetch = async () => ({ ok: true, status: 200, text: async () => JSON.stringify({ ok: true, id: "RS-X" }) });
   let last;
-  for (let i = 0; i < 12; i++) last = await call(good(), "9.9.9.9");
-  assert.equal(last.code, 429);
+  // ลิมิตอ่านจากซอร์สจริง — แขกทุกห้องใช้ไวไฟเดียวกัน ลิมิตต้องรองรับทั้งตึกในหนึ่งรอบส่ง
+  const ORDER_MAX = Number(require("fs").readFileSync(require("path").join(__dirname, "..", "api", "order.js"), "utf8").match(/const RATE_MAX = (\d+)/)[1]);
+  assert.ok(ORDER_MAX >= 15, "ลิมิตสั่งอาหารต้องรองรับอย่างน้อย 15 ห้องต่อชั่วโมง");
+  for (let i = 0; i < ORDER_MAX; i++) { last = await call(good(), "9.9.9.9"); assert.equal(last.code, 201, "ออเดอร์ก่อนถึงลิมิตต้องผ่าน"); }
+  last = await call(good(), "9.9.9.9");
+  assert.equal(last.code, 429, "เกินลิมิตแล้วจึงบล็อก");
 
   console.log("ORDER API TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });
