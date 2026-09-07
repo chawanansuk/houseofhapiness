@@ -997,8 +997,8 @@ function buildConfirmMsg(b, lang, payLink){
     `📍 ${lang === 'en' ? 'Map' : 'แผนที่'}: ${MAP_LINK}`,
     ``,
     lang === 'en'
-      ? `A refundable ฿1,000 key deposit is collected at check-in. Please let us know your arrival time. See you soon! 😊`
-      : `มีมัดจำกุญแจ 1,000 บาท (คืนตอนเช็คเอาต์) รบกวนแจ้งเวลาที่จะมาถึงล่วงหน้านะคะ แล้วเจอกันค่ะ 😊`);
+      ? `Please let us know your arrival time so we can be ready for you. See you soon! 😊`
+      : `รบกวนแจ้งเวลาที่จะมาถึงล่วงหน้านะคะ ทีมงานจะเตรียมห้องรอ แล้วเจอกันค่ะ 😊`);
   return lines.join('\n');
 }
 let msgCtx = null;
