@@ -64,16 +64,18 @@ module.exports = async (req, res) => {
     const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
     bookings = demoBookings(today);
     rooms = Array.from({ length: 18 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 18 ห้อง
-  } else if (dbEnabled()) {
-    try {
-      await getStore().bootstrapFromSheet();
-      const d = await getStore().listAll();
-      bookings = d.bookings; rooms = normalizeRooms(d.rooms);
-    } catch (e) {
-      console.error(JSON.stringify({ event: "availability_upstream_failed", db: String((e && e.message) || e).slice(0, 80) }));
-      return res.status(503).json({ ok: false, error: "availability-unavailable", retryable: true });
-    }
   } else {
+    let fromDb = false;
+    if (dbEnabled()) {
+      try {
+        await getStore().bootstrapFromSheet();
+        const d = await getStore().listAll();
+        bookings = d.bookings; rooms = normalizeRooms(d.rooms); fromDb = true;
+      } catch (e) {
+        console.error(JSON.stringify({ event: "availability_db_failed_fallback_sheet", reason: String((e && e.message) || e).slice(0, 120) }));
+      }
+    }
+    if (!fromDb) {
     const [sheet, ic] = await Promise.all([fetchSheet(), fetchIcal()]);
     if (!sheet.ok || !ic.ok) {
       console.error(JSON.stringify({
@@ -88,6 +90,7 @@ module.exports = async (req, res) => {
     // และกันชื่อซ้ำกรณีชีตมีทั้งชื่อเก่า (707-สองเตียง) และชื่อใหม่ (707twin)
     rooms = normalizeRooms(sheet.rooms);
     ical = ic.events;
+    }
   }
 
   const total = rooms.length || 15;

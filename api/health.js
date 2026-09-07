@@ -3,7 +3,7 @@
  * ไม่ส่งคืน URL, token หรือข้อมูลลูกค้า
  */
 
-const { dbEnabled, getStore } = require("./_store.js");
+const { dbEnabled, dbConfigError, getStore } = require("./_store.js");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -24,7 +24,16 @@ module.exports = async (req, res) => {
 
 async function checkDb() {
   if (!dbEnabled()) return "not-configured";
-  try { await getStore().ping(); return "ok"; } catch { return "unavailable"; }
+  const cfg = dbConfigError();
+  if (cfg) return `invalid-url-${cfg}`; // เช่น ยังมี [YOUR-PASSWORD] ค้าง หรือรูปแบบผิด — ไม่พิมพ์ค่าจริง
+  try { await getStore().ping(); return "ok"; }
+  catch (e) {
+    const code = e && e.code;
+    if (code === "28P01" || /password authentication failed/i.test(String(e && e.message))) return "auth-failed";
+    if (code === "ENOTFOUND" || code === "EAI_AGAIN") return "host-not-found";
+    if (code === "ETIMEDOUT" || /timeout/i.test(String(e && e.message))) return "timeout";
+    return "unavailable";
+  }
 }
 
 async function checkSheet() {

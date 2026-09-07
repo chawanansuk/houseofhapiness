@@ -74,8 +74,8 @@ module.exports = async (req, res) => {
       console.info(JSON.stringify({ event: "booking_saved", bookingId: String(id) }));
       return res.status(201).json({ ok: true, saved: true, id: String(id) });
     } catch (e) {
-      console.error(JSON.stringify({ event: "booking_storage_unavailable", reason: String((e && e.message) || "db").slice(0, 120) }));
-      return res.status(502).json({ ok: false, saved: false, error: "booking-storage-unavailable" });
+      console.error(JSON.stringify({ event: "booking_db_failed_fallback_sheet", reason: String((e && e.message) || "db").slice(0, 120) }));
+      if (!url || !token) return res.status(502).json({ ok: false, saved: false, error: "booking-storage-unavailable" });
     }
   }
 
