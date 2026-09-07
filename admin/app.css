@@ -734,3 +734,6 @@ body.offline .sync-chip i,body.offline .sync i{background:var(--dirty);box-shado
 .sheet .q-row .q-acts{grid-column:1 / -1;display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
 .sheet .od-row{grid-template-columns:auto auto minmax(0,1fr);padding:10px 0}
 .sheet .od-right{grid-column:1 / -1;flex-direction:row;justify-content:space-between}
+
+.login-card .remember{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink-2);cursor:pointer;user-select:none}
+.login-card .remember input{width:16px;height:16px;accent-color:var(--brand)}

@@ -105,7 +105,8 @@ async function fetchSheet() {
   if (!url) return { ok: false, rows: [], rooms: [], expenses: [], orders: [], error: "ยังไม่ได้ตั้ง SHEET_WEBAPP_URL" };
   try {
     const sep = url.includes("?") ? "&" : "?";
-    const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}`, {
+    // _ts กันแคชระหว่างทางของ Apps Script web app (อ่านหลังเขียนแล้วได้ค่าเก่า)
+    const r = await fetch(`${url}${sep}action=list&token=${encodeURIComponent(token)}&_ts=${Date.now()}`, {
       redirect: "follow",
     });
     if (!r.ok) return { ok: false, rows: [], rooms: [], expenses: [], orders: [], error: `ชีตตอบ HTTP ${r.status}` };

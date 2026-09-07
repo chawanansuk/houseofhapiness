@@ -40,6 +40,8 @@ function resetDB(){
 }
 resetDB();
 const updates = [];
+// จำลองพฤติกรรมจริงของ Apps Script: รอบอ่านถัดจากการเขียน room_no อาจได้ค่าเก่ากลับมา 1 ครั้ง
+let staleNext = null;
 const MIME = { ".html":"text/html", ".js":"text/javascript", ".css":"text/css", ".webmanifest":"application/json", ".woff2":"font/woff2" };
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
@@ -48,7 +50,8 @@ const server = http.createServer((req, res) => {
     res.setHeader("Content-Type", "application/json");
     if (key !== "x" && key !== "staffpass") { res.statusCode = 401; return res.end(JSON.stringify({ ok: false, error: "unauthorized", demo: false })); }
     const role = key === "staffpass" ? "staff" : "admin";
-    const bookings = DB.bookings.map((b) => role === "staff" ? { ...b, amount: "" } : b);
+    let bookings = DB.bookings.map((b) => role === "staff" ? { ...b, amount: "" } : b);
+    if (staleNext) { bookings = bookings.map((b) => b.id === staleNext.id ? { ...b, room_no: staleNext.room_no } : b); staleNext = null; }
     return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, orders: DB.orders, sources: { sheet: true, ical: false } }));
   }
   if (url === "/api/update") {
@@ -56,7 +59,7 @@ const server = http.createServer((req, res) => {
     req.on("end", () => {
       let j = {}; try { j = JSON.parse(body); } catch {}
       updates.push(j);
-      if (j.action === "update") { const b = DB.bookings.find((x) => x.id === j.id); if (b && j.fields) Object.assign(b, j.fields); }
+      if (j.action === "update") { const b = DB.bookings.find((x) => x.id === j.id); if (b && j.fields) { if ("room_no" in j.fields) staleNext = { id: b.id, room_no: b.room_no }; Object.assign(b, j.fields); } }
       if (j.action === "roomclean") { const r = DB.rooms.find((x) => x.room === j.room); if (r) { r.clean = j.clean; if (j.note !== undefined) r.note = j.note; } }
       if (j.action === "add") DB.bookings.push({ ...j, id: "WEB-E2E-NEW", rooms: 1 });
       if (j.action === "expadd") DB.expenses.push({ ...j, id: "EXP-E2E-1" });
@@ -128,9 +131,19 @@ const server = http.createServer((req, res) => {
   await dt.waitForTimeout(400);
   check("โหมดจัดห้อง: มี assign bar + ห้องว่างขึ้นเส้นประ", await dt.locator("#assignBar.on").count() === 1 && await dt.locator("#roomGrid .room.assignable").count() > 0);
   await dt.locator('#roomGrid .room.assignable[data-no="704"]').click();
+  // กดรัวต่อทันทีที่ห้องอื่น (พฤติกรรมจริงของทีมตอนหน้าจอไม่เปลี่ยน) — ต้องไม่กลายเป็นการจัดห้องซ้ำ/ย้ายห้อง
+  await dt.locator('#roomGrid .room[data-no="705"]').click().catch(() => {});
+  await dt.waitForTimeout(900);
+  const asgAll = updates.filter((u) => u.action === "update" && u.id === "BDC-2004" && u.fields && "room_no" in u.fields);
+  check("จัดห้อง → {action:'update', fields:{room_no:'704'}} ครั้งเดียว แม้กดรัวต่อ", asgAll.length === 1 && asgAll[0].fields.room_no === "704");
+  check("ออกจากโหมดจัดห้องทันทีหลังแตะ (assign bar หาย)", await dt.locator("#assignBar.on").count() === 0);
+  await dt.keyboard.press("Escape");
+  await dt.waitForTimeout(200);
+  check("หน้าจอโชว์ Sofia ในห้อง 704 ทันที และไม่เด้งกลับแม้ชีตส่งค่าเก่ามาในรอบอ่านถัดไป", (await dt.locator('#roomGrid .room[data-no="704"]').innerText()).includes("Sofia"));
+  await dt.locator("#refreshBtn").click();
   await dt.waitForTimeout(700);
-  const asg = updates.find((u) => u.action === "update" && u.id === "BDC-2004");
-  check("จัดห้อง → {action:'update', fields:{room_no:'704'}}", !!asg && asg.fields.room_no === "704");
+  check("รีเฟรชอีกรอบ (ชีตตามทันแล้ว) ห้อง 704 ยังเป็น Sofia", (await dt.locator('#roomGrid .room[data-no="704"]').innerText()).includes("Sofia"));
+  check("จำเครื่องนี้ไว้: รหัสอยู่ใน localStorage (ปิดแท็บแล้วเปิดใหม่ไม่ต้องล็อกอินซ้ำ)", (await dt.evaluate(() => localStorage.getItem("hoh-admin-key"))) === "x");
 
   // 6) รายการจอง: ค่าเริ่มต้นซ่อนที่ยกเลิก · toggle แล้วเห็น
   await dt.evaluate(() => { location.hash = "#bookings"; });
