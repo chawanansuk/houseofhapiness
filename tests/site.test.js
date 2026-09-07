@@ -45,6 +45,9 @@ for (const page of ["index.html", "booking.html", "room-standard.html", "room-st
   assert.doesNotMatch(html, /฿700|฿800|฿850|700 บาท|priceRange/, page + " must not show room rates (rate parity policy)");
   assert.doesNotMatch(html, /ราคาดีที่สุด|ราคาดีกว่า|best rate|better rates/i, page + " must not claim better/best rates vs OTA");
   assert.doesNotMatch(html, /\bOTA\b|commission|คอมมิชชั่น|เว็บตัวกลาง|middleman|จองตรงถูกกว่า|cheaper booked direct/i, page + " must not compare against OTA / Booking.com");
+  // ราคาที่ Google/Facebook อ่านได้ (og:description, JSON-LD offers.price) และคำเคลมเทียบราคา ก็ห้ามเช่นกัน
+  assert.doesNotMatch(html, /\d{3} THB|THB\/night|"price":\s*"\d+"|"priceCurrency"|หาไม่ได้ในย่าน|won't find elsewhere|ราคาเดียวกัน|same-priced/i,
+    page + " must not expose room rates in meta/JSON-LD or make price-comparison claims");
 }
 assert.doesNotMatch(read("index.html"), /id="whydirect"|wbd-table/, "homepage must not carry the direct-vs-OTA comparison table");
 assert.doesNotMatch(read("index.html"), /instead of Booking\.com/i, "homepage FAQ must not frame itself against Booking.com");
