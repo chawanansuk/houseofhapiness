@@ -3,21 +3,29 @@
  * ไม่ส่งคืน URL, token หรือข้อมูลลูกค้า
  */
 
+const { dbEnabled, getStore } = require("./_store.js");
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") return res.status(405).json({ ok: false, error: "method-not-allowed" });
 
-  const [sheet, ical] = await Promise.all([checkSheet(), checkIcal()]);
-  const ok = sheet === "ok" && (ical === "ok" || ical === "not-configured");
+  const [sheet, ical, db] = await Promise.all([checkSheet(), checkIcal(), checkDb()]);
+  // เมื่อใช้ฐานข้อมูลแล้ว ชีตเป็นแค่สำเนา — สุขภาพระบบตัดสินจากฐานข้อมูล
+  const ok = (dbEnabled() ? db === "ok" : sheet === "ok") && (ical === "ok" || ical === "not-configured");
   const result = {
     ok,
     checkedAt: new Date().toISOString(),
-    checks: { sheet, ical },
+    checks: { db, sheet, ical },
   };
-  const event = JSON.stringify({ event: "dependency_health", ok, sheet, ical });
+  const event = JSON.stringify({ event: "dependency_health", ok, db, sheet, ical });
   if (ok) console.info(event); else console.error(event);
   return res.status(ok ? 200 : 503).json(result);
 };
+
+async function checkDb() {
+  if (!dbEnabled()) return "not-configured";
+  try { await getStore().ping(); return "ok"; } catch { return "unavailable"; }
+}
 
 async function checkSheet() {
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();

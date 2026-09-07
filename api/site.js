@@ -14,6 +14,7 @@ const DEFAULTS = {
   ann: { th: "", en: "" },
 };
 
+const { dbEnabled, getStore } = require("./_store.js");
 const ROOM_KEYS = ["std", "stu", "dlx", "all"];
 const isYmd = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
 const toPrice = (v, fallback) => {
@@ -29,14 +30,19 @@ module.exports = async (req, res) => {
 
   const url = (process.env.SHEET_WEBAPP_URL || "").trim();
   const token = (process.env.SHEET_TOKEN || "").trim();
-  if (!url) return res.status(200).json({ ok: true, ...DEFAULTS, source: "default" });
+  if (!url && !dbEnabled()) return res.status(200).json({ ok: true, ...DEFAULTS, source: "default" });
 
   try {
-    const sep = url.includes("?") ? "&" : "?";
-    const r = await fetch(`${url}${sep}action=site&token=${encodeURIComponent(token)}`, { redirect: "follow" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const j = await r.json();
-    if (j && j.error) throw new Error(String(j.error)); // สคริปต์เก่ายังไม่รู้จัก action=site
+    let j;
+    if (dbEnabled()) {
+      j = await getStore().getSite();
+    } else {
+      const sep = url.includes("?") ? "&" : "?";
+      const r = await fetch(`${url}${sep}action=site&token=${encodeURIComponent(token)}`, { redirect: "follow" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      j = await r.json();
+      if (j && j.error) throw new Error(String(j.error)); // สคริปต์เก่ายังไม่รู้จัก action=site
+    }
     const s = (j && j.site) || {};
     const prices = {
       std: toPrice(s.price_per_night, DEFAULTS.prices.std),
@@ -64,7 +70,7 @@ module.exports = async (req, res) => {
         th: String(s.announcement_th || "").trim().slice(0, 300),
         en: String(s.announcement_en || "").trim().slice(0, 300),
       },
-      source: "sheet",
+      source: dbEnabled() ? "db" : "sheet",
     });
   } catch {
     return res.status(200).json({ ok: true, ...DEFAULTS, source: "default" });

@@ -19,6 +19,7 @@
 // (ชีตอาจยังเป็นชื่อเก่า จนกว่าเจ้าของจะรัน applyRealRoomList — no-op เมื่อชีตอัปเดตแล้ว)
 const ROOM_RENAMES = { "707-สองเตียง": "707twin", "708-สองเตียง": "708twin", "715-สองเตียง": "715twin" };
 const ROOM_REMOVED = ["งิ้ว1", "งิ้ว4", "จั่ว1", "จั่ว4"];
+const { dbEnabled, getStore } = require("./_store.js");
 function normalizeRooms(rooms) {
   const seen = new Set();
   const out = [];
@@ -63,6 +64,14 @@ module.exports = async (req, res) => {
     const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
     bookings = demoBookings(today);
     rooms = Array.from({ length: 18 }, (_, i) => ({ room: "R" + i })); // ผังจริงมี 18 ห้อง
+  } else if (dbEnabled()) {
+    try {
+      const d = await getStore().listAll();
+      bookings = d.bookings; rooms = normalizeRooms(d.rooms);
+    } catch (e) {
+      console.error(JSON.stringify({ event: "availability_upstream_failed", db: String((e && e.message) || e).slice(0, 80) }));
+      return res.status(503).json({ ok: false, error: "availability-unavailable", retryable: true });
+    }
   } else {
     const [sheet, ic] = await Promise.all([fetchSheet(), fetchIcal()]);
     if (!sheet.ok || !ic.ok) {

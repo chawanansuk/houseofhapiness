@@ -1,0 +1,15 @@
+{
+  "name": "houseofhapiness",
+  "private": true,
+  "description": "House of Happiness Bangkok — เว็บไซต์ + หลังบ้าน (Vercel functions)",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node tests/availability.test.js && node tests/update.test.js && node tests/order.test.js && node tests/booking-email-parser.test.js && node tests/deployment.test.js && node tests/site.test.js && node tests/store.test.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.0"
+  }
+}
