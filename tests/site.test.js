@@ -178,3 +178,19 @@ module.exports = (async () => {
   process.exitCode = 1;
   throw e;
 });
+
+// หน้าแรกมือถือแบบกะทัดรัด (Prom Design item 4): รางเลื่อน + ส่วนพับ + i18n ครบ — desktop ต้องไม่เปลี่ยน
+{
+  const idx = read("index.html"), css = read("assets/style.css"), ui = read("assets/ui.js"), i18n = read("assets/i18n.js");
+  assert.match(idx, /<div class="room-rail rail" id="roomRail">/, "room cards must sit inside .room-rail");
+  assert.equal((idx.match(/<div class="room-card">/g) || []).length, 3, "3 room cards, no inline margin-top");
+  assert.match(idx, /<div class="gallery rail" id="galleryRail">/, "gallery is a rail on mobile");
+  assert.equal((idx.match(/<details class="m-fold" open>/g) || []).length, 2, "hand map + getting-here folds (open by default for desktop/no-JS)");
+  assert.equal((idx.match(/class="rail-cue m-only"/g) || []).length, 2, "swipe cues for rooms + gallery");
+  assert.match(css, /\.room-rail \{ display: contents; \}/, "desktop: .room-rail must not change layout");
+  assert.match(css, /details\.m-fold \{ background: none; border: 0;/, "m-fold must not inherit FAQ card box");
+  assert.match(css, /\.gallery figcaption, \.gallery figure \.prov \{ z-index: 2; \}/, "gallery captions above image");
+  assert.match(css, /@media \(max-width: 640px\) \{\s*\.m-only \{ display: block; \}/, "mobile compaction block");
+  assert.match(ui, /details\.m-fold\[open\]"\)\.forEach\(\(d\) => d\.removeAttribute\("open"\)\)/, "ui.js closes folds on mobile");
+  for (const k of ["rail.cue", "rail.cue2", "loc.foldmap", "gh.fold"]) assert.match(i18n, new RegExp(`"${k.replace(".", "\\.")}":\\s*\\{ th: "[^"]+", en: "[^"]+" \\}`), "i18n key " + k);
+}

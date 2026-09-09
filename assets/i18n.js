@@ -180,6 +180,10 @@ const I18N = {
   "gh.2.d":          { th: "แท็กซี่ ~40-60 นาที (~250-350 บาท) แนะนำใช้ทางด่วนช่วงเย็น", en: "Taxi ~40-60 min (~250-350 THB); take the expressway at rush hour" },
   "gh.3.t":          { th: "โดยรถไฟฟ้า BTS", en: "By BTS Skytrain" },
   "gh.3.d":          { th: "สายสีลม ลงสถานีกรุงธนบุรี → ต่อสายสีทอง ลงสถานีคลองสาน → เดิน/วินมอเตอร์ไซค์ถึงที่พัก", en: "Silom Line to Krung Thonburi → Gold Line to Khlong San station → short walk or motorbike taxi" },
+  "rail.cue":        { th: "← เลื่อนซ้าย-ขวาดูห้องแบบอื่น →", en: "← Swipe to see other room types →" },
+  "rail.cue2":       { th: "← เลื่อนดูรูปเพิ่ม →", en: "← Swipe for more photos →" },
+  "loc.foldmap":     { th: "🗺️ แผนที่วาดมือของเรา (เรือ รถไฟฟ้า จุดเที่ยว)", en: "🗺️ Our hand-drawn area map (boats, trains, sights)" },
+  "gh.fold":         { th: "✈️ สนามบินสุวรรณภูมิ · ดอนเมือง · 🚆 BTS สายสีทอง — ดูวิธีเดินทาง", en: "✈️ Suvarnabhumi · Don Mueang · 🚆 BTS Gold Line — how to get here" },
   "gh.note":         { th: "* เวลาและค่าใช้จ่ายโดยประมาณ ขึ้นกับสภาพจราจร — ต้องการให้ช่วยเรียกรถ แจ้งเราได้เลย", en: "* Times and fares are approximate. Need help arranging a pickup? Just ask us" },
 
   /* ── ปุ่มติดต่อลอย ── */

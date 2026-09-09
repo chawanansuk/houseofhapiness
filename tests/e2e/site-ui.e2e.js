@@ -50,9 +50,28 @@ const server = http.createServer((req, res) => {
   const order = await page.evaluate(() => [...document.querySelectorAll("main > section")].map((s) => s.id));
   check("แถบตัวเลขจริงใต้ hero แล้วห้องพักขึ้นก่อน (numbers → rooms → reviews → about)", order[0] === "numbers" && order[1] === "rooms" && order[2] === "reviews" && order[3] === "about");
 
-  /* ── B1: แกลเลอรีหน้าแรก 2 คอลัมน์บนมือถือ ── */
-  const cols = await page.evaluate(() => getComputedStyle(document.querySelector(".gallery")).gridTemplateColumns.split(" ").length);
-  check("แกลเลอรีหน้าแรก 2 คอลัมน์", cols === 2);
+  /* ── B1: หน้าแรกมือถือแบบกะทัดรัด (Prom Design density budget) ── */
+  await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 30)); } window.scrollTo(0, 0); });
+  const dens = await page.evaluate(() => {
+    const rail = (sel) => { const el = document.querySelector(sel); const cs = getComputedStyle(el); return cs.display === "flex" && cs.overflowX === "auto" && el.scrollWidth > el.clientWidth + 40; };
+    return {
+      screens: document.documentElement.scrollHeight / innerHeight,
+      noSideScroll: document.documentElement.scrollWidth <= innerWidth,
+      roomRail: rail(".room-rail"), galleryRail: rail(".gallery.rail"), nearRail: rail(".near-photos.rail"),
+      cues: [...document.querySelectorAll(".rail-cue")].every((c) => getComputedStyle(c).display !== "none"),
+      foldsClosed: document.querySelectorAll("details.m-fold").length === 2 && document.querySelectorAll("details.m-fold[open]").length === 0,
+      summaryTap: [...document.querySelectorAll("details.m-fold > summary")].every((s) => s.getBoundingClientRect().height >= 44),
+      heroExtrasHidden: getComputedStyle(document.querySelector(".hero .highlights")).display === "none" && getComputedStyle(document.querySelector(".cta-strip")).display === "none",
+    };
+  });
+  check("หน้าแรกมือถือยาวไม่เกิน 8 จอ (ได้ " + dens.screens.toFixed(1) + ")", dens.screens <= 8);
+  check("หน้าไม่เลื่อนด้านข้าง", dens.noSideScroll);
+  check("ห้องพัก / แกลเลอรี / สถานที่ใกล้เคียง เป็นรางเลื่อนแนวนอน", dens.roomRail && dens.galleryRail && dens.nearRail);
+  check("รางเลื่อนมีคำใบ้ 'เลื่อนดู'", dens.cues);
+  check("แผนที่วาดมือ + วิธีเดินทาง พับไว้บนมือถือ (2 ส่วน) หัวข้อกดได้ ≥44px", dens.foldsClosed && dens.summaryTap);
+  check("hero ซ่อนไฮไลต์ซ้ำ + ไม่มีแถบ CTA ท้ายหน้าซ้ำกับแถบจองติดล่าง", dens.heroExtrasHidden);
+  await page.click("#gettinghere .m-fold > summary");
+  check("กดหัวข้อพับแล้วเปิดดูวิธีเดินทางได้", await page.evaluate(() => document.querySelector("#gettinghere .m-fold").open && document.querySelector(".gh-card").getBoundingClientRect().height > 40));
 
   /* เมนูจากหน้าอื่น: ลิงก์ anchor ต้องพากลับ index.html ── */
   await page.goto("http://127.0.0.1:8899/gallery.html", { waitUntil: "domcontentloaded" });
@@ -108,6 +127,15 @@ const server = http.createServer((req, res) => {
   await dt.waitForTimeout(300);
   check("desktop: ไม่เห็นปุ่ม ☰ (ใช้เมนูบนตามเดิม)", !(await dt.isVisible(".menu-btn")));
   check("desktop: เมนูบน nav ยังอยู่ครบ", await dt.locator(".navlinks a").count() === 5);
+  const dl = await dt.evaluate(() => ({
+    foldsOpen: document.querySelectorAll("details.m-fold[open]").length === 2,
+    summaryHidden: [...document.querySelectorAll("details.m-fold > summary")].every((s) => getComputedStyle(s).display === "none"),
+    cardsStacked: (() => { const c = [...document.querySelectorAll(".room-rail .room-card")]; return c.length === 3 && c[1].getBoundingClientRect().top > c[0].getBoundingClientRect().bottom; })(),
+    galleryGrid: getComputedStyle(document.querySelector(".gallery")).display === "grid",
+    cueHidden: [...document.querySelectorAll(".rail-cue")].every((c) => getComputedStyle(c).display === "none"),
+  }));
+  check("desktop: ส่วนพับเปิดค้าง ไม่เห็นหัวข้อพับ", dl.foldsOpen && dl.summaryHidden);
+  check("desktop: การ์ดห้องยังเรียงลงตามเดิม แกลเลอรียัง grid ไม่มีคำใบ้เลื่อน", dl.cardsStacked && dl.galleryGrid && dl.cueHidden);
 
   await browser.close();
   server.close();
