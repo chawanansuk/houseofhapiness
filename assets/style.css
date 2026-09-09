@@ -1467,3 +1467,147 @@ body { font-variant-numeric: tabular-nums; }
 .room-pic .room-thumb { display: block; }
 .gallery figure .prov { top: auto; bottom: 2.6rem; left: 0.6rem; font-size: 0.58rem; }
 @media (max-width: 640px) { .gallery figure .prov { display: none; } .room-pic { width: 100%; } .room-pic .room-thumb { width: 100%; } }
+
+/* ══ หน้าแรกมือถือแบบกะทัดรัด (Prom Design: density budget) ══
+   เป้าหมาย: หน้าแรก 375px ยาวไม่เกิน ~8 จอ (เดิม ~14.6) — desktop ไม่เปลี่ยน
+   หลัก: โชว์ข้อสรุป ซ่อนที่มา / รางเลื่อนแนวนอนแทนการซ้อนการ์ด / พับส่วนที่ยาวไว้ก่อน */
+.m-only { display: none; }
+.room-rail { display: contents; }
+.room-rail .room-card + .room-card { margin-top: 1.2rem; }
+/* desktop: details.m-fold เปิดค้าง ซ่อนหัวข้อพับ */
+.m-fold > summary { display: none; }
+.m-fold > summary::-webkit-details-marker { display: none; }
+/* details.m-fold ไม่ใช่การ์ด FAQ — ล้าง style กล่องของ details ทั่วไปออก */
+details.m-fold { background: none; border: 0; border-radius: 0; padding: 0; margin: 0; box-shadow: none; }
+/* แกลเลอรี: อีโมจิพื้นหลังต้องไม่กินพื้นที่ flex (ไม่งั้นรูปถูกดันเบี้ยว) และคำบรรยายต้องอยู่เหนือรูป */
+.gallery figure::before { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.gallery figcaption, .gallery figure .prov { z-index: 2; }
+
+@media (max-width: 640px) {
+  .m-only { display: block; }
+  main.site { padding: 1.6rem 1.1rem 1rem; }
+  section { margin-bottom: 2.1rem; scroll-margin-top: 4rem; }
+  .sec-head { margin-bottom: 1rem; }
+  .sec-head h2 { font-size: 1.55rem; }
+
+  /* hero: ตัวเลข/ไฮไลต์ซ้ำกับแถบตัวเลขข้างล่าง เก็บเฉพาะชื่อ แท็กไลน์ ฟอร์มเช็คห้องว่าง */
+  .hero { padding: 2.2rem 1.1rem 1.6rem; }
+  .hero .kicker { margin-bottom: 0.5rem; font-size: 0.68rem; letter-spacing: 0.24em; }
+  .hero h1 { font-size: 2.35rem; }
+  .hero .divider { display: none; }
+  .hero .tagline { margin-bottom: 1.1rem; font-size: 0.95rem; }
+  .hero .cta-row { gap: 0.5rem; }
+  .hero .cta-row .btn { flex: 1 1 0; padding: 0.7rem 0.6rem; font-size: 0.86rem; }
+  .hero .rating-pill, .hero .highlights { display: none; }
+  .hero-book { margin-top: 1rem; padding: 0.9rem; gap: 0.6rem; }
+  .hero-book .hb-field { flex-direction: row; align-items: center; justify-content: space-between; }
+  .hero-book .hb-field label { flex: 0 0 5.5rem; }
+  .hero-book .hb-field input, .hero-book .hb-field select { flex: 1; }
+  .hero-min-note { margin-top: 0.6rem; font-size: 0.78rem; }
+  #numbers.proof { margin-bottom: 1.8rem; }
+
+  /* รางเลื่อนแนวนอน: การ์ดถัดไปโผล่มาให้เห็นขอบ + ขอบจางด้านขวา + คำใบ้ครั้งแรก */
+  .rail {
+    display: flex !important;
+    gap: 0.8rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -1.1rem;
+    padding: 0.2rem 1.1rem 0.6rem;
+    scroll-padding-left: 1.1rem;
+    mask-image: linear-gradient(90deg, #000 0, #000 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 92%, transparent 100%);
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { flex: 0 0 auto; scroll-snap-align: start; }
+  .rail-cue {
+    text-align: center; font-size: 0.74rem; color: var(--muted);
+    margin: -0.4rem 0 0.5rem; letter-spacing: 0.02em;
+    animation: railNudge 1.6s ease-in-out 2;
+    transition: opacity 0.4s ease;
+  }
+  .rail-cue.seen { opacity: 0; }
+  @keyframes railNudge { 0%,100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+
+  /* ห้องพัก: 3 การ์ดเรียงข้าง กว้าง 78% ของจอ */
+  .room-rail .room-card { width: 78vw; max-width: 20rem; margin: 0 !important; padding-bottom: 0.9rem; gap: 0.6rem; }
+  .room-rail .room-card:hover { transform: none; }
+  .room-rail .room-thumb { aspect-ratio: 16/10; }
+  .room-rail .room-card .info { padding: 0 0.9rem; }
+  .room-rail .room-card .info h3 { font-size: 1.02rem; margin-bottom: 0.2rem; }
+  .room-rail .room-card .info p { font-size: 0.82rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .room-rail .room-card .price-box { margin: 0 0.9rem; padding: 0.7rem 0.8rem; row-gap: 0.3rem; }
+  .room-rail .room-card .price-box .amount { font-size: 0.86rem !important; flex: 1 1 100%; }
+  .room-rail .room-card .price-box .btn-gold { margin-left: 0; flex: 1 1 auto; text-align: center; padding: 0.55rem 0.8rem; font-size: 0.84rem; }
+  .room-rail .room-card .price-box .room-detail-link { margin-top: 0.35rem; font-size: 0.8rem; }
+
+  /* รีวิว: กะทัดรัดขึ้น */
+  #reviews .review-card { padding: 1rem; gap: 0.8rem; }
+  #reviews .review-chips p { font-size: 0.86rem; margin-bottom: 0.4rem; }
+
+  /* เกี่ยวกับเรา: จุดเด่นเป็นชิปแถวเดียว */
+  #about p[data-i18n="about.body"] { font-size: 0.92rem; }
+  .about-feats { display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; margin-top: 0.8rem; }
+  .about-feats li { font-size: 0.78rem; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.7rem; gap: 0.35rem; }
+
+  /* แกลเลอรี: รางเลื่อน 8 รูป */
+  .gallery.rail figure { width: 54vw; max-width: 14rem; aspect-ratio: 3/4; }
+  .gallery.rail figure:hover { transform: none; }
+  #gallery > p { margin-top: 0.4rem !important; }
+  #gallery > p .btn { padding: 0.6rem 1.1rem; font-size: 0.86rem; }
+
+  /* สิ่งอำนวยความสะดวก: ตาราง 3 คอลัมน์ ไอคอนบน ป้ายล่าง */
+  .amenities { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .amenities li { flex-direction: column; text-align: center; gap: 0.35rem; padding: 0.6rem 0.35rem; font-size: 0.72rem; line-height: 1.3; border-radius: 10px; }
+  .amenities li .ico { width: 1.9rem; height: 1.9rem; }
+
+  /* ที่ตั้ง: แผนที่เตี้ยลง แผนที่วาดมือพับไว้ สถานที่ใกล้เคียงเป็นราง + 2 คอลัมน์ */
+  #location address, #location > p[data-i18n="loc.near"] { font-size: 0.88rem; }
+  .map-embed iframe { height: 13rem; }
+  .near-head { margin: 1.1rem 0 0.6rem; font-size: 1.02rem; }
+  .near-photos.rail a { width: 44vw; max-width: 11rem; aspect-ratio: 4/3; }
+  .near-photos.rail a:hover { transform: none; }
+  .nearby { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+  .nearby li { padding: 0.45rem 0.55rem; font-size: 0.78rem; gap: 0.4rem; flex-wrap: wrap; }
+  .nearby .ico { width: 1.5rem; height: 1.5rem; }
+  .nearby .dist { margin-left: 0; flex: 1 1 100%; padding-left: 1.9rem; font-size: 0.72rem; }
+  .near-links { display: flex; flex-wrap: wrap; gap: 0.45rem; justify-content: center; margin-top: 0.9rem !important; }
+  .near-links .btn { margin-left: 0 !important; padding: 0.5rem 0.8rem; font-size: 0.8rem; flex: 1 1 auto; }
+
+  /* ส่วนพับ (details.m-fold): หัวข้อเป็นการ์ดกดได้ ขนาดนิ้วโป้ง */
+  .m-fold > summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+    list-style: none; cursor: pointer; min-height: 44px;
+    padding: 0.7rem 0.9rem; margin-top: 0.9rem;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    font-size: 0.88rem; font-weight: 600; color: var(--dark); box-shadow: var(--shadow-sm);
+  }
+  .m-fold > summary::after { content: "▾"; color: var(--gold); font-size: 1rem; transition: transform 0.2s ease; }
+  .m-fold[open] > summary::after { transform: rotate(180deg); }
+  .m-fold[open] > summary { margin-bottom: 0.6rem; }
+  #gettinghere .m-fold > summary { margin-top: 0; }
+  .gh-grid { gap: 0.6rem; }
+  .gh-card { padding: 0.8rem 0.9rem; }
+  .gh-card h3 { font-size: 0.95rem; }
+  .gh-card p { font-size: 0.84rem; }
+
+  /* FAQ */
+  #faq details { padding: 0.55rem 0.8rem; }
+  #faq summary { font-size: 0.9rem; }
+
+  /* แถบ CTA ท้ายหน้า: มีแถบจองติดล่างจออยู่แล้ว ไม่ต้องซ้ำ */
+  .cta-strip { display: none; }
+
+  /* footer: เมนูเป็นลิงก์เรียงแถว ไม่ใช่ลิสต์ยาว */
+  footer.site { padding-top: 1.6rem; }
+  .foot-grid { gap: 1rem; }
+  .foot-brand p { display: none; }
+  .foot-col h4 { margin-bottom: 0.35rem; font-size: 0.8rem; }
+  .foot-col { display: flex; flex-wrap: wrap; gap: 0.15rem 0.9rem; }
+  .foot-col h4 { flex: 1 1 100%; }
+  .foot-col a { display: inline-block; font-size: 0.8rem; padding: 0.22rem 0; }
+  .foot-bottom { margin-top: 1rem; padding-top: 0.9rem; font-size: 0.76rem; }
+}

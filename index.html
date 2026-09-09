@@ -168,6 +168,8 @@
 
   <section id="rooms" class="reveal">
     <div class="sec-head"><h2 data-i18n="rooms.title">ห้องพักและราคา</h2></div>
+    <p class="rail-cue m-only" data-i18n="rail.cue">← เลื่อนซ้าย-ขวาดูห้องแบบอื่น →</p>
+    <div class="room-rail rail" id="roomRail">
     <div class="room-card">
       <span class="room-pic"><img class="room-thumb" src="images/standard.jpg" alt="Standard Apartment" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span></span>
       <div class="info">
@@ -180,7 +182,7 @@
         <a class="room-detail-link" href="room-standard.html" data-i18n="rooms.detail">รายละเอียดห้อง + รูป →</a>
       </div>
     </div>
-    <div class="room-card" style="margin-top:1.2rem">
+    <div class="room-card">
       <span class="room-pic"><img class="room-thumb" src="images/studio.jpg" alt="Studio Apartment twin beds" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span></span>
       <div class="info">
         <h3 data-i18n="rooms.stu.name">ห้อง Studio — 2 เตียงแยก</h3>
@@ -192,7 +194,7 @@
         <a class="room-detail-link" href="room-studio.html" data-i18n="rooms.detail">รายละเอียดห้อง + รูป →</a>
       </div>
     </div>
-    <div class="room-card" style="margin-top:1.2rem">
+    <div class="room-card">
       <span class="room-pic"><img class="room-thumb" src="images/deluxe.jpg" alt="Deluxe extra-large room with double bed and sofa corner" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span></span>
       <div class="info">
         <h3 data-i18n="rooms.dlx.name">ห้อง Deluxe — ห้องใหญ่ พร้อมโซฟา</h3>
@@ -203,6 +205,7 @@
         <a class="btn btn-gold btn-sm" href="booking.html" data-i18n="rooms.cta">เช็คห้องว่างและจอง</a>
         <a class="room-detail-link" href="room-deluxe.html" data-i18n="rooms.detail">รายละเอียดห้อง + รูป →</a>
       </div>
+    </div>
     </div>
   </section>
 
@@ -245,7 +248,8 @@
 
   <section id="gallery" class="reveal">
     <div class="sec-head"><h2 data-i18n="gallery.title">รูปห้องพัก</h2></div>
-    <div class="gallery">
+    <p class="rail-cue m-only" data-i18n="rail.cue2">← เลื่อนดูรูปเพิ่ม →</p>
+    <div class="gallery rail" id="galleryRail">
       <figure data-icon="🛏️"><img src="images/bedroom.jpg" alt="Bedroom with balcony" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.bedroom">ห้องนอน</figcaption></figure>
       <figure data-icon="🛏️"><img src="images/twin.jpg" alt="Twin bed room" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.twin">ห้องเตียงคู่ (2 เตียงแยก)</figcaption></figure>
       <figure data-icon="🛋️"><img src="images/living.jpg" alt="Living area" width="1024" height="683" loading="lazy" decoding="async" onerror="this.remove()"><span class="prov real" data-i18n="prov.real">ภาพถ่ายจริงจากที่พัก</span><figcaption data-i18n="gallery.living">มุมโซฟานั่งเล่น</figcaption></figure>
@@ -284,12 +288,15 @@
         src="https://maps.google.com/maps?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok&z=16&output=embed"></iframe>
     </div>
     <a class="map-link" href="https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok" target="_blank" rel="noopener" data-i18n="loc.open">เปิดใน Google Maps →</a>
+    <details class="m-fold" open>
+    <summary data-i18n="loc.foldmap">🗺️ แผนที่วาดมือของเรา (เรือ รถไฟฟ้า จุดเที่ยว)</summary>
     <figure style="margin:1.4rem auto 0; max-width:560px; text-align:center">
       <img src="images/map-hand.jpg" alt="House of Happiness hand-drawn area map" width="703" height="768" loading="lazy" decoding="async" style="width:100%; border-radius:14px; border:1px solid var(--line); box-shadow:0 6px 20px rgba(62,47,35,0.08)" onerror="this.parentElement.remove()">
       <figcaption style="font-size:0.8rem; color:var(--muted); margin-top:0.5rem" data-i18n="loc.handmap">แผนที่ฉบับวาดมือของเรา — เรือ รถไฟฟ้า และจุดเที่ยวรอบที่พัก</figcaption>
     </figure>
+    </details>
     <h3 class="near-head" data-i18n="near.title">สถานที่ใกล้เคียง</h3>
-    <div class="near-photos">
+    <div class="near-photos rail">
       <a href="attractions.html"><img src="images/attractions/skypark.jpg" alt="Chao Phraya Sky Park" width="960" height="720" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.skypark.n">สวนลอยฟ้าเจ้าพระยา</span></a>
       <a href="attractions.html"><img src="images/attractions/iconsiam.jpg" alt="ICONSIAM" width="704" height="1251" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.iconsiam.n">ICONSIAM</span></a>
       <a href="attractions.html"><img src="images/attractions/watarun.jpg" alt="Wat Arun" width="960" height="640" loading="lazy" decoding="async" onerror="this.parentElement.remove()"><span class="np-label" data-i18n="atr.watarun.n">วัดอรุณราชวราราม</span></a>
@@ -303,7 +310,7 @@
       <li><span class="ico" data-icon="bag" aria-hidden="true"></span><span class="nm" data-i18n="near.5">ICONSIAM</span><span class="dist" data-i18n="near.5.d">รถ ~5 นาที</span></li>
       <li><span class="ico" data-icon="image" aria-hidden="true"></span><span class="nm" data-i18n="near.6">River City Bangkok</span><span class="dist" data-i18n="near.6.d">รถ ~5 นาที</span></li>
     </ul>
-    <p style="text-align:center; margin-top:1.4rem">
+    <p class="near-links" style="text-align:center; margin-top:1.4rem">
       <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent" href="attractions.html" data-i18n="near.more">ดูแหล่งท่องเที่ยวใกล้ที่พักทั้งหมด →</a>
       <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent; margin-left:0.6rem" href="local.html" data-i18n="near.local">🍜 ไกด์ลับ: กิน-เที่ยวรอบซอย →</a>
       <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent; margin-left:0.6rem" href="airport-guide.html" data-i18n="nav.airport">✈️ วิธีเดินทางจากสนามบิน →</a>
@@ -312,6 +319,8 @@
 
   <section id="gettinghere" class="reveal">
     <div class="sec-head"><h2 data-i18n="gh.title">การเดินทางมาที่พัก</h2></div>
+    <details class="m-fold" open>
+    <summary data-i18n="gh.fold">✈️ สนามบินสุวรรณภูมิ · ดอนเมือง · 🚆 BTS สายสีทอง — ดูวิธีเดินทาง</summary>
     <div class="gh-grid">
       <div class="gh-card">
         <span class="ico" data-icon="plane" aria-hidden="true"></span>
@@ -330,6 +339,7 @@
       </div>
     </div>
     <p class="gh-note" data-i18n="gh.note">* เวลาและค่าใช้จ่ายโดยประมาณ ขึ้นกับสภาพจราจร — ต้องการให้ช่วยเรียกรถ แจ้งเราได้เลย</p>
+    </details>
   </section>
 
   <section id="faq" class="reveal">

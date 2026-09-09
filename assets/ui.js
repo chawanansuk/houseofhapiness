@@ -200,3 +200,16 @@ document.addEventListener("DOMContentLoaded", () => {
   script.src = "/_vercel/insights/script.js";
   document.head.appendChild(script);
 })();
+
+// มือถือ: ส่วนที่ยาวพับเก็บไว้ก่อน (แผนที่วาดมือ, วิธีเดินทาง) กดเปิดเมื่ออยากอ่าน — desktop เปิดค้างเสมอ
+// ถ้าสคริปต์ไม่ทำงานทุกอย่างยังเปิดอยู่ตามเดิม (graceful)
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.matchMedia("(max-width: 640px)").matches) return;
+  document.querySelectorAll("details.m-fold[open]").forEach((d) => d.removeAttribute("open"));
+  // คำใบ้ "เลื่อนดู" ซ่อนหลังผู้ใช้เลื่อนรางครั้งแรก (บอกครั้งเดียวพอ)
+  document.querySelectorAll(".rail").forEach((rail) => {
+    const cue = rail.previousElementSibling;
+    if (!cue || !cue.classList.contains("rail-cue")) return;
+    rail.addEventListener("scroll", () => cue.classList.add("seen"), { once: true, passive: true });
+  });
+});
