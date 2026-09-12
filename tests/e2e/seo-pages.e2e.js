@@ -26,6 +26,7 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     ["new-year-countdown.html","เคาท์ดาวน์ปีใหม่ริมเจ้าพระยา","New Year's Eve on the Chao Phraya"],
     ["thonburi-one-day.html","เที่ยวฝั่งธนฯ 1 วันเต็ม","One Full Day in Thonburi"],
     ["heritage-walk.html","มรดกไชน่าทาวน์","Heritage Walk"],
+    ["yaowarat-night-walk.html","เยาวราชกลางคืน","Night Food Walk"],
     ["services.html","รูมเซอร์วิส","Room Service"],
   ];
   for (const [file, thH1, enH1] of PAGES) {
