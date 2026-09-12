@@ -237,7 +237,7 @@ const I18N = {
   "lc.title":        { th: "กิน-เที่ยวรอบซอย ท่าดินแดง", en: "Eat & Explore: Tha Din Daeng" },
   "lc.sub":          { th: "ไกด์ลับฉบับเจ้าของที่พัก — ร้านอร่อยหน้าปากซอยที่คนท้องถิ่นกินจริง และเส้นทางเดินเที่ยวคลองสานที่นักท่องเที่ยวส่วนใหญ่ไม่รู้จัก",
                        en: "Our insider guide — the street food locals actually eat, and a Khlong San walking route most tourists never find" },
-  "lc.stat1":        { th: "🍜 13 ร้านเด็ด เดินถึงใน 1-10 นาที", en: "🍜 13 food gems, 1-10 min on foot" },
+  "lc.stat1":        { th: "🍜 13 ร้านเด็ด เดินถึงใน 1-12 นาที", en: "🍜 13 food gems, 1-12 min on foot" },
   "lc.stat2":        { th: "🚶 เส้นทางเดินเที่ยว 10 จุด", en: "🚶 10-stop walking route" },
   "lc.stat3":        { th: "🚌 วิธีเดินทาง 8 แบบ", en: "🚌 8 ways to get around" },
   "lc.map.t":        { th: "🗺️ แผนที่รวมทุกจุด", en: "🗺️ Everything on one map" },
