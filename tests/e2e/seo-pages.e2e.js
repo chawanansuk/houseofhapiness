@@ -27,6 +27,15 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     ["thonburi-one-day.html","เที่ยวฝั่งธนฯ 1 วันเต็ม","One Full Day in Thonburi"],
     ["heritage-walk.html","มรดกไชน่าทาวน์","Heritage Walk"],
     ["yaowarat-night-walk.html","เยาวราชกลางคืน","Night Food Walk"],
+    ["sampeng-morning.html","ตลาดสำเพ็งตอนเช้า — ข้ามเรือ 5 บาท ซื้อของ 4 ซอย กลับที่พักก่อนเที่ยง","Sampeng Market at Dawn — a ฿5 Ferry, Four Lanes of Shopping, Home Before Noon"],
+    ["three-temples-boat.html","วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร — 3 วัดครึ่งวันทางเรือจากที่พัก","Wat Pho, Wat Arun & Wat Kalayanamit — Three Temples in Half a Day, Mostly by River"],
+    ["sunrise-alms-market.html","เช้าตรู่ริมเจ้าพระยา — ใส่บาตร เดินตลาดเช้า ดูพระอาทิตย์ขึ้น กลับมากินข้าวเช้า","Dawn on the Chao Phraya — Offer Alms, Walk the Morning Market, Watch the Sunrise, Home for Breakfast"],
+    ["thonburi-riverside-evening.html","คาเฟ่ริมน้ำ สวนลอยฟ้า ล้ง 1919 — ครึ่งวันเย็นฝั่งธน","Riverside Cafés, the Sky Park & Lhong 1919 — a Thonburi Evening"],
+    ["iconsiam-asiatique-boat.html","ICONSIAM ถึงเอเชียทีค — วันเที่ยวทางเรือฟรีและเรือด่วน","ICONSIAM to Asiatique — a River Day by Free Shuttle & Express Boat"],
+    ["thonburi-by-bike.html","ปั่นจักรยานฝั่งธน — ตรอกซอกซอย วัดริมน้ำ และแม่น้ำเจ้าพระยา","Thonburi by Bike — Backlanes, Riverside Temples & the Chao Phraya"],
+    ["family-river-day.html","เที่ยวริมน้ำแบบครอบครัว — สวนลอยฟ้า เรือข้ามฟาก แล้วเข้าห้างเย็น ๆ ไม่ต้องเดินไกล","A Family River Day — a flat park, a short ฿5 boat, then a cool indoor afternoon, almost no walking"],
+    ["rainy-day-indoor.html","วันฝนตกก็เที่ยวได้ — แผนในร่มทั้งวัน ห้าง คาเฟ่ วิหารมีหลังคา เปียกน้อยที่สุด","A rainy day still works — an all-indoor plan of malls, cafes and covered halls, staying as dry as possible"],
+    ["chinatown-festivals.html","ตามเทศกาลเยาวราช — เทศกาลกินเจ (ราวตุลาคม) และตรุษจีน (ปลายมกราฯ–กุมภาฯ)","Yaowarat by the season — the Vegetarian Festival (around October) and Chinese New Year (late Jan or Feb)"],
     ["services.html","รูมเซอร์วิส","Room Service"],
   ];
   for (const [file, thH1, enH1] of PAGES) {
