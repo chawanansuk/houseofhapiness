@@ -171,7 +171,14 @@ module.exports = (async () => {
   assert.equal(r.body.source, "default");
   assert.deepEqual(r.body.prices, { std: 700, stu: 800, dlx: 850 });
 
-  console.log("SITE TESTS PASSED");
+  // ไกด์เยาวราชกลางคืน: ไม่มีคำซ้ำผิด + หน้าไกด์พี่น้องลิงก์กลับมา (internal linking สองทาง)
+{
+  const yn = read("yaowarat-night-walk.html");
+  assert.doesNotMatch(yn, /ต่างกันต่างกัน/, "night-walk page must not contain the duplicated word typo");
+  assert.match(read("heritage-walk.html"), /href="yaowarat-night-walk\.html"/, "heritage walk must link to the night walk");
+  assert.match(read("near-chinatown.html"), /href=\\?"yaowarat-night-walk\.html/, "near-chinatown must link to the night walk");
+}
+console.log("SITE TESTS PASSED");
   return "SITE TESTS PASSED";
 })().catch((e) => {
   console.error("TEST FAILED:", e.message);
