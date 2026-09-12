@@ -178,6 +178,21 @@ module.exports = (async () => {
   assert.match(read("heritage-walk.html"), /href="yaowarat-night-walk\.html"/, "heritage walk must link to the night walk");
   assert.match(read("near-chinatown.html"), /href=\\?"yaowarat-night-walk\.html/, "near-chinatown must link to the night walk");
 }
+// ไล่ตรวจไกด์ (audit ก.ย. 2569): คำผิดที่แก้แล้วต้องไม่กลับมา + หน้าที่บางต้องมีรูปเพิ่ม
+{
+  assert.doesNotMatch(read("heritage-walk.html"), /ฮกเกี้ยว/, "heritage walk: Hokkien must be ฮกเกี้ยน not ฮกเกี้ยว");
+  assert.doesNotMatch(read("near-iconsiam.html"), /เส้นทางเรียบถนน/, "near-iconsiam: must be เลียบถนน (walk along), not เรียบ");
+  assert.doesNotMatch(read("local.html"), /Chua Jeab Ngon/, "local: romanisation must be Chua Jeab Nguan");
+  assert.doesNotMatch(read("thonburi-one-day.html"), /~฿100 total transport|ค่าเดินทางรวม ~100 บาท/, "thonburi transport cost must be a realistic range");
+  // หน้าไกด์ที่เคยมีรูปเดียว เติมแถวรูปแล้ว
+  for (const [f, n] of [["thonburi-one-day.html", 4], ["loy-krathong.html", 2], ["new-year-countdown.html", 2]]) {
+    assert.ok((read(f).match(/<img /g) || []).length > 1, f + " should have more than one image after enrichment");
+    assert.match(read(f), /class="near-photos"/, f + " should carry the credited photo strip");
+  }
+  // local + attractions ต้องลิงก์กลับ hub ไกด์ (ไม่เป็นทางตัน)
+  assert.match(read("local.html"), /href="guides\.html"/, "local must link back to the guides hub");
+  assert.match(read("attractions.html"), /href="guides\.html"/, "attractions must link back to the guides hub");
+}
 console.log("SITE TESTS PASSED");
   return "SITE TESTS PASSED";
 })().catch((e) => {
