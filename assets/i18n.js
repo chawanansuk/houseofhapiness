@@ -314,6 +314,24 @@ const I18N = {
   "bk.hint.phone":   { th: "กรอกเบอร์โทร", en: "enter your phone number" },
   "bk.trust.2":      { th: "ยืนยันการจองภายใน 24 ชั่วโมง", en: "Booking confirmed within 24 hours" },
   "bk.trust.3":      { th: "สอบถาม/แก้ไขการจองได้ทาง LINE, WhatsApp หรืออีเมล", en: "Questions or changes welcome via LINE, WhatsApp or email" },
+  /* ── กล่องทางเลือกเมื่อกด LINE บนคอมพิวเตอร์ ── */
+  "lf.title":        { th: "เปิด LINE บนคอมไม่ได้ใช่ไหม", en: "LINE didn't open on your computer?" },
+  "lf.lead":         { th: "แอป LINE อยู่บนมือถือ คอมจึงเปิดให้ไม่ได้ เลือกวิธีที่สะดวกได้เลย ข้อความที่กรอกไว้ยังอยู่ครบ",
+                       en: "LINE lives on your phone, so your computer can't open it. Pick whichever way is easiest — everything you filled in is still here." },
+  "lf.qr":           { th: "สแกนด้วยกล้องมือถือ แล้วแชตกับเราต่อในมือถือได้เลย",
+                       en: "Scan with your phone camera and chat with us right there." },
+  "lf.idlabel":      { th: "หรือค้นหาไอดีนี้ในแอป LINE", en: "Or search this ID inside the LINE app" },
+  "lf.copyid":       { th: "คัดลอกไอดี", en: "Copy ID" },
+  "lf.msglabel":     { th: "ข้อความของคุณ — คัดลอกไปวางในแชต LINE ได้เลย",
+                       en: "Your message — copy it and paste into the LINE chat" },
+  "lf.copymsg":      { th: "คัดลอกข้อความ", en: "Copy message" },
+  "lf.copied":       { th: "คัดลอกแล้ว", en: "Copied" },
+  "lf.altlabel":     { th: "หรือส่งหาเราทางอื่น ได้ผลเหมือนกัน", en: "Or reach us another way — same result" },
+  "lf.wa":           { th: "ส่งทาง WhatsApp (ใช้ได้บนคอม)", en: "Send via WhatsApp (works on desktop)" },
+  "lf.mail":         { th: "ส่งทางอีเมล", en: "Send by email" },
+  "lf.open":         { th: "ฉันมีแอป LINE บนคอมอยู่แล้ว — เปิดเลย", en: "I already have LINE on this computer — open it" },
+  "lf.mailsub":      { th: "ติดต่อจากเว็บไซต์ House of Happiness", en: "Enquiry from the House of Happiness website" },
+  "lf.close":        { th: "ปิด", en: "Close" },
 };
 
 /* ─── ตัวจัดการภาษา ─── */
