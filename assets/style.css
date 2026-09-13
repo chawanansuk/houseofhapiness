@@ -1089,6 +1089,12 @@ textarea { resize: vertical; min-height: 4.5rem; }
   .line-fb-card { padding: 1.3rem 1.05rem 1.1rem; }
 }
 
+/* iconsiam.jpg เป็นรูปแนวตั้ง (704x1251) พอวางในกรอบแนวนอนแล้ว object-fit: cover
+   ครอปกลางภาพ เหลือแต่ผนังตึกสูงที่ไม่รู้ว่าที่ไหน — ตัวห้างกับป้าย ICONSIAM
+   แม่น้ำ และเรือ อยู่ครึ่งล่างของภาพทั้งหมด จึงยึดขอบล่างไว้แทนกลางภาพ
+   (แก้ชั่วคราวจนกว่าจะเปลี่ยนเป็นรูปแนวนอนที่เห็นตัวห้างเต็มๆ) */
+img[src$="attractions/iconsiam.jpg"] { object-position: center bottom; }
+
 /* ── 404 page ── */
 .nf-wrap { text-align: center; padding: clamp(4rem, 12vw, 8rem) 1.5rem; }
 .nf-wrap .code { font-family: var(--font-display); font-size: clamp(4rem, 14vw, 7rem); font-weight: 700; color: var(--gold); line-height: 1; }
