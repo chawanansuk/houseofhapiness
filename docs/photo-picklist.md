@@ -278,6 +278,16 @@ name + licence). They are currently listed in
 Also attribution-requiring, if you ever go there: Flickr CC BY / CC BY-SA, Vecteezy free tier,
 and Wikimedia generally.
 
+
+## 14. `songwat.jpg` — Song Wat Road (ถนนทรงวาด)  ★ NEW, needed for the Song Wat article
+
+- [ ] **Must show:** the old Chinese-European shophouses / godown fronts along Song Wat Road, ideally with the layering of a working warehouse next to a restored creative space. A narrow-street perspective works better than a single facade.
+- **Site:** Unsplash / Pexels / Pixabay (search first; Song Wat has far less free coverage than Yaowarat)
+- **Search URL:** https://unsplash.com/s/photos/song-wat · https://www.pexels.com/search/song%20wat/
+- **Type in the search box:** `song wat` → `song wat road bangkok` → fall back to `bangkok chinatown shophouse` / `talat noi bangkok`
+- **Licence:** no attribution required on all three.
+- **Note:** coverage is thin. If nothing good turns up, this is another strong candidate to **shoot yourself** — it is a 3-minute ฿5 ferry from the hotel to Ratchawong pier, which is at the head of the road. Until then the page honestly captions a Yaowarat photo as Yaowarat.
+
 ## Licences that DO NOT require attribution
 
 - **Unsplash License** — free commercial use, no permission needed, no credit required.
