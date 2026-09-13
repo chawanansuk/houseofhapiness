@@ -27,7 +27,7 @@ const server = http.createServer((req,res)=>{ const url=req.url.split("?")[0];
     ["thonburi-one-day.html","เที่ยวฝั่งธนฯ 1 วันเต็ม","One Full Day in Thonburi"],
     ["heritage-walk.html","มรดกไชน่าทาวน์","Heritage Walk"],
     ["yaowarat-night-walk.html","เยาวราชกลางคืน","Night Food Walk"],
-    ["ayutthaya-day-trip.html","เที่ยวอยุธยา 1 วันจากกรุงเทพ — ออกเช้าจากคลองสาน กลับมานอนริมแม่น้ำ","Ayutthaya in One Day from Bangkok — Out Early from Khlong San, Back by the River at Night"],
+    ["ayutthaya-day-trip.html","เที่ยวอยุธยา 1 วันจากกรุงเทพฯ — ออกเช้าจากคลองสาน กลับมานอนริมแม่น้ำ","Ayutthaya in One Day from Bangkok — Out Early from Khlong San, Back by the River at Night"],
     ["songkran-riverside.html","สงกรานต์ริมเจ้าพระยา ฉบับคลองสาน — เลือกได้ว่าจะเปียกแค่ไหน แล้วกลับมานอนฝั่งที่เงียบกว่า","Songkran by the Chao Phraya, the Khlong San Way — Choose How Wet You Get, Then Sleep on the Quieter Bank"],
     ["chao-phraya-boat-guide.html","คู่มือเรือเจ้าพระยา ฉบับเข้าใจง่าย — เรือมีกี่แบบ ขึ้นท่าไหน จ่ายยังไง","The Chao Phraya boat guide, made simple — which boat, which pier, how to pay"],
     ["getting-around-bangkok.html","เดินทางในกรุงเทพจากคลองสาน — เลือกรถไฟฟ้า เรือ หรือรถ ให้ถูกจังหวะ","Getting around Bangkok from Khlong San — picking the train, the boat or the car at the right moment"],
