@@ -213,3 +213,146 @@ document.addEventListener("DOMContentLoaded", () => {
     rail.addEventListener("scroll", () => cue.classList.add("seen"), { once: true, passive: true });
   });
 });
+
+// บนคอมพิวเตอร์ ลิงก์ LINE เปิดไม่ได้ (แอปอยู่บนมือถือ) กดแล้วเงียบ
+// หน้าจองกับหน้ารูมเซอร์วิสส่งข้อความที่ลูกค้ากรอกไว้ไปกับลิงก์ ถ้าเปิดไม่ติดข้อมูลหายทั้งก้อน
+// จึงดักเฉพาะเครื่องที่ไม่ใช่มือถือ แล้วเปิดกล่องทางเลือก (QR / คัดลอกข้อความ / WhatsApp / อีเมล)
+// มือถือไม่แตะต้อง — ลิงก์ยังเด้งเข้าแอป LINE เหมือนเดิม
+(() => {
+  const LINE_ID = "@060hvzok";
+  const WA_NUMBER = "66994419465";
+  const EMAIL = "houseofhapinessbangkok@gmail.com";
+
+  const ua = navigator.userAgent || "";
+  // iPadOS 13+ รายงานตัวเองเป็น Macintosh — ดูจากนิ้วสัมผัสเพิ่ม
+  const isMobile = /Android|iPhone|iPad|iPod|Windows Phone|IEMobile/i.test(ua) ||
+                   (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if (isMobile) return;
+
+  const say = (key, fallback) => (typeof t === "function" ? t(key) : fallback);
+
+  let box = null, msgWrap = null, msgBox = null, waBtn = null, mailBtn = null, openBtn = null, lastFocus = null;
+
+  function build() {
+    box = document.createElement("div");
+    box.className = "line-fb";
+    box.hidden = true;
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-labelledby", "lineFbTitle");
+    box.innerHTML =
+      '<div class="line-fb-card">' +
+        '<button class="line-fb-x" type="button" data-i18n="lf.close" data-i18n-attr="aria-label" aria-label="ปิด">✕</button>' +
+        '<h3 id="lineFbTitle" data-i18n="lf.title">เปิด LINE บนคอมไม่ได้ใช่ไหม</h3>' +
+        '<p class="line-fb-lead" data-i18n="lf.lead"></p>' +
+        '<div class="line-fb-qr">' +
+          '<img src="/images/line-qr.svg" alt="LINE QR ' + LINE_ID + '" width="150" height="150">' +
+          '<p data-i18n="lf.qr"></p>' +
+          '<p class="line-fb-idlabel" data-i18n="lf.idlabel"></p>' +
+          '<p class="line-fb-id"><code>' + LINE_ID + '</code>' +
+            '<button type="button" class="line-fb-copy" data-copy="id" data-i18n="lf.copyid">คัดลอกไอดี</button></p>' +
+        '</div>' +
+        '<div class="line-fb-msg" hidden>' +
+          '<p data-i18n="lf.msglabel"></p>' +
+          '<textarea readonly rows="5" aria-label="message"></textarea>' +
+          '<button type="button" class="btn line-fb-copy line-fb-copymsg" data-copy="msg" data-i18n="lf.copymsg">คัดลอกข้อความ</button>' +
+        '</div>' +
+        '<p class="line-fb-altlabel" data-i18n="lf.altlabel"></p>' +
+        '<div class="line-fb-alt">' +
+          '<a class="btn btn-wa" target="_blank" rel="noopener" data-i18n="lf.wa">WhatsApp</a>' +
+          '<a class="btn btn-mail" data-i18n="lf.mail">อีเมล</a>' +
+        '</div>' +
+        '<a class="line-fb-open" target="_blank" rel="noopener" data-i18n="lf.open"></a>' +
+      '</div>';
+    document.body.appendChild(box);
+    msgWrap = box.querySelector(".line-fb-msg");
+    msgBox = box.querySelector("textarea");
+    waBtn = box.querySelector(".btn-wa");
+    mailBtn = box.querySelector(".btn-mail");
+    openBtn = box.querySelector(".line-fb-open");
+
+    box.querySelector(".line-fb-x").addEventListener("click", close);
+    box.addEventListener("click", (e) => { if (e.target === box) close(); });
+    document.addEventListener("keydown", (e) => {
+      if (box.hidden) return;
+      if (e.key === "Escape") return close();
+      if (e.key !== "Tab") return;
+      const f = [...box.querySelectorAll('button, a[href], textarea')].filter((el) => el.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    box.addEventListener("click", (e) => {
+      const b = e.target.closest(".line-fb-copy");
+      if (!b) return;
+      const text = b.dataset.copy === "msg" ? msgBox.value : LINE_ID;
+      const done = () => {
+        const before = b.textContent;
+        b.textContent = say("lf.copied", "คัดลอกแล้ว");
+        b.classList.add("ok");
+        setTimeout(() => { b.textContent = before; b.classList.remove("ok"); }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, () => selectFallback(b, text, done));
+      } else selectFallback(b, text, done);
+    });
+    if (typeof applyLang === "function") applyLang();
+  }
+
+  // เบราว์เซอร์เก่า/หน้าที่ไม่ใช่ https — คลิปบอร์ด API ใช้ไม่ได้
+  // เลือกตัวอักษรไว้ให้จริงก่อน แล้วค่อยสั่งคัดลอก ถ้ายังไม่ได้อย่างน้อยผู้ใช้กด Ctrl+C เองต่อได้
+  function selectFallback(btn, text, done) {
+    if (btn.dataset.copy === "msg") {
+      msgBox.focus();
+      msgBox.select();
+    } else {
+      const code = box.querySelector(".line-fb-id code");
+      const r = document.createRange();
+      r.selectNodeContents(code);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }
+    try { if (document.execCommand("copy")) done(); } catch (e) { /* ผู้ใช้กด Ctrl+C เองได้ */ }
+  }
+
+  function close() {
+    if (!box || box.hidden) return;
+    box.hidden = true;
+    document.body.style.overflow = "";
+    lastFocus && lastFocus.focus();
+  }
+
+  // ดึงข้อความที่แนบมากับลิงก์ LINE ออกมา (รูปแบบ line.me/R/oaMessage/<id>/?<ข้อความ>)
+  function messageOf(href) {
+    const m = /line\.me\/R\/oaMessage\/[^/]+\/\?(.+)$/.exec(href);
+    if (!m) return "";
+    try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
+  }
+
+  function open(href) {
+    if (!box) build();
+    const msg = messageOf(href);
+    msgWrap.hidden = !msg;
+    msgBox.value = msg;
+    waBtn.href = "https://wa.me/" + WA_NUMBER + (msg ? "?text=" + encodeURIComponent(msg) : "");
+    const subject = say("lf.mailsub", "ติดต่อจากเว็บไซต์ House of Happiness");
+    mailBtn.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(subject) +
+                   (msg ? "&body=" + encodeURIComponent(msg) : "");
+    openBtn.href = href;
+    lastFocus = document.activeElement;
+    box.hidden = false;
+    document.body.style.overflow = "hidden";
+    box.querySelector(".line-fb-x").focus();
+  }
+
+  document.addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // ผู้ใช้ตั้งใจเปิดแท็บใหม่เอง
+    const a = e.target.closest('a[href*="line.me/"]');
+    if (!a || a.closest(".line-fb")) return;
+    if (a.getAttribute("aria-disabled") === "true") return;
+    e.preventDefault();
+    open(a.href);
+  });
+})();
