@@ -40,6 +40,16 @@ for (const f of fs.readdirSync(path.join(ROOT, DIR))) {
   else console.warn(`อ่านขนาดไม่ได้: ${f}`);
 }
 
+// og:image ชี้ไปรูปไหนก็ได้ใต้ images/ จึงอ่านขนาดตอนใช้จริงแทนการอ่านล่วงหน้า
+const sizeCache = new Map();
+function sizeOf(rel) {
+  if (!sizeCache.has(rel)) {
+    const abs = path.join(ROOT, rel);
+    sizeCache.set(rel, rel.endsWith(".jpg") && fs.existsSync(abs) ? jpegSize(abs) : null);
+  }
+  return sizeCache.get(rel);
+}
+
 let changed = 0, files = 0;
 for (const fn of fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"))) {
   const p = path.join(ROOT, fn);
@@ -56,10 +66,23 @@ for (const fn of fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"))) {
     hits++;
     return tag.replace(/\bwidth="\d+"/, `width="${w}"`).replace(/\bheight="\d+"/, `height="${h}"`);
   });
+  let after2 = after;
+  const og = /<meta property="og:image" content="[^"]*\/(images\/[^"]+)">/.exec(after);
+  const sz = og && sizeOf(og[1]);
+  if (sz) {
+    after2 = after2.replace(/(<meta property="og:image:width" content=")\d+(">)/, (m, a, b) => {
+      if (m === `${a}${sz.w}${b}`) return m;
+      hits++; return `${a}${sz.w}${b}`;
+    }).replace(/(<meta property="og:image:height" content=")\d+(">)/, (m, a, b) => {
+      if (m === `${a}${sz.h}${b}`) return m;
+      hits++; return `${a}${sz.h}${b}`;
+    });
+  }
+
   if (hits) {
     files++; changed += hits;
     console.log(`${fn}: ${hits} จุด`);
-    if (write) fs.writeFileSync(p, after);
+    if (write) fs.writeFileSync(p, after2);
   }
 }
 

@@ -17,7 +17,7 @@
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="https://houseofhappinessbangkok.com/images/attractions/grandpalace.jpg">
 <meta property="og:image:width" content="960">
-<meta property="og:image:height" content="720">
+<meta property="og:image:height" content="639">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="เที่ยวอะไรใกล้ที่พัก | Things to Do Nearby — House of Happiness Bangkok">
 <meta name="twitter:description" content="ICONSIAM สวนลอยฟ้าเจ้าพระยา วัดอรุณ และเยาวราช พร้อมวิธีเดินทางจาก House of Happiness คลองสาน">
@@ -96,7 +96,7 @@
       <span data-i18n="atr.f3">📍 ทุกจุดมีปุ่มนำทางจากที่พัก</span>
     </div>
   </div>
-  <span class="credit"><span data-i18n="prov.stock">ภาพประกอบ · Wikimedia Commons</span> · <a href="attractions.html#creditsBox">credits</a></span>
+  <span class="credit"><span data-i18n="prov.stock">ภาพประกอบ · Wikimedia Commons</span> · <a href="credits.html">credits</a></span>
 </header>
 
 <div class="atr-wrap">
@@ -115,10 +115,6 @@
     <a class="btn btn-gold" href="booking.html" data-i18n="atr.book">จองห้องพักกับเรา</a>
   </div>
 
-  <div class="atr-credits" id="creditsBox" hidden>
-    <h4 data-i18n="atr.credits">เครดิตรูปภาพ (Wikimedia Commons)</h4>
-    <ul id="creditsList"></ul>
-  </div>
 </div>
 
 <footer class="site">
@@ -194,18 +190,7 @@ document.getElementById("gridNear").innerHTML = NEAR.map(card).join("");
 document.getElementById("gridOld").innerHTML = OLDTOWN.map(card).join("");
 applyLang(getLang());
 
-// เครดิตรูปตามสัญญา CC — สร้างจาก credits.json ที่ระบบ build เขียนไว้
-fetch("images/attractions/credits.json")
-  .then((r) => r.ok ? r.json() : [])
-  .then((list) => {
-    if (!Array.isArray(list) || !list.length) return;
-    document.getElementById("creditsBox").hidden = false;
-    document.getElementById("creditsList").innerHTML = list.map((c) =>
-      `<li><a href="${c.filePage}" target="_blank" rel="noopener">${c.file}</a>` +
-      `${c.artist ? " — " + c.artist.replace(/</g, "&lt;") : ""} · ${String(c.license).replace(/</g, "&lt;")}</li>`
-    ).join("");
-  })
-  .catch(() => {});
+
 </script>
 
 </body>
