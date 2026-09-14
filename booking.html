@@ -296,6 +296,22 @@ const fmtDate = (d) =>
   new Date(d).toLocaleDateString(lang() === "th" ? "th-TH" : "en-GB",
     { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 
+// วันที่ในข้อความจอง: เขียนให้คนอ่านออก ไม่ใช่ 2026-09-15
+// แขกอ่านข้อความตัวเองซ้ำใน LINE แล้วจับได้ทันทีถ้าเลือกวันผิด และคนรับจองก็เช็คง่ายขึ้น
+// ใช้ปี ค.ศ. ตามที่แขกเลือกในปฏิทิน ไม่แปลงเป็น พ.ศ. จะได้ไม่สับสน
+const DOW_TH = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+const MON_TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const DOW_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function niceDate(iso, th) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+  if (!m) return iso || "-";
+  const y = +m[1], mo = +m[2], d = +m[3];
+  const dow = new Date(y, mo - 1, d).getDay();
+  return th ? `${DOW_TH[dow]} ${d} ${MON_TH[mo - 1]} ${y}`
+            : `${DOW_EN[dow]} ${d} ${MON_EN[mo - 1]} ${y}`;
+}
+
 function update() {
   const s = getState();
   document.querySelectorAll(".room").forEach((el) =>
@@ -326,12 +342,12 @@ function update() {
     ? `สวัสดีครับ/ค่ะ ขอจองห้องพัก House of Happiness`
     : `Hello! I would like to book a room at House of Happiness`) + `
 • ${L ? "ห้อง" : "Room"}: ${s.room ? s.room.name[lang()] : "-"} × ${s.numRooms}
-• ${L ? "เช็คอิน" : "Check-in"}: ${s.ci || "-"}
-• ${L ? "เช็คเอาท์" : "Check-out"}: ${s.co || "-"} (${s.nights} ${t("bk.nights")})
+• ${L ? "เช็คอิน" : "Check-in"}: ${niceDate(s.ci, L)}
+• ${L ? "เช็คเอาท์" : "Check-out"}: ${niceDate(s.co, L)} (${s.nights} ${t("bk.nights")})
 • ${L ? "ผู้เข้าพัก" : "Guests"}: ${s.guests}
 • ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
 • ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}
-${L ? "รบกวนแจ้งราคารวมด้วยนะครับ/ค่ะ 🙏" : "Could you let me know the total price? 🙏"}`;
+${L ? "รบกวนแจ้งราคารวมและวิธีชำระเงินด้วยนะครับ/ค่ะ 🙏" : "Could you let me know the total price and how to pay? 🙏"}`;
   lastMsg = msg;
 
   const btnLine = $("btnLine"), btnWa = $("btnWa"), btnMail = $("btnMail");

@@ -1739,3 +1739,11 @@ details.m-fold { background: none; border: 0; border-radius: 0; padding: 0; marg
   .foot-col a { display: inline-block; font-size: 0.8rem; padding: 0.22rem 0; }
   .foot-bottom { margin-top: 1rem; padding-top: 0.9rem; font-size: 0.76rem; }
 }
+
+/* หน้าเครดิตรูปภาพ — แยกออกมาจากหน้าที่เที่ยว เพื่อไม่ให้รายการยาวไปคั่นเนื้อหา
+   แต่ยังคงระบุผู้ถ่ายและสัญญาอนุญาตไว้ครบตามเงื่อนไข CC */
+.cr-wrap { max-width: 46rem; margin: 0 auto; padding: clamp(2rem, 6vw, 3.5rem) 1.2rem 3rem; }
+.cr-wrap h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 5vw, 2.1rem); color: var(--dark); margin-bottom: 0.8rem; }
+.cr-lead { color: var(--muted); font-size: 0.92rem; line-height: 1.75; margin-bottom: 1.4rem; }
+.cr-lead a { color: var(--gold); }
+.cr-wrap .atr-credits + .cr-lead { margin-top: 1.6rem; }
