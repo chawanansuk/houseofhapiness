@@ -190,6 +190,33 @@ const server = http.createServer((req, res) => {
   await dt.waitForTimeout(500);
   check("ไทม์ไลน์มีแถบการจอง", await dt.locator("#tl .bar").count() >= 2);
   check("ถาดรอจัดห้องแสดงจำนวน", (await dt.locator("#tlTray").innerText()).includes("รอจัดห้อง"));
+
+  // แถบต้องลากถึง "กลางช่องวันเช็คเอาต์" ไม่ใช่หยุดที่คืนสุดท้าย
+  // BDC-2006 Kenji ห้อง 709 เข้า -1 ออก +6 → แถบต้องจบกลางช่องวันที่ +6
+  // เคยมีบั๊ก: จอง 17-21 วาดถึงแค่วันที่ 20 เจ้าของที่พักดูผังแล้วเข้าใจวันออกผิด
+  const geo = await dt.evaluate(() => {
+    const cell = Number(document.getElementById("tl").dataset.cell);
+    const bar = document.querySelector('.tl-row[data-rowno="709"] .bar');
+    if (!bar) return null;
+    const track = bar.parentElement;
+    const left = parseFloat(bar.style.left), width = parseFloat(bar.style.width);
+    return { cell, left, right: left + width + 2, trackW: parseFloat(track.style.width) };
+  });
+  // tlStart = เมื่อวาน (TODAY-1) → วันเข้า -1 อยู่ช่อง 0, วันออก +6 อยู่ช่อง 7
+  check("แถบเริ่มกลางช่องวันเช็คอิน", geo && Math.abs(geo.left - 0.5 * geo.cell) < 1.5);
+  check("แถบจบกลางช่องวันเช็คเอาต์ (ไม่ใช่คืนสุดท้าย)", geo && Math.abs(geo.right - 7.5 * geo.cell) < 1.5);
+  check("แถบไม่ล้นความกว้างราง", geo && geo.right <= geo.trackW + 1);
+
+  // แถบจริงกับแถบพรีวิวตอนจัดห้อง ต้องยาวเท่ากัน ไม่งั้นจัดแล้วแถบหดดูสับสน
+  const same = await dt.evaluate(() => {
+    const cell = Number(document.getElementById("tl").dataset.cell);
+    const bar = document.querySelector('.tl-row[data-rowno="709"] .bar');
+    const left = parseFloat(bar.style.left), width = parseFloat(bar.style.width);
+    // สูตรของ ghost: left = s*cell + cell*0.5, width = (e-s)*cell - 2
+    const s = 0, e = 7;
+    return Math.abs(left - (s * cell + cell * 0.5)) < 1.5 && Math.abs(width - ((e - s) * cell - 2)) < 1.5;
+  });
+  check("แถบจริงยาวเท่าแถบพรีวิวตอนจัดห้อง", same);
   await dt.locator('.tl-row[data-rowno="705"] .tl-cellbtn').first().click();
   await dt.waitForTimeout(300);
   check("แตะช่องว่างเปิด sheet จองใหม่ (prefill ห้อง)", (await dt.locator("#sheetTitle").innerText()).includes("จองใหม่"));
