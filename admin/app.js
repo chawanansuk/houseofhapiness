@@ -589,7 +589,12 @@ function renderTimeline(){
     const bars = roomBookings(r.no).filter(b => overlaps(b, state.tlStart, end)).map(b => {
       const s = Math.max(0, diffDays(state.tlStart, b.checkin)), e = Math.min(state.tlDays, diffDays(state.tlStart, effCheckout(b)));
       const contL = b.checkin < state.tlStart, contR = effCheckout(b) > end;
-      const left = s*cell + (contL?0:cell*0.5), width = (e-s)*cell - (contL?0:cell*0.5) - (contR?0:cell*0.5) - 2;
+      // แขกเข้าช่วงบ่ายและออกช่วงสาย แถบจึงเริ่มกลางช่องวันเข้า และต้องจบ "กลางช่องวันเช็คเอาต์"
+      // ไม่ใช่จบกลางช่องคืนสุดท้าย จอง 17-21 ต้องลากถึงวันที่ 21 ไม่ใช่หยุดที่ 20
+      // ถ้าการจองยาวเลยขอบจอ ให้ชนขอบพอดี และห้ามล้นความกว้างของราง
+      const x1 = contL ? 0 : (s + 0.5) * cell;
+      const x2 = Math.min(contR ? e*cell : (e + 0.5) * cell, state.tlDays * cell);
+      const left = x1, width = x2 - x1 - 2;
       const cls = isInhouse(b) ? 'occ' : isCheckedOut(b) ? 'done' : isPending(b) ? 'pend' : 'arr';
       const w = Math.max(width, 28);
       const req = guestReqOf(b);
