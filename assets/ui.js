@@ -190,8 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
 // แขกสอบถามราคาทาง LINE/WhatsApp แทน — ราคาในชีต (แท็บ Site) ยังใช้ในระบบหลังบ้านได้
 
 
-// Vercel Web Analytics: page views only, no custom events or booking/customer fields.
-// Vercel reports page paths without query parameters and does not use tracking cookies.
+// Vercel Web Analytics — ยอดเข้าชมหน้า + เหตุการณ์ที่บอกว่าแขก "ลงมือทำ" ไม่ใช่แค่เปิดหน้าแล้วปิด
+// ไม่ส่งข้อมูลส่วนตัวใด ๆ เลย: ไม่มีชื่อ เบอร์โทร อีเมล วันเข้าพัก หรือเนื้อความที่แขกพิมพ์
+// ส่งแค่ชื่อเหตุการณ์กับช่องทางที่ใช้ (line/whatsapp/mail) ซึ่งนับรวมแล้วไม่ชี้ตัวบุคคล
+// Vercel เก็บ path โดยตัด query string ทิ้ง และไม่ใช้คุกกี้ติดตาม
 (() => {
   if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -200,6 +202,41 @@ document.addEventListener("DOMContentLoaded", () => {
   script.src = "/_vercel/insights/script.js";
   document.head.appendChild(script);
 })();
+
+// ตัวส่งเหตุการณ์ — เงียบเสมอถ้า analytics ปิดอยู่หรือสคริปต์โหลดไม่ขึ้น ห้ามทำให้หน้าเว็บพัง
+function hohTrack(name, data) {
+  try { if (window.va) window.va("event", data ? { name, data } : { name }); } catch (e) { /* ไม่สนใจ */ }
+}
+
+// ผูกครั้งเดียวที่ document ครอบคลุมทุกหน้า และปุ่มที่หน้าอื่นสร้างทีหลังก็จับได้
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a, button");
+  if (!a) return;
+  // ปุ่มส่งในกล่องทางเลือก LINE บนคอม นับแยกจากลิงก์ LINE ปกติ
+  const inFallback = !!a.closest(".line-fb");
+  const href = a.getAttribute("href") || "";
+
+  if (a.id === "btnLine" || a.id === "btnWa" || a.id === "btnMail" || a.id === "btnCopy") {
+    if (a.getAttribute("aria-disabled") === "true") return; // ยังกรอกไม่ครบ กดไม่ติด ไม่ต้องนับ
+    hohTrack("booking_sent", { via: { btnLine: "line", btnWa: "whatsapp", btnMail: "email", btnCopy: "copy" }[a.id] });
+    return;
+  }
+  if (a.id === "rsSend" || a.id === "rsSendWa") {
+    hohTrack("order_sent", { via: a.id === "rsSendWa" ? "whatsapp" : "line" });
+    return;
+  }
+  if (href.includes("line.me/")) { hohTrack("line_click", { from: inFallback ? "desktop_fallback" : "link" }); return; }
+  if (href.includes("wa.me/")) { hohTrack("whatsapp_click", { from: inFallback ? "desktop_fallback" : "link" }); return; }
+  if (href.startsWith("mailto:")) { hohTrack("email_click", { from: inFallback ? "desktop_fallback" : "link" }); return; }
+});
+
+// สลับภาษา — ตอบคำถามว่าควรแยก URL ภาษาอังกฤษไหม ต้องรู้ก่อนว่ามีคนกดกี่คน
+// ต้องดักในเฟส capture เพราะปุ่มใช้ onclick="setLang(...)" ซึ่งเปลี่ยน <html lang> ไปก่อน
+// ถ้าดักตอน bubble จะเทียบภาษาเก่าไม่ได้แล้ว และจะไม่นับอะไรเลย
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".lang-toggle button[data-lang]");
+  if (b && b.dataset.lang !== document.documentElement.lang) hohTrack("lang_switch", { to: b.dataset.lang });
+}, true);
 
 // มือถือ: ส่วนที่ยาวพับเก็บไว้ก่อน (แผนที่วาดมือ, วิธีเดินทาง) กดเปิดเมื่ออยากอ่าน — desktop เปิดค้างเสมอ
 // ถ้าสคริปต์ไม่ทำงานทุกอย่างยังเปิดอยู่ตามเดิม (graceful)
@@ -343,6 +380,8 @@ document.addEventListener("DOMContentLoaded", () => {
     openBtn.href = href;
     lastFocus = document.activeElement;
     box.hidden = false;
+    // วัดว่าปัญหา "กด LINE บนคอมแล้วเงียบ" เกิดขึ้นจริงบ่อยแค่ไหน และมีข้อความค้างอยู่ไหม
+    hohTrack("line_desktop_fallback", { has_message: msg ? "yes" : "no" });
     document.body.style.overflow = "hidden";
     box.querySelector(".line-fb-x").focus();
   }
