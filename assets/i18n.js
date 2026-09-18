@@ -32,6 +32,8 @@ const I18N = {
   "about.title":     { th: "เกี่ยวกับเรา", en: "About" },
   "about.body":      { th: "House of Happiness เป็นเซอร์วิสอพาร์ตเมนต์ 15 ยูนิต มีห้องให้เลือก 3 แบบ — Standard เตียงใหญ่, Studio 2 เตียงแยก และ Deluxe ห้องใหญ่พิเศษพร้อมมุมโซฟา ทุกห้องมีระเบียงวิวเมือง แอร์ ตู้เย็น และทีวีจอแบน มีเครื่องซักผ้าหยอดเหรียญในอาคาร ฟรี Wi-Fi และน้ำดื่มทุกการเข้าพัก",
                        en: "House of Happiness offers 15 serviced apartments in three styles — Standard (double bed), Studio (twin beds) and Deluxe (extra-large with sofa corner). Every unit has a city-view balcony, air conditioning, a refrigerator, and a flat-screen TV. A coin-operated laundry is available on site. Free Wi-Fi and complimentary bottled water with every stay." },
+  "svc.link.t":      { th: "รูมเซอร์วิส — สั่งอาหารถึงหน้าห้อง", en: "Room service — Thai food to your door" },
+  "svc.link.d":      { th: "มัสมั่น ผัดไทย ของหวานไทย กาแฟเย็น สั่งล่วงหน้าทาง LINE", en: "Massaman, pad thai, Thai desserts, iced coffee — order ahead on LINE" },
   "rooms.title":     { th: "ห้องพักและราคา", en: "Rooms & Rates" },
   "rooms.std.name":  { th: "ห้อง Standard — เตียงใหญ่", en: "Standard Apartment — Double Bed" },
   "rooms.std.desc":  { th: "เตียงใหญ่ 1 เตียง · ระเบียงวิวเมือง · ตู้เย็น · แอร์ · ทีวี · ห้องน้ำในตัว (ฝักบัว) · พัก 2 ท่าน",
