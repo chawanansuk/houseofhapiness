@@ -354,6 +354,18 @@ const I18N = {
   /* แถบปุ่มติดขอบล่างของหน้าบทความบนมือถือ */
   "sb.rates": { th: "เช็คห้องว่าง", en: "Check rates" },
   "sb.line": { th: "ถามทางไลน์", en: "Ask on LINE" },
+
+  /* ส่วนไกด์เที่ยวในหน้าแรก */
+  "hg.title": { th: "ไกด์เที่ยวจากคนพื้นที่", en: "Local guides, written by us" },
+  "hg.lead": { th: "เราอยู่คลองสานมาทั้งชีวิต — 24 ไกด์ที่เราเขียนเอง ไม่ได้ลอกมาจากที่ไหน", en: "We have lived in Khlong San all our lives. All 24 guides are ours, not copied from anywhere." },
+  "hg.1t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท", en: "The Chinatown heritage walk, one ฿5 ferry away" },
+  "hg.1d": { th: "ครึ่งวัน 8 จุด เริ่มที่ท่าเรือท้ายซอย", en: "Half a day, eight stops, starting at the pier down our lane" },
+  "hg.2t": { th: "ถนนทรงวาด ย่านสร้างสรรค์ที่ใกล้เราที่สุด", en: "Song Wat Road, the creative district closest to us" },
+  "hg.2d": { th: "ข้ามเรือ 5 บาท 3 นาที ขึ้นตรงหัวถนน", en: "A ฿5 ferry, three minutes, landing at the head of the road" },
+  "hg.3t": { th: "เดินทางในกรุงเทพจากคลองสาน", en: "Getting around Bangkok from Khlong San" },
+  "hg.3d": { th: "สายสีทอง เรือข้ามฟาก หรือเรียกรถ เลือกให้ถูกจังหวะ", en: "The Gold Line, the ferry or a car, and when each one wins" },
+  "hg.all": { th: "ดูไกด์ทั้งหมด 24 เรื่อง", en: "See all 24 guides" },
+
 };
 
 /* ─── ตัวจัดการภาษา ─── */

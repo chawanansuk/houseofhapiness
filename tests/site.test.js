@@ -273,6 +273,10 @@ console.log("IMAGE PIPELINE TESTS PASSED");
   assert.match(css, /html\.js \.reveal \{ opacity: 0;/,
     ".reveal ต้องถูกซ่อนเฉพาะตอน html มีคลาส js ไม่งั้น JS พังแล้วหน้าจะว่าง");
   assert.ok(!/^\.reveal \{ opacity: 0;/m.test(css), "ห้ามมีกฎ .reveal ที่ซ่อนเนื้อหาโดยไม่ดูว่า JS ทำงานไหม");
+  // กฎที่ทำให้โผล่ต้องเจาะจงเท่ากฎที่ซ่อน ไม่งั้นกฎซ่อนชนะแล้วทั้งเว็บไม่มีอะไรโผล่เลย
+  assert.match(css, /html\.js \.reveal\.visible \{ opacity: 1;/,
+    "กฎ .visible ต้องขึ้นต้นด้วย html.js ให้ specificity เท่ากับกฎที่ซ่อน");
+  assert.ok(!/^\.reveal\.visible \{/m.test(css), "ห้ามเหลือกฎ .reveal.visible ที่ specificity ต่ำกว่ากฎซ่อน");
   for (const f of htmlFiles) {
     assert.match(read(f), /<script>document\.documentElement\.classList\.add\("js"\);<\/script>/,
       `${f}: ต้องมีสคริปต์บรรทัดเดียวใน <head> ที่ใส่คลาส js`);
@@ -313,3 +317,44 @@ console.log("IMAGE PIPELINE TESTS PASSED");
     "attractions.html ต้องปล่อยให้หัวข้อตัดบรรทัดบนมือถือ");
 }
 console.log("UX TESTS PASSED");
+
+// ── Phase 3: หน้ารวมไกด์ + ส่วนไกด์ในหน้าแรก ──
+{
+  const gd = read("guides.html");
+  // เลขนับต้องมาจาก DOM ไม่ใช่พิมพ์ทิ้งไว้
+  assert.ok(!/<span class="cnt">\d/.test(gd), "guides.html ห้ามมีเลขนับคงที่ใน HTML — ให้ JS นับจากการ์ดจริง");
+  assert.match(gd, /cnt\.textContent = String\(n\)/, "ต้องมีโค้ดเขียนเลขนับจากจำนวนการ์ดจริง");
+  assert.equal((gd.match(/<section class="gd-sec" data-cat="/g) || []).length, 5, "หมวดไกด์ 5 หมวด ต้องมี data-cat ครบ");
+  const cards = (gd.match(/<a class="gd-card"/g) || []).length + (gd.match(/<a class="gd-feat"/g) || []).length;
+  assert.ok(cards >= 24, `คาดว่ามีการ์ดไกด์อย่างน้อย 24 ใบ เจอ ${cards}`);
+  // ข้อความจำนวนไกด์ต้องตรงกับจำนวนการ์ดในหมวดจริง (ไม่นับการ์ดรูมเซอร์วิส)
+  const inCats = [...gd.matchAll(/<section class="gd-sec" data-cat="[^"]+">([\s\S]*?)<\/section>/g)]
+    .reduce((n, m) => n + (m[1].match(/<a class="gd-card"/g) || []).length, 0) + 1;
+  assert.ok(new RegExp(`✍️ ${inCats} ไกด์`).test(gd), `ข้อความสถิติต้องบอก ${inCats} ไกด์ ให้ตรงกับการ์ดจริง`);
+  const pracSec = (gd.match(/<section class="gd-sec" data-cat="prac">([\s\S]*?)<\/section>/) || [])[1] || "";
+  assert.ok(pracSec && !pracSec.includes("services.html"), "รูมเซอร์วิสต้องไม่อยู่ในหมวดไกด์แล้ว");
+  assert.match(gd, /<section class="gd-rs" id="gdRs">/, "ต้องมีบล็อกรูมเซอร์วิสแยกท้ายหน้า");
+  assert.match(gd, /id="gdFilter"/, "ต้องมีแถบตัวกรอง");
+  assert.match(gd, /id="gdSearch"/, "ต้องมีช่องค้นหา");
+  assert.match(gd, /id="gdStart"/, "ต้องมีบล็อก เริ่มจาก 3 อันนี้");
+  assert.match(gd, /id="gdFest"/, "ต้องมีแถบเทศกาล");
+  assert.match(gd, /class="gd-ask-map"/, "กล่องถามต้องมีแผนที่วาดมือ");
+  assert.equal((gd.match(/data-f="/g) || []).length, 6, "ปุ่มกรอง 6 ปุ่ม (ทั้งหมด + 5 หมวด)");
+
+  // festivals.json ต้องอ่านได้ และทุกวันที่ที่ยังไม่ยืนยันต้องมีโน้ต TODO-OWNER
+  const fest = JSON.parse(read("assets/festivals.json"));
+  assert.ok(Array.isArray(fest.festivals) && fest.festivals.length, "festivals.json ต้องมีรายการ");
+  for (const f of fest.festivals) {
+    assert.ok(f.id && f.slug && f.label && f.label.th && f.label.en, `festival ${f.id} ข้อมูลไม่ครบ`);
+    assert.ok(fs.existsSync(path.join(root, f.slug)), `festival ${f.id} ชี้ไปหน้า ${f.slug} ที่ไม่มีอยู่`);
+    if (!f.confirmed) assert.match(f.todo, /TODO-OWNER/, `festival ${f.id} ยังไม่ยืนยัน ต้องมีโน้ต TODO-OWNER`);
+    if (f.start) assert.match(f.start, /^\d{4}-\d{2}-\d{2}$/, `festival ${f.id} รูปแบบวันที่ผิด`);
+  }
+
+  // หน้าแรกต้องมีส่วนไกด์ + ลิงก์ไปหน้ารวม
+  const idx = read("index.html");
+  assert.match(idx, /<section id="guides" class="reveal">/, "หน้าแรกต้องมีส่วนไกด์เที่ยว");
+  assert.equal((idx.match(/<a class="hg-card"/g) || []).length, 3, "ส่วนไกด์ในหน้าแรกมี 3 การ์ด");
+  assert.match(idx, /href="guides\.html" data-i18n="hg\.all"/, "ต้องมีปุ่มไปหน้ารวมไกด์");
+}
+console.log("GUIDES HUB TESTS PASSED");

@@ -45,10 +45,24 @@ const VIEWS = [{ n: "m", width: 390, height: 844 }, { n: "d", width: 1280, heigh
         const errs = [];
         page.on("pageerror", (e) => errs.push(String(e).slice(0, 120)));
         await page.goto(`http://127.0.0.1:8901/${file}`, { waitUntil: "load" }).catch(() => {});
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-        await page.waitForTimeout(350);
-        await page.evaluate(() => window.scrollTo(0, 0));
-        await page.waitForTimeout(450);
+        // เลื่อนทีละจอจากบนลงล่าง แล้วดูว่ามีบล็อกไหนอยู่ในจอแต่ยังโปร่งใสอยู่ไหม
+        // นี่คือสิ่งที่แขกเจอจริง ๆ ถ้าเอฟเฟกต์ fade พัง: แถบว่างกลางหน้า
+        const blankSeen = await (async () => {
+          let worst = 0;
+          const steps = await page.evaluate(() => Math.ceil(document.body.scrollHeight / innerHeight));
+          for (let k = 0; k <= Math.min(steps, 12); k++) {
+            await page.evaluate((i) => window.scrollTo({ top: i * innerHeight * 0.9, behavior: "instant" }), k);
+            await page.waitForTimeout(180);
+            const n = await page.evaluate(() => [...document.querySelectorAll(".reveal")]
+              .filter((el) => { const r = el.getBoundingClientRect();
+                return r.bottom > 0 && r.top < innerHeight && getComputedStyle(el).opacity === "0"; }).length);
+            if (n > worst) worst = n;
+            if (worst) break;
+          }
+          return worst;
+        })();
+        await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+        await page.waitForTimeout(500);
         const slug = file.replace(/\.html$/, "");
         await page.screenshot({ path: path.join(outDir, `${slug}.${view.n}.${lang}.png`), fullPage: true });
 
@@ -61,15 +75,14 @@ const VIEWS = [{ n: "m", width: 390, height: 844 }, { n: "d", width: 1280, heigh
           const wide = over > 1 ? [...document.querySelectorAll("body *")]
             .filter((el) => el.getBoundingClientRect().right > de.clientWidth + 1 && !inRail(el))
             .slice(0, 4).map((el) => el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).join(".") : "")) : [];
-          // นับเฉพาะบล็อกที่ยังไม่ถูกสั่งให้โผล่เลย — ที่มีคลาส visible แล้วแต่ opacity ยัง 0
-          // คือกำลังอยู่ระหว่างทรานซิชัน ไม่ใช่ของค้าง
-          const blank = [...document.querySelectorAll(".reveal:not(.visible)")]
-            .filter((el) => el.getBoundingClientRect().top < innerHeight).length;
+          // บล็อกที่ยังโปร่งใสอยู่หลังหน้านิ่งแล้ว = ของจริงที่แขกจะเห็นเป็นที่ว่าง
+          // ดูที่ opacity ที่คำนวณจริง ไม่ดูแค่คลาส เพราะกฎ CSS ที่เจาะจงกว่าอาจทับกันเองได้
+          const blank = 0;
           const broken = [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && i.getAttribute("src")).map((i) => i.currentSrc || i.src);
           return { over, wide, blank, broken, h: document.body.scrollHeight };
         });
         if (info.over > 1) problems.push(`${file} ${view.n}/${lang}: ล้นขวา ${info.over}px — ${info.wide.join(", ")}`);
-        if (info.blank) problems.push(`${file} ${view.n}/${lang}: มี ${info.blank} บล็อกยังโปร่งใสอยู่ในจอแรก`);
+        if (blankSeen) problems.push(`${file} ${view.n}/${lang}: เลื่อนแล้วเจอ ${blankSeen} บล็อกอยู่ในจอแต่ยังโปร่งใส`);
         if (info.broken.length) problems.push(`${file} ${view.n}/${lang}: รูปโหลดไม่ขึ้น ${info.broken.slice(0, 3).join(", ")}`);
         if (errs.length) problems.push(`${file} ${view.n}/${lang}: JS error ${errs[0]}`);
       }

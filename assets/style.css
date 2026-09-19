@@ -559,6 +559,19 @@ footer.site a:hover { color: #f5d9b8; text-decoration: underline; }
 @media (max-width: 640px) { .ld-bar { display: flex; } }
 @media (prefers-reduced-motion: reduce) { .ld-bar { transition: none; } }
 
+
+/* ── ส่วนไกด์เที่ยวในหน้าแรก ── */
+.hg-lead { text-align: center; color: var(--muted); max-width: 44em; margin: 0 auto 1.4rem; line-height: 1.7; }
+.hg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.hg-card { display: block; text-decoration: none; color: inherit; background: var(--card);
+  border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.hg-card:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 14px 32px rgba(62,47,35,.14); }
+.hg-card img { width: 100%; height: auto; aspect-ratio: 16/10; object-fit: cover; display: block; }
+.hg-card .b { display: block; padding: .9rem 1rem 1.1rem; }
+.hg-card .t { display: block; font-family: "Prompt", sans-serif; font-size: .98rem; color: var(--dark); line-height: 1.4; }
+.hg-card .d { display: block; font-size: .84rem; color: var(--muted); line-height: 1.6; margin-top: .3rem; }
+
 /* ── Sticky mobile booking bar (index) ── */
 .sticky-cta {
   position: fixed;
@@ -1128,7 +1141,8 @@ img[src$="attractions/iconsiam.jpg"] { object-position: center bottom; }
 /* ซ่อนไว้ก่อนเฉพาะตอนที่ JS ทำงานจริง (html.js) — ถ้าสคริปต์โหลดไม่ขึ้น
    เนื้อหาต้องเห็นทุกบล็อก ห้ามมีหน้าว่างเพราะแอนิเมชันไม่ทำงาน */
 html.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.reveal.visible { opacity: 1; transform: none; }
+/* ต้องเจาะจงเท่ากับกฎที่ซ่อน (html.js .reveal) ไม่งั้นกฎซ่อนจะชนะ แล้วไม่มีอะไรโผล่เลย */
+html.js .reveal.visible { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   html.js .reveal { opacity: 1; transform: none; transition: none; }
