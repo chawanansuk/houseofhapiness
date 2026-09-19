@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add("js");</script>
 <title>เที่ยวอะไรใกล้ที่พัก | Things to Do Nearby · House of Happiness</title>
 <meta name="description" content="9 จุดเที่ยวหลักใกล้ House of Happiness คลองสาน: สวนลอยฟ้าเจ้าพระยา ICONSIAM วัดอรุณ เยาวราช กุฎีจีน พร้อมระยะทางและปุ่มนำทางจากที่พัก">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
@@ -23,6 +24,9 @@
 <meta name="twitter:description" content="ICONSIAM สวนลอยฟ้าเจ้าพระยา วัดอรุณ และเยาวราช พร้อมวิธีเดินทางจาก House of Happiness คลองสาน">
 <meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/attractions.html">
+<link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/attractions.html">
+<link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/attractions.html">
+<link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/attractions.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
 <link rel="stylesheet" href="assets/fonts.css">
@@ -35,6 +39,8 @@
 .atr-group h2{font-family:"Prompt",sans-serif; font-size:1.15rem; color:var(--dark); white-space:nowrap}
 .atr-group h2::before{content:"✦ "; color:var(--gold); font-size:0.78rem}
 .atr-group::after{content:""; flex:1; height:1px; background:var(--line)}
+/* หัวข้อกลุ่มห้ามใช้ nowrap บนจอแคบ — หัวข้อภาษาอังกฤษยาวกว่าไทย แล้วดันหน้าเลื่อนซ้ายขวาได้ */
+@media (max-width:640px){.atr-group h2{white-space:normal}}
 .atr-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.1rem}
 .atr-card{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
@@ -73,6 +79,7 @@
 <nav class="topnav">
   <a class="brand" href="index.html"><span class="logo">🏠</span> House of Happiness</a>
   <div class="navlinks">
+    <a href="guides.html" data-i18n="nav.guides">ไกด์เที่ยว &amp; บทความ</a>
     <a href="local.html" data-i18n="lc.title">กิน-เที่ยวรอบซอย</a>
     <a href="index.html" data-i18n="bk.back">← กลับหน้าหลัก</a>
   </div>
@@ -85,11 +92,10 @@
 </nav>
 
 <header class="ld-hero cover">
-  <img class="bg" src="images/attractions/grandpalace.jpg" alt="" width="960" height="639" fetchpriority="high" decoding="async">
+  <picture><source type="image/webp" srcset="images/attractions/grandpalace-800.webp 800w, images/attractions/grandpalace.webp 960w" sizes="100vw"><img alt="พระบรมมหาราชวังเปิดไฟยามค่ำ มองข้ามแม่น้ำเจ้าพระยา" data-i18n="ph.grandpalace" data-i18n-attr="alt" class="bg" src="images/attractions/grandpalace.jpg" width="960" height="639" fetchpriority="high" decoding="async"></picture>
   <div class="in">
     <div class="kicker" data-i18n="atr.kicker">Things to Do · รอบที่พัก</div>
     <h1 data-i18n="atr.title">เที่ยวอะไรใกล้ House of Happiness</h1>
-    <p class="sub" data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p>
     <div class="ld-facts">
       <span data-i18n="atr.f1">🚶 4 จุด เดินถึง / BTS สายสีทอง</span>
       <span data-i18n="atr.f2">🚕 5 จุด เมืองเก่า ~10–15 นาที</span>
@@ -98,6 +104,7 @@
   </div>
   <span class="credit"><span data-i18n="prov.stock">ภาพประกอบ · Wikimedia Commons</span> · <a href="credits.html">credits</a></span>
 </header>
+<div class="ld-intro"><p class="lead" data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p></div>
 
 <div class="atr-wrap">
 
@@ -114,6 +121,15 @@
     <a class="btn btn-outline" style="color:var(--dark); border-color:var(--gold); background:transparent; margin-right:0.6rem" href="guides.html" data-i18n="nav.guides">ไกด์เที่ยว &amp; บทความ</a>
     <a class="btn btn-gold" href="booking.html" data-i18n="atr.book">จองห้องพักกับเรา</a>
   </div>
+
+  <section class="ld-sec">
+    <h2 data-i18n="rel.t">ไกด์ที่เกี่ยวกัน</h2>
+    <div class="ld-rooms">
+      <a class="ld-room" href="heritage-walk.html"><picture><source type="image/webp" srcset="images/attractions/yaowarat-800.webp 800w, images/attractions/yaowarat.webp 960w" sizes="(max-width: 760px) 100vw, 280px"><img src="images/attractions/yaowarat.jpg" alt="ตึกแถวเก่าย่านเยาวราช ห่างจากถนนทรงวาดไม่กี่ร้อยเมตร" data-i18n="ph.yaowarat" data-i18n-attr="alt" width="960" height="721" loading="lazy" decoding="async"></picture><span class="b"><span class="nm">🏮 <span data-i18n="rel.atrx.1t">เดินเที่ยวมรดกไชน่าทาวน์ครึ่งวัน</span></span><span class="pr" data-i18n="rel.atrx.1d">ร้อยจุดเหล่านี้เข้าด้วยกันเป็นเส้นทางเดียว</span></span></a>
+      <a class="ld-room" href="three-temples-boat.html"><picture><source type="image/webp" srcset="images/attractions/watarun-800.webp 800w, images/attractions/watarun.webp 960w" sizes="(max-width: 760px) 100vw, 280px"><img src="images/attractions/watarun.jpg" alt="พระปรางค์วัดอรุณประดับกระเบื้องเคลือบ ริมแม่น้ำเจ้าพระยา" data-i18n="ph.watarun" data-i18n-attr="alt" width="960" height="640" loading="lazy" decoding="async"></picture><span class="b"><span class="nm">🛕 <span data-i18n="rel.atrx.2t">3 วัดด้วยเรือ</span></span><span class="pr" data-i18n="rel.atrx.2d">วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร ต่อกันด้วยเรือ</span></span></a>
+      <a class="ld-room" href="getting-around-bangkok.html"><picture><source type="image/webp" srcset="images/attractions/skypark-800.webp 800w, images/attractions/skypark.webp 960w" sizes="(max-width: 760px) 100vw, 280px"><img src="images/attractions/skypark.jpg" alt="สะพานข้ามเจ้าพระยาและสวนลอยฟ้าเจ้าพระยา มองจากกลางแม่น้ำ" data-i18n="ph.skypark" data-i18n-attr="alt" width="960" height="720" loading="lazy" decoding="async"></picture><span class="b"><span class="nm">🚈 <span data-i18n="rel.atrx.3t">เดินทางในกรุงเทพจากคลองสาน</span></span><span class="pr" data-i18n="rel.atrx.3d">เลือกรถไฟฟ้า เรือ หรือรถ ให้ถูกจังหวะ</span></span></a>
+    </div>
+  </section>
 
 </div>
 
@@ -145,6 +161,9 @@
 }
 </script>
 
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Article", "headline": "เที่ยวอะไรใกล้ House of Happiness", "description": "9 จุดเที่ยวหลักใกล้ House of Happiness คลองสาน: สวนลอยฟ้าเจ้าพระยา ICONSIAM วัดอรุณ เยาวราช กุฎีจีน พร้อมระยะทางและปุ่มนำทางจากที่พัก", "datePublished": "2026-09-12", "dateModified": "2026-09-19", "author": {"@type": "Organization", "name": "House of Happiness"}, "publisher": {"@type": "Organization", "name": "House of Happiness", "url": "https://houseofhappinessbangkok.com/"}, "inLanguage": "th", "about": [{"@type": "Place", "name": "Chao Phraya Sky Park"}, {"@type": "Place", "name": "ICONSIAM"}, {"@type": "Place", "name": "Wat Arun"}, {"@type": "Place", "name": "Wat Pho"}, {"@type": "Place", "name": "Yaowarat Road"}, {"@type": "Place", "name": "Kudi Chin"}], "mainEntityOfPage": "https://houseofhappinessbangkok.com/attractions.html", "image": "https://houseofhappinessbangkok.com/images/attractions/grandpalace.jpg"}
+</script>
 <script src="assets/i18n.js"></script>
 <script src="assets/ui.js"></script>
 <script>
@@ -174,8 +193,9 @@ function card(a){
   return `<article class="atr-card">
     <div class="atr-img">
       <span class="ph">✦</span>
+      <picture><source type="image/webp" srcset="images/attractions/${a.slug}.webp">
       <img src="images/attractions/${a.slug}.jpg" alt="${a.dest}" width="960" height="600" loading="lazy" decoding="async"
-           onerror="this.remove()">
+           onerror="this.remove()"></picture>
     </div>
     <div class="atr-body">
       <h3 data-i18n="atr.${a.slug}.n"></h3>

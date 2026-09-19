@@ -2,14 +2,20 @@
   "name": "houseofhapiness",
   "private": true,
   "description": "House of Happiness Bangkok — เว็บไซต์ + หลังบ้าน (Vercel functions)",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "test": "node tests/availability.test.js && node tests/update.test.js && node tests/order.test.js && node tests/booking-email-parser.test.js && node tests/deployment.test.js && node tests/site.test.js && node tests/store.test.js"
+    "test": "node tests/availability.test.js && node tests/update.test.js && node tests/order.test.js && node tests/booking-email-parser.test.js && node tests/deployment.test.js && node tests/site.test.js && node tests/store.test.js && node tests/en-pages.test.js && node scripts/build-en.mjs --check && node scripts/build-sitemap.mjs --check",
+    "build:en": "node scripts/build-en.mjs && node scripts/build-sitemap.mjs",
+    "build:images": "python3 tools/make-webp.py && node tools/wrap-picture.js && node tools/sync-image-dims.js",
+    "build:pages": "node tools/add-places.js && node tools/related-images.js && node tools/stamp-updated.js && npm run build:en"
   },
   "dependencies": {
     "pg": "^8.13.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.3.0"
+    "@electric-sql/pglite": "^0.3.0",
+    "jsdom": "^30.1.0"
   }
 }

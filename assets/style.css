@@ -40,6 +40,12 @@ body {
 }
 h1, h2, h3 { font-family: var(--font-head); }
 img { max-width: 100%; }
+/* attribute hidden ต้องชนะกฎ display ของ class เสมอ
+   ไม่งั้นของที่สั่งซ่อนจะเหลือเป็นกล่องว่างค้างอยู่กลางหน้า (เจอมาแล้วกับ .gd-fest และ .rs-bar) */
+[hidden] { display: none !important; }
+/* <picture> เป็นแค่ตัวห่อให้เบราว์เซอร์เลือกไฟล์ .webp ที่เล็กกว่า
+   display:contents ทำให้มันไม่สร้างกล่องของตัวเอง เลย์เอาต์ของ <img> ข้างในจึงเหมือนเดิมทุกที่ */
+picture { display: contents; }
 
 /* ── Top navigation ── */
 .topnav {
@@ -113,7 +119,7 @@ img { max-width: 100%; }
   .topnav .brand { min-width: 0; gap: 0.25rem; font-size: 0.92rem; }
   .topnav .brand .logo { font-size: 1rem; }
   .topnav .nav-right { gap: 0.4rem; }
-  .lang-toggle button { padding: 0.3rem 0.55rem; }
+  .lang-toggle button, .lang-toggle a { padding: 0.3rem 0.55rem; }
   .topnav .nav-right > .btn { display: none; }
 }
 
@@ -125,8 +131,12 @@ img { max-width: 100%; }
   overflow: hidden;
   background: #fff;
 }
-.lang-toggle button {
+/* หน้าใน /en/ ใช้ <a> แทน <button> เพราะสลับภาษา = ไปอีก URL ไม่ใช่สลับในหน้า */
+.lang-toggle button, .lang-toggle a {
   background: transparent;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
   color: #7a6a58;
   border: none;
   padding: 0.3rem 0.8rem;
@@ -135,7 +145,7 @@ img { max-width: 100%; }
   cursor: pointer;
   transition: background 0.15s ease;
 }
-.lang-toggle button.active { background: var(--gold); color: var(--on-dark); font-weight: 700; }
+.lang-toggle button.active, .lang-toggle a.active { background: var(--gold); color: var(--on-dark); font-weight: 700; }
 
 /* ── Buttons ── */
 .btn {
@@ -537,6 +547,63 @@ footer.site a:hover { color: #f5d9b8; text-decoration: underline; }
 
 /* ── Nav active state (scrollspy) ── */
 .navlinks a.active { color: var(--gold); font-weight: 600; }
+
+
+/* ── จุดบนแผนที่ท้ายบทความ ── */
+.ld-pl { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .3rem; }
+.ld-pl a { display: inline-flex; align-items: center; gap: .3rem; text-decoration: none;
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: .35rem .85rem; font-size: .88rem; color: var(--text); transition: border-color .15s ease; }
+.ld-pl a:hover { border-color: var(--gold); color: var(--dark); }
+.ld-plroute { display: inline-block; margin-top: .9rem; font-family: "Prompt", sans-serif;
+  font-size: .9rem; color: var(--gold-dark); text-decoration: none; border-bottom: 1px solid var(--gold); }
+.ld-plroute:hover { color: var(--dark); }
+
+/* ── บรรทัดผู้เขียนและวันที่ปรับปรุง ── */
+.ld-stamp { margin: 2.2rem auto 0; max-width: 880px; padding: .9rem 1.2rem 0;
+  border-top: 1px solid var(--line); font-size: .82rem; color: var(--muted); }
+
+/* ── สารบัญ (สร้างจาก ui.js เมื่อหน้ามีหัวข้อ h2 ตั้งแต่ 4 อันขึ้นไป) ── */
+.ld-toc { max-width: 880px; margin: 1.4rem auto 0; padding: 0 1.2rem; }
+.ld-toc > div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: .9rem 1.1rem; }
+.ld-toc .h { font-family: "Prompt", sans-serif; font-size: .78rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gold-dark); margin-bottom: .5rem; }
+.ld-toc ol { margin: 0; padding-left: 1.2rem; }
+.ld-toc li { margin: .2rem 0; }
+.ld-toc a { color: var(--text); text-decoration: none; font-size: .92rem; line-height: 1.6; }
+.ld-toc a:hover { color: var(--gold-dark); text-decoration: underline; }
+@media (max-width: 640px) { .ld-toc { padding: 0 1.1rem; } .ld-toc a { font-size: .88rem; } }
+
+/* ── แถบปุ่มท้ายจอของหน้าบทความ (สร้างจาก ui.js) ── */
+.ld-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  display: none; gap: .6rem;
+  padding: .6rem .9rem calc(.6rem + env(safe-area-inset-bottom));
+  background: rgba(255, 252, 246, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1.5px solid var(--line);
+  box-shadow: 0 -6px 20px rgba(62,47,35,0.08);
+  transform: translateY(100%);
+  transition: transform .22s ease;
+}
+.ld-bar .btn { flex: 1; text-align: center; }
+.ld-bar .bar-line { background: #06C755; color: #fff; border-color: #06C755; }
+.ld-bar.show { transform: none; }
+@media (max-width: 640px) { .ld-bar { display: flex; } }
+@media (prefers-reduced-motion: reduce) { .ld-bar { transition: none; } }
+
+
+/* ── ส่วนไกด์เที่ยวในหน้าแรก ── */
+.hg-lead { text-align: center; color: var(--muted); max-width: 44em; margin: 0 auto 1.4rem; line-height: 1.7; }
+.hg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.hg-card { display: block; text-decoration: none; color: inherit; background: var(--card);
+  border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.hg-card:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 14px 32px rgba(62,47,35,.14); }
+.hg-card img { width: 100%; height: auto; aspect-ratio: 16/10; object-fit: cover; display: block; }
+.hg-card .b { display: block; padding: .9rem 1rem 1.1rem; }
+.hg-card .t { display: block; font-family: "Prompt", sans-serif; font-size: .98rem; color: var(--dark); line-height: 1.4; }
+.hg-card .d { display: block; font-size: .84rem; color: var(--muted); line-height: 1.6; margin-top: .3rem; }
 
 /* ── Sticky mobile booking bar (index) ── */
 .sticky-cta {
@@ -1104,11 +1171,14 @@ img[src$="attractions/iconsiam.jpg"] { object-position: center bottom; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* ── Reveal animation ── */
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.reveal.visible { opacity: 1; transform: none; }
+/* ซ่อนไว้ก่อนเฉพาะตอนที่ JS ทำงานจริง (html.js) — ถ้าสคริปต์โหลดไม่ขึ้น
+   เนื้อหาต้องเห็นทุกบล็อก ห้ามมีหน้าว่างเพราะแอนิเมชันไม่ทำงาน */
+html.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+/* ต้องเจาะจงเท่ากับกฎที่ซ่อน (html.js .reveal) ไม่งั้นกฎซ่อนจะชนะ แล้วไม่มีอะไรโผล่เลย */
+html.js .reveal.visible { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  html.js .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .room-card, .gallery img { transition: none; }
 }
 
@@ -1510,6 +1580,16 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 .ld-hero.cover .sub { color: rgba(255,248,239,.9); margin: 0; max-width: 46em; }
 .ld-hero.cover .ld-facts { justify-content: flex-start; margin-top: 1.1rem; }
 .ld-hero.cover .ld-facts span { background: rgba(255,248,239,.14); border-color: rgba(255,248,239,.38); color: #fff8ef; backdrop-filter: blur(6px); }
+/* ย่อหน้านำ — ย้ายออกมาจากใน hero เพราะบนมือถือมันดัน h1 กับชิปตกจอไปหมด
+   อยู่ตรงนี้อ่านง่ายกว่า และทำให้เริ่มอ่านเนื้อหาได้ภายในการเลื่อนครั้งเดียว */
+.ld-intro { max-width: 880px; margin: 0 auto; padding: 1.6rem 1.2rem 0; }
+.ld-intro .lead { font-size: 1.06rem; line-height: 1.8; color: var(--text);
+  border-left: 3px solid var(--gold); padding-left: 1rem; margin: 0; }
+@media (max-width: 640px) {
+  .ld-intro { padding: 1.2rem 1.1rem 0; }
+  .ld-intro .lead { font-size: 1rem; line-height: 1.75; padding-left: .8rem; }
+}
+
 .ld-hero.cover .credit { position: absolute; right: 12px; bottom: 8px; z-index: 1; font-size: .64rem; color: rgba(255,248,239,.62); }
 .ld-hero.cover .credit a { color: inherit; }
 /* เนื้อหา */
@@ -1540,7 +1620,14 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 .copy-box .addr { font-size: 1.12rem; line-height: 1.85; }
 .copy-box .addr b { font-family: "Prompt", sans-serif; font-size: 1.2rem; color: var(--gold-dark); }
 @media (max-width: 640px) {
-  .ld-hero.cover { border-radius: 0 0 20px 20px; min-height: 320px; }
+  .ld-hero.cover { border-radius: 0 0 20px 20px; min-height: 360px; max-height: 70vh; }
+  /* เว้นที่ให้บรรทัดเครดิตภาพมุมขวาล่าง ไม่ให้ทับรางชิป */
+  .ld-hero.cover .in { padding-bottom: 2.4rem; }
+  /* ชิปข้อเท็จจริงเป็นรางเลื่อนแนวนอน — เก็บข้อมูลไว้ครบโดยไม่กิน 4 บรรทัดของจอ */
+  .ld-hero.cover .ld-facts { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    margin-left: -1.1rem; margin-right: -1.1rem; padding: 0 1.1rem; scroll-snap-type: x proximity; }
+  .ld-hero.cover .ld-facts::-webkit-scrollbar { display: none; }
+  .ld-hero.cover .ld-facts span { flex: 0 0 auto; scroll-snap-align: start; }
   .ld-hero.cover .in { padding: 1.6rem 1.1rem 1.5rem; }
   .ld-hero.cover h1 { font-size: 1.7rem; }
   .ld-steps li { padding: .85rem .9rem .85rem 3.1rem; }

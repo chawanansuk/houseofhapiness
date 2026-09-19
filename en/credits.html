@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add("js");</script>
+<title>Photo Credits — House of Happiness Bangkok</title>
+<meta name="description" content="Attribution and licences for the attraction photos used on this site.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="canonical" href="https://houseofhappinessbangkok.com/en/credits.html">
+
+
+
+<meta property="og:title" content="Photo Credits — House of Happiness Bangkok">
+<meta property="og:description" content="Attribution and licences for the attraction photos used on this site.">
+<meta property="og:image" content="https://houseofhappinessbangkok.com/images/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/og.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/i18n.js" defer=""></script>
+<script src="/assets/ui.js" defer=""></script>
+<link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/credits.html"><link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/credits.html"><link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/credits.html"><meta property="og:locale" content="en_US"><script>window.HOH_LANG = "en";</script></head>
+<body>
+
+<nav class="topnav">
+  <a class="brand" href="/en/index.html"><span class="logo">🏠</span> House of Happiness</a>
+  <div class="navlinks">
+    <a href="/en/guides.html">Guides &amp; articles</a>
+    <a href="/en/attractions.html">Things to Do near House of Happiness</a>
+    <a href="/en/index.html">← Back to home</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle"><a href="/credits.html" hreflang="th">ไทย</a><a class="active" aria-current="true" href="/en/credits.html" hreflang="en">EN</a></div>
+  </div>
+</nav>
+
+<div class="cr-wrap">
+  <h1>Photo credits</h1>
+  <p class="cr-lead">The attraction photos on this site come from Wikimedia Commons and are used under Creative Commons licences, which require the photographer and licence to be named. All room and building photos are our own.</p>
+
+  <div class="atr-credits" id="creditsBox" hidden="">
+    <ul id="creditsList"></ul>
+  </div>
+  <p class="cr-lead" id="creditsEmpty" hidden="">No photos currently require attribution.</p>
+
+  <p class="cr-lead"><a href="/en/attractions.html">← Back to things to do nearby</a></p>
+</div>
+
+<footer class="site">
+  <div class="foot-bottom">© House of Happiness · Khlong San, Bangkok · <a href="/en/index.html" style="color:inherit">houseofhappinessbangkok.com</a></div>
+</footer>
+
+<script>
+// เครดิตรูปตามสัญญา CC — สร้างจาก credits.json ไฟล์เดียวกับที่ระบบใช้ตอน build
+fetch("/images/attractions/credits.json")
+  .then((r) => r.ok ? r.json() : [])
+  .then((list) => {
+    const box = document.getElementById("creditsBox");
+    if (!Array.isArray(list) || !list.length) {
+      document.getElementById("creditsEmpty").hidden = false;
+      return;
+    }
+    box.hidden = false;
+    document.getElementById("creditsList").innerHTML = list.map((c) =>
+      `<li><a href="${c.filePage}" target="_blank" rel="noopener">${c.file}</a>` +
+      `${c.artist ? " — " + c.artist.replace(/</g, "&lt;") : ""} · ${String(c.license).replace(/</g, "&lt;")}</li>`
+    ).join("");
+  })
+  .catch(() => { document.getElementById("creditsEmpty").hidden = false; });
+</script>
+
+
+
+</body></html>

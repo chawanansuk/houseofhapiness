@@ -216,3 +216,232 @@ console.log("SITE TESTS PASSED");
   assert.match(ui, /details\.m-fold\[open\]"\)\.forEach\(\(d\) => d\.removeAttribute\("open"\)\)/, "ui.js closes folds on mobile");
   for (const k of ["rail.cue", "rail.cue2", "loc.foldmap", "gh.fold"]) assert.match(i18n, new RegExp(`"${k.replace(".", "\\.")}":\\s*\\{ th: "[^"]+", en: "[^"]+" \\}`), "i18n key " + k);
 }
+
+// ── รูปภาพ: ทุก <img> ที่ชี้ .jpg ต้องมี .webp คู่กันและถูกห่อด้วย <picture> ──
+// กันไม่ให้มีคนเพิ่มรูปใหม่แล้วลืมสร้าง WebP (node tools/make-webp.js ทำให้อัตโนมัติ)
+{
+  const htmlFiles = fs.readdirSync(root).filter((f) => f.endsWith(".html"));
+  let wrapped = 0;
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    const re = /<img\b[^>]*\bsrc="(images\/[^"]+\.jpg)"[^>]*>/g;
+    let m;
+    while ((m = re.exec(raw))) {
+      const jpg = m[1];
+      if (jpg.includes("${")) continue; // สร้างจาก JS — เช็กด้วยเทสต์อื่น
+      const webp = jpg.replace(/\.jpg$/, ".webp");
+      assert.ok(fs.existsSync(path.join(root, webp)), `${f}: ${jpg} ยังไม่มีไฟล์ ${webp} — รัน python3 tools/make-webp.py`);
+      const before = raw.slice(Math.max(0, m.index - 260), m.index);
+      assert.ok(/<picture\b[^>]*>\s*(<source[^>]*>\s*)+$/.test(before),
+        `${f}: <img src="${jpg}"> ต้องอยู่ใน <picture> พร้อม <source type="image/webp">`);
+      wrapped++;
+    }
+  }
+  assert.ok(wrapped >= 100, `คาดว่ามีรูปที่ห่อ <picture> อย่างน้อย 100 รูป แต่เจอ ${wrapped}`);
+  // ทุกไฟล์ที่อ้างใน srcset ต้องมีจริง — ถ้า <source> โหลดไม่ได้ เบราว์เซอร์จะไม่ถอยไปใช้ <img> ให้
+  for (const f of htmlFiles) {
+    for (const m of read(f).matchAll(/srcset="([^"]+)"/g)) {
+      for (const cand of m[1].split(",")) {
+        const url = cand.trim().split(/\s+/)[0];
+        if (!url || url.includes("${")) continue;
+        assert.ok(fs.existsSync(path.join(root, url)), `${f}: srcset ชี้ไปที่ ${url} ซึ่งไม่มีไฟล์จริง`);
+      }
+    }
+  }
+  assert.match(read("assets/style.css"), /picture \{ display: contents; \}/,
+    "ต้องมี picture { display: contents; } ไม่งั้นตัวห่อจะดันเลย์เอาต์");
+  // hero ต้องมีคำอธิบายรูปสองภาษา ไม่ใช่ alt=""
+  const i18nSrc = read("assets/i18n.js");
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    const hero = raw.match(/<img class="bg"[^>]*>/) || raw.match(/<img[^>]*class="bg"[^>]*>/);
+    if (!hero || !/images\/attractions\//.test(hero[0])) continue;
+    const key = (hero[0].match(/data-i18n="(ph\.[a-z]+)"/) || [])[1];
+    assert.ok(key, `${f}: hero ต้องมี data-i18n="ph.*" สำหรับ alt สองภาษา`);
+    assert.ok(new RegExp(`"${key.replace(".", "\\.")}":`).test(i18nSrc), `i18n.js ขาดคีย์ ${key}`);
+    assert.match(hero[0], /data-i18n-attr="alt"/, `${f}: hero ต้องมี data-i18n-attr="alt"`);
+  }
+}
+console.log("IMAGE PIPELINE TESTS PASSED");
+
+// ── Phase 2: UX ทั้งเว็บ ──
+{
+  const htmlFiles = fs.readdirSync(root).filter((f) => f.endsWith(".html"));
+  const css = read("assets/style.css"), ui = read("assets/ui.js"), i18n = read("assets/i18n.js");
+
+  // 1) เนื้อหาต้องไม่หายถ้า JS ไม่ทำงาน
+  // attribute hidden ต้องชนะกฎ display ของ class ไม่งั้นของที่สั่งซ่อนจะเหลือเป็นกล่องว่างค้างจอ
+  assert.match(css, /\[hidden\] \{ display: none !important; \}/,
+    "style.css ต้องมีกฎ [hidden] { display: none !important } ครอบทั้งเว็บ");
+  assert.match(css, /html\.js \.reveal \{ opacity: 0;/,
+    ".reveal ต้องถูกซ่อนเฉพาะตอน html มีคลาส js ไม่งั้น JS พังแล้วหน้าจะว่าง");
+  assert.ok(!/^\.reveal \{ opacity: 0;/m.test(css), "ห้ามมีกฎ .reveal ที่ซ่อนเนื้อหาโดยไม่ดูว่า JS ทำงานไหม");
+  // กฎที่ทำให้โผล่ต้องเจาะจงเท่ากฎที่ซ่อน ไม่งั้นกฎซ่อนชนะแล้วทั้งเว็บไม่มีอะไรโผล่เลย
+  assert.match(css, /html\.js \.reveal\.visible \{ opacity: 1;/,
+    "กฎ .visible ต้องขึ้นต้นด้วย html.js ให้ specificity เท่ากับกฎที่ซ่อน");
+  assert.ok(!/^\.reveal\.visible \{/m.test(css), "ห้ามเหลือกฎ .reveal.visible ที่ specificity ต่ำกว่ากฎซ่อน");
+  for (const f of htmlFiles) {
+    assert.match(read(f), /<script>document\.documentElement\.classList\.add\("js"\);<\/script>/,
+      `${f}: ต้องมีสคริปต์บรรทัดเดียวใน <head> ที่ใส่คลาส js`);
+  }
+  assert.match(ui, /rootMargin: "220px 0px"/, "observer ต้องเริ่มแสดงก่อนถึงจอ");
+  assert.match(ui, /if \(!fired\) showAll\(\)/, "ต้องมีตัวจับว่า observer ไม่เคยทำงาน");
+
+  // 2) ลิงก์ไกด์ต้องอยู่ในเมนูบนของทุกหน้า (ยกเว้นหน้าไกด์เองกับ 404)
+  for (const f of htmlFiles) {
+    if (f === "guides.html" || f === "404.html") continue;
+    const nav = (read(f).match(/<div class="navlinks">[\s\S]*?<\/div>/) || [""])[0];
+    assert.match(nav, /href="guides\.html"/, `${f}: เมนูบนต้องมีลิงก์ไปหน้ารวมไกด์`);
+  }
+  assert.match(ui, /href="guides\.html" data-i18n="nav\.guides"/, "เมนู ☰ มือถือต้องมีลิงก์ไกด์");
+
+  // 3) hero มือถือต้องไม่กินจอ และย่อหน้านำต้องย้ายออกมานอก hero แล้ว
+  assert.match(css, /\.ld-hero\.cover \{ border-radius: 0 0 20px 20px; min-height: 360px; max-height: 70vh; \}/,
+    "hero บนมือถือต้องสูงไม่เกิน 70vh");
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    if (!raw.includes('<header class="ld-hero cover">')) continue;
+    const head = raw.slice(raw.indexOf('<header class="ld-hero cover">'), raw.indexOf("</header>"));
+    assert.ok(!/<p class="sub"/.test(head), `${f}: ย่อหน้านำต้องอยู่นอก hero (ใน .ld-intro)`);
+    assert.match(raw, /<div class="ld-intro"><p class="lead"/, `${f}: ต้องมี .ld-intro ต่อจาก hero`);
+  }
+
+  // 4) แถบปุ่มติดขอบล่างของหน้าบทความ
+  assert.match(ui, /bar\.className = "ld-bar"/, "ui.js ต้องสร้างแถบปุ่มให้หน้าบทความ");
+  assert.match(ui, /page === "booking\.html"/, "หน้า booking ไม่ต้องมีแถบซ้ำ");
+  assert.match(ui, /ctaIn = e\.isIntersecting/, "แถบต้องหลบให้ปุ่ม CTA ท้ายบทความ");
+  assert.match(css, /@media \(max-width: 640px\) \{ \.ld-bar \{ display: flex; \} \}/, "แถบนี้เฉพาะมือถือ");
+  for (const k of ["sb.rates", "sb.line"]) {
+    assert.ok(new RegExp(`"${k.replace(".", "\\.")}":`).test(i18n), `i18n.js ขาดคีย์ ${k}`);
+  }
+
+  // 5) หัวข้อกลุ่มในหน้า attractions ห้าม nowrap บนจอแคบ (ภาษาอังกฤษยาวกว่าไทยจนหน้าเลื่อนได้)
+  assert.match(read("attractions.html"), /@media \(max-width:640px\)\{\.atr-group h2\{white-space:normal\}\}/,
+    "attractions.html ต้องปล่อยให้หัวข้อตัดบรรทัดบนมือถือ");
+}
+console.log("UX TESTS PASSED");
+
+// ── Phase 3: หน้ารวมไกด์ + ส่วนไกด์ในหน้าแรก ──
+{
+  const gd = read("guides.html");
+  // เลขนับต้องมาจาก DOM ไม่ใช่พิมพ์ทิ้งไว้
+  assert.ok(!/<span class="cnt">\d/.test(gd), "guides.html ห้ามมีเลขนับคงที่ใน HTML — ให้ JS นับจากการ์ดจริง");
+  assert.match(gd, /cnt\.textContent = String\(n\)/, "ต้องมีโค้ดเขียนเลขนับจากจำนวนการ์ดจริง");
+  assert.equal((gd.match(/<section class="gd-sec" data-cat="/g) || []).length, 5, "หมวดไกด์ 5 หมวด ต้องมี data-cat ครบ");
+  const cards = (gd.match(/<a class="gd-card"/g) || []).length + (gd.match(/<a class="gd-feat"/g) || []).length;
+  assert.ok(cards >= 24, `คาดว่ามีการ์ดไกด์อย่างน้อย 24 ใบ เจอ ${cards}`);
+  // ข้อความจำนวนไกด์ต้องตรงกับจำนวนการ์ดในหมวดจริง (ไม่นับการ์ดรูมเซอร์วิส)
+  const inCats = [...gd.matchAll(/<section class="gd-sec" data-cat="[^"]+">([\s\S]*?)<\/section>/g)]
+    .reduce((n, m) => n + (m[1].match(/<a class="gd-card"/g) || []).length, 0) + 1;
+  assert.ok(new RegExp(`✍️ ${inCats} ไกด์`).test(gd), `ข้อความสถิติต้องบอก ${inCats} ไกด์ ให้ตรงกับการ์ดจริง`);
+  const pracSec = (gd.match(/<section class="gd-sec" data-cat="prac">([\s\S]*?)<\/section>/) || [])[1] || "";
+  assert.ok(pracSec && !pracSec.includes("services.html"), "รูมเซอร์วิสต้องไม่อยู่ในหมวดไกด์แล้ว");
+  assert.match(gd, /<section class="gd-rs" id="gdRs">/, "ต้องมีบล็อกรูมเซอร์วิสแยกท้ายหน้า");
+  assert.match(gd, /id="gdFilter"/, "ต้องมีแถบตัวกรอง");
+  assert.match(gd, /id="gdSearch"/, "ต้องมีช่องค้นหา");
+  assert.match(gd, /id="gdStart"/, "ต้องมีบล็อก เริ่มจาก 3 อันนี้");
+  assert.match(gd, /id="gdFest"/, "ต้องมีแถบเทศกาล");
+  assert.match(gd, /class="gd-ask-map"/, "กล่องถามต้องมีแผนที่วาดมือ");
+  assert.equal((gd.match(/data-f="/g) || []).length, 6, "ปุ่มกรอง 6 ปุ่ม (ทั้งหมด + 5 หมวด)");
+
+  // festivals.json ต้องอ่านได้ และทุกวันที่ที่ยังไม่ยืนยันต้องมีโน้ต TODO-OWNER
+  const fest = JSON.parse(read("assets/festivals.json"));
+  assert.ok(Array.isArray(fest.festivals) && fest.festivals.length, "festivals.json ต้องมีรายการ");
+  for (const f of fest.festivals) {
+    assert.ok(f.id && f.slug && f.label && f.label.th && f.label.en, `festival ${f.id} ข้อมูลไม่ครบ`);
+    assert.ok(fs.existsSync(path.join(root, f.slug)), `festival ${f.id} ชี้ไปหน้า ${f.slug} ที่ไม่มีอยู่`);
+    if (!f.confirmed) assert.match(f.todo, /TODO-OWNER/, `festival ${f.id} ยังไม่ยืนยัน ต้องมีโน้ต TODO-OWNER`);
+    if (f.start) assert.match(f.start, /^\d{4}-\d{2}-\d{2}$/, `festival ${f.id} รูปแบบวันที่ผิด`);
+  }
+
+  // หน้าแรกต้องมีส่วนไกด์ + ลิงก์ไปหน้ารวม
+  const idx = read("index.html");
+  assert.match(idx, /<section id="guides" class="reveal">/, "หน้าแรกต้องมีส่วนไกด์เที่ยว");
+  assert.equal((idx.match(/<a class="hg-card"/g) || []).length, 3, "ส่วนไกด์ในหน้าแรกมี 3 การ์ด");
+  assert.match(idx, /href="guides\.html" data-i18n="hg\.all"/, "ต้องมีปุ่มไปหน้ารวมไกด์");
+}
+console.log("GUIDES HUB TESTS PASSED");
+
+// ── Phase 4: เทมเพลตบทความ ──
+{
+  const htmlFiles = fs.readdirSync(root).filter((f) => f.endsWith(".html"));
+  const ui = read("assets/ui.js"), css = read("assets/style.css"), i18n = read("assets/i18n.js");
+
+  // สารบัญสร้างจาก ui.js และผูก id กับคีย์ภาษา ไม่ใช่ข้อความ (สลับภาษาแล้วลิงก์ต้องไม่พัง)
+  assert.match(ui, /nav\.className = "ld-toc"/, "ui.js ต้องสร้างสารบัญ");
+  assert.match(ui, /heads\.length < 4/, "สารบัญขึ้นเฉพาะหน้าที่มีหัวข้อ 4 อันขึ้นไป");
+  assert.match(ui, /h\.id = "s-" \+ \(\(h\.dataset\.i18n/, "id หัวข้อต้องมาจากคีย์ภาษา");
+  assert.match(css, /\.ld-toc \{/, "ต้องมีสไตล์สารบัญ");
+
+  // ทุกหน้าบทความต้องมีบรรทัดผู้เขียน + วันที่ และวันที่ต้องเป็น ISO ใน datetime
+  const articlePages = htmlFiles.filter((f) => read(f).includes('<div class="ld-wrap">'));
+  assert.ok(articlePages.length >= 25, `คาดว่ามีหน้าบทความอย่างน้อย 25 หน้า เจอ ${articlePages.length}`);
+  for (const f of articlePages) {
+    const raw = read(f);
+    assert.match(raw, /<p class="ld-stamp">/, `${f}: ต้องมีบรรทัดผู้เขียน/วันที่ปรับปรุง`);
+    assert.match(raw, /<time datetime="\d{4}-\d{2}-\d{2}">/, `${f}: วันที่ต้องอยู่ในรูป ISO ใน datetime`);
+  }
+  assert.match(ui, /MON_TH = \["ม\.ค\."/, "ต้องแปลงวันที่เป็นรูปแบบไทย (พ.ศ.) ตอนแสดงผล");
+
+  // บล็อกจุดบนแผนที่: ทุกลิงก์ต้องเป็น Google Maps API url และชื่อสถานที่ต้องมาจาก schema ของหน้านั้น
+  let placePages = 0;
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    if (!raw.includes('class="ld-sec ld-places"')) continue;
+    placePages++;
+    const schema = [...raw.matchAll(/<script type="application\/ld\+json">\s*(\{[\s\S]*?\})\s*<\/script>/g)]
+      .map((m) => { try { return JSON.parse(m[1]); } catch (e) { return null; } })
+      .find((d) => d && d["@type"] === "Article");
+    assert.ok(schema && Array.isArray(schema.about), `${f}: บล็อกแผนที่ต้องมี schema Article ที่มี about`);
+    const declared = new Set(schema.about.filter((a) => a["@type"] === "Place").map((a) => a.name));
+    for (const m of raw.matchAll(/<a href="(https:\/\/www\.google\.com\/maps\/search[^"]+)" target="_blank" rel="noopener">📍 ([^<]+)<\/a>/g)) {
+      assert.ok(declared.has(m[2]), `${f}: ชื่อสถานที่ "${m[2]}" ไม่ได้ประกาศไว้ใน schema — ห้ามตั้งเอง`);
+    }
+    assert.match(raw, /class="ld-plroute" href="https:\/\/www\.google\.com\/maps\/dir\/\?api=1&origin=/,
+      `${f}: ต้องมีลิงก์เปิดเส้นทางทั้งหมด`);
+    assert.ok(!/@-?\d+\.\d+,/.test(raw.match(/class="ld-plroute" href="([^"]+)"/)[1]),
+      `${f}: ห้ามฝังพิกัดที่ไม่ได้ตรวจสอบในลิงก์แผนที่`);
+  }
+  assert.ok(placePages >= 12, `คาดว่ามีหน้าที่มีบล็อกแผนที่อย่างน้อย 12 หน้า เจอ ${placePages}`);
+
+  // ลิงก์ไกด์ที่เกี่ยวกันทุกอันต้องมีรูป และรูปในบล็อกเดียวกันต้องไม่ซ้ำ
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    for (const block of raw.match(/<div class="ld-rooms">[\s\S]*?<\/div>/g) || []) {
+      const seen = new Set();
+      for (const m of block.matchAll(/<a class="ld-room" href="([^"]+)">(<picture>|<img\b)?/g)) {
+        assert.ok(m[2], `${f}: ลิงก์ไกด์ที่เกี่ยวกัน ${m[1]} ยังไม่มีรูป`);
+      }
+      for (const m of block.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)) {
+        assert.ok(!seen.has(m[1]), `${f}: บล็อกไกด์ที่เกี่ยวกันใช้รูป ${m[1]} ซ้ำ`);
+        seen.add(m[1]);
+      }
+    }
+  }
+  // หน้าบทความทุกหน้าต้องไม่เป็นทางตัน
+  for (const f of articlePages) {
+    assert.match(read(f), /<div class="ld-rooms">/, `${f}: ต้องมีบล็อกไกด์ที่เกี่ยวกัน`);
+  }
+
+  // twitter card + Article schema
+  for (const f of htmlFiles) {
+    if (f === "404.html") continue;
+    const raw = read(f);
+    if (!raw.includes('property="og:image"')) continue;
+    assert.match(raw, /<meta name="twitter:card" content="summary_large_image">/, `${f}: ขาด twitter:card`);
+    assert.match(raw, /<meta name="twitter:image"/, `${f}: ขาด twitter:image`);
+  }
+  for (const f of ["airport-guide.html", "attractions.html", "local.html", "loy-krathong.html", "new-year-countdown.html"]) {
+    assert.match(read(f), /"@type": "Article"/, `${f}: ต้องมี schema Article`);
+  }
+  // ld+json ทุกก้อนในเว็บต้อง parse ได้
+  for (const f of htmlFiles) {
+    for (const m of read(f).matchAll(/<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g)) {
+      assert.doesNotThrow(() => JSON.parse(m[1]), `${f}: มี ld+json ที่ parse ไม่ได้`);
+    }
+  }
+  for (const k of ["pl.t", "pl.d", "pl.route", "st.by", "st.on", "toc.t", "rel.t"]) {
+    assert.ok(new RegExp(`"${k.replace(".", "\\.")}":`).test(i18n), `i18n.js ขาดคีย์ ${k}`);
+  }
+}
+console.log("ARTICLE TEMPLATE TESTS PASSED");
