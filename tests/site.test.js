@@ -412,9 +412,19 @@ console.log("GUIDES HUB TESTS PASSED");
       for (const m of block.matchAll(/<a class="ld-room" href="([^"]+)">(<picture>|<img\b)?/g)) {
         assert.ok(m[2], `${f}: ลิงก์ไกด์ที่เกี่ยวกัน ${m[1]} ยังไม่มีรูป`);
       }
-      for (const m of block.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)) {
-        assert.ok(!seen.has(m[1]), `${f}: บล็อกไกด์ที่เกี่ยวกันใช้รูป ${m[1]} ซ้ำ`);
-        seen.add(m[1]);
+      // รูปซ้ำในบล็อกเดียวยอมได้ (หลายไกด์ใช้รูปปกเดียวกันจริง เพราะรูปสถานที่มีแค่ 9 ไฟล์)
+      // แต่รูปผิดเรื่องยอมไม่ได้ — เคยหลุดเป็นรูปเตียงบนการ์ด "เที่ยวเยาวราชกลางคืน" มาแล้ว
+      for (const m of block.matchAll(/<a class="ld-room" href="([^"]+)">(?:<picture><source[^>]*>)?<img\b[^>]*\bsrc="([^"]+)"[^>]*\balt="([^"]*)"/g)) {
+        const [, href, src, alt] = m;
+        // รูปต้องเป็นรูปปกของหน้าปลายทางเอง หรือรูปในคลังภาพประกอบเนื้อหา
+        // (รูปห้องพักที่ติดมาจากบล็อกอื่นในหน้านั้น ไม่นับ)
+        const target = fs.existsSync(path.join(root, href)) ? read(href) : "";
+        const isHeroOfTarget = new RegExp(`<img[^>]*class="[^"]*\\bbg\\b[^"]*"[^>]*src="${src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"|<img[^>]*src="${src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*class="[^"]*\\bbg\\b`).test(target);
+        const isTopical = /^images\/(attractions|local|services)\//.test(src);
+        assert.ok(isHeroOfTarget || isTopical,
+          `${f}: การ์ด ${href} ใช้รูป ${src} ซึ่งไม่ใช่รูปปกของหน้านั้นและไม่ใช่ภาพประกอบเนื้อหา`);
+        assert.ok(alt, `${f}: รูปบนการ์ด ${href} ไม่มีคำอธิบาย`);
+        seen.add(src);
       }
     }
   }

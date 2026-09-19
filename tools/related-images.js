@@ -15,6 +15,13 @@ const check = process.argv.includes("--check");
 const FALLBACK = {
   "local.html": { src: "images/local/krua.webp", alt: "ร้านอาหารใกล้ที่พักในซอยท่าดินแดง", w: "800", h: "824" },
 };
+/* หัวเรื่องของหน้า ใช้เป็นคำอธิบายรูปเวลารูปปกไม่มี alt */
+function headingOf(raw) {
+  const h1 = raw.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
+  if (!h1) return "";
+  return h1[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
 const heroCache = new Map();
 function imagesOf(file) {
   if (heroCache.has(file)) return heroCache.get(file);
@@ -22,8 +29,8 @@ function imagesOf(file) {
   if (!fs.existsSync(p)) { heroCache.set(file, []); return []; }
   if (FALLBACK[file]) { heroCache.set(file, [FALLBACK[file]]); return heroCache.get(file); }
   const raw = fs.readFileSync(p, "utf8");
-  const tags = [...raw.matchAll(/<img\b[^>]*\bsrc="(images\/[^"]+\.(?:jpg|webp))"[^>]*>/g)].map((m) => m[0]);
   const isBg = (t) => /class="[^"]*\bbg\b/.test(t);
+  const tags = [...raw.matchAll(/<img\b[^>]*\bsrc="(images\/[^"]+\.(?:jpg|webp))"[^>]*>/g)].map((m) => m[0]);
   tags.sort((a, b) => (isBg(b) ? 1 : 0) - (isBg(a) ? 1 : 0));   // hero มาก่อน
   const seen = new Set();
   const out = [];
@@ -32,9 +39,22 @@ function imagesOf(file) {
     if (src.includes("${") || seen.has(src)) continue;   // ข้ามรูปที่หน้าปลายทางสร้างจาก JS
     if (!fs.existsSync(path.join(root, src))) continue;
     seen.add(src);
+    // รูปห้องพัก/รูปอาคารของที่พัก ไม่ใช่ภาพประกอบเรื่องของหน้านั้น
+    // (เคยหลุดไปเป็นรูปเตียงบนการ์ด "เที่ยวเยาวราชกลางคืน" มาแล้ว)
+    // รับเฉพาะรูปปกของหน้านั้น หรือรูปที่เป็นเรื่องของหน้านั้นจริง ๆ
+    // ไม่งั้นจะไปหยิบรูปห้องพักที่ติดมาจากบล็อกอื่นในหน้า (เคยหลุดเป็นรูปเตียง
+    // บนการ์ด "เที่ยวเยาวราชกลางคืน" มาแล้ว) — หน้าห้องพักยังใช้รูปปกตัวเองได้ปกติ
+    const bg = isBg(tag);
+    const isTopical = bg || /^images\/(attractions|local|services)\//.test(src);
+    if (!isTopical) continue;
+    // รูปปกของหน้าห้องพักตั้ง alt="" ไว้ (ถูกต้องแล้วเพราะมี h1 ทับอยู่)
+    // พอเอามาใช้บนการ์ด รูปกลายเป็นเนื้อหา จึงต้องมีคำอธิบาย — ใช้ h1 ของหน้านั้น
+    let alt = (tag.match(/\balt="([^"]*)"/) || [, ""])[1];
+    if (!alt && bg) alt = headingOf(raw);
+    if (!alt) continue;
     out.push({
       src,
-      alt: (tag.match(/\balt="([^"]*)"/) || [, ""])[1],
+      alt,
       key: (tag.match(/data-i18n="(ph\.[a-z]+)"/) || [])[1],
       w: (tag.match(/\bwidth="(\d+)"/) || [])[1],
       h: (tag.match(/\bheight="(\d+)"/) || [])[1],
@@ -81,7 +101,13 @@ for (const file of files) {
     return block.replace(/<a class="ld-room" href="([^"]+)">/g, (m, href) => {
       const cands = imagesOf(href);
       if (!cands.length) return m;
-      const pick = cands.find((c) => !used.has(c.src)) || cands[0];
+      // ลำดับความสำคัญ: รูปปกของหน้านั้นก่อนเสมอ เพราะตรงเรื่องที่สุด
+      // ถ้าซ้ำกับการ์ดอื่นในบล็อกเดียวกัน ค่อยหารูปสถานที่อื่นของหน้านั้นแทน
+      // แต่ไม่ลงไปหยิบรูปอาหารรูมเซอร์วิสมาใส่การ์ดไกด์ ยอมให้รูปซ้ำดีกว่ารูปผิดเรื่อง
+      let pick = cands[0];
+      if (used.has(pick.src)) {
+        pick = cands.find((c) => !used.has(c.src) && c.src.startsWith("images/attractions/")) || pick;
+      }
       if (used.has(pick.src)) dup++;
       used.add(pick.src);
       n++;
