@@ -163,15 +163,40 @@ for (const file of [...pages].sort()) {
   forced.textContent = 'window.HOH_LANG = "en";';
   head.appendChild(forced);
 
-  /* 7) schema: ภาษา อังกฤษ และ URL ชี้มาที่หน้านี้ */
+  /* 7) schema: ภาษา อังกฤษ และ URL ชี้มาที่หน้านี้
+        BreadcrumbList เก็บชื่อไว้เป็นข้อความไทย ต้องหาคู่ภาษาอังกฤษจากพจนานุกรมของหน้าเอง
+        ไม่งั้นหน้าอังกฤษจะมี breadcrumb เป็นภาษาไทย ซึ่ง Google เอาไปแสดงใน SERP ตรง ๆ */
+  // ป้าย breadcrumb ชุดคงที่ที่ไม่ได้อยู่ในพจนานุกรมแบบตรงตัว (ตัดคำ/ย่อไว้ต่างกัน)
+  const enNames = {
+    "ไกด์เที่ยว": "Local guides",
+    "ไกด์เที่ยว & บทความ": "Guides & articles",
+    "ที่พักใกล้ ICONSIAM": "Hotel near ICONSIAM",
+    "ที่พักใกล้เยาวราช": "Hotel near Chinatown",
+    "วิธีเดินทางจากสนามบิน": "Getting here from the airport",
+  };
+  for (const item of Object.values(I18N)) {
+    if (item && typeof item.th === "string" && typeof item.en === "string") {
+      const k = item.th.replace(/<[^>]+>/g, "").trim();
+      if (!(k in enNames)) enNames[k] = item.en.replace(/<[^>]+>/g, "").trim();
+    }
+  }
+
+  const enHeading = (doc.querySelector("h1") ? doc.querySelector("h1").textContent : doc.title).replace(/\s+/g, " ").trim();
+  const hasThai = (x) => /[\u0E01-\u0E5B]/.test(x);   // ไม่นับ ฿ (U+0E3F) ซึ่งใช้ในข้อความอังกฤษด้วย
   for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
     let d; try { d = JSON.parse(s.textContent); } catch (e) { continue; }
+    // ป้าย breadcrumb ตัวสุดท้ายคือชื่อหน้านั้นเอง ใช้หัวเรื่องอังกฤษของหน้าได้ตรงที่สุด
+    if (d["@type"] === "BreadcrumbList" && Array.isArray(d.itemListElement)) {
+      const last = d.itemListElement[d.itemListElement.length - 1];
+      if (last && hasThai(last.name || "") && enHeading) last.name = enHeading;
+    }
     const fix = (o) => {
       if (!o || typeof o !== "object") return;
       if (Array.isArray(o)) return o.forEach(fix);
       if (o.inLanguage) o.inLanguage = "en";
       if (typeof o.mainEntityOfPage === "string") o.mainEntityOfPage = o.mainEntityOfPage.replace(`${SITE}/`, `${SITE}/en/`);
       if (typeof o.item === "string" && o.item.startsWith(SITE) && /\.html$/.test(o.item)) o.item = o.item.replace(`${SITE}/`, `${SITE}/en/`);
+      if (o["@type"] === "ListItem" && typeof o.name === "string" && enNames[o.name]) o.name = enNames[o.name];
       if (o["@type"] === "Article") {
         if (o.alternativeHeadline) { o.headline = o.alternativeHeadline; delete o.alternativeHeadline; }
         o.description = enDesc;
