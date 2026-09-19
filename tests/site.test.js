@@ -270,6 +270,9 @@ console.log("IMAGE PIPELINE TESTS PASSED");
   const css = read("assets/style.css"), ui = read("assets/ui.js"), i18n = read("assets/i18n.js");
 
   // 1) เนื้อหาต้องไม่หายถ้า JS ไม่ทำงาน
+  // attribute hidden ต้องชนะกฎ display ของ class ไม่งั้นของที่สั่งซ่อนจะเหลือเป็นกล่องว่างค้างจอ
+  assert.match(css, /\[hidden\] \{ display: none !important; \}/,
+    "style.css ต้องมีกฎ [hidden] { display: none !important } ครอบทั้งเว็บ");
   assert.match(css, /html\.js \.reveal \{ opacity: 0;/,
     ".reveal ต้องถูกซ่อนเฉพาะตอน html มีคลาส js ไม่งั้น JS พังแล้วหน้าจะว่าง");
   assert.ok(!/^\.reveal \{ opacity: 0;/m.test(css), "ห้ามมีกฎ .reveal ที่ซ่อนเนื้อหาโดยไม่ดูว่า JS ทำงานไหม");
