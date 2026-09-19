@@ -48,18 +48,23 @@ const VIEWS = [{ n: "m", width: 390, height: 844 }, { n: "d", width: 1280, heigh
         await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
         await page.waitForTimeout(350);
         await page.evaluate(() => window.scrollTo(0, 0));
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(450);
         const slug = file.replace(/\.html$/, "");
         await page.screenshot({ path: path.join(outDir, `${slug}.${view.n}.${lang}.png`), fullPage: true });
 
         const info = await page.evaluate(() => {
           const de = document.documentElement;
           const over = de.scrollWidth - de.clientWidth;
+          // ข้ามของที่อยู่ในรางเลื่อนแนวนอน (ตั้งใจให้ล้นอยู่แล้ว) จะได้เหลือแต่ของที่ล้นจริง
+          const inRail = (el) => { for (let p = el.parentElement; p && p !== document.body; p = p.parentElement)
+            if (/auto|scroll/.test(getComputedStyle(p).overflowX)) return true; return false; };
           const wide = over > 1 ? [...document.querySelectorAll("body *")]
-            .filter((el) => el.getBoundingClientRect().right > de.clientWidth + 1)
+            .filter((el) => el.getBoundingClientRect().right > de.clientWidth + 1 && !inRail(el))
             .slice(0, 4).map((el) => el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).join(".") : "")) : [];
-          const blank = [...document.querySelectorAll(".reveal")].filter((el) => getComputedStyle(el).opacity === "0"
-            && el.getBoundingClientRect().top < innerHeight).length;
+          // นับเฉพาะบล็อกที่ยังไม่ถูกสั่งให้โผล่เลย — ที่มีคลาส visible แล้วแต่ opacity ยัง 0
+          // คือกำลังอยู่ระหว่างทรานซิชัน ไม่ใช่ของค้าง
+          const blank = [...document.querySelectorAll(".reveal:not(.visible)")]
+            .filter((el) => el.getBoundingClientRect().top < innerHeight).length;
           const broken = [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && i.getAttribute("src")).map((i) => i.currentSrc || i.src);
           return { over, wide, blank, broken, h: document.body.scrollHeight };
         });

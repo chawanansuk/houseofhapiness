@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add("js");</script>
 <title>เที่ยวอะไรใกล้ที่พัก | Things to Do Nearby · House of Happiness</title>
 <meta name="description" content="9 จุดเที่ยวหลักใกล้ House of Happiness คลองสาน: สวนลอยฟ้าเจ้าพระยา ICONSIAM วัดอรุณ เยาวราช กุฎีจีน พร้อมระยะทางและปุ่มนำทางจากที่พัก">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
@@ -35,6 +36,8 @@
 .atr-group h2{font-family:"Prompt",sans-serif; font-size:1.15rem; color:var(--dark); white-space:nowrap}
 .atr-group h2::before{content:"✦ "; color:var(--gold); font-size:0.78rem}
 .atr-group::after{content:""; flex:1; height:1px; background:var(--line)}
+/* หัวข้อกลุ่มห้ามใช้ nowrap บนจอแคบ — หัวข้อภาษาอังกฤษยาวกว่าไทย แล้วดันหน้าเลื่อนซ้ายขวาได้ */
+@media (max-width:640px){.atr-group h2{white-space:normal}}
 .atr-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.1rem}
 .atr-card{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
@@ -73,6 +76,7 @@
 <nav class="topnav">
   <a class="brand" href="index.html"><span class="logo">🏠</span> House of Happiness</a>
   <div class="navlinks">
+    <a href="guides.html" data-i18n="nav.guides">ไกด์เที่ยว &amp; บทความ</a>
     <a href="local.html" data-i18n="lc.title">กิน-เที่ยวรอบซอย</a>
     <a href="index.html" data-i18n="bk.back">← กลับหน้าหลัก</a>
   </div>
@@ -89,7 +93,6 @@
   <div class="in">
     <div class="kicker" data-i18n="atr.kicker">Things to Do · รอบที่พัก</div>
     <h1 data-i18n="atr.title">เที่ยวอะไรใกล้ House of Happiness</h1>
-    <p class="sub" data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p>
     <div class="ld-facts">
       <span data-i18n="atr.f1">🚶 4 จุด เดินถึง / BTS สายสีทอง</span>
       <span data-i18n="atr.f2">🚕 5 จุด เมืองเก่า ~10–15 นาที</span>
@@ -98,6 +101,7 @@
   </div>
   <span class="credit"><span data-i18n="prov.stock">ภาพประกอบ · Wikimedia Commons</span> · <a href="credits.html">credits</a></span>
 </header>
+<div class="ld-intro"><p class="lead" data-i18n="atr.sub">ทำเลคลองสาน — ริมแม่น้ำเจ้าพระยา ใกล้ BTS สายสีทอง เดินทางง่ายทั้งฝั่งธนฯ และเกาะรัตนโกสินทร์</p></div>
 
 <div class="atr-wrap">
 

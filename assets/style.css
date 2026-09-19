@@ -541,6 +541,24 @@ footer.site a:hover { color: #f5d9b8; text-decoration: underline; }
 /* ── Nav active state (scrollspy) ── */
 .navlinks a.active { color: var(--gold); font-weight: 600; }
 
+/* ── แถบปุ่มท้ายจอของหน้าบทความ (สร้างจาก ui.js) ── */
+.ld-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  display: none; gap: .6rem;
+  padding: .6rem .9rem calc(.6rem + env(safe-area-inset-bottom));
+  background: rgba(255, 252, 246, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1.5px solid var(--line);
+  box-shadow: 0 -6px 20px rgba(62,47,35,0.08);
+  transform: translateY(100%);
+  transition: transform .22s ease;
+}
+.ld-bar .btn { flex: 1; text-align: center; }
+.ld-bar .bar-line { background: #06C755; color: #fff; border-color: #06C755; }
+.ld-bar.show { transform: none; }
+@media (max-width: 640px) { .ld-bar { display: flex; } }
+@media (prefers-reduced-motion: reduce) { .ld-bar { transition: none; } }
+
 /* ── Sticky mobile booking bar (index) ── */
 .sticky-cta {
   position: fixed;
@@ -1107,11 +1125,13 @@ img[src$="attractions/iconsiam.jpg"] { object-position: center bottom; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* ── Reveal animation ── */
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+/* ซ่อนไว้ก่อนเฉพาะตอนที่ JS ทำงานจริง (html.js) — ถ้าสคริปต์โหลดไม่ขึ้น
+   เนื้อหาต้องเห็นทุกบล็อก ห้ามมีหน้าว่างเพราะแอนิเมชันไม่ทำงาน */
+html.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .reveal.visible { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  html.js .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .room-card, .gallery img { transition: none; }
 }
 
@@ -1513,6 +1533,16 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 .ld-hero.cover .sub { color: rgba(255,248,239,.9); margin: 0; max-width: 46em; }
 .ld-hero.cover .ld-facts { justify-content: flex-start; margin-top: 1.1rem; }
 .ld-hero.cover .ld-facts span { background: rgba(255,248,239,.14); border-color: rgba(255,248,239,.38); color: #fff8ef; backdrop-filter: blur(6px); }
+/* ย่อหน้านำ — ย้ายออกมาจากใน hero เพราะบนมือถือมันดัน h1 กับชิปตกจอไปหมด
+   อยู่ตรงนี้อ่านง่ายกว่า และทำให้เริ่มอ่านเนื้อหาได้ภายในการเลื่อนครั้งเดียว */
+.ld-intro { max-width: 880px; margin: 0 auto; padding: 1.6rem 1.2rem 0; }
+.ld-intro .lead { font-size: 1.06rem; line-height: 1.8; color: var(--text);
+  border-left: 3px solid var(--gold); padding-left: 1rem; margin: 0; }
+@media (max-width: 640px) {
+  .ld-intro { padding: 1.2rem 1.1rem 0; }
+  .ld-intro .lead { font-size: 1rem; line-height: 1.75; padding-left: .8rem; }
+}
+
 .ld-hero.cover .credit { position: absolute; right: 12px; bottom: 8px; z-index: 1; font-size: .64rem; color: rgba(255,248,239,.62); }
 .ld-hero.cover .credit a { color: inherit; }
 /* เนื้อหา */
@@ -1543,7 +1573,14 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 .copy-box .addr { font-size: 1.12rem; line-height: 1.85; }
 .copy-box .addr b { font-family: "Prompt", sans-serif; font-size: 1.2rem; color: var(--gold-dark); }
 @media (max-width: 640px) {
-  .ld-hero.cover { border-radius: 0 0 20px 20px; min-height: 320px; }
+  .ld-hero.cover { border-radius: 0 0 20px 20px; min-height: 360px; max-height: 70vh; }
+  /* เว้นที่ให้บรรทัดเครดิตภาพมุมขวาล่าง ไม่ให้ทับรางชิป */
+  .ld-hero.cover .in { padding-bottom: 2.4rem; }
+  /* ชิปข้อเท็จจริงเป็นรางเลื่อนแนวนอน — เก็บข้อมูลไว้ครบโดยไม่กิน 4 บรรทัดของจอ */
+  .ld-hero.cover .ld-facts { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    margin-left: -1.1rem; margin-right: -1.1rem; padding: 0 1.1rem; scroll-snap-type: x proximity; }
+  .ld-hero.cover .ld-facts::-webkit-scrollbar { display: none; }
+  .ld-hero.cover .ld-facts span { flex: 0 0 auto; scroll-snap-align: start; }
   .ld-hero.cover .in { padding: 1.6rem 1.1rem 1.5rem; }
   .ld-hero.cover h1 { font-size: 1.7rem; }
   .ld-steps li { padding: .85rem .9rem .85rem 3.1rem; }

@@ -1,0 +1,51 @@
+{
+  "_note": "แถบ 'ใกล้ถึงแล้ว' ในหน้า guides.html อ่านไฟล์นี้ · จะแสดงเฉพาะเทศกาลที่เริ่มภายใน 45 วันข้างหน้า · วันที่ทุกอันต้องให้เจ้าของยืนยันก่อน (confirmed) ไม่งั้นจะขึ้นป้ายว่ารอยืนยัน",
+  "_fields": "start/end = YYYY-MM-DD (วันจริงตามปฏิทินสุริยคติ) · confirmed = เจ้าของตรวจแล้ว · slug = หน้าไกด์ที่เกี่ยวข้อง",
+  "festivals": [
+    {
+      "id": "vegetarian-2026",
+      "slug": "chinatown-festivals.html",
+      "label": { "th": "เทศกาลกินเจเยาวราช", "en": "Vegetarian Festival, Yaowarat" },
+      "start": null,
+      "end": null,
+      "confirmed": false,
+      "todo": "TODO-OWNER: กินเจเป็นวันทางจันทรคติ เลื่อนทุกปี — ใส่วันเริ่ม-จบของปี 2569 (ราวเดือนตุลาคม) ตามประกาศของศาลเจ้า"
+    },
+    {
+      "id": "loy-krathong-2026",
+      "slug": "loy-krathong.html",
+      "label": { "th": "ลอยกระทง", "en": "Loy Krathong" },
+      "start": "2026-11-25",
+      "end": "2026-11-25",
+      "confirmed": false,
+      "todo": "TODO-OWNER: หน้า loy-krathong.html ระบุ พุธ 25 พ.ย. 2569 — ยืนยันกับปฏิทินทางการอีกครั้งก่อนเปิดแถบ"
+    },
+    {
+      "id": "countdown-2026",
+      "slug": "new-year-countdown.html",
+      "label": { "th": "เคานต์ดาวน์ปีใหม่ริมเจ้าพระยา", "en": "New Year countdown on the river" },
+      "start": "2026-12-31",
+      "end": "2027-01-01",
+      "confirmed": true,
+      "todo": ""
+    },
+    {
+      "id": "chinese-new-year-2027",
+      "slug": "chinatown-festivals.html",
+      "label": { "th": "ตรุษจีนเยาวราช", "en": "Chinese New Year, Yaowarat" },
+      "start": null,
+      "end": null,
+      "confirmed": false,
+      "todo": "TODO-OWNER: ตรุษจีนเป็นวันทางจันทรคติ ปลายมกราคม–กุมภาพันธ์ — ใส่วันของปี 2570"
+    },
+    {
+      "id": "songkran-2027",
+      "slug": "songkran-riverside.html",
+      "label": { "th": "สงกรานต์ริมเจ้าพระยา", "en": "Songkran on the river" },
+      "start": "2027-04-13",
+      "end": "2027-04-15",
+      "confirmed": true,
+      "todo": "วันหลัก 13–15 เมษายนทุกปี · TODO-OWNER: บางปีมีวันหยุดต่อเนื่องเพิ่ม ถ้ามีให้ขยาย end"
+    }
+  ]
+}

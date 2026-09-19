@@ -263,3 +263,53 @@ console.log("SITE TESTS PASSED");
   }
 }
 console.log("IMAGE PIPELINE TESTS PASSED");
+
+// ── Phase 2: UX ทั้งเว็บ ──
+{
+  const htmlFiles = fs.readdirSync(root).filter((f) => f.endsWith(".html"));
+  const css = read("assets/style.css"), ui = read("assets/ui.js"), i18n = read("assets/i18n.js");
+
+  // 1) เนื้อหาต้องไม่หายถ้า JS ไม่ทำงาน
+  assert.match(css, /html\.js \.reveal \{ opacity: 0;/,
+    ".reveal ต้องถูกซ่อนเฉพาะตอน html มีคลาส js ไม่งั้น JS พังแล้วหน้าจะว่าง");
+  assert.ok(!/^\.reveal \{ opacity: 0;/m.test(css), "ห้ามมีกฎ .reveal ที่ซ่อนเนื้อหาโดยไม่ดูว่า JS ทำงานไหม");
+  for (const f of htmlFiles) {
+    assert.match(read(f), /<script>document\.documentElement\.classList\.add\("js"\);<\/script>/,
+      `${f}: ต้องมีสคริปต์บรรทัดเดียวใน <head> ที่ใส่คลาส js`);
+  }
+  assert.match(ui, /rootMargin: "220px 0px"/, "observer ต้องเริ่มแสดงก่อนถึงจอ");
+  assert.match(ui, /if \(!fired\) showAll\(\)/, "ต้องมีตัวจับว่า observer ไม่เคยทำงาน");
+
+  // 2) ลิงก์ไกด์ต้องอยู่ในเมนูบนของทุกหน้า (ยกเว้นหน้าไกด์เองกับ 404)
+  for (const f of htmlFiles) {
+    if (f === "guides.html" || f === "404.html") continue;
+    const nav = (read(f).match(/<div class="navlinks">[\s\S]*?<\/div>/) || [""])[0];
+    assert.match(nav, /href="guides\.html"/, `${f}: เมนูบนต้องมีลิงก์ไปหน้ารวมไกด์`);
+  }
+  assert.match(ui, /href="guides\.html" data-i18n="nav\.guides"/, "เมนู ☰ มือถือต้องมีลิงก์ไกด์");
+
+  // 3) hero มือถือต้องไม่กินจอ และย่อหน้านำต้องย้ายออกมานอก hero แล้ว
+  assert.match(css, /\.ld-hero\.cover \{ border-radius: 0 0 20px 20px; min-height: 360px; max-height: 70vh; \}/,
+    "hero บนมือถือต้องสูงไม่เกิน 70vh");
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    if (!raw.includes('<header class="ld-hero cover">')) continue;
+    const head = raw.slice(raw.indexOf('<header class="ld-hero cover">'), raw.indexOf("</header>"));
+    assert.ok(!/<p class="sub"/.test(head), `${f}: ย่อหน้านำต้องอยู่นอก hero (ใน .ld-intro)`);
+    assert.match(raw, /<div class="ld-intro"><p class="lead"/, `${f}: ต้องมี .ld-intro ต่อจาก hero`);
+  }
+
+  // 4) แถบปุ่มติดขอบล่างของหน้าบทความ
+  assert.match(ui, /bar\.className = "ld-bar"/, "ui.js ต้องสร้างแถบปุ่มให้หน้าบทความ");
+  assert.match(ui, /page === "booking\.html"/, "หน้า booking ไม่ต้องมีแถบซ้ำ");
+  assert.match(ui, /ctaIn = e\.isIntersecting/, "แถบต้องหลบให้ปุ่ม CTA ท้ายบทความ");
+  assert.match(css, /@media \(max-width: 640px\) \{ \.ld-bar \{ display: flex; \} \}/, "แถบนี้เฉพาะมือถือ");
+  for (const k of ["sb.rates", "sb.line"]) {
+    assert.ok(new RegExp(`"${k.replace(".", "\\.")}":`).test(i18n), `i18n.js ขาดคีย์ ${k}`);
+  }
+
+  // 5) หัวข้อกลุ่มในหน้า attractions ห้าม nowrap บนจอแคบ (ภาษาอังกฤษยาวกว่าไทยจนหน้าเลื่อนได้)
+  assert.match(read("attractions.html"), /@media \(max-width:640px\)\{\.atr-group h2\{white-space:normal\}\}/,
+    "attractions.html ต้องปล่อยให้หัวข้อตัดบรรทัดบนมือถือ");
+}
+console.log("UX TESTS PASSED");

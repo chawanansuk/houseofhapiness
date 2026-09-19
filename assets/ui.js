@@ -1,30 +1,38 @@
-/* เอฟเฟกต์เลื่อนแล้วค่อยๆ ปรากฏ — ปิดอัตโนมัติถ้าผู้ใช้ตั้งค่า reduced motion */
+/* เอฟเฟกต์เลื่อนแล้วค่อยๆ ปรากฏ
+   กฎเหล็ก: หน้าเว็บห้ามมีแถบว่างเพราะแอนิเมชันไม่ทำงาน — ถ้าเมื่อไหร่ไม่แน่ใจ ให้แสดงเนื้อหา
+   ชั้นกันพลาดมี 4 ชั้น: reduced-motion · observer ล่วงหน้า 220px · sweep ตอนเลื่อน · ตัวจับว่า observer ไม่เคยทำงาน */
 document.addEventListener("DOMContentLoaded", () => {
   const els = document.querySelectorAll(".reveal");
+  if (!els.length) return;
+  const showAll = () => els.forEach((el) => el.classList.add("visible"));
   if (!("IntersectionObserver" in window) ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    els.forEach((el) => el.classList.add("visible"));
+    showAll();
     return;
   }
+  // แสดงทุกบล็อกที่เลื่อนผ่านมาแล้วหรือใกล้จะถึงจอ
+  const sweep = () => {
+    const limit = window.innerHeight * 1.15;
+    els.forEach((el) => { if (!el.classList.contains("visible") && el.getBoundingClientRect().top < limit) el.classList.add("visible"); });
+  };
+  let fired = false;
   const io = new IntersectionObserver((entries) => {
+    fired = true;
     entries.forEach((e) => {
       if (e.isIntersecting) {
         e.target.classList.add("visible");
         io.unobserve(e.target);
       }
     });
-  }, { threshold: 0.05 });
+  }, { threshold: 0.05, rootMargin: "220px 0px" });  // เริ่มโผล่ก่อนถึงจอ เลื่อนเร็วแค่ไหนก็ทัน
   els.forEach((el) => io.observe(el));
-  // ตัวกันพลาด: ถ้า observer ไม่ยิง (เลื่อนเร็วมาก / เบราว์เซอร์แปลก) ทุกส่วนที่เลื่อนผ่านมาแล้วต้องโชว์เสมอ
-  // หน้าเว็บห้ามมีแถบว่างเพราะแอนิเมชันไม่ทำงาน
-  const sweep = () => {
-    const limit = window.innerHeight * 1.15;
-    els.forEach((el) => { if (!el.classList.contains("visible") && el.getBoundingClientRect().top < limit) el.classList.add("visible"); });
-  };
+
   let t;
-  window.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(sweep, 120); }, { passive: true });
-  setTimeout(sweep, 2500);
-  window.addEventListener("beforeprint", () => els.forEach((el) => el.classList.add("visible")));
+  window.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(sweep, 100); }, { passive: true });
+  setTimeout(sweep, 1500);
+  // ถ้า observer ไม่เคยส่งอะไรมาเลยภายใน 3 วิ แปลว่ามันไม่ทำงาน — เลิกซ่อนทั้งหมด
+  setTimeout(() => { if (!fired) showAll(); }, 3000);
+  window.addEventListener("beforeprint", showAll);
 });
 
 // ไอคอนเส้นบาง (แทนอีโมจิ — อีโมจิหน้าตาต่างกันทุกเครื่องและดูเป็นเทมเพลต) วาดจาก data-icon
@@ -102,6 +110,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) setOpen(false);
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden) setOpen(false); });
+});
+
+/* แถบปุ่มติดขอบล่างสำหรับหน้าบทความบนมือถือ
+   โผล่เมื่อ hero เลื่อนพ้นจอ และหลบให้ตอนถึงปุ่ม CTA ท้ายบทความ จะได้ไม่ซ้ำซ้อนกัน */
+document.addEventListener("DOMContentLoaded", () => {
+  const hero = document.querySelector(".ld-hero");
+  const page = location.pathname.split("/").pop() || "index.html";
+  if (!hero || page === "booking.html" || document.querySelector(".sticky-cta, .ld-bar")) return;
+
+  const bar = document.createElement("div");
+  bar.className = "ld-bar";
+  bar.innerHTML =
+    '<a class="btn btn-gold btn-sm" href="booking.html" data-i18n="sb.rates">เช็คห้องว่าง</a>' +
+    '<a class="btn bar-line btn-sm" href="https://line.me/R/ti/p/@060hvzok" target="_blank" rel="noopener" data-i18n="sb.line">ถามทางไลน์</a>';
+  document.body.appendChild(bar);
+  if (typeof applyLang === "function") applyLang();
+
+  const cta = document.querySelector(".ld-cta");
+  let heroOut = false, ctaIn = false;
+  const update = () => bar.classList.toggle("show", heroOut && !ctaIn);
+  if (!("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([e]) => { heroOut = !e.isIntersecting; update(); }, { threshold: 0 }).observe(hero);
+  if (cta) new IntersectionObserver(([e]) => { ctaIn = e.isIntersecting; update(); }, { threshold: 0 }).observe(cta);
 });
 
 // Lightbox: รองรับเมาส์ คีย์บอร์ด และ screen reader

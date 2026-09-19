@@ -350,6 +350,10 @@ const I18N = {
   "ph.watpho": { th: "พระพุทธไสยาสน์ปิดทองที่วัดโพธิ์ ยาวราว 46 เมตร", en: "The gilded Reclining Buddha at Wat Pho, about 46 metres long" },
   "ph.kudichin": { th: "โบสถ์ซางตาครู้สในชุมชนกุฎีจีน", en: "Santa Cruz Church in the Kudi Chin quarter" },
   "ph.pakkhlong": { th: "ตลาดดอกไม้ปากคลองตลาดตอนเช้ามืด", en: "Pak Khlong flower market in the early morning" },
+
+  /* แถบปุ่มติดขอบล่างของหน้าบทความบนมือถือ */
+  "sb.rates": { th: "เช็คห้องว่าง", en: "Check rates" },
+  "sb.line": { th: "ถามทางไลน์", en: "Ask on LINE" },
 };
 
 /* ─── ตัวจัดการภาษา ─── */
