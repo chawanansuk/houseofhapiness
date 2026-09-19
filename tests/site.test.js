@@ -358,3 +358,87 @@ console.log("UX TESTS PASSED");
   assert.match(idx, /href="guides\.html" data-i18n="hg\.all"/, "ต้องมีปุ่มไปหน้ารวมไกด์");
 }
 console.log("GUIDES HUB TESTS PASSED");
+
+// ── Phase 4: เทมเพลตบทความ ──
+{
+  const htmlFiles = fs.readdirSync(root).filter((f) => f.endsWith(".html"));
+  const ui = read("assets/ui.js"), css = read("assets/style.css"), i18n = read("assets/i18n.js");
+
+  // สารบัญสร้างจาก ui.js และผูก id กับคีย์ภาษา ไม่ใช่ข้อความ (สลับภาษาแล้วลิงก์ต้องไม่พัง)
+  assert.match(ui, /nav\.className = "ld-toc"/, "ui.js ต้องสร้างสารบัญ");
+  assert.match(ui, /heads\.length < 4/, "สารบัญขึ้นเฉพาะหน้าที่มีหัวข้อ 4 อันขึ้นไป");
+  assert.match(ui, /h\.id = "s-" \+ \(\(h\.dataset\.i18n/, "id หัวข้อต้องมาจากคีย์ภาษา");
+  assert.match(css, /\.ld-toc \{/, "ต้องมีสไตล์สารบัญ");
+
+  // ทุกหน้าบทความต้องมีบรรทัดผู้เขียน + วันที่ และวันที่ต้องเป็น ISO ใน datetime
+  const articlePages = htmlFiles.filter((f) => read(f).includes('<div class="ld-wrap">'));
+  assert.ok(articlePages.length >= 25, `คาดว่ามีหน้าบทความอย่างน้อย 25 หน้า เจอ ${articlePages.length}`);
+  for (const f of articlePages) {
+    const raw = read(f);
+    assert.match(raw, /<p class="ld-stamp">/, `${f}: ต้องมีบรรทัดผู้เขียน/วันที่ปรับปรุง`);
+    assert.match(raw, /<time datetime="\d{4}-\d{2}-\d{2}">/, `${f}: วันที่ต้องอยู่ในรูป ISO ใน datetime`);
+  }
+  assert.match(ui, /MON_TH = \["ม\.ค\."/, "ต้องแปลงวันที่เป็นรูปแบบไทย (พ.ศ.) ตอนแสดงผล");
+
+  // บล็อกจุดบนแผนที่: ทุกลิงก์ต้องเป็น Google Maps API url และชื่อสถานที่ต้องมาจาก schema ของหน้านั้น
+  let placePages = 0;
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    if (!raw.includes('class="ld-sec ld-places"')) continue;
+    placePages++;
+    const schema = [...raw.matchAll(/<script type="application\/ld\+json">\s*(\{[\s\S]*?\})\s*<\/script>/g)]
+      .map((m) => { try { return JSON.parse(m[1]); } catch (e) { return null; } })
+      .find((d) => d && d["@type"] === "Article");
+    assert.ok(schema && Array.isArray(schema.about), `${f}: บล็อกแผนที่ต้องมี schema Article ที่มี about`);
+    const declared = new Set(schema.about.filter((a) => a["@type"] === "Place").map((a) => a.name));
+    for (const m of raw.matchAll(/<a href="(https:\/\/www\.google\.com\/maps\/search[^"]+)" target="_blank" rel="noopener">📍 ([^<]+)<\/a>/g)) {
+      assert.ok(declared.has(m[2]), `${f}: ชื่อสถานที่ "${m[2]}" ไม่ได้ประกาศไว้ใน schema — ห้ามตั้งเอง`);
+    }
+    assert.match(raw, /class="ld-plroute" href="https:\/\/www\.google\.com\/maps\/dir\/\?api=1&origin=/,
+      `${f}: ต้องมีลิงก์เปิดเส้นทางทั้งหมด`);
+    assert.ok(!/@-?\d+\.\d+,/.test(raw.match(/class="ld-plroute" href="([^"]+)"/)[1]),
+      `${f}: ห้ามฝังพิกัดที่ไม่ได้ตรวจสอบในลิงก์แผนที่`);
+  }
+  assert.ok(placePages >= 12, `คาดว่ามีหน้าที่มีบล็อกแผนที่อย่างน้อย 12 หน้า เจอ ${placePages}`);
+
+  // ลิงก์ไกด์ที่เกี่ยวกันทุกอันต้องมีรูป และรูปในบล็อกเดียวกันต้องไม่ซ้ำ
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    for (const block of raw.match(/<div class="ld-rooms">[\s\S]*?<\/div>/g) || []) {
+      const seen = new Set();
+      for (const m of block.matchAll(/<a class="ld-room" href="([^"]+)">(<picture>|<img\b)?/g)) {
+        assert.ok(m[2], `${f}: ลิงก์ไกด์ที่เกี่ยวกัน ${m[1]} ยังไม่มีรูป`);
+      }
+      for (const m of block.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)) {
+        assert.ok(!seen.has(m[1]), `${f}: บล็อกไกด์ที่เกี่ยวกันใช้รูป ${m[1]} ซ้ำ`);
+        seen.add(m[1]);
+      }
+    }
+  }
+  // หน้าบทความทุกหน้าต้องไม่เป็นทางตัน
+  for (const f of articlePages) {
+    assert.match(read(f), /<div class="ld-rooms">/, `${f}: ต้องมีบล็อกไกด์ที่เกี่ยวกัน`);
+  }
+
+  // twitter card + Article schema
+  for (const f of htmlFiles) {
+    if (f === "404.html") continue;
+    const raw = read(f);
+    if (!raw.includes('property="og:image"')) continue;
+    assert.match(raw, /<meta name="twitter:card" content="summary_large_image">/, `${f}: ขาด twitter:card`);
+    assert.match(raw, /<meta name="twitter:image"/, `${f}: ขาด twitter:image`);
+  }
+  for (const f of ["airport-guide.html", "attractions.html", "local.html", "loy-krathong.html", "new-year-countdown.html"]) {
+    assert.match(read(f), /"@type": "Article"/, `${f}: ต้องมี schema Article`);
+  }
+  // ld+json ทุกก้อนในเว็บต้อง parse ได้
+  for (const f of htmlFiles) {
+    for (const m of read(f).matchAll(/<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g)) {
+      assert.doesNotThrow(() => JSON.parse(m[1]), `${f}: มี ld+json ที่ parse ไม่ได้`);
+    }
+  }
+  for (const k of ["pl.t", "pl.d", "pl.route", "st.by", "st.on", "toc.t", "rel.t"]) {
+    assert.ok(new RegExp(`"${k.replace(".", "\\.")}":`).test(i18n), `i18n.js ขาดคีย์ ${k}`);
+  }
+}
+console.log("ARTICLE TEMPLATE TESTS PASSED");

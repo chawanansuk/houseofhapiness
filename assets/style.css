@@ -116,7 +116,7 @@ picture { display: contents; }
   .topnav .brand { min-width: 0; gap: 0.25rem; font-size: 0.92rem; }
   .topnav .brand .logo { font-size: 1rem; }
   .topnav .nav-right { gap: 0.4rem; }
-  .lang-toggle button { padding: 0.3rem 0.55rem; }
+  .lang-toggle button, .lang-toggle a { padding: 0.3rem 0.55rem; }
   .topnav .nav-right > .btn { display: none; }
 }
 
@@ -128,8 +128,12 @@ picture { display: contents; }
   overflow: hidden;
   background: #fff;
 }
-.lang-toggle button {
+/* หน้าใน /en/ ใช้ <a> แทน <button> เพราะสลับภาษา = ไปอีก URL ไม่ใช่สลับในหน้า */
+.lang-toggle button, .lang-toggle a {
   background: transparent;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
   color: #7a6a58;
   border: none;
   padding: 0.3rem 0.8rem;
@@ -138,7 +142,7 @@ picture { display: contents; }
   cursor: pointer;
   transition: background 0.15s ease;
 }
-.lang-toggle button.active { background: var(--gold); color: var(--on-dark); font-weight: 700; }
+.lang-toggle button.active, .lang-toggle a.active { background: var(--gold); color: var(--on-dark); font-weight: 700; }
 
 /* ── Buttons ── */
 .btn {
@@ -540,6 +544,32 @@ footer.site a:hover { color: #f5d9b8; text-decoration: underline; }
 
 /* ── Nav active state (scrollspy) ── */
 .navlinks a.active { color: var(--gold); font-weight: 600; }
+
+
+/* ── จุดบนแผนที่ท้ายบทความ ── */
+.ld-pl { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .3rem; }
+.ld-pl a { display: inline-flex; align-items: center; gap: .3rem; text-decoration: none;
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: .35rem .85rem; font-size: .88rem; color: var(--text); transition: border-color .15s ease; }
+.ld-pl a:hover { border-color: var(--gold); color: var(--dark); }
+.ld-plroute { display: inline-block; margin-top: .9rem; font-family: "Prompt", sans-serif;
+  font-size: .9rem; color: var(--gold-dark); text-decoration: none; border-bottom: 1px solid var(--gold); }
+.ld-plroute:hover { color: var(--dark); }
+
+/* ── บรรทัดผู้เขียนและวันที่ปรับปรุง ── */
+.ld-stamp { margin: 2.2rem auto 0; max-width: 880px; padding: .9rem 1.2rem 0;
+  border-top: 1px solid var(--line); font-size: .82rem; color: var(--muted); }
+
+/* ── สารบัญ (สร้างจาก ui.js เมื่อหน้ามีหัวข้อ h2 ตั้งแต่ 4 อันขึ้นไป) ── */
+.ld-toc { max-width: 880px; margin: 1.4rem auto 0; padding: 0 1.2rem; }
+.ld-toc > div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: .9rem 1.1rem; }
+.ld-toc .h { font-family: "Prompt", sans-serif; font-size: .78rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gold-dark); margin-bottom: .5rem; }
+.ld-toc ol { margin: 0; padding-left: 1.2rem; }
+.ld-toc li { margin: .2rem 0; }
+.ld-toc a { color: var(--text); text-decoration: none; font-size: .92rem; line-height: 1.6; }
+.ld-toc a:hover { color: var(--gold-dark); text-decoration: underline; }
+@media (max-width: 640px) { .ld-toc { padding: 0 1.1rem; } .ld-toc a { font-size: .88rem; } }
 
 /* ── แถบปุ่มท้ายจอของหน้าบทความ (สร้างจาก ui.js) ── */
 .ld-bar {

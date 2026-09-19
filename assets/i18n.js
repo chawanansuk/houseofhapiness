@@ -366,10 +366,60 @@ const I18N = {
   "hg.3d": { th: "สายสีทอง เรือข้ามฟาก หรือเรียกรถ เลือกให้ถูกจังหวะ", en: "The Gold Line, the ferry or a car, and when each one wins" },
   "hg.all": { th: "ดูไกด์ทั้งหมด 24 เรื่อง", en: "See all 24 guides" },
 
+
+  /* บล็อกจุดบนแผนที่ · บรรทัดผู้เขียน/วันที่ · สารบัญ */
+  "pl.t": { th: "จุดในเส้นทางนี้บน Google Maps", en: "The stops on this route in Google Maps" },
+  "pl.d": { th: "กดชื่อสถานที่เพื่อเปิดหมุดใน Google Maps — ใช้ชื่อภาษาอังกฤษแบบที่ Google ค้นเจอ", en: "Tap a name to drop a pin in Google Maps. We use the English spelling Google recognises." },
+  "pl.route": { th: "เปิดเส้นทางทั้งหมดจากที่พัก →", en: "Open the whole route from the hotel →" },
+  "st.by": { th: "เขียนโดยทีม House of Happiness", en: "Written by the House of Happiness team" },
+  "st.on": { th: "ปรับปรุงล่าสุด", en: "Last updated" },
+  "toc.t": { th: "ในหน้านี้มีอะไรบ้าง", en: "What's on this page" },
+
+
+  /* ไกด์ที่เกี่ยวกัน สำหรับหน้าที่เดิมไม่มีบล็อกนี้ */
+  "rel.t": { th: "ไกด์ที่เกี่ยวกัน", en: "Related guides" },
+  "rel.ag.1t": { th: "เดินทางในกรุงเทพจากคลองสาน", en: "Getting around Bangkok from Khlong San" },
+  "rel.ag.1d": { th: "ถึงที่พักแล้วไปต่อยังไง — สายสีทอง เรือข้ามฟาก หรือเรียกรถ", en: "Once you have dropped the bags: the Gold Line, the ferry, or a car" },
+  "rel.ag.2t": { th: "คู่มือเรือเจ้าพระยา", en: "The Chao Phraya boat guide" },
+  "rel.ag.2d": { th: "เรือมีกี่แบบ สีธงต่างกันยังไง ขึ้นท่าไหน", en: "How many kinds of boat there are, what the flag colours mean, which pier to use" },
+  "rel.ag.3t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ครึ่งวัน", en: "The half-day Chinatown heritage walk" },
+  "rel.ag.3d": { th: "แผนวันแรกที่เริ่มจากท่าเรือท้ายซอยที่พัก", en: "A first-day plan that starts at the pier down our lane" },
+  "rel.lk.1t": { th: "สงกรานต์ริมเจ้าพระยา", en: "Songkran on the river" },
+  "rel.lk.1d": { th: "อีกเทศกาลใหญ่ของย่านนี้ เช้าทำบุญ บ่ายเล่นน้ำ", en: "The other big festival here: merit in the morning, water in the afternoon" },
+  "rel.lk.2t": { th: "เทศกาลที่เยาวราช", en: "Festivals in Chinatown" },
+  "rel.lk.2d": { th: "กินเจและตรุษจีน ข้ามเรือ 5 บาทก็ถึง", en: "The Vegetarian Festival and Chinese New Year, one ฿5 ferry away" },
+  "rel.lk.3t": { th: "3 วัดด้วยเรือ", en: "Three temples by boat" },
+  "rel.lk.3d": { th: "ไปวัดตอนเช้าก่อนงานคืนนั้นจะเริ่ม", en: "Temples in the morning, before the evening gets busy" },
+  "rel.nyc.1t": { th: "ICONSIAM และเอเชียทีค ด้วยเรือ", en: "ICONSIAM and Asiatique by boat" },
+  "rel.nyc.1d": { th: "เส้นทางเรือที่ใช้ได้ทั้งวันธรรมดาและคืนเคาต์ดาวน์", en: "The boat route that works on an ordinary day and on countdown night" },
+  "rel.nyc.2t": { th: "เย็นริมน้ำฝั่งธนฯ", en: "A Thonburi riverside evening" },
+  "rel.nyc.2d": { th: "แผนหัวค่ำที่ไม่ต้องข้ามแม่น้ำ", en: "An early-evening plan with no river crossing" },
+  "rel.nyc.3t": { th: "เทศกาลที่เยาวราช", en: "Festivals in Chinatown" },
+  "rel.nyc.3d": { th: "ปฏิทินเทศกาลอื่นของย่านนี้", en: "The rest of the festival calendar in this neighbourhood" },
+  "rel.atrx.1t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ครึ่งวัน", en: "The half-day Chinatown heritage walk" },
+  "rel.atrx.1d": { th: "ร้อยจุดเหล่านี้เข้าด้วยกันเป็นเส้นทางเดียว", en: "The same sights, strung together into one walking route" },
+  "rel.atrx.2t": { th: "3 วัดด้วยเรือ", en: "Three temples by boat" },
+  "rel.atrx.2d": { th: "วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร ต่อกันด้วยเรือ", en: "Wat Pho, Wat Arun and Wat Kalayanamit, linked by boat" },
+  "rel.atrx.3t": { th: "เดินทางในกรุงเทพจากคลองสาน", en: "Getting around Bangkok from Khlong San" },
+  "rel.atrx.3d": { th: "เลือกรถไฟฟ้า เรือ หรือรถ ให้ถูกจังหวะ", en: "Picking the train, the boat or the car at the right moment" },
+  "rel.lcx.1t": { th: "ตลาดสำเพ็งตอนเช้า", en: "Sampeng Market at dawn" },
+  "rel.lcx.1d": { th: "ข้ามเรือ 5 บาท ซื้อของ 4 ซอย กลับก่อนเที่ยง", en: "A ฿5 ferry, four lanes of wholesale, back before noon" },
+  "rel.lcx.2t": { th: "เที่ยวเยาวราชกลางคืน 2 ชั่วโมง", en: "Two hours in Yaowarat after dark" },
+  "rel.lcx.2d": { th: "อยากกินไกลกว่าซอยเรา ข้ามไปเยาวราช", en: "When you want to eat further than our lane" },
+  "rel.lcx.3t": { th: "ถนนทรงวาด", en: "Song Wat Road" },
+  "rel.lcx.3d": { th: "ย่านสร้างสรรค์ที่ใกล้ที่พักที่สุด", en: "The creative district closest to us" },
+
+
+  /* หน้ารูปทั้งหมด */
+  "gl.title": { th: "รูปทั้งหมดของที่พัก", en: "All photos" },
+  "gl.sub": { th: "ห้องพักทุกแบบ ห้องน้ำ และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา", en: "Every room type, the bathrooms and the building — real photos taken at our place." },
+
 };
 
 /* ─── ตัวจัดการภาษา ─── */
 function getLang() {
+  // หน้าใน /en/ เป็นภาษาอังกฤษถาวร — ไม่ให้ค่าที่เคยเลือกไว้มาเปลี่ยนหน้าที่มี URL ของตัวเอง
+  if (typeof window !== "undefined" && window.HOH_LANG) return window.HOH_LANG;
   const saved = localStorage.getItem("hoh-lang");
   if (saved === "th" || saved === "en") return saved;
   return (navigator.language || "th").toLowerCase().startsWith("th") ? "th" : "en";

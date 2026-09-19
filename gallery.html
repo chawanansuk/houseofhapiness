@@ -24,6 +24,9 @@
 <meta name="twitter:description" content="ชมรูปจริงของห้องพัก ห้องน้ำ ระเบียง และตัวอาคาร House of Happiness คลองสาน กรุงเทพฯ กว่า 30 รูป">
 <meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/bedroom.jpg">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/gallery.html">
+<link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/gallery.html">
+<link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/gallery.html">
+<link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/gallery.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
 <link rel="stylesheet" href="assets/fonts.css">
@@ -84,8 +87,8 @@
 </nav>
 
 <header class="gl-hero">
-  <h1 id="glTitle">รูปทั้งหมดของที่พัก</h1>
-  <p id="glSub">ห้องพักทุกแบบ ห้องน้ำ และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา</p>
+  <h1 id="glTitle" data-i18n="gl.title">รูปทั้งหมดของที่พัก</h1>
+  <p id="glSub" data-i18n="gl.sub">ห้องพักทุกแบบ ห้องน้ำ และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา</p>
 </header>
 
 <div class="gl-wrap" id="glWrap"></div>
@@ -157,10 +160,6 @@ GROUPS.forEach(function (g) { g.items.forEach(function (it) { FLAT.push(it); });
 
 function render() {
   var lang = getLang();
-  document.getElementById("glTitle").textContent = lang === "en" ? "All Photos" : "รูปทั้งหมดของที่พัก";
-  document.getElementById("glSub").textContent = lang === "en"
-    ? "Every room type, bathrooms and the building — real photos taken at our place."
-    : "ห้องพักทุกแบบ ห้องน้ำ และตัวอาคาร — รูปถ่ายจริงจากที่พักของเรา";
   var idx = 0;
   document.getElementById("glWrap").innerHTML = GROUPS.map(function (g) {
     var cards = g.items.map(function (it) {

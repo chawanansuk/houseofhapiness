@@ -135,6 +135,75 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cta) new IntersectionObserver(([e]) => { ctaIn = e.isIntersecting; update(); }, { threshold: 0 }).observe(cta);
 });
 
+/* สารบัญอัตโนมัติสำหรับหน้าบทความที่ยาวพอ (หัวข้อ h2 ตั้งแต่ 4 อันขึ้นไป)
+   id ของหัวข้อมาจากคีย์ภาษา ไม่ใช่ข้อความ — ลิงก์จึงไม่พังเวลาสลับไทย/อังกฤษ */
+document.addEventListener("DOMContentLoaded", () => {
+  const wrap = document.querySelector(".ld-wrap");
+  if (!wrap || document.querySelector(".ld-toc")) return;
+  const heads = [].slice.call(wrap.querySelectorAll(".ld-sec > h2"));
+  if (heads.length < 4) return;
+
+  heads.forEach((h, i) => {
+    if (!h.id) h.id = "s-" + ((h.dataset.i18n || "").replace(/[^a-z0-9]+/gi, "-") || "sec-" + (i + 1));
+  });
+
+  const nav = document.createElement("nav");
+  nav.className = "ld-toc";
+  nav.setAttribute("aria-label", "สารบัญ");
+  nav.innerHTML = '<div><div class="h" data-i18n="toc.t">ในหน้านี้มีอะไรบ้าง</div><ol></ol></div>';
+  const ol = nav.querySelector("ol");
+  heads.forEach((h) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#" + h.id;
+    if (h.dataset.i18n) { a.dataset.i18n = h.dataset.i18n; }
+    a.textContent = h.textContent.trim();
+    li.appendChild(a);
+    ol.appendChild(li);
+  });
+
+  const intro = document.querySelector(".ld-intro");
+  if (intro) intro.insertAdjacentElement("afterend", nav);
+  else wrap.insertAdjacentElement("beforebegin", nav);
+  if (typeof applyLang === "function") applyLang();
+});
+
+/* วันที่ปรับปรุงล่าสุด: เก็บเป็น ISO ใน datetime="" ให้เครื่องอ่าน แล้วแสดงตามภาษาที่เลือก
+   ไทยใช้ พ.ศ. ให้ตรงกับที่ใช้ในหน้าอื่นของเว็บ */
+(function () {
+  var MON_TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  var MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function paint() {
+    var th = (typeof getLang === "function" ? getLang() : "th") === "th";
+    [].forEach.call(document.querySelectorAll(".ld-stamp time[datetime]"), function (el) {
+      var p = el.getAttribute("datetime").split("-");
+      if (p.length !== 3) return;
+      var y = Number(p[0]), m = Number(p[1]) - 1, d = Number(p[2]);
+      el.textContent = th ? d + " " + MON_TH[m] + " " + (y + 543) : d + " " + MON_EN[m] + " " + y;
+    });
+  }
+  document.addEventListener("DOMContentLoaded", paint);
+  document.addEventListener("langchange", paint);
+})();
+
+/* ปุ่ม EN บนหน้าไทย: ถ้าหน้านั้นมีคู่ภาษาอังกฤษเป็น URL ของตัวเองแล้ว ให้พาไปหน้านั้นเลย
+   จะได้ไม่มีสองวิธีในการอ่านภาษาอังกฤษ (สลับในหน้า กับ /en/...) ซึ่งทำให้ลิงก์ที่แชร์ออกไปไม่ตรงกัน
+   หน้าไหนยังไม่มีคู่ภาษา (เช่น รูมเซอร์วิส) ปุ่มยังทำงานแบบสลับในหน้าเหมือนเดิม */
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.HOH_LANG) return;                       // อยู่ในหน้า /en/ อยู่แล้ว
+  const alt = document.querySelector('link[rel="alternate"][hreflang="en"]');
+  const btn = document.querySelector('.lang-toggle button[data-lang="en"]');
+  if (!alt || !btn) return;
+  const url = new URL(alt.href);
+  const a = document.createElement("a");
+  a.href = url.pathname;
+  a.setAttribute("hreflang", "en");
+  a.textContent = btn.textContent;
+  a.className = btn.className;
+  a.addEventListener("click", () => { try { localStorage.setItem("hoh-lang", "en"); } catch (e) {} });
+  btn.replaceWith(a);
+});
+
 // Lightbox: รองรับเมาส์ คีย์บอร์ด และ screen reader
 document.addEventListener("DOMContentLoaded", () => {
   const imgs = document.querySelectorAll(".gallery img");

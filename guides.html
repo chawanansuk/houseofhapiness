@@ -9,6 +9,9 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="canonical" href="https://houseofhappinessbangkok.com/guides.html">
+<link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/guides.html">
+<link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/guides.html">
+<link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/guides.html">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#f7f1e6">
 <meta property="og:title" content="ไกด์เที่ยวคลองสาน-ฝั่งธนฯ จากคนพื้นที่ — House of Happiness">
@@ -17,6 +20,8 @@
 <meta property="og:url" content="https://houseofhappinessbangkok.com/guides.html">
 <meta property="og:site_name" content="House of Happiness">
 <meta property="og:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <style>
@@ -479,7 +484,7 @@
 </div>
 
 <footer class="site">
-  <div class="foot-bottom">© House of Happiness · 558/1 ถนนท่าดินแดง 16 คลองสาน กรุงเทพฯ · <a href="index.html" style="color:inherit">houseofhappinessbangkok.com</a></div>
+  <div class="foot-bottom">© House of Happiness · <span data-i18n="footer.addr">558/1 ถนนท่าดินแดง 16 คลองสาน กรุงเทพฯ 10600</span> · <a href="index.html" style="color:inherit">houseofhappinessbangkok.com</a></div>
 </footer>
 
 <script type="application/ld+json">
@@ -804,7 +809,7 @@ Object.assign(I18N, {
     paint();
     document.addEventListener("langchange", paint);
   }
-  fetch("assets/festivals.json").then(function (r) { return r.json(); }).then(renderFest).catch(function () {});
+  fetch("/assets/festivals.json").then(function (r) { return r.json(); }).then(renderFest).catch(function () {});
 
   apply();
   paintCount();

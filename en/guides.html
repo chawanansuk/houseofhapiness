@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add("js");</script>
+<title>Local Guides · House of Happiness</title>
+<meta name="description" content="We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="canonical" href="https://houseofhappinessbangkok.com/en/guides.html">
+
+
+
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#f7f1e6">
+<meta property="og:title" content="Local Guides · House of Happiness">
+<meta property="og:description" content="We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://houseofhappinessbangkok.com/en/guides.html">
+<meta property="og:site_name" content="House of Happiness">
+<meta property="og:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://houseofhappinessbangkok.com/images/attractions/skypark.jpg">
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/style.css">
+<style>
+/* ── หน้ารวมไกด์: สไตล์แมกกาซีน การ์ดมีรูปปก ── */
+.gd-hero{padding:3.4rem 1.2rem 1.4rem; text-align:center}
+.gd-hero .kicker{font-family:"Prompt",sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.28em; color:var(--gold-dark); text-transform:uppercase}
+.gd-hero h1{font-family:var(--font-display); font-size:clamp(1.7rem,4.6vw,2.7rem); color:var(--dark); margin:0.5rem 0 0.6rem; line-height:1.2}
+.gd-hero .sub{color:var(--muted); max-width:44em; margin:0 auto; line-height:1.75}
+.gd-stats{display:flex; flex-wrap:wrap; justify-content:center; gap:0.5rem; margin-top:1rem}
+.gd-stats span{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:0.38rem 0.9rem; font-size:0.83rem; color:var(--text)}
+.gd-wrap{max-width:1080px; margin:0 auto; padding:0.4rem 1.2rem 3.5rem}
+/* ไกด์เด่น */
+.gd-feat{position:relative; display:grid; grid-template-columns:1.15fr 1fr; background:var(--card); border:1px solid var(--line); border-radius:22px; overflow:hidden;
+  box-shadow:0 10px 30px rgba(62,47,35,.10); text-decoration:none; color:var(--text); margin-top:1.4rem; transition:transform .22s ease, box-shadow .22s ease}
+.gd-feat:hover{transform:translateY(-3px); box-shadow:0 18px 40px rgba(62,47,35,.16)}
+.gd-feat .pic{position:relative; min-height:300px; overflow:hidden}
+.gd-feat .pic img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+.gd-feat:hover .pic img{transform:scale(1.04)}
+.gd-feat .pic::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(62,47,35,0) 60%, rgba(255,252,246,.55) 100%)}
+.gd-feat .body{padding:1.6rem 1.7rem 1.5rem; display:flex; flex-direction:column; gap:0.6rem; justify-content:center}
+.gd-feat .tags{display:flex; gap:0.4rem; flex-wrap:wrap}
+.gd-feat h2{font-family:var(--font-display); font-size:clamp(1.35rem,2.6vw,1.9rem); color:var(--dark); line-height:1.25}
+.gd-feat p{color:var(--text); line-height:1.7; font-size:0.95rem}
+.gd-meta{display:flex; flex-wrap:wrap; gap:0.45rem; margin-top:0.2rem}
+.gd-meta span{font-size:0.8rem; color:var(--gold-dark); background:var(--gold-soft); border-radius:999px; padding:0.28rem 0.7rem; font-weight:600}
+.gd-feat .go,.gd-card .go{font-family:"Prompt",sans-serif; font-size:0.88rem; font-weight:700; color:var(--gold-dark); display:inline-flex; align-items:center; gap:0.35rem; margin-top:auto}
+.gd-feat .go::after,.gd-card .go::after{content:"→"; transition:transform .2s ease}
+.gd-feat:hover .go::after,.gd-card:hover .go::after{transform:translateX(4px)}
+/* หัวหมวด */
+.gd-sec{margin-top:2.6rem}
+.gd-sec-h{display:flex; align-items:center; gap:0.7rem; margin-bottom:1rem}
+.gd-sec-h h2{font-family:"Prompt",sans-serif; font-size:1.15rem; color:var(--dark); white-space:nowrap}
+.gd-sec-h .cnt{font-size:0.75rem; font-weight:700; color:var(--gold-dark); background:var(--gold-soft); border-radius:999px; padding:0.15rem 0.6rem}
+.gd-sec-h::after{content:""; flex:1; height:1px; background:var(--line)}
+/* การ์ด */
+.gd-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.1rem}
+.gd-card{background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; box-shadow:0 4px 16px rgba(62,47,35,.06); transition:transform .2s ease, box-shadow .2s ease}
+.gd-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(62,47,35,.14)}
+.gd-card .pic{position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--gold-soft)}
+.gd-card .pic img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+.gd-card:hover .pic img{transform:scale(1.06)}
+.gd-card .em{position:absolute; left:10px; bottom:10px; width:38px; height:38px; border-radius:12px; background:rgba(255,252,246,.94); display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow:0 4px 10px rgba(62,47,35,.18)}
+.gd-tag{position:absolute; top:10px; left:10px; font-size:0.7rem; font-weight:700; background:var(--gold-dark); color:#fff8ef; border-radius:999px; padding:0.22rem 0.65rem; box-shadow:0 3px 8px rgba(62,47,35,.25)}
+.gd-card .body{padding:0.95rem 1.05rem 1.05rem; display:flex; flex-direction:column; gap:0.4rem; flex:1}
+.gd-card h2{font-family:"Prompt",sans-serif; font-size:1.02rem; color:var(--dark); line-height:1.35}
+.gd-card p{font-size:0.85rem; line-height:1.65; color:var(--muted); flex:1}
+/* แถบถามเรา */
+.gd-ask{margin-top:2.8rem; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#fff8ef; border-radius:22px; padding:1.6rem 1.6rem; display:flex; align-items:center; justify-content:space-between; gap:1.2rem; flex-wrap:wrap; box-shadow:0 12px 30px rgba(107,66,38,.25)}
+.gd-ask h3{font-family:"Prompt",sans-serif; font-size:1.2rem; margin-bottom:0.25rem}
+.gd-ask p{opacity:.92; font-size:0.92rem; line-height:1.6; max-width:34em}
+.gd-ask .btns{display:flex; gap:0.6rem; flex-wrap:wrap}
+.gd-ask .btn{border:0}
+.gd-ask .b-line{background:#06C755; color:#fff}
+.gd-ask .b-wa{background:#25D366; color:#fff}
+.gd-ask .btn:hover{filter:brightness(1.06)}
+.gd-credit{text-align:center; font-size:0.78rem; color:var(--muted); margin-top:1.4rem}
+.gd-credit a{color:var(--gold-dark)}
+@media (max-width:760px){
+  .gd-feat{grid-template-columns:1fr}
+  .gd-feat .pic{min-height:200px; aspect-ratio:16/9}
+  .gd-feat .pic::after{background:linear-gradient(180deg, rgba(62,47,35,0) 55%, rgba(255,252,246,.6) 100%)}
+  .gd-feat .body{padding:1.2rem 1.2rem 1.3rem}
+}
+@media (max-width:640px){
+  .gd-grid{grid-template-columns:1fr; gap:0.8rem}
+  .gd-card{flex-direction:row; align-items:stretch}
+  .gd-card .pic{aspect-ratio:auto; width:36%; min-width:120px; flex:none}
+  .gd-card .em{width:30px; height:30px; font-size:0.95rem; left:7px; bottom:7px; border-radius:9px}
+  .gd-tag{top:7px; left:7px; font-size:0.64rem}
+  .gd-card .body{padding:0.75rem 0.85rem 0.8rem}
+  .gd-card h2{font-size:0.95rem}
+  .gd-card p{font-size:0.8rem; line-height:1.5}
+  .gd-ask{padding:1.3rem 1.2rem}
+}
+
+/* ── แถบเทศกาลใกล้ถึง ── */
+.gd-fest{display:flex; align-items:center; flex-wrap:wrap; gap:.6rem; margin-top:1.2rem;
+  background:var(--gold-soft); border:1px solid var(--gold); border-radius:16px; padding:.7rem 1rem}
+.gd-fest .lb{font-family:"Prompt",sans-serif; font-size:.74rem; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-dark)}
+.gd-fest a{display:inline-flex; align-items:center; gap:.4rem; text-decoration:none; color:var(--dark);
+  background:var(--card); border:1px solid var(--line); border-radius:999px; padding:.3rem .8rem; font-size:.86rem}
+.gd-fest a:hover{border-color:var(--gold)}
+.gd-fest a .when{color:var(--gold-dark); font-weight:600}
+.gd-fest a .unconf{color:var(--muted); font-size:.78rem}
+
+/* ── ตัวกรอง + ค้นหา ── */
+.gd-filter{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin-top:1.3rem;
+  position:sticky; top:0; z-index:20; background:var(--bg); padding:.6rem 0}
+.gd-filter .pills{display:flex; gap:.45rem; overflow-x:auto; scrollbar-width:none; flex:1 1 320px; padding-bottom:2px}
+.gd-filter .pills::-webkit-scrollbar{display:none}
+.gd-filter .pill{flex:0 0 auto; cursor:pointer; font-family:"Prompt",sans-serif; font-size:.84rem;
+  background:var(--card); border:1px solid var(--line); border-radius:999px; padding:.35rem .9rem; color:var(--text);
+  transition:background .15s ease, color .15s ease, border-color .15s ease}
+.gd-filter .pill:hover{border-color:var(--gold)}
+.gd-filter .pill.on{background:var(--gold); border-color:var(--gold); color:var(--on-dark)}
+.gd-search{display:flex; align-items:center; gap:.4rem; background:var(--card); border:1px solid var(--line);
+  border-radius:999px; padding:.3rem .8rem; flex:0 1 240px}
+.gd-search input{border:0; background:none; outline:none; font:inherit; font-size:.88rem; color:var(--text); width:100%}
+.gd-empty{margin:1.6rem 0; color:var(--muted); text-align:center}
+
+/* ── เริ่มจาก 3 อันนี้ ── */
+.gd-start{margin-top:1.8rem}
+.gd-startgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.8rem}
+.gd-scard{display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:.1rem .7rem;
+  text-decoration:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:.9rem 1rem;
+  transition:transform .18s ease, border-color .18s ease}
+.gd-scard:hover{transform:translateY(-2px); border-color:var(--gold)}
+.gd-scard b{grid-row:1 / span 2; align-self:center; font-family:var(--font-display); font-size:1.5rem; color:var(--gold)}
+.gd-scard .t{font-family:"Prompt",sans-serif; font-size:.95rem; color:var(--dark)}
+.gd-scard .d{font-size:.82rem; color:var(--muted); line-height:1.5}
+
+/* ── ชิปสรุปบนการ์ด ── */
+.gd-chips{display:flex; flex-wrap:wrap; gap:.35rem; margin:.5rem 0 .1rem}
+.gd-chips span{font-size:.76rem; color:var(--muted); background:var(--bg); border:1px solid var(--line);
+  border-radius:999px; padding:.15rem .55rem}
+
+/* ── แผนที่วาดมือในกล่องถาม ── */
+.gd-ask{align-items:center}
+.gd-ask-map{width:150px; height:auto; border-radius:14px; flex:0 0 auto; box-shadow:0 8px 20px rgba(62,47,35,.18)}
+@media (max-width:760px){.gd-ask-map{display:none}}
+</style>
+<link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/guides.html"><link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/guides.html"><link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/guides.html"><meta property="og:locale" content="en_US"><script>window.HOH_LANG = "en";</script></head>
+<body>
+
+<nav class="topnav">
+  <a class="brand" href="/en/index.html"><span class="logo">🏠</span> House of Happiness</a>
+  <div class="navlinks">
+    <a href="/en/index.html#rooms">Rooms</a>
+    <a href="/en/index.html">← Back to home</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle"><a href="/guides.html" hreflang="th">ไทย</a><a class="active" aria-current="true" href="/en/guides.html" hreflang="en">EN</a></div>
+    <a class="btn btn-gold btn-sm" href="/en/booking.html">Book Now</a>
+  </div>
+</nav>
+
+<header class="gd-hero">
+  <div class="kicker">Guides &amp; Stories · Khlong San – Thonburi</div>
+  <h1>Local Travel Guides</h1>
+  <p class="sub">We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.</p>
+  <div class="gd-stats">
+    <span>✍️ 24 guides, all written by us</span>
+    <span>🚶 Everything within 15 min by foot, boat or train</span>
+    <span>🌐 ไทย · English</span>
+  </div>
+</header>
+
+<div class="gd-wrap">
+
+  <div class="gd-fest" id="gdFest" hidden=""></div>
+
+  <div class="gd-filter" id="gdFilter">
+    <div class="pills">
+      <button type="button" class="pill on" data-f="all">All</button>
+      <button type="button" class="pill" data-f="area">This neighbourhood</button>
+      <button type="button" class="pill" data-f="routes">Day routes</button>
+      <button type="button" class="pill" data-f="trips">Day trips</button>
+      <button type="button" class="pill" data-f="season">Festivals</button>
+      <button type="button" class="pill" data-f="prac">Before you arrive</button>
+    </div>
+    <label class="gd-search">
+      <span aria-hidden="true">🔍</span>
+      <input type="search" id="gdSearch" autocomplete="off" placeholder="Search guide titles" aria-label="ค้นหาชื่อไกด์">
+    </label>
+  </div>
+  <p class="gd-empty" id="gdEmpty" hidden="">Nothing matched — try a shorter word, or tap “All”</p>
+
+  <section class="gd-start" id="gdStart">
+    <div class="gd-sec-h"><h2>Just booked? Start with these three</h2></div>
+    <div class="gd-startgrid">
+      <a class="gd-scard" href="/en/airport-guide.html"><b>1</b><span class="t">Getting here from the airport</span><span class="d">Real taxi prices, and the train step by step</span></a>
+      <a class="gd-scard" href="/en/getting-around-bangkok.html"><b>2</b><span class="t">Getting around the city</span><span class="d">The Gold Line, the ferry, or a car</span></a>
+      <a class="gd-scard" href="/en/heritage-walk.html"><b>3</b><span class="t">Where to go on day one</span><span class="d">A half-day walk that starts at the pier down our lane</span></a>
+    </div>
+  </section>
+
+  <a class="gd-feat" href="/en/heritage-walk.html">
+    <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/riverboat.jpg" alt="เรือข้ามฟากแม่น้ำเจ้าพระยา — จุดเริ่มต้นเส้นทางเดินเที่ยวมรดกไชน่าทาวน์" width="960" height="720" loading="eager" decoding="async"></picture></div>
+    <div class="body">
+      <div class="tags"><span class="gd-meta"><span>✨ Newest guide</span></span></div>
+      <h2>Chinatown Heritage Walk — a ฿5 ferry away</h2>
+      <p>A half-day, 8-stop route: Guan Yu shrine on our side → ferry → Sampeng → Leng Noei Yi → Song Wat → Talat Noi → Yaowarat dinner, with heritage foods and etiquette for four faiths</p>
+      <div class="gd-meta">
+        <span>🚤 ฿5 ferry</span><span>🚶 ~4 km · 3–4 h</span><span>🕒 Best 3–8 PM</span>
+      </div>
+      <div class="gd-chips"><span>~4 km · 4–5 hr</span><span>฿5 ferry</span><span>15:00–20:00</span></div>
+      <span class="go">Read the full guide</span>
+    </div>
+  </a>
+
+  <section class="gd-sec" data-cat="area">
+    <div class="gd-sec-h"><h2>Exploring the neighbourhood</h2><span class="cnt"></span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="/en/yaowarat-night-walk.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/yaowarat-800.webp 800w, /images/attractions/yaowarat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/yaowarat.jpg" alt="ถนนเยาวราช ป้ายร้านจีนเรียงสองฝั่งถนนและตุ๊กตุ๊กจอดรอ" width="960" height="721" loading="lazy" decoding="async"></picture><span class="em">🌙</span></div>
+        <div class="body">
+          <h2>Yaowarat Night Food Walk, 2 Hours</h2>
+          <p>A 6-stop, ~3 km eating loop: ฿5 ferry, six dishes with prices, about ฿350 a head, and three ways home after the last boat</p>
+          <div class="gd-chips"><span>~3 km · 2 hr</span><span>~฿300–500 pp</span><span>Leave 18:30</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/thonburi-one-day.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/watarun-800.webp 800w, /images/attractions/watarun.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/watarun.jpg" alt="วัดอรุณราชวราราม" width="960" height="640" loading="lazy" decoding="async"></picture><span class="em">🗺️</span></div>
+        <div class="body">
+          <h2>One Full Day in Thonburi</h2>
+          <p>Morning to night: market → Wat Arun → Kudi Chin → Sky Park → ICONSIAM → Chinatown.</p>
+          <div class="gd-chips"><span>Morning to evening</span><span>Transport ~฿150–350</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/local.html">
+        <div class="pic"><img src="/images/local/krua.webp" alt="ร้านอาหารรอบซอยท่าดินแดง" width="800" height="824" loading="lazy" decoding="async"><span class="em">🍜</span></div>
+        <div class="body">
+          <h2>Tha Din Daeng Food &amp; Neighbourhood</h2>
+          <p>13 spots locals actually eat at + a 10-stop walk most tourists never find.</p>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/attractions.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/kudichin-800.webp 800w, /images/attractions/kudichin.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/kudichin.jpg" alt="Santa Cruz Church in the Kudi Chin quarter — one of the places within walking and ferry reach" width="960" height="1344" loading="lazy" decoding="async"></picture><span class="em">🛕</span></div>
+        <div class="body">
+          <h2>Things to Do Nearby</h2>
+          <p>9 top sights — Sky Park, ICONSIAM, Wat Arun, Chinatown — with directions from the hotel.</p>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/near-chinatown.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/yaowarat-800.webp 800w, /images/attractions/yaowarat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/yaowarat.jpg" alt="ถนนเยาวราช ตึกแถวและป้ายร้านจีนริมถนนใหญ่" width="960" height="721" loading="lazy" decoding="async"></picture><span class="em">🐉</span></div>
+        <div class="body">
+          <h2>Hotel near Chinatown</h2>
+          <p>One bridge from Yaowarat — easy late-night returns, and our side sleeps quiet.</p>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="gd-sec" data-cat="routes">
+    <div class="gd-sec-h"><h2>Themed day routes</h2><span class="cnt"></span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="/en/song-wat-road.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/yaowarat-800.webp 800w, /images/attractions/yaowarat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/yaowarat.jpg" alt="Song Wat Road — The Creative District Closest to Us, One ฿5 Ferry Away" width="960" height="721" loading="lazy" decoding="async"></picture><span class="em">🎨</span></div>
+        <div class="body">
+          <h2>Song Wat Road — The Creative District Closest to Us, One ฿5 Ferry Away</h2>
+          <p>A ฿5 ferry, ~3 minutes, and you're at the head of Song Wat — our closest creative district</p>
+          <div class="gd-chips"><span>Late afternoon to dusk</span><span>฿5 ferry</span><span>Many places shut Mondays</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/sampeng-morning.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/pakkhlong-800.webp 800w, /images/attractions/pakkhlong.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/pakkhlong.jpg" alt="Pak Khlong flower market at first light — the same early-morning trading hours as Sampeng" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🛍️</span></div>
+        <div class="body">
+          <h2>Sampeng Market at Dawn — a ฿5 Ferry, Four Lanes of Shopping, Home Before Noon</h2>
+          <p>Cross the ฿5 ferry, shop the Sampeng lanes at dawn, home before noon</p>
+          <div class="gd-chips"><span>Dawn to noon</span><span>฿5 ferry · bring cash</span><span>The earlier the better</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/three-temples-boat.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/watpho-800.webp 800w, /images/attractions/watpho.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/watpho.jpg" alt="The gilded Reclining Buddha at Wat Pho — the first of the three temples on this route" width="960" height="1440" loading="lazy" decoding="async"></picture><span class="em">⛩️</span></div>
+        <div class="body">
+          <h2>Wat Pho, Wat Arun &amp; Wat Kalayanamit — Three Temples in Half a Day, Mostly by River</h2>
+          <p>Wat Pho → Wat Arun → Wat Kalayanamit — half a day by river, then home</p>
+          <div class="gd-chips"><span>~4–5 hr</span><span>A few baht per boat</span><span>Early, before the crowds</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/sunrise-alms-market.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/riverboat.jpg" alt="Dawn on the Chao Phraya — Offer Alms, Walk the Morning Market, Watch the Sunrise, Home for Breakfast" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🌅</span></div>
+        <div class="body">
+          <h2>Dawn on the Chao Phraya — Offer Alms, Walk the Morning Market, Watch the Sunrise, Home for Breakfast</h2>
+          <p>Dawn: alms, a morning market, river views — then home for breakfast</p>
+          <div class="gd-chips"><span>~2 hr</span><span>Before first light</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/thonburi-riverside-evening.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/skypark.jpg" alt="Riverside Cafés, the Sky Park &amp; Lhong 1919 — a Thonburi Evening" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🌆</span></div>
+        <div class="body">
+          <h2>Riverside Cafés, the Sky Park &amp; Lhong 1919 — a Thonburi Evening</h2>
+          <p>Riverside cafés · the Sky Park at golden hour · Lhong 1919 — a Thonburi evening from our door</p>
+          <div class="gd-chips"><span>~3–4 hr</span><span>No river crossing needed</span><span>Late afternoon to dusk</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/iconsiam-asiatique-boat.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/iconsiam.webp 704w"><img src="/images/attractions/iconsiam.jpg" alt="ICONSIAM to Asiatique — a River Day by Free Shuttle &amp; Express Boat" width="704" height="1251" loading="lazy" decoding="async"></picture><span class="em">⛴️</span></div>
+        <div class="body">
+          <h2>ICONSIAM to Asiatique — a River Day by Free Shuttle &amp; Express Boat</h2>
+          <p>From ICONSIAM on our bank down the Chao Phraya to Asiatique — free shuttles and the express boat, in one day</p>
+          <div class="gd-chips"><span>A full day</span><span>Free shuttle boats</span><span>Flexible, boat times rule</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/thonburi-by-bike.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/riverboat.jpg" alt="Thonburi by Bike — Backlanes, Riverside Temples &amp; the Chao Phraya" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🚲</span></div>
+        <div class="body">
+          <h2>Thonburi by Bike — Backlanes, Riverside Temples &amp; the Chao Phraya</h2>
+          <p>Cycle the quiet Thonburi backlanes past riverside temples and the Chao Phraya — a slow alternative from Khlong San</p>
+          <div class="gd-chips"><span>Half to full day</span><span>Arrange a bike in advance</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/family-river-day.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/skypark.jpg" alt="A Family River Day — a flat park, a short ฿5 boat, then a cool indoor afternoon, very little walking" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">👨‍👩‍👧</span></div>
+        <div class="body">
+          <h2>A Family River Day — a flat park, a short ฿5 boat, then a cool indoor afternoon, very little walking</h2>
+          <p>A low-walking family river day — a flat park, a ฿5 boat and a cool mall afternoon</p>
+          <div class="gd-chips"><span>Little walking · stroller-friendly</span><span>฿5 ferry</span><span>Indoors in the afternoon</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/rainy-day-indoor.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/iconsiam.webp 704w"><img src="/images/attractions/iconsiam.jpg" alt="A rainy day still works — an all-indoor plan of malls, cafes and covered halls, staying as dry as possible" width="704" height="1251" loading="lazy" decoding="async"></picture><span class="em">🌧️</span></div>
+        <div class="body">
+          <h2>A rainy day still works — an all-indoor plan of malls, cafes and covered halls, staying as dry as possible</h2>
+          <p>Rainy day, all-indoor plan — malls, cafes and covered halls, keeping dry</p>
+          <div class="gd-chips"><span>All day indoors</span><span>For a day the rain won't stop</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/chinatown-festivals.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/yaowarat-800.webp 800w, /images/attractions/yaowarat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/yaowarat.jpg" alt="Yaowarat by the season — the Vegetarian Festival (around October) and Chinese New Year (late Jan or Feb)" width="960" height="721" loading="lazy" decoding="async"></picture><span class="em">🏮</span></div>
+        <div class="body">
+          <h2>Yaowarat by the season — the Vegetarian Festival (around October) and Chinese New Year (late Jan or Feb)</h2>
+          <p>Yaowarat by the season — Vegetarian Festival and Chinese New Year, across the ฿5 ferry</p>
+          <div class="gd-chips"><span>฿5 ferry</span><span>Vegetarian ~Oct · CNY Jan–Feb</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="gd-sec" data-cat="trips">
+    <div class="gd-sec-h"><h2>Day trips out of town</h2><span class="cnt"></span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="/en/ayutthaya-day-trip.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/riverboat.jpg" alt="A Chao Phraya express boat — the river that runs from Khlong San up to Ayutthaya" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🏛️</span></div>
+        <div class="body">
+          <h2>Ayutthaya in One Day from Bangkok — Out Early from Khlong San, Back by the River at Night</h2>
+          <p>Ayutthaya in a day from Khlong San — out early, the main ruins, home to the river by night (~80 km north of the hotel).</p>
+          <div class="gd-chips"><span>Day trip · 1–2 hr each way</span><span>Out 06:30, back ~19:00</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="gd-sec" data-cat="season">
+    <div class="gd-sec-h"><h2>Festival guides</h2><span class="cnt"></span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="/en/songkran-riverside.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/riverboat.jpg" alt="Songkran by the Chao Phraya, the Khlong San Way — Choose How Wet You Get, Then Sleep on the Quieter Bank" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">💦</span></div>
+        <div class="body">
+          <h2>Songkran by the Chao Phraya, the Khlong San Way — Choose How Wet You Get, Then Sleep on the Quieter Bank</h2>
+          <p>Songkran, 13–15 April, from Khlong San — merit in the morning, water in the afternoon, quiet at night</p>
+          <div class="gd-chips"><span>13–15 April</span><span>฿5 ferry</span><span>Merit in the morning, water after</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/loy-krathong.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/grandpalace-800.webp 800w, /images/attractions/grandpalace.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/grandpalace.jpg" alt="The Grand Palace lit across the Chao Phraya after dark — the river Loy Krathong happens on" width="960" height="639" loading="lazy" decoding="async"></picture><span class="gd-tag">25 Nov 2026</span><span class="em">🏮</span></div>
+        <div class="body">
+          <h2>Loy Krathong on the Chao Phraya</h2>
+          <p>Where to float near the hotel — community piers and big riverside events, with crowd-dodging tips.</p>
+          <div class="gd-chips"><span>The full-moon night of the 12th month</span><span>Wed 25 Nov 2026</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/new-year-countdown.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/iconsiam.webp 704w"><img src="/images/attractions/iconsiam.jpg" alt="ICONSIAM on the riverfront — where the countdown fireworks are launched" width="704" height="1251" loading="lazy" decoding="async"></picture><span class="gd-tag">31 Dec</span><span class="em">🎆</span></div>
+        <div class="body">
+          <h2>NYE — ICONSIAM Countdown Fireworks</h2>
+          <p>Free viewing spots on our side of the river — walk home after midnight, skip the taxi chaos.</p>
+          <div class="gd-chips"><span>The night of 31 December</span><span>Fireworks spots within walking distance</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="gd-sec" data-cat="prac">
+    <div class="gd-sec-h"><h2>Before you arrive</h2><span class="cnt"></span></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="/en/chao-phraya-boat-guide.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/riverboat.jpg" alt="The Chao Phraya boat guide, made simple — which boat, which pier, how to pay" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">⛴️</span></div>
+        <div class="body">
+          <h2>The Chao Phraya boat guide, made simple — which boat, which pier, how to pay</h2>
+          <p>The Chao Phraya boat guide, made simple — four kinds of boat, the piers, and how to pay</p>
+          <div class="gd-chips"><span>฿5 ferry</span><span>Read before your first boat</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/getting-around-bangkok.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/attractions/skypark.jpg" alt="Getting around Bangkok from Khlong San — picking the train, the boat or the car at the right moment" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🚈</span></div>
+        <div class="body">
+          <h2>Getting around Bangkok from Khlong San — picking the train, the boat or the car at the right moment</h2>
+          <p>Getting around Bangkok from Khlong San — trains, boats, Grab and motorbike taxis</p>
+          <div class="gd-chips"><span>Gold Line, 2 stops to Silom</span><span>฿5 ferry</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/airport-guide.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/entrance-800.webp 800w, /images/entrance.webp 1024w" sizes="(max-width: 760px) 100vw, 380px"><img src="/images/entrance.jpg" alt="ทางเข้าที่พัก House of Happiness" width="1024" height="683" loading="lazy" decoding="async"></picture><span class="em">✈️</span></div>
+        <div class="body">
+          <h2>Getting Here from the Airport</h2>
+          <p>BKK &amp; DMK: real taxi fares, step-by-step trains, and a Thai address to show your driver.</p>
+          <div class="gd-chips"><span>40–60 min</span><span>Taxi ~฿250–450</span></div>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+      <a class="gd-card" href="/en/near-iconsiam.html">
+        <div class="pic"><picture><source type="image/webp" srcset="/images/attractions/iconsiam.webp 704w"><img src="/images/attractions/iconsiam.jpg" alt="ICONSIAM ริมแม่น้ำเจ้าพระยา" width="704" height="1251" loading="lazy" decoding="async"></picture><span class="em">🛍️</span></div>
+        <div class="body">
+          <h2>Hotel near ICONSIAM</h2>
+          <p>~2 km, 5 minutes by car, one Gold Line stop — shop all day, sleep close by.</p>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="gd-rs" id="gdRs">
+    <div class="gd-sec-h"><h2>Staying in today</h2></div>
+    <div class="gd-grid">
+      <a class="gd-card" href="/services.html">
+        <div class="pic"><img src="/images/services/massaman.webp" alt="Room service — Thai dishes delivered to the room" width="640" height="510" loading="lazy" decoding="async"><span class="em">🍛</span></div>
+        <div class="body">
+          <h2>Room service — Thai food to your door</h2>
+          <p>Massaman, green curry, pad thai, Thai desserts and iced coffee from ฿40 — order ahead on LINE or WhatsApp</p>
+          <span class="go">Read the guide</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <div class="gd-ask">
+    <picture><source type="image/webp" srcset="/images/map-hand.webp"><img class="gd-ask-map" src="/images/map-hand.jpg" alt="A hand-drawn map of the Khlong San neighbourhood" width="703" height="768" loading="lazy" decoding="async"></picture>
+    <div>
+      <h3>Can't find what you need?</h3>
+      <p>Just message us — which places are open today, how to get anywhere, boat times, or a hand-drawn map marked up for you. We're locals and we reply fast.</p>
+    </div>
+    <div class="btns">
+      <a class="btn b-line" href="https://line.me/R/ti/p/@060hvzok" target="_blank" rel="noopener">💬 Ask on LINE</a>
+      <a class="btn b-wa" href="https://wa.me/66994419465" target="_blank" rel="noopener">📱 WhatsApp</a>
+    </div>
+  </div>
+
+  <div class="ld-cta" style="margin-top:2rem">
+    <a class="btn btn-gold" href="/en/booking.html">Check availability &amp; book</a>
+  </div>
+  <p class="gd-credit"><a href="/en/credits.html">Attraction photos from Wikimedia Commons — see credits</a></p>
+</div>
+
+<footer class="site">
+  <div class="foot-bottom">© House of Happiness · <span>558/1 Tha Din Daeng 16, Khlong San, Bangkok 10600</span> · <a href="/en/index.html" style="color:inherit">houseofhappinessbangkok.com</a></div>
+</footer>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"House of Happiness","item":"https://houseofhappinessbangkok.com/"},{"@type":"ListItem","position":2,"name":"ไกด์เที่ยว & บทความ","item":"https://houseofhappinessbangkok.com/en/guides.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Khlong San & Thonburi travel guides by House of Happiness","url":"https://houseofhappinessbangkok.com/guides.html","hasPart":[{"@type":"Article","name":"Loy Krathong on the Chao Phraya","url":"https://houseofhappinessbangkok.com/loy-krathong.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"ICONSIAM New Year Countdown Fireworks","url":"https://houseofhappinessbangkok.com/new-year-countdown.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Chinatown Heritage Walk from Khlong San","url":"https://houseofhappinessbangkok.com/heritage-walk.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Yaowarat Night Food Walk from Khlong San","url":"https://houseofhappinessbangkok.com/yaowarat-night-walk.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"One Full Day in Thonburi","url":"https://houseofhappinessbangkok.com/thonburi-one-day.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Tha Din Daeng food & neighbourhood guide","url":"https://houseofhappinessbangkok.com/local.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Things to do near House of Happiness","url":"https://houseofhappinessbangkok.com/attractions.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Airport directions","url":"https://houseofhappinessbangkok.com/airport-guide.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Song Wat Road — The Creative District Closest to Us, One ฿5 Ferry Away","url":"https://houseofhappinessbangkok.com/song-wat-road.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Ayutthaya in One Day from Bangkok — Out Early from Khlong San, Back by the River at Night","url":"https://houseofhappinessbangkok.com/ayutthaya-day-trip.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Songkran by the Chao Phraya, the Khlong San Way — Choose How Wet You Get, Then Sleep on the Quieter Bank","url":"https://houseofhappinessbangkok.com/songkran-riverside.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"The Chao Phraya boat guide, made simple — which boat, which pier, how to pay","url":"https://houseofhappinessbangkok.com/chao-phraya-boat-guide.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Getting around Bangkok from Khlong San — picking the train, the boat or the car at the right moment","url":"https://houseofhappinessbangkok.com/getting-around-bangkok.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Sampeng Market at Dawn — a ฿5 Ferry, Four Lanes of Shopping, Home Before Noon","url":"https://houseofhappinessbangkok.com/sampeng-morning.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Wat Pho, Wat Arun & Wat Kalayanamit — Three Temples in Half a Day, Mostly by River","url":"https://houseofhappinessbangkok.com/three-temples-boat.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Dawn on the Chao Phraya — Offer Alms, Walk the Morning Market, Watch the Sunrise, Home for Breakfast","url":"https://houseofhappinessbangkok.com/sunrise-alms-market.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Riverside Cafés, the Sky Park & Lhong 1919 — a Thonburi Evening","url":"https://houseofhappinessbangkok.com/thonburi-riverside-evening.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"ICONSIAM to Asiatique — a River Day by Free Shuttle & Express Boat","url":"https://houseofhappinessbangkok.com/iconsiam-asiatique-boat.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Thonburi by Bike — Backlanes, Riverside Temples & the Chao Phraya","url":"https://houseofhappinessbangkok.com/thonburi-by-bike.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"A Family River Day — a flat park, a short ฿5 boat, then a cool indoor afternoon, very little walking","url":"https://houseofhappinessbangkok.com/family-river-day.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"A rainy day still works — an all-indoor plan of malls, cafes and covered halls, staying as dry as possible","url":"https://houseofhappinessbangkok.com/rainy-day-indoor.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"},{"@type":"Article","name":"Yaowarat by the season — the Vegetarian Festival (around October) and Chinese New Year (late Jan or Feb)","url":"https://houseofhappinessbangkok.com/chinatown-festivals.html","description":"We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review.","inLanguage":"en"}]}</script>
+<script src="/assets/i18n.js"></script>
+<script>
+Object.assign(I18N, {
+  /* ตัวกรอง ค้นหา แถบเทศกาล และบล็อกเริ่มต้นในหน้ารวมไกด์ */
+  "gd.f.all": { th: "ทั้งหมด", en: "All" },
+  "gd.f.area": { th: "เที่ยวย่านนี้", en: "This neighbourhood" },
+  "gd.f.routes": { th: "เส้นทาง", en: "Day routes" },
+  "gd.f.trips": { th: "นอกเมือง", en: "Day trips" },
+  "gd.f.season": { th: "เทศกาล", en: "Festivals" },
+  "gd.f.prac": { th: "ก่อนมาพัก", en: "Before you arrive" },
+  "gd.f.ph": { th: "ค้นหาชื่อไกด์", en: "Search guide titles" },
+  "gd.f.none": { th: "ไม่เจอไกด์ที่ตรงกับคำค้น — ลองคำสั้นลง หรือกด “ทั้งหมด”", en: "Nothing matched — try a shorter word, or tap “All”" },
+  "gd.start.t": { th: "เพิ่งจองเสร็จ? เริ่มจาก 3 อันนี้", en: "Just booked? Start with these three" },
+  "gd.start.1t": { th: "มาจากสนามบินยังไง", en: "Getting here from the airport" },
+  "gd.start.1d": { th: "แท็กซี่ราคาจริง กับรถไฟฟ้าทีละขั้น", en: "Real taxi prices, and the train step by step" },
+  "gd.start.2t": { th: "เดินทางในเมืองยังไง", en: "Getting around the city" },
+  "gd.start.2d": { th: "สายสีทอง เรือข้ามฟาก หรือเรียกรถ", en: "The Gold Line, the ferry, or a car" },
+  "gd.start.3t": { th: "วันแรกไปไหนดี", en: "Where to go on day one" },
+  "gd.start.3d": { th: "เส้นทางเดินครึ่งวัน เริ่มที่ท่าเรือท้ายซอย", en: "A half-day walk that starts at the pier down our lane" },
+  "gd.rs.t": { th: "ไม่ได้ออกไปไหนวันนี้", en: "Staying in today" },
+  "gd.ask.map": { th: "แผนที่ย่านคลองสานวาดมือ", en: "A hand-drawn map of the Khlong San neighbourhood" },
+  "gd.fest.t": { th: "ใกล้ถึงแล้ว", en: "Coming up" },
+  "gd.fest.in": { th: "อีก {n} วัน", en: "in {n} days" },
+  "gd.fest.tmr": { th: "พรุ่งนี้", en: "tomorrow" },
+  "gd.fest.today": { th: "วันนี้", en: "today" },
+  "gd.fest.now": { th: "กำลังจัดอยู่", en: "on now" },
+  "gd.fest.unconf": { th: "รอยืนยันวัน", en: "date to confirm" },
+  "gd.count": { th: "✍️ {n} ไกด์ เขียนเองทั้งหมด", en: "✍️ {n} guides, all written by us" },
+  /* ชิปสรุปบนการ์ด — ดึงจากข้อเท็จจริงที่แต่ละบทความเขียนไว้เอง */
+  "gd.m.heritagewalk.1": { th: "~4 กม. · 4–5 ชม.", en: "~4 km · 4–5 hr" },
+  "gd.m.heritagewalk.2": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.heritagewalk.3": { th: "15:00–20:00", en: "15:00–20:00" },
+  "gd.m.yaowaratnightwalk.1": { th: "~3 กม. · 2 ชม.", en: "~3 km · 2 hr" },
+  "gd.m.yaowaratnightwalk.2": { th: "~฿300–500/คน", en: "~฿300–500 pp" },
+  "gd.m.yaowaratnightwalk.3": { th: "ออก 18:30", en: "Leave 18:30" },
+  "gd.m.thonburioneday.1": { th: "เช้าจรดค่ำ", en: "Morning to evening" },
+  "gd.m.thonburioneday.2": { th: "ค่าเดินทาง ~฿150–350", en: "Transport ~฿150–350" },
+  "gd.m.songwatroad.1": { th: "บ่ายแก่–หัวค่ำ", en: "Late afternoon to dusk" },
+  "gd.m.songwatroad.2": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.songwatroad.3": { th: "หลายร้านปิดวันจันทร์", en: "Many places shut Mondays" },
+  "gd.m.sampengmorning.1": { th: "เช้าตรู่–ก่อนเที่ยง", en: "Dawn to noon" },
+  "gd.m.sampengmorning.2": { th: "เรือ 5 บาท · พกเงินสด", en: "฿5 ferry · bring cash" },
+  "gd.m.sampengmorning.3": { th: "ยิ่งเช้ายิ่งดี", en: "The earlier the better" },
+  "gd.m.threetemplesboat.1": { th: "~4–5 ชม.", en: "~4–5 hr" },
+  "gd.m.threetemplesboat.2": { th: "ค่าเรือหลักบาท", en: "A few baht per boat" },
+  "gd.m.threetemplesboat.3": { th: "ไปเช้า วัดยังไม่แน่น", en: "Early, before the crowds" },
+  "gd.m.sunrisealmsmarket.1": { th: "~2 ชม.", en: "~2 hr" },
+  "gd.m.sunrisealmsmarket.2": { th: "ก่อนฟ้าสว่าง", en: "Before first light" },
+  "gd.m.thonbuririversideevening.1": { th: "~3–4 ชม.", en: "~3–4 hr" },
+  "gd.m.thonbuririversideevening.2": { th: "ไม่ต้องข้ามแม่น้ำ", en: "No river crossing needed" },
+  "gd.m.thonbuririversideevening.3": { th: "บ่ายแก่จรดค่ำ", en: "Late afternoon to dusk" },
+  "gd.m.iconsiamasiatiqueboat.1": { th: "ทั้งวัน", en: "A full day" },
+  "gd.m.iconsiamasiatiqueboat.2": { th: "เรือรับส่งฟรี", en: "Free shuttle boats" },
+  "gd.m.iconsiamasiatiqueboat.3": { th: "ยืดหยุ่นตามรอบเรือ", en: "Flexible, boat times rule" },
+  "gd.m.thonburibybike.1": { th: "ครึ่งวัน–ทั้งวัน", en: "Half to full day" },
+  "gd.m.thonburibybike.2": { th: "ต้องจัดจักรยานล่วงหน้า", en: "Arrange a bike in advance" },
+  "gd.m.familyriverday.1": { th: "เดินน้อย · เข็นรถเข็นเด็กได้", en: "Little walking · stroller-friendly" },
+  "gd.m.familyriverday.2": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.familyriverday.3": { th: "บ่ายเข้าห้างแอร์เย็น", en: "Indoors in the afternoon" },
+  "gd.m.rainydayindoor.1": { th: "ทั้งวันในร่ม", en: "All day indoors" },
+  "gd.m.rainydayindoor.2": { th: "วันที่ฝนไม่หยุด", en: "For a day the rain won't stop" },
+  "gd.m.chinatownfestivals.1": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.chinatownfestivals.2": { th: "กินเจ ~ต.ค. · ตรุษจีน ม.ค.–ก.พ.", en: "Vegetarian ~Oct · CNY Jan–Feb" },
+  "gd.m.ayutthayadaytrip.1": { th: "ไปกลับวันเดียว · 1–2 ชม./เที่ยว", en: "Day trip · 1–2 hr each way" },
+  "gd.m.ayutthayadaytrip.2": { th: "ออก 06:30 กลับ ~19:00", en: "Out 06:30, back ~19:00" },
+  "gd.m.songkranriverside.1": { th: "13–15 เมษายน", en: "13–15 April" },
+  "gd.m.songkranriverside.2": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.songkranriverside.3": { th: "เช้าทำบุญ บ่ายเล่นน้ำ", en: "Merit in the morning, water after" },
+  "gd.m.loykrathong.1": { th: "คืนวันเพ็ญเดือน 12", en: "The full-moon night of the 12th month" },
+  "gd.m.loykrathong.2": { th: "พุธ 25 พ.ย. 2569", en: "Wed 25 Nov 2026" },
+  "gd.m.newyearcountdown.1": { th: "คืน 31 ธันวาคม", en: "The night of 31 December" },
+  "gd.m.newyearcountdown.2": { th: "จุดดูพลุเดินถึง", en: "Fireworks spots within walking distance" },
+  "gd.m.chaophrayaboatguide.1": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.chaophrayaboatguide.2": { th: "อ่านก่อนลงเรือครั้งแรก", en: "Read before your first boat" },
+  "gd.m.gettingaroundbangkok.1": { th: "สายสีทอง 2 สถานีต่อสีลม", en: "Gold Line, 2 stops to Silom" },
+  "gd.m.gettingaroundbangkok.2": { th: "เรือข้ามฟาก 5 บาท", en: "฿5 ferry" },
+  "gd.m.airportguide.1": { th: "40–60 นาที", en: "40–60 min" },
+  "gd.m.airportguide.2": { th: "แท็กซี่ ~฿250–450", en: "Taxi ~฿250–450" },
+  "gd.n6.t": { th: "รูมเซอร์วิส — สั่งอาหารไทยถึงหน้าห้อง", en: "Room service — Thai food to your door" },
+  "gd.n6.d": { th: "มัสมั่น แกงเขียวหวาน ผัดไทย ของหวานไทย กาแฟเย็น เริ่ม ฿40 สั่งล่วงหน้าทาง LINE หรือ WhatsApp", en: "Massaman, green curry, pad thai, Thai desserts and iced coffee from ฿40 — order ahead on LINE or WhatsApp" },
+  "gd.trips.t": { th: "ทริปไปกลับนอกเมือง", en: "Day trips out of town" },
+  "gd.n5.t": { th: "ถนนทรงวาด — ย่านสร้างสรรค์ที่ใกล้ที่พักเราที่สุด ข้ามเรือ 5 บาทก็ถึงหัวถนน", en: "Song Wat Road — The Creative District Closest to Us, One ฿5 Ferry Away" },
+  "gd.n5.d": { th: "ข้ามเรือ 5 บาท 3 นาที ขึ้นตรงหัวถนนทรงวาด — ย่านสร้างสรรค์ที่ใกล้เราที่สุด", en: "A ฿5 ferry, ~3 minutes, and you're at the head of Song Wat — our closest creative district" },
+  "gd.n1.t": { th: "เที่ยวอยุธยา 1 วันจากกรุงเทพฯ — ออกเช้าจากคลองสาน กลับมานอนริมแม่น้ำ", en: "Ayutthaya in One Day from Bangkok — Out Early from Khlong San, Back by the River at Night" },
+  "gd.n1.d": { th: "อยุธยา 1 วันจากคลองสาน (~80 กม. ทางเหนือ) — ไปเช้า เก็บวัดหลัก กลับค่ำมานอนริมน้ำ", en: "Ayutthaya in a day from Khlong San — out early, the main ruins, home to the river by night (~80 km north of the hotel)." },
+  "gd.n2.t": { th: "สงกรานต์ริมเจ้าพระยา ฉบับคลองสาน — เลือกได้ว่าจะเปียกแค่ไหน แล้วกลับมานอนฝั่งที่เงียบกว่า", en: "Songkran by the Chao Phraya, the Khlong San Way — Choose How Wet You Get, Then Sleep on the Quieter Bank" },
+  "gd.n2.d": { th: "สงกรานต์ 13–15 เมษายน จากฝั่งคลองสาน — เช้าทำบุญ บ่ายเล่นน้ำ ค่ำกลับมาฝั่งเงียบ", en: "Songkran, 13–15 April, from Khlong San — merit in the morning, water in the afternoon, quiet at night" },
+  "gd.n3.t": { th: "คู่มือเรือเจ้าพระยา ฉบับเข้าใจง่าย — เรือมีกี่แบบ ขึ้นท่าไหน จ่ายยังไง", en: "The Chao Phraya boat guide, made simple — which boat, which pier, how to pay" },
+  "gd.n3.d": { th: "คู่มือเรือเจ้าพระยา ฉบับเข้าใจง่าย — เรือสี่แบบ ท่าเรือ และวิธีจ่าย", en: "The Chao Phraya boat guide, made simple — four kinds of boat, the piers, and how to pay" },
+  "gd.n4.t": { th: "เดินทางในกรุงเทพจากคลองสาน — เลือกรถไฟฟ้า เรือ หรือรถ ให้ถูกจังหวะ", en: "Getting around Bangkok from Khlong San — picking the train, the boat or the car at the right moment" },
+  "gd.n4.d": { th: "เดินทางในกรุงเทพจากคลองสาน — รถไฟฟ้า เรือ Grab และวิน", en: "Getting around Bangkok from Khlong San — trains, boats, Grab and motorbike taxis" },
+  "gd.routes.t": { th: "แผนเที่ยวเป็นเส้นทาง", en: "Themed day routes" },
+  "gd.r1.t": { th: "ตลาดสำเพ็งตอนเช้า — ข้ามเรือ 5 บาท ซื้อของ 4 ซอย กลับที่พักก่อนเที่ยง", en: "Sampeng Market at Dawn — a ฿5 Ferry, Four Lanes of Shopping, Home Before Noon" },
+  "gd.r1.d": { th: "ข้ามเรือ 5 บาทไปเดินตลาดสำเพ็งตอนเช้า ซื้อของ กลับก่อนเที่ยง", en: "Cross the ฿5 ferry, shop the Sampeng lanes at dawn, home before noon" },
+  "gd.r2.t": { th: "วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร — 3 วัดครึ่งวันทางเรือจากที่พัก", en: "Wat Pho, Wat Arun & Wat Kalayanamit — Three Temples in Half a Day, Mostly by River" },
+  "gd.r2.d": { th: "วัดโพธิ์ → วัดอรุณ → วัดกัลยาณมิตร ครึ่งวันทางเรือ แล้วกลับที่พัก", en: "Wat Pho → Wat Arun → Wat Kalayanamit — half a day by river, then home" },
+  "gd.r3.t": { th: "เช้าตรู่ริมเจ้าพระยา — ใส่บาตร เดินตลาดเช้า ดูพระอาทิตย์ขึ้น กลับมากินข้าวเช้า", en: "Dawn on the Chao Phraya — Offer Alms, Walk the Morning Market, Watch the Sunrise, Home for Breakfast" },
+  "gd.r3.d": { th: "เช้าตรู่: ใส่บาตร ตลาดเช้า วิวแม่น้ำ แล้วกลับมากินข้าวเช้า", en: "Dawn: alms, a morning market, river views — then home for breakfast" },
+  "gd.r4.t": { th: "คาเฟ่ริมน้ำ สวนลอยฟ้า ล้ง 1919 — ครึ่งวันเย็นฝั่งธน", en: "Riverside Cafés, the Sky Park & Lhong 1919 — a Thonburi Evening" },
+  "gd.r4.d": { th: "คาเฟ่ริมน้ำ · สวนลอยฟ้าตอนแดดอ่อน · ล้ง 1919 — ครึ่งวันเย็นฝั่งธนจากหน้าบ้านเรา", en: "Riverside cafés · the Sky Park at golden hour · Lhong 1919 — a Thonburi evening from our door" },
+  "gd.r5.t": { th: "ICONSIAM ถึงเอเชียทีค — วันเที่ยวทางเรือฟรีและเรือด่วน", en: "ICONSIAM to Asiatique — a River Day by Free Shuttle & Express Boat" },
+  "gd.r5.d": { th: "จาก ICONSIAM ฝั่งเรา ล่องเรือลงเจ้าพระยาสู่เอเชียทีค — เรือฟรีและเรือด่วน ในวันเดียว", en: "From ICONSIAM on our bank down the Chao Phraya to Asiatique — free shuttles and the express boat, in one day" },
+  "gd.r6.t": { th: "ปั่นจักรยานฝั่งธน — ตรอกซอกซอย วัดริมน้ำ และแม่น้ำเจ้าพระยา", en: "Thonburi by Bike — Backlanes, Riverside Temples & the Chao Phraya" },
+  "gd.r6.d": { th: "ปั่นจักรยานลัดเลาะตรอกฝั่งธน ผ่านวัดริมน้ำและแม่น้ำเจ้าพระยา — ทางเลือกช้า ๆ จากคลองสาน", en: "Cycle the quiet Thonburi backlanes past riverside temples and the Chao Phraya — a slow alternative from Khlong San" },
+  "gd.r7.t": { th: "เที่ยวริมน้ำแบบครอบครัว — สวนลอยฟ้า เรือข้ามฟาก แล้วเข้าห้างเย็น ๆ ไม่ต้องเดินไกล", en: "A Family River Day — a flat park, a short ฿5 boat, then a cool indoor afternoon, very little walking" },
+  "gd.r7.d": { th: "เที่ยวริมน้ำแบบครอบครัว เดินน้อย — สวนลอยฟ้า เรือ 5 บาท แล้วเข้าห้างเย็น ๆ", en: "A low-walking family river day — a flat park, a ฿5 boat and a cool mall afternoon" },
+  "gd.r8.t": { th: "วันฝนตกก็เที่ยวได้ — แผนในร่มทั้งวัน ห้าง คาเฟ่ วิหารมีหลังคา เปียกน้อยที่สุด", en: "A rainy day still works — an all-indoor plan of malls, cafes and covered halls, staying as dry as possible" },
+  "gd.r8.d": { th: "วันฝนตก แผนในร่มทั้งวัน — ห้าง คาเฟ่ วิหารมีหลังคา เดินให้เปียกน้อยที่สุด", en: "Rainy day, all-indoor plan — malls, cafes and covered halls, keeping dry" },
+  "gd.r9.t": { th: "ตามเทศกาลเยาวราช — เทศกาลกินเจ (ราวตุลาคม) และตรุษจีน (ปลายมกราฯ–กุมภาฯ)", en: "Yaowarat by the season — the Vegetarian Festival (around October) and Chinese New Year (late Jan or Feb)" },
+  "gd.r9.d": { th: "ตามเทศกาลเยาวราช — กินเจ (ราวตุลาคม) และตรุษจีน (ปลายมกราฯ–กุมภาฯ) ข้ามเรือ 5 บาท", en: "Yaowarat by the season — Vegetarian Festival and Chinese New Year, across the ฿5 ferry" },
+  "gd.kicker": { th: "Guides & Stories · คลองสาน–ฝั่งธนฯ", en: "Guides & Stories · Khlong San – Thonburi" },
+  "gd.st1": { th: "✍️ 24 ไกด์ เขียนเองทั้งหมด", en: "✍️ 24 guides, all written by us" },
+  "gd.st2": { th: "🚶 ทุกจุดเดิน/เรือ/รถไฟฟ้าจากที่พักไม่เกิน 15 นาที", en: "🚶 Everything within 15 min by foot, boat or train" },
+  "gd.st3": { th: "🌐 ไทย · English", en: "🌐 ไทย · English" },
+  "gd.feat.tag": { th: "✨ ไกด์ใหม่ล่าสุด", en: "✨ Newest guide" },
+  "gd.feat.m1": { th: "🚤 เรือ 5 บาท", en: "🚤 ฿5 ferry" },
+  "gd.feat.m2": { th: "🚶 ~4 กม. · 3–4 ชม.", en: "🚶 ~4 km · 3–4 h" },
+  "gd.feat.m3": { th: "🕒 ดีสุด 15:00–20:00", en: "🕒 Best 3–8 PM" },
+  "gd.read.feat": { th: "อ่านไกด์ฉบับเต็ม", en: "Read the full guide" },
+  "gd.ask.t": { th: "ไม่เจอเรื่องที่อยากรู้?", en: "Can't find what you need?" },
+  "gd.ask.d": { th: "ทักถามเราได้เลย — ร้านที่เปิดวันนี้ วิธีไปที่ไหนก็ได้ เวลาเรือ หรือขอให้วงแผนที่วาดมือให้ เราคนพื้นที่ ตอบไวมาก", en: "Just message us — which places are open today, how to get anywhere, boat times, or a hand-drawn map marked up for you. We're locals and we reply fast." },
+  "gd.ask.line": { th: "💬 ถามทาง LINE", en: "💬 Ask on LINE" },
+  "gd.ask.wa": { th: "📱 WhatsApp", en: "📱 WhatsApp" },
+  "gd.tag.new": { th: "ใหม่", en: "New" },
+  "gd.hw.t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท", en: "Chinatown Heritage Walk — a ฿5 ferry away" },
+  "gd.hw.d": { th: "เส้นทางครึ่งวัน 8 จุด: ศาลเจ้ากวนอูฝั่งเรา → เรือข้ามฟาก → สำเพ็ง → เล่งเน่ยยี่ → ทรงวาด → ตลาดน้อย → มื้อค่ำเยาวราช พร้อมของกินมรดกและมารยาท 4 ศาสนา",
+              en: "A half-day, 8-stop route: Guan Yu shrine on our side → ferry → Sampeng → Leng Noei Yi → Song Wat → Talat Noi → Yaowarat dinner, with heritage foods and etiquette for four faiths" },
+  "gd.h1":  { th: "ไกด์เที่ยวจากคนพื้นที่", en: "Local Travel Guides" },
+  "gd.sub": { th: "เราอยู่คลองสานมาทั้งชีวิต — นี่คือทุกไกด์ที่เราเขียนเองเพื่อให้แขกเที่ยวย่านนี้ได้แบบคนท้องถิ่น ไม่ใช่ตามรีวิวซ้ำ ๆ",
+              en: "We've lived in Khlong San all our lives — these are the guides we wrote ourselves so guests can explore like locals, not like a copy-pasted review." },
+  "gd.season.t": { th: "ตามเทศกาล", en: "Festival guides" },
+  "gd.area.t":   { th: "เที่ยวย่านนี้", en: "Exploring the neighbourhood" },
+  "gd.prac.t":   { th: "ข้อมูลก่อนมาพัก", en: "Before you arrive" },
+  "gd.read": { th: "อ่านไกด์", en: "Read the guide" },
+  "gd.tag.nov": { th: "25 พ.ย. 2569", en: "25 Nov 2026" },
+  "gd.tag.dec": { th: "31 ธ.ค.", en: "31 Dec" },
+  "gd.c1.t": { th: "ลอยกระทงริมเจ้าพระยา ฝั่งธนฯ", en: "Loy Krathong on the Chao Phraya" },
+  "gd.c1.d": { th: "จุดลอยกระทงใกล้ที่พัก ทั้งท่าน้ำชุมชนและงานใหญ่ริมน้ำ พร้อมทริคเลี่ยงคนแน่น", en: "Where to float near the hotel — community piers and big riverside events, with crowd-dodging tips." },
+  "gd.c2.t": { th: "เคาท์ดาวน์ปีใหม่ — ดูพลุ ICONSIAM", en: "NYE — ICONSIAM Countdown Fireworks" },
+  "gd.c2.d": { th: "จุดดูพลุฟรีฝั่งคลองสาน เดินกลับที่พักได้หลังเที่ยงคืน ไม่ต้องรอรถเป็นชั่วโมง", en: "Free viewing spots on our side of the river — walk home after midnight, skip the taxi chaos." },
+  "gd.c9.t": { th: "เที่ยวเยาวราชกลางคืน 2 ชั่วโมง", en: "Yaowarat Night Food Walk, 2 Hours" },
+  "gd.c9.d": { th: "เส้นทางเดินกิน 6 จุด ~3 กม. เรือ 5 บาท ของกิน 6 อย่างพร้อมราคา งบ ~350 บาท/คน และ 3 วิธีกลับหลังเรือหมดรอบ", en: "A 6-stop, ~3 km eating loop: ฿5 ferry, six dishes with prices, about ฿350 a head, and three ways home after the last boat" },
+  "gd.c3.t": { th: "เที่ยวฝั่งธนฯ 1 วันเต็ม", en: "One Full Day in Thonburi" },
+  "gd.c3.d": { th: "เส้นทางเช้าจรดค่ำ: ตลาดเช้า → วัดอรุณ → กุฎีจีน → สวนลอยฟ้า → ICONSIAM → เยาวราช", en: "Morning to night: market → Wat Arun → Kudi Chin → Sky Park → ICONSIAM → Chinatown." },
+  "gd.c4.t": { th: "กิน-เที่ยวรอบซอยท่าดินแดง", en: "Tha Din Daeng Food & Neighbourhood" },
+  "gd.c4.d": { th: "13 ร้านที่คนพื้นที่กินจริง + เส้นทางเดิน 10 จุดที่นักท่องเที่ยวส่วนใหญ่หาไม่เจอ", en: "13 spots locals actually eat at + a 10-stop walk most tourists never find." },
+  "gd.c5.t": { th: "เที่ยวอะไรใกล้ที่พัก", en: "Things to Do Nearby" },
+  "gd.c5.d": { th: "9 จุดเที่ยวหลัก — สวนลอยฟ้า ICONSIAM วัดอรุณ เยาวราช พร้อมปุ่มนำทางจากที่พัก", en: "9 top sights — Sky Park, ICONSIAM, Wat Arun, Chinatown — with directions from the hotel." },
+  "gd.c6.t": { th: "วิธีเดินทางจากสนามบิน", en: "Getting Here from the Airport" },
+  "gd.c6.d": { th: "สุวรรณภูมิ/ดอนเมือง: แท็กซี่ราคาจริง รถไฟฟ้าทีละขั้น + ที่อยู่ภาษาไทยให้คนขับ", en: "BKK & DMK: real taxi fares, step-by-step trains, and a Thai address to show your driver." },
+  "gd.c7.t": { th: "ที่พักใกล้ ICONSIAM", en: "Hotel near ICONSIAM" },
+  "gd.c7.d": { th: "ห่าง ~2 กม. รถ 5 นาที Gold Line สถานีเดียว — เดินห้างเสร็จกลับมานอนใกล้ ๆ", en: "~2 km, 5 minutes by car, one Gold Line stop — shop all day, sleep close by." },
+  "gd.c8.t": { th: "ที่พักใกล้เยาวราช", en: "Hotel near Chinatown" },
+  "gd.c8.d": { th: "ข้ามสะพานเดียวถึงไชน่าทาวน์ กินตอนค่ำกลับดึกสะดวก ย่านเราเงียบนอนสบาย", en: "One bridge from Yaowarat — easy late-night returns, and our side sleeps quiet." },
+  "gd.cta": { th: "เช็คห้องว่างและจองเลย", en: "Check availability & book" },
+});
+</script>
+<script>
+/* หน้ารวมไกด์: นับจำนวนเอง กรองตามหมวด ค้นหาชื่อ และแถบเทศกาลที่ใกล้ถึง
+   ทุกอย่างทำงานบนสิ่งที่อยู่ใน DOM อยู่แล้ว — ไม่มี JS ก็ยังเห็นไกด์ครบทุกใบ */
+(function () {
+  var wrap = document.querySelector(".gd-wrap");
+  if (!wrap) return;
+  var secs = [].slice.call(document.querySelectorAll(".gd-sec[data-cat]"));
+  var feat = document.querySelector(".gd-feat");
+  var start = document.getElementById("gdStart");
+  var rs = document.getElementById("gdRs");
+  var empty = document.getElementById("gdEmpty");
+  var search = document.getElementById("gdSearch");
+
+  /* ── นับจากการ์ดจริงใน DOM ไม่ใช่เลขที่พิมพ์ไว้ ── */
+  var total = 0;
+  secs.forEach(function (sec) {
+    var n = sec.querySelectorAll(".gd-card").length;
+    total += n;
+    var cnt = sec.querySelector(".gd-sec-h .cnt");
+    if (cnt) cnt.textContent = String(n);
+  });
+  if (feat) total += 1;
+  function paintCount() {
+    var el = document.querySelector('[data-i18n="gd.st1"]');
+    if (!el || typeof t !== "function") return;
+    el.textContent = t("gd.count").replace("{n}", String(total));
+  }
+  document.addEventListener("langchange", paintCount);
+
+  /* ── ตัวกรอง + ค้นหา ── */
+  var state = { cat: "all", q: "" };
+  function norm(x) { return (x || "").toLowerCase().replace(/\s+/g, " ").trim(); }
+  /* ดัชนีค้นหาเก็บข้อความทั้งไทยและอังกฤษของการ์ด — แขกพิมพ์ภาษาไหนก็เจอ
+     ไม่ต้องสนว่าตอนนั้นหน้าเว็บแสดงภาษาอะไรอยู่ */
+  function indexText(el) {
+    if (el.__idx) return el.__idx;
+    var txt = el.textContent;
+    [].forEach.call(el.querySelectorAll("[data-i18n]"), function (n) {
+      var it = typeof I18N !== "undefined" && I18N[n.dataset.i18n];
+      if (it) txt += " " + it.th + " " + it.en;
+    });
+    el.__idx = norm(txt.replace(/<[^>]+>/g, " "));
+    return el.__idx;
+  }
+  function apply() {
+    var q = norm(state.q);
+    var shown = 0;
+    secs.forEach(function (sec) {
+      var catOk = state.cat === "all" || sec.dataset.cat === state.cat;
+      var visible = 0;
+      [].forEach.call(sec.querySelectorAll(".gd-card"), function (card) {
+        var hit = catOk && (!q || indexText(card).indexOf(q) > -1);
+        card.hidden = !hit;
+        if (hit) visible++;
+      });
+      sec.hidden = visible === 0;
+      shown += visible;
+    });
+    var featHit = !!feat && (state.cat === "all" || state.cat === "routes") &&
+      (!q || indexText(feat).indexOf(q) > -1);
+    if (feat) feat.hidden = !featHit;
+    if (featHit) shown++;
+    var plain = state.cat === "all" && !q;
+    if (start) start.hidden = !plain;
+    if (rs) rs.hidden = !plain;
+    if (empty) empty.hidden = shown > 0;
+    var hash = plain ? "" : "#" + (state.cat !== "all" ? state.cat : "") + (q ? (state.cat !== "all" ? "+" : "") + "q=" + encodeURIComponent(state.q) : "");
+    history.replaceState(null, "", hash || location.pathname);
+  }
+  [].forEach.call(document.querySelectorAll(".gd-filter .pill"), function (b) {
+    b.addEventListener("click", function () {
+      state.cat = b.dataset.f;
+      [].forEach.call(document.querySelectorAll(".gd-filter .pill"), function (x) { x.classList.toggle("on", x === b); });
+      apply();
+      if (typeof hohTrack === "function") hohTrack("guides_filter", { cat: state.cat });
+    });
+  });
+  if (search) {
+    var timer;
+    search.addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { state.q = search.value; apply(); }, 120);
+    });
+  }
+  /* อ่านสถานะจาก URL ตอนเปิดหน้า เผื่อมีคนแชร์ลิงก์ที่กรองไว้แล้ว */
+  (function fromHash() {
+    var h = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+    if (!h) return;
+    var parts = h.split("+");
+    parts.forEach(function (p) {
+      if (p.indexOf("q=") === 0) { state.q = decodeURIComponent(p.slice(2)); if (search) search.value = state.q; }
+      else if (p) state.cat = p;
+    });
+    [].forEach.call(document.querySelectorAll(".gd-filter .pill"), function (x) { x.classList.toggle("on", x.dataset.f === state.cat); });
+  })();
+
+  /* ── แถบเทศกาล: แสดงเฉพาะอันที่เริ่มภายใน 45 วัน ── */
+  /* ปกติแสดงเฉพาะเทศกาลที่เริ่มภายใน 45 วัน — เปิด guides.html?fest=all เพื่อดูตัวอย่างทุกอัน */
+  var WINDOW_DAYS = /[?&]fest=all/.test(location.search) ? 100000 : 45;
+  function days(a, b) { return Math.round((a - b) / 86400000); }
+  function renderFest(data) {
+    var box = document.getElementById("gdFest");
+    if (!box || !data || !data.festivals) return;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var items = data.festivals.filter(function (f) {
+      if (!f.start) return false;
+      var s = new Date(f.start + "T00:00:00");
+      var e = new Date((f.end || f.start) + "T00:00:00");
+      var d = days(s, today);
+      return d <= WINDOW_DAYS && (WINDOW_DAYS > 1000 || days(e, today) >= 0);
+    }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+    if (!items.length) return;
+    function label(f) {
+      var d = days(new Date(f.start + "T00:00:00"), today);
+      if (d < 0) return t("gd.fest.now");
+      if (d === 0) return t("gd.fest.today");
+      if (d === 1) return t("gd.fest.tmr");
+      return t("gd.fest.in").replace("{n}", String(d));
+    }
+    function paint() {
+      var lang = typeof getLang === "function" ? getLang() : "th";
+      box.innerHTML = '<span class="lb">' + t("gd.fest.t") + "</span>" +
+        items.map(function (f) {
+          return '<a href="' + f.slug + '">' + (f.label[lang] || f.label.th) +
+            ' <span class="when">' + label(f) + "</span>" +
+            (f.confirmed ? "" : ' <span class="unconf">· ' + t("gd.fest.unconf") + "</span>") + "</a>";
+        }).join("");
+      box.hidden = false;
+    }
+    paint();
+    document.addEventListener("langchange", paint);
+  }
+  fetch("/assets/festivals.json").then(function (r) { return r.json(); }).then(renderFest).catch(function () {});
+
+  apply();
+  paintCount();
+})();
+</script>
+<script src="/assets/ui.js"></script>
+
+
+</body></html>
