@@ -216,3 +216,50 @@ console.log("SITE TESTS PASSED");
   assert.match(ui, /details\.m-fold\[open\]"\)\.forEach\(\(d\) => d\.removeAttribute\("open"\)\)/, "ui.js closes folds on mobile");
   for (const k of ["rail.cue", "rail.cue2", "loc.foldmap", "gh.fold"]) assert.match(i18n, new RegExp(`"${k.replace(".", "\\.")}":\\s*\\{ th: "[^"]+", en: "[^"]+" \\}`), "i18n key " + k);
 }
+
+// ── รูปภาพ: ทุก <img> ที่ชี้ .jpg ต้องมี .webp คู่กันและถูกห่อด้วย <picture> ──
+// กันไม่ให้มีคนเพิ่มรูปใหม่แล้วลืมสร้าง WebP (node tools/make-webp.js ทำให้อัตโนมัติ)
+{
+  const htmlFiles = fs.readdirSync(root).filter((f) => f.endsWith(".html"));
+  let wrapped = 0;
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    const re = /<img\b[^>]*\bsrc="(images\/[^"]+\.jpg)"[^>]*>/g;
+    let m;
+    while ((m = re.exec(raw))) {
+      const jpg = m[1];
+      if (jpg.includes("${")) continue; // สร้างจาก JS — เช็กด้วยเทสต์อื่น
+      const webp = jpg.replace(/\.jpg$/, ".webp");
+      assert.ok(fs.existsSync(path.join(root, webp)), `${f}: ${jpg} ยังไม่มีไฟล์ ${webp} — รัน python3 tools/make-webp.py`);
+      const before = raw.slice(Math.max(0, m.index - 260), m.index);
+      assert.ok(/<picture\b[^>]*>\s*(<source[^>]*>\s*)+$/.test(before),
+        `${f}: <img src="${jpg}"> ต้องอยู่ใน <picture> พร้อม <source type="image/webp">`);
+      wrapped++;
+    }
+  }
+  assert.ok(wrapped >= 100, `คาดว่ามีรูปที่ห่อ <picture> อย่างน้อย 100 รูป แต่เจอ ${wrapped}`);
+  // ทุกไฟล์ที่อ้างใน srcset ต้องมีจริง — ถ้า <source> โหลดไม่ได้ เบราว์เซอร์จะไม่ถอยไปใช้ <img> ให้
+  for (const f of htmlFiles) {
+    for (const m of read(f).matchAll(/srcset="([^"]+)"/g)) {
+      for (const cand of m[1].split(",")) {
+        const url = cand.trim().split(/\s+/)[0];
+        if (!url || url.includes("${")) continue;
+        assert.ok(fs.existsSync(path.join(root, url)), `${f}: srcset ชี้ไปที่ ${url} ซึ่งไม่มีไฟล์จริง`);
+      }
+    }
+  }
+  assert.match(read("assets/style.css"), /picture \{ display: contents; \}/,
+    "ต้องมี picture { display: contents; } ไม่งั้นตัวห่อจะดันเลย์เอาต์");
+  // hero ต้องมีคำอธิบายรูปสองภาษา ไม่ใช่ alt=""
+  const i18nSrc = read("assets/i18n.js");
+  for (const f of htmlFiles) {
+    const raw = read(f);
+    const hero = raw.match(/<img class="bg"[^>]*>/) || raw.match(/<img[^>]*class="bg"[^>]*>/);
+    if (!hero || !/images\/attractions\//.test(hero[0])) continue;
+    const key = (hero[0].match(/data-i18n="(ph\.[a-z]+)"/) || [])[1];
+    assert.ok(key, `${f}: hero ต้องมี data-i18n="ph.*" สำหรับ alt สองภาษา`);
+    assert.ok(new RegExp(`"${key.replace(".", "\\.")}":`).test(i18nSrc), `i18n.js ขาดคีย์ ${key}`);
+    assert.match(hero[0], /data-i18n-attr="alt"/, `${f}: hero ต้องมี data-i18n-attr="alt"`);
+  }
+}
+console.log("IMAGE PIPELINE TESTS PASSED");

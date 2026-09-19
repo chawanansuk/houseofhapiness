@@ -339,6 +339,17 @@ const I18N = {
   "lf.open":         { th: "ฉันมีแอป LINE บนคอมอยู่แล้ว — เปิดเลย", en: "I already have LINE on this computer — open it" },
   "lf.mailsub":      { th: "ติดต่อจากเว็บไซต์ House of Happiness", en: "Enquiry from the House of Happiness website" },
   "lf.close":        { th: "ปิด", en: "Close" },
+
+  /* คำอธิบายรูป (alt) ของภาพสถานที่ — ใช้ร่วมกันทุกหน้าที่ใช้ไฟล์เดียวกัน */
+  "ph.riverboat": { th: "เรือด่วนเจ้าพระยากำลังแล่นเข้าเทียบท่า", en: "A Chao Phraya express boat coming in to a pier" },
+  "ph.yaowarat": { th: "ตึกแถวเก่าย่านเยาวราช ห่างจากถนนทรงวาดไม่กี่ร้อยเมตร", en: "Old shophouses on Yaowarat, a few hundred metres from Song Wat" },
+  "ph.skypark": { th: "สะพานข้ามเจ้าพระยาและสวนลอยฟ้าเจ้าพระยา มองจากกลางแม่น้ำ", en: "The bridge and the Chao Phraya Sky Park seen from the water" },
+  "ph.iconsiam": { th: "ตึกสูงริมเจ้าพระยาฝั่งคลองสาน มองข้ามแม่น้ำมา เห็นไอคอนสยามอยู่ที่ฐานตึก", en: "Riverside towers on the Khlong San bank seen across the river, with ICONSIAM at their base" },
+  "ph.watarun": { th: "พระปรางค์วัดอรุณประดับกระเบื้องเคลือบ ริมแม่น้ำเจ้าพระยา", en: "The porcelain-clad prang of Wat Arun on the Chao Phraya riverbank" },
+  "ph.grandpalace": { th: "พระบรมมหาราชวังเปิดไฟยามค่ำ มองข้ามแม่น้ำเจ้าพระยา", en: "The Grand Palace lit up at night, seen across the Chao Phraya" },
+  "ph.watpho": { th: "พระพุทธไสยาสน์ปิดทองที่วัดโพธิ์ ยาวราว 46 เมตร", en: "The gilded Reclining Buddha at Wat Pho, about 46 metres long" },
+  "ph.kudichin": { th: "โบสถ์ซางตาครู้สในชุมชนกุฎีจีน", en: "Santa Cruz Church in the Kudi Chin quarter" },
+  "ph.pakkhlong": { th: "ตลาดดอกไม้ปากคลองตลาดตอนเช้ามืด", en: "Pak Khlong flower market in the early morning" },
 };
 
 /* ─── ตัวจัดการภาษา ─── */

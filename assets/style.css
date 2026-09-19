@@ -40,6 +40,9 @@ body {
 }
 h1, h2, h3 { font-family: var(--font-head); }
 img { max-width: 100%; }
+/* <picture> เป็นแค่ตัวห่อให้เบราว์เซอร์เลือกไฟล์ .webp ที่เล็กกว่า
+   display:contents ทำให้มันไม่สร้างกล่องของตัวเอง เลย์เอาต์ของ <img> ข้างในจึงเหมือนเดิมทุกที่ */
+picture { display: contents; }
 
 /* ── Top navigation ── */
 .topnav {
