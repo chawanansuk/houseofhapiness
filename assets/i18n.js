@@ -341,6 +341,7 @@ const I18N = {
   "lf.close":        { th: "ปิด", en: "Close" },
 
   /* คำอธิบายรูป (alt) ของภาพสถานที่ — ใช้ร่วมกันทุกหน้าที่ใช้ไฟล์เดียวกัน */
+  "ph.ayutthaya": { th: "วัดไชยวัฒนาราม อยุธยา ปรางค์ประธานกับปรางค์บริวารตอนพลบค่ำ", en: "Wat Chaiwatthanaram in Ayutthaya, the main prang and its satellite prangs at dusk" },
   "ph.riverboat": { th: "เรือด่วนเจ้าพระยากำลังแล่นเข้าเทียบท่า", en: "A Chao Phraya express boat coming in to a pier" },
   "ph.yaowarat": { th: "ตึกแถวเก่าย่านเยาวราช ห่างจากถนนทรงวาดไม่กี่ร้อยเมตร", en: "Old shophouses on Yaowarat, a few hundred metres from Song Wat" },
   "ph.skypark": { th: "สะพานข้ามเจ้าพระยาและสวนลอยฟ้าเจ้าพระยา มองจากกลางแม่น้ำ", en: "The bridge and the Chao Phraya Sky Park seen from the water" },
