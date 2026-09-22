@@ -1161,6 +1161,8 @@ textarea { resize: vertical; min-height: 4.5rem; }
    แม่น้ำ และเรือ อยู่ครึ่งล่างของภาพทั้งหมด จึงยึดขอบล่างไว้แทนกลางภาพ
    (แก้ชั่วคราวจนกว่าจะเปลี่ยนเป็นรูปแนวนอนที่เห็นตัวห้างเต็มๆ) */
 img[src$="attractions/iconsiam.jpg"] { object-position: center bottom; }
+/* องค์พระปรางค์อยู่ค่อนไปทางซ้ายของภาพ ถ้าครอปตรงกลางจะไปจมอยู่หลังหัวเรื่องบนมือถือ */
+img[src$="attractions/watarun.jpg"] { object-position: 20% center; }
 
 /* ── 404 page ── */
 .nf-wrap { text-align: center; padding: clamp(4rem, 12vw, 8rem) 1.5rem; }
