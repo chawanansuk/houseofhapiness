@@ -452,10 +452,15 @@ function json_(obj) {
 function scanBookingEmails() {
   var label = GmailApp.getUserLabelByName(LABEL_DONE) || GmailApp.createLabel(LABEL_DONE);
   var threads = GmailApp.search('from:(booking.com) newer_than:7d -label:"' + LABEL_DONE + '"');
+  var news = [];      // การจองใหม่ที่เพิ่งบันทึกรอบนี้ — ใช้ส่งแจ้งเตือนท้ายรอบ
+  var failures = [];  // อีเมลที่อ่านไม่ออก — ต้องแจ้งด้วย ไม่งั้นเงียบหาย
 
   threads.forEach(function (thread) {
     thread.getMessages().forEach(function (msg) {
-      try { processMessage_(msg); }
+      try {
+        var res = processMessage_(msg);
+        if (res && res.kind === "new") news.push(res);
+      }
       catch (err) {
         appendBooking_({
           id: "MAIL-" + msg.getId().slice(-8),
@@ -463,10 +468,18 @@ function scanBookingEmails() {
           name: "", status: "ตรวจสอบเอง",
           note: "หัวข้อ: " + msg.getSubject() + " | error: " + err,
         });
+        failures.push({ subject: msg.getSubject() || "" });
       }
     });
     thread.addLabel(label);
   });
+
+  // แจ้งเตือนเจ้าของทันทีที่เจอจองใหม่ (ไม่ต้องรอสรุปเช้า)
+  // ครอบ try ไว้เพราะการแจ้งเตือนพังต้องไม่ทำให้การบันทึกการจองพังตาม
+  try { notifyNewBookings_(news, failures); }
+  catch (err) { console.error("notifyNewBookings_ ล้มเหลว: " + err); }
+
+  return { newBookings: news.length, failures: failures.length };
 }
 
 function processMessage_(msg) {
@@ -477,11 +490,11 @@ function processMessage_(msg) {
   // จองใหม่/ยกเลิก/แก้ไข ทำให้รุ่นก่อนข้ามไปเฉย ๆ ทั้งที่ข้อมูลดีที่สุด
   if (isArrivalsDigest_(subject)) {
     importArrivalRows_(msg.getBody() || msg.getPlainBody() || "");
-    return;
+    return { kind: "digest" };
   }
 
   var parsed = parseBookingEmail_(subject, msg.getPlainBody() || "");
-  if (!parsed.type) return; // โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ
+  if (!parsed.type) return { kind: "skip" }; // โปรโมชั่น, รีวิว, ใบแจ้งหนี้ ฯลฯ
 
   var resNo = parsed.reservationNo;
   var id = resNo ? "BDC-" + resNo : "MAIL-" + msg.getId().slice(-8);
@@ -496,7 +509,7 @@ function processMessage_(msg) {
         note: "อีเมลยกเลิกแต่ไม่พบการจองเดิมในชีต (orphan) — เปิด Pulse ตรวจว่ายกเลิกรายการไหน",
       });
     }
-    return;
+    return { kind: "cancel", id: id, name: parsed.name };
   }
 
   // อีเมลซ้ำและอีเมลแก้ไขช่วยเติมเฉพาะช่องที่ยังว่าง โดยไม่ทับค่าที่พนักงานแก้เอง
@@ -509,7 +522,7 @@ function processMessage_(msg) {
       var detail = filled.length ? " (เติม: " + filled.join(", ") + ")" : "";
       setStatus_(existing._rowIndex, status, action + fmtDate_(msg.getDate()) + detail);
     }
-    return;
+    return { kind: "update", id: existing.id };
   }
 
   // อีเมลแก้ไขแต่ยังไม่มีแถวเดิม: เก็บเป็นรายการใหม่เพื่อไม่ให้การจองหายเงียบ ๆ
@@ -531,6 +544,101 @@ function processMessage_(msg) {
     status: incomplete ? "รอเติมชื่อจาก Pulse" : "ยืนยันแล้ว",
     note: noteBits.join(" | "),
   });
+
+  return {
+    kind: "new",
+    id: id,
+    name: parsed.name,
+    checkin: parsed.checkin,
+    checkout: parsed.checkout,
+    incomplete: incomplete,
+  };
+}
+
+/* ═══════════════ แจ้งเตือนจองใหม่ ═══════════════ */
+
+var TH_MON_AB_ = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+var TH_DOW_AB_ = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+
+function isYMD_(v) { return /^\d{4}-\d{2}-\d{2}$/.test(String(v == null ? "" : v)); }
+
+/** "2026-11-14" → "ส. 14 พ.ย. 2569" (พ.ศ. เหมือนที่หลังบ้านใช้) */
+function fmtThaiYMD_(ymd) {
+  if (!isYMD_(ymd)) return "";
+  var y = Number(ymd.slice(0, 4)), m = Number(ymd.slice(5, 7)), d = Number(ymd.slice(8, 10));
+  var dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return TH_DOW_AB_[dow] + " " + d + " " + TH_MON_AB_[m - 1] + " " + (y + 543);
+}
+
+/** จำนวนคืนระหว่างสองวัน (0 ถ้าวันใดวันหนึ่งไม่ครบ) */
+function nightsBetween_(checkin, checkout) {
+  if (!isYMD_(checkin) || !isYMD_(checkout)) return 0;
+  var a = Date.UTC(+checkin.slice(0, 4), +checkin.slice(5, 7) - 1, +checkin.slice(8, 10));
+  var b = Date.UTC(+checkout.slice(0, 4), +checkout.slice(5, 7) - 1, +checkout.slice(8, 10));
+  var n = Math.round((b - a) / 86400000);
+  return n > 0 ? n : 0;
+}
+
+/**
+ * ประกอบข้อความแจ้งเตือน — แยกจากการส่งจริงเพื่อให้เทสต์เรียกได้โดยไม่ต้องมี Gmail
+ * คืน null เมื่อไม่มีอะไรต้องแจ้ง (จะได้ไม่ส่งเมลเปล่า)
+ * ข้อมูลที่อีเมลไม่ได้บอกจะเขียนว่าไม่ทราบ ไม่เดาแทน
+ */
+function buildNewBookingNotice_(news, failures) {
+  news = news || [];
+  failures = failures || [];
+  if (!news.length && !failures.length) return null;
+
+  var firstDate = "";
+  for (var i = 0; i < news.length; i++) {
+    if (isYMD_(news[i].checkin)) { firstDate = news[i].checkin; break; }
+  }
+
+  var subject;
+  if (!news.length) {
+    subject = "[HOH] อ่านอีเมล Booking.com ไม่สำเร็จ " + failures.length + " ฉบับ";
+  } else if (news.length === 1) {
+    subject = "[HOH] จองใหม่ " + (firstDate ? "— เข้า " + fmtThaiYMD_(firstDate) : "— อีเมลไม่ระบุวันเข้า");
+  } else {
+    subject = "[HOH] จองใหม่ " + news.length + " รายการ" + (firstDate ? " — เข้าวันแรก " + fmtThaiYMD_(firstDate) : "");
+  }
+
+  var L = [];
+  if (news.length) {
+    L.push("มีการจองใหม่จาก Booking.com " + news.length + " รายการ — บันทึกลงชีตแล้ว");
+    L.push("");
+    news.forEach(function (b) {
+      if (isYMD_(b.checkin)) {
+        var line = "• เข้า " + fmtThaiYMD_(b.checkin);
+        if (isYMD_(b.checkout)) line += " → ออก " + fmtThaiYMD_(b.checkout) + " (" + nightsBetween_(b.checkin, b.checkout) + " คืน)";
+        else line += " → ออก (อีเมลไม่ระบุวันออก)";
+        L.push(line);
+      } else {
+        L.push("• อีเมลไม่ระบุวันเข้า — เปิดหลังบ้านเติมให้ด้วย");
+      }
+      L.push("   " + (b.name ? b.name : "(ยังไม่ทราบชื่อ)") + " · #" + b.id);
+    });
+  }
+
+  if (failures.length) {
+    if (L.length) L.push("");
+    L.push("อ่านอีเมลไม่สำเร็จ " + failures.length + " ฉบับ — บันทึกไว้ในชีตให้ตรวจเอง:");
+    failures.slice(0, 5).forEach(function (f) { L.push("• " + (f.subject || "(ไม่มีหัวข้อ)")); });
+    if (failures.length > 5) L.push("...และอีก " + (failures.length - 5) + " ฉบับ");
+  }
+
+  L.push("");
+  L.push("เปิดหลังบ้าน: https://houseofhappinessbangkok.com/admin/");
+
+  return { subject: subject, body: L.join("\n") };
+}
+
+/** ส่งแจ้งเตือนเข้าอีเมลเจ้าของ (บัญชีเดียวกับที่ติดตั้งสคริปต์) */
+function notifyNewBookings_(news, failures) {
+  var notice = buildNewBookingNotice_(news, failures);
+  if (!notice) return false;
+  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), notice.subject, notice.body);
+  return true;
 }
 
 /**

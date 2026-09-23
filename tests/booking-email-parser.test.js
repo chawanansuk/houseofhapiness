@@ -206,4 +206,99 @@ assert.equal(sandbox.isArrivalsDigest_("Booking cancelled - 5566778899"), false)
   assert.ok(sent.subject.includes("พรุ่งนี้ 1"));
 }
 
+/* ── แจ้งเตือนจองใหม่: วันที่แบบไทย + จำนวนคืน ── */
+{
+  assert.equal(sandbox.fmtThaiYMD_("2026-11-14"), "ส. 14 พ.ย. 2569");
+  assert.equal(sandbox.fmtThaiYMD_("2026-01-01"), "พฤ. 1 ม.ค. 2569");
+  assert.equal(sandbox.fmtThaiYMD_(""), "", "วันที่ว่างต้องไม่พังและไม่เดาแทน");
+  assert.equal(sandbox.fmtThaiYMD_("13 August 2026"), "", "รับเฉพาะรูปแบบ YYYY-MM-DD");
+  assert.equal(sandbox.nightsBetween_("2026-11-14", "2026-11-16"), 2);
+  assert.equal(sandbox.nightsBetween_("2026-11-14", ""), 0, "ขาดวันออก = ไม่เดาจำนวนคืน");
+}
+
+/* ── ไม่มีอะไรใหม่ = ไม่ส่งเมลเปล่า ── */
+{
+  assert.equal(sandbox.buildNewBookingNotice_([], []), null);
+  assert.equal(sandbox.buildNewBookingNotice_(null, null), null);
+}
+
+/* ── จองใหม่ 1 รายการ ครบวัน ── */
+{
+  const n = sandbox.buildNewBookingNotice_(
+    [{ id: "BDC-1234567890", name: "Jane Doe", checkin: "2026-11-14", checkout: "2026-11-16" }],
+    []
+  );
+  assert.equal(n.subject, "[HOH] จองใหม่ — เข้า ส. 14 พ.ย. 2569");
+  assert.ok(n.body.includes("เข้า ส. 14 พ.ย. 2569 → ออก จ. 16 พ.ย. 2569 (2 คืน)"));
+  assert.ok(n.body.includes("Jane Doe · #BDC-1234567890"));
+  assert.ok(n.body.includes("/admin/"), "ต้องมีลิงก์หลังบ้านให้กดต่อ");
+}
+
+/* ── อีเมลไม่บอกวัน/ชื่อ: ยังต้องแจ้ง และบอกตรง ๆ ว่าไม่ทราบ ห้ามเดา ── */
+{
+  const n = sandbox.buildNewBookingNotice_([{ id: "MAIL-abcd1234", name: "", checkin: "", checkout: "" }], []);
+  assert.ok(n, "ข้อมูลไม่ครบก็ยังต้องแจ้ง");
+  assert.equal(n.subject, "[HOH] จองใหม่ — อีเมลไม่ระบุวันเข้า");
+  assert.ok(n.body.includes("อีเมลไม่ระบุวันเข้า"));
+  assert.ok(n.body.includes("(ยังไม่ทราบชื่อ)"));
+  assert.ok(!/2569/.test(n.body), "ไม่มีวันที่ = ห้ามมีวันที่โผล่ในข้อความ");
+}
+
+/* ── หลายรายการ: หัวข้อบอกจำนวน + วันเข้าที่เจอเป็นอันแรก ── */
+{
+  const n = sandbox.buildNewBookingNotice_(
+    [
+      { id: "MAIL-1", name: "", checkin: "", checkout: "" },
+      { id: "BDC-2", name: "Somchai", checkin: "2026-12-31", checkout: "2027-01-02" },
+    ],
+    []
+  );
+  assert.equal(n.subject, "[HOH] จองใหม่ 2 รายการ — เข้าวันแรก พฤ. 31 ธ.ค. 2569");
+  assert.ok(n.body.includes("→ ออก ส. 2 ม.ค. 2570 (2 คืน)"), "ข้ามปีต้องคิดคืนถูก");
+}
+
+/* ── อ่านอีเมลไม่ออก: ต้องแจ้งด้วย ไม่ปล่อยเงียบ ── */
+{
+  const n = sandbox.buildNewBookingNotice_([], [{ subject: "Your invoice is ready" }]);
+  assert.equal(n.subject, "[HOH] อ่านอีเมล Booking.com ไม่สำเร็จ 1 ฉบับ");
+  assert.ok(n.body.includes("Your invoice is ready"));
+}
+
+/* ── processMessage_ ต้องรายงานว่าเป็นจองใหม่ ไม่งั้น scanBookingEmails ไม่มีอะไรจะแจ้ง ── */
+{
+  const appended = [];
+  sandbox.appendBooking_ = (b) => { appended.push(b); };
+  sandbox.findById_ = () => null;
+  sandbox.findByResNo_ = () => null;
+  const msg = {
+    getSubject: () => "New booking - 1234567890",
+    getPlainBody: () => [
+      "Reservation number: 1234567890",
+      "Guest name: Jane Doe",
+      "Check-in: Thursday, 13 August 2026",
+      "Check-out: Saturday, 15 August 2026",
+    ].join("\n"),
+    getBody: () => "",
+    getDate: () => new Date("2026-08-01T00:00:00Z"),
+    getId: () => "msg-abcdefgh",
+  };
+  const res = sandbox.processMessage_(msg);
+  assert.equal(res.kind, "new");
+  assert.equal(res.id, "BDC-1234567890");
+  assert.equal(res.checkin, "2026-08-13");
+  assert.equal(res.checkout, "2026-08-15");
+  assert.equal(appended.length, 1, "ยังต้องบันทึกลงชีตเหมือนเดิม");
+
+  // อีเมลที่ไม่เกี่ยวกับการจองต้องไม่ถูกนับเป็นจองใหม่
+  const promo = sandbox.processMessage_({
+    getSubject: () => "Rate your stay",
+    getPlainBody: () => "How was it?",
+    getBody: () => "",
+    getDate: () => new Date(),
+    getId: () => "msg-zzzzzzzz",
+  });
+  assert.equal(promo.kind, "skip");
+  assert.equal(appended.length, 1, "อีเมลโปรโมชั่นต้องไม่สร้างแถวใหม่");
+}
+
 console.log("Booking email parser tests passed");
