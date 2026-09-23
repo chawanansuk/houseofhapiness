@@ -50,4 +50,15 @@ const dest = path.join(root, "sitemap.xml");
 const prev = fs.existsSync(dest) ? fs.readFileSync(dest, "utf8") : null;
 if (prev !== xml && !check) fs.writeFileSync(dest, xml);
 console.log(`${urls.length} URL (ไทย ${thPages.length} · อังกฤษ ${thPages.filter(hasEn).length})`);
-if (check && prev !== xml) { console.log("sitemap.xml ยังไม่ตรงกับไฟล์จริง"); process.exitCode = 1; }
+if (check && prev !== xml) {
+  // lastmod อ่านจากวันที่ commit ล่าสุดของไฟล์ แต่ sitemap ถูกสร้าง "ก่อน" commit เสมอ
+  // ค่าที่คอมมิตไปจึงช้ากว่าความจริงหนึ่งคอมมิตตลอด พอคอมมิตถัดไปข้ามวัน ค่าจะขยับเอง
+  // ทั้งที่ไม่มีใครแก้อะไร — เทสต์เคยแดงด้วยเหตุนี้ จึงแยกสองกรณีออกจากกัน
+  const stripLastmod = (t) => String(t).replace(/<lastmod>[^<]*<\/lastmod>/g, "<lastmod/>");
+  if (stripLastmod(prev) !== stripLastmod(xml)) {
+    console.log("sitemap.xml ยังไม่ตรงกับไฟล์จริง — รัน node scripts/build-sitemap.mjs");
+    process.exitCode = 1;
+  } else {
+    console.log("sitemap.xml: ต่างแค่ lastmod ที่ขยับตามวันที่ commit — รายการ URL ยังตรง");
+  }
+}
