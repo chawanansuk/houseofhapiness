@@ -64,6 +64,13 @@ function englishTitle(file, title) {
   return file === "index.html" ? parts[0] : parts[parts.length - 1];
 }
 
+/* หน้าที่ย่อหน้านำสั้นเกินไป และ meta ไทยไม่มีครึ่งภาษาอังกฤษ — เขียนให้ตรง ๆ
+   (เคยหลุดเป็นคำบรรยายภาษาไทยบนหน้าอังกฤษ เวลาแชร์ลิงก์หรือขึ้นใน Google) */
+const EN_DESC = {
+  "index.html": "Aparthotel in Khlong San, Bangkok, with three room layouts, a ฿5 ferry to Chinatown and the Gold Line nearby. Rated 8.8/10 on Booking.com.",
+  "local.html": "Our insider guide: 13 places locals really eat around Soi Tha Din Daeng 16, plus a 10-stop Khlong San walk most visitors never find.",
+};
+
 /* คำอธิบายภาษาอังกฤษ: ใช้ย่อหน้านำของหน้านั้นเอง ตัดให้จบประโยคภายใน ~158 ตัวอักษร */
 function englishDescription(doc, fallback) {
   // ถ้าต้องใช้ meta เดิมเป็นตัวสำรอง ให้ตัดครึ่งภาษาไทยออกก่อน
@@ -111,7 +118,9 @@ for (const file of [...pages].sort()) {
   const oldTitle = doc.title;
   doc.title = englishTitle(file, oldTitle);
   const descEl = doc.querySelector('meta[name="description"]');
-  const enDesc = englishDescription(doc, descEl ? descEl.content : "");
+  const enDesc = EN_DESC[file] || englishDescription(doc, descEl ? descEl.content : "");
+  // ตัวอักษรไทยจริง ไม่นับ ฿ (U+0E3F) ซึ่งอยู่ช่วงรหัสเดียวกันแต่หน้าอังกฤษใช้ได้ปกติ
+  if (/[\u0E01-\u0E3A\u0E40-\u0E5B]/.test(enDesc)) throw new Error(`en/${file}: คำบรรยายยังเป็นภาษาไทย — เพิ่มใน EN_DESC`);
   if (descEl) descEl.content = enDesc;
 
   /* 3) canonical / og / hreflang */

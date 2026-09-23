@@ -16,8 +16,8 @@ const I18N = {
                        en: "558/1 Tha Din Daeng 16, Khlong San, Bangkok 10600" },
   "footer.or":       { th: "หรือจองผ่าน", en: "Or book via" },
   "skip":            { th: "ข้ามไปยังเนื้อหา", en: "Skip to content" },
-  "foot.desc":       { th: "เซอร์วิสอพาร์ตเมนต์ 15 ยูนิต 3 แบบ ใจกลางคลองสาน ใกล้แม่น้ำเจ้าพระยาและ ICONSIAM",
-                       en: "15 serviced apartments in three styles in the heart of Khlong San, near the Chao Phraya River and ICONSIAM." },
+  "foot.desc":       { th: "เซอร์วิสอพาร์ตเมนต์ 3 แบบ ใจกลางคลองสาน ใกล้แม่น้ำเจ้าพระยาและ ICONSIAM",
+                       en: "Serviced apartments in three styles in the heart of Khlong San, near the Chao Phraya River and ICONSIAM." },
   "foot.menu":       { th: "เมนู", en: "Menu" },
   "foot.booking":    { th: "การจอง", en: "Booking" },
   "loc.open":        { th: "เปิดใน Google Maps →", en: "Open in Google Maps →" },
@@ -30,8 +30,8 @@ const I18N = {
   "hero.rating":     { th: "คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com",
                        en: "Rated <strong>8.8 / 10</strong> from 770+ verified guest reviews on Booking.com" },
   "about.title":     { th: "เกี่ยวกับเรา", en: "About" },
-  "about.body":      { th: "House of Happiness เป็นเซอร์วิสอพาร์ตเมนต์ 15 ยูนิต มีห้องให้เลือก 3 แบบ — Standard เตียงใหญ่, Studio 2 เตียงแยก และ Deluxe ห้องใหญ่พิเศษพร้อมมุมโซฟา ทุกห้องมีระเบียงวิวเมือง แอร์ ตู้เย็น และทีวีจอแบน มีเครื่องซักผ้าหยอดเหรียญในอาคาร ฟรี Wi-Fi และน้ำดื่มทุกการเข้าพัก",
-                       en: "House of Happiness offers 15 serviced apartments in three styles — Standard (double bed), Studio (twin beds) and Deluxe (extra-large with sofa corner). Every unit has a city-view balcony, air conditioning, a refrigerator, and a flat-screen TV. A coin-operated laundry is available on site. Free Wi-Fi and complimentary bottled water with every stay." },
+  "about.body":      { th: "House of Happiness เป็นเซอร์วิสอพาร์ตเมนต์ที่มีห้องให้เลือก 3 แบบ — Standard เตียงใหญ่, Studio 2 เตียงแยก และ Deluxe ห้องใหญ่พิเศษพร้อมมุมโซฟา ทุกห้องมีระเบียงวิวเมือง แอร์ ตู้เย็น และทีวีจอแบน มีเครื่องซักผ้าหยอดเหรียญในอาคาร ฟรี Wi-Fi และน้ำดื่มทุกการเข้าพัก",
+                       en: "House of Happiness offers serviced apartments in three styles — Standard (double bed), Studio (twin beds) and Deluxe (extra-large with sofa corner). Every unit has a city-view balcony, air conditioning, a refrigerator, and a flat-screen TV. A coin-operated laundry is available on site. Free Wi-Fi and complimentary bottled water with every stay." },
   "svc.link.t":      { th: "รูมเซอร์วิส — สั่งอาหารถึงหน้าห้อง", en: "Room service — Thai food to your door" },
   "svc.link.d":      { th: "มัสมั่น ผัดไทย ของหวานไทย กาแฟเย็น สั่งล่วงหน้าทาง LINE", en: "Massaman, pad thai, Thai desserts, iced coffee — order ahead on LINE" },
   "rooms.title":     { th: "ห้องพักและราคา", en: "Rooms & Rates" },
@@ -134,7 +134,6 @@ const I18N = {
   "hb.cta":          { th: "เช็คห้องว่าง →", en: "Check availability →" },
 
   /* ── แถบตัวเลข ── */
-  "nb.l1":           { th: "ยูนิตทั้งหมด", en: "apartment units" },
   "nb.l2":           { th: "คะแนนจากผู้เข้าพักจริง", en: "verified guest score" },
   "nb.l3":           { th: "รีวิวบน Booking.com", en: "reviews on Booking.com" },
   "nb.l4":           { th: "ถึง ICONSIAM", en: "to ICONSIAM" },
@@ -165,7 +164,7 @@ const I18N = {
   "av.uncertain":    { th: "ส่งคำขอมาได้เลย — เราจะเช็คห้องว่างและยืนยันให้ภายใน 24 ชม.", en: "Send your request — we'll check availability and confirm within 24 hrs" },
 
   /* ── ขั้นตอนการจอง 3 สเต็ป ── */
-  "bs.t":            { th: "จองง่าย ๆ ใน 3 ขั้นตอน", en: "How booking works" },
+  "bs.t":            { th: "จองกับเราทำงานยังไง", en: "How booking works" },
   "bs.1":            { th: "ส่งคำขอจอง", en: "Send your request" },
   "bs.1.d":          { th: "เลือกวัน กรอกชื่อ แล้วส่ง — ฟรี ไม่ผูกมัด", en: "Pick your dates and send — free, no commitment" },
   "bs.2":            { th: "เรายืนยันภายใน 24 ชม.", en: "We confirm within 24 h" },
