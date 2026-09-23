@@ -67,5 +67,63 @@ function call(body, ip = "1.1.1.1") {
   last = await call(good(), "9.9.9.9");
   assert.equal(last.code, 429, "เกินลิมิตแล้วจึงบล็อก");
 
+  /* ── แจ้งเตือน LINE เมื่อมีออเดอร์ใหม่ ── */
+  {
+    // ข้อความ: อ่านจบในจอเดียว
+    const msg = order.orderMessage({ ...good(), date: "2026-09-24", items: "มัสมั่น (ไก่) × 2 — ฿200; ชาไทย × 1 — ฿40", total: "240" }, "RS-9");
+    assert.ok(msg.startsWith("🛎 ออเดอร์รูมเซอร์วิสใหม่"));
+    assert.ok(msg.includes("ห้อง 701 · Somchai Test"));
+    assert.ok(msg.includes("ส่ง พฤ. 24 ก.ย. 2569 เวลา 09:30 (รอบเช้า)"), "วันไทย พ.ศ. + รอบ");
+    assert.ok(msg.includes("• มัสมั่น (ไก่) × 2 — ฿200\n• ชาไทย × 1 — ฿40"), "รายการละบรรทัด");
+    assert.ok(msg.includes("รวม ฿240 · เก็บเงินสดตอนส่ง"));
+    assert.ok(msg.includes("หมายเหตุ: ไม่เผ็ด"));
+    assert.ok(msg.includes("#RS-9"));
+    const pm = order.orderMessage({ ...good(), time: "14:00", note: "", lang: "en", channel: "whatsapp", items: "x × 1 — ฿10", total: "10" }, "RS-1");
+    assert.ok(pm.includes("(รอบบ่าย)") && pm.includes("แขกส่งทาง WhatsApp · แขกใช้ภาษาอังกฤษ") && !pm.includes("หมายเหตุ"));
+
+    // ตั้งค่าแล้ว: บันทึกสำเร็จ → push 1 ครั้ง ไปหาคนที่ตั้งไว้ ด้วย token ที่ตั้งไว้
+    process.env.LINE_CHANNEL_TOKEN = "line-test-token";
+    process.env.LINE_NOTIFY_TO = "Uowner";
+    const calls = [];
+    const router = (lineResult) => async (url, opts) => {
+      calls.push({ url, opts });
+      if (String(url).includes("api.line.me")) return lineResult();
+      return { ok: true, status: 200, text: async () => JSON.stringify({ ok: true, id: "RS-N1" }) };
+    };
+    global.fetch = router(() => ({ ok: true, status: 200, text: async () => "{}" }));
+    let r2 = await call(good(), "2.2.2.2");
+    assert.equal(r2.code, 201);
+    const pushes = calls.filter((c) => c.url.includes("api.line.me/v2/bot/message/push"));
+    assert.equal(pushes.length, 1, "ออเดอร์หนึ่งรายการ = แจ้งหนึ่งครั้ง");
+    assert.equal(pushes[0].opts.headers.Authorization, "Bearer line-test-token");
+    const pb = JSON.parse(pushes[0].opts.body);
+    assert.equal(pb.to, "Uowner");
+    assert.ok(pb.messages[0].text.includes("ห้อง 701") && pb.messages[0].text.includes("#RS-N1"));
+
+    // LINE ตอบ error → ออเดอร์ยังสำเร็จ และบันทึกครั้งเดียว ไม่เบิ้ล
+    calls.length = 0;
+    global.fetch = router(() => ({ ok: false, status: 401, text: async () => '{"message":"Authentication failed"}' }));
+    r2 = await call(good(), "2.2.2.3");
+    assert.equal(r2.code, 201, "LINE พังต้องไม่ทำให้ออเดอร์พัง");
+    assert.equal(calls.filter((c) => !c.url.includes("api.line.me")).length, 1, "บันทึกออเดอร์ครั้งเดียว");
+
+    // LINE ต่อไม่ติด → ออเดอร์ยังสำเร็จ
+    global.fetch = router(() => { throw new Error("offline"); });
+    r2 = await call(good(), "2.2.2.4");
+    assert.equal(r2.code, 201, "LINE ต่อไม่ติดต้องไม่ทำให้ออเดอร์พัง");
+
+    // สร้างข้อความพัง → ต้องไม่โยน error ออกมา (ในทางฐานข้อมูล ถ้าโยนจะไปบันทึกซ้ำลงชีต)
+    await order.notifyOrder(null, "RS-X");
+
+    // ยังไม่ได้ตั้งค่า → ไม่ยิงไปหา LINE เลย
+    delete process.env.LINE_CHANNEL_TOKEN;
+    delete process.env.LINE_NOTIFY_TO;
+    calls.length = 0;
+    global.fetch = router(() => ({ ok: true, status: 200, text: async () => "{}" }));
+    r2 = await call(good(), "2.2.2.5");
+    assert.equal(r2.code, 201);
+    assert.equal(calls.filter((c) => c.url.includes("api.line.me")).length, 0, "ไม่ได้ตั้งค่า = ไม่ส่ง");
+  }
+
   console.log("ORDER API TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });
