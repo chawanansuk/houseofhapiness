@@ -3,6 +3,7 @@
  *
  * เว็บยิงมาแบบเงียบ ๆ ตอนแขกกด "ส่งออร์เดอร์ใน LINE / WhatsApp" — ข้อความในแชทยังเป็นช่องทางยืนยัน
  * แต่หลังบ้านจะเห็นออเดอร์ทันทีในการ์ด "รูมเซอร์วิส" หน้าวันนี้ ไม่ต้องเลื่อนแชทหา
+ * และส่ง LINE แจ้งเจ้าของทันทีที่บันทึกสำเร็จ (ตั้งค่าใน api/_notify.js — ไม่ได้ตั้ง = ข้าม)
  * ยอดคำนวณใหม่ฝั่งเซิร์ฟเวอร์จากรายการ (ไม่เชื่อ total ที่ส่งมา)
  */
 
@@ -11,6 +12,7 @@ const RATE_MAX = 40, RATE_WINDOW_MS = 60 * 60 * 1000;
 const SHEET_TIMEOUT_MS = 12000;
 const hits = new Map();
 const { dbEnabled, getStore } = require("./_store.js");
+const { notifyLine, thaiDate } = require("./_notify.js");
 
 function rateLimited(ip) {
   const now = Date.now();
@@ -42,6 +44,32 @@ function normalizeItems(raw) {
     lines.push(`${name}${variant ? ` (${variant})` : ""} × ${qty} — ฿${price * qty}`);
   }
   return { text: lines.join("; ").slice(0, 1000), total };
+}
+
+/** ข้อความ LINE ถึงเจ้าของ — อ่านจบในจอเดียว: ห้อง ชื่อ เวลาส่ง รายการ ยอด */
+function orderMessage(row, id) {
+  const slot = String(row.time) < "12:30" ? "รอบเช้า" : "รอบบ่าย";
+  const lines = [
+    "🛎 ออเดอร์รูมเซอร์วิสใหม่",
+    `ห้อง ${row.room} · ${row.name}`,
+    `ส่ง ${thaiDate(row.date)} เวลา ${row.time} (${slot})`,
+    "",
+    ...String(row.items || "").split(/;\s*/).filter(Boolean).map((x) => `• ${x}`),
+    `รวม ฿${Number(row.total).toLocaleString("en-US")} · เก็บเงินสดตอนส่ง`,
+  ];
+  if (row.note) lines.push("", `หมายเหตุ: ${row.note}`);
+  lines.push(
+    "",
+    `แขกส่งทาง ${row.channel === "whatsapp" ? "WhatsApp" : "LINE"}${row.lang === "en" ? " · แขกใช้ภาษาอังกฤษ" : ""} · #${id}`,
+    "กดยืนยันใน /admin: https://houseofhappinessbangkok.com/admin/"
+  );
+  return lines.join("\n");
+}
+
+/** ห้ามโยน error ออกไปเด็ดขาด — ในทางฐานข้อมูลคำสั่งนี้อยู่ใน try ที่ถ้าพังจะไปบันทึกลงชีตซ้ำ = ออเดอร์เบิ้ล */
+async function notifyOrder(row, id) {
+  try { await notifyLine(orderMessage(row, id)); }
+  catch (e) { console.error(JSON.stringify({ event: "line_notify_failed", reason: "message-build", detail: String((e && e.message) || e).slice(0, 120) })); }
 }
 
 module.exports = async (req, res) => {
@@ -79,6 +107,7 @@ module.exports = async (req, res) => {
     try {
       const id = await getStore().addOrder(row);
       console.info(JSON.stringify({ event: "order_saved", orderId: String(id), total: items.total }));
+      await notifyOrder(row, String(id));
       return res.status(201).json({ ok: true, saved: true, id: String(id) });
     } catch (e) {
       console.error(JSON.stringify({ event: "order_db_failed_fallback_sheet", reason: String((e && e.message) || "db").slice(0, 120) }));
@@ -110,6 +139,7 @@ module.exports = async (req, res) => {
       return res.status(502).json({ ok: false, saved: false, error: "order-storage-failed" });
     }
     console.info(JSON.stringify({ event: "order_saved", orderId: String(result.id), total: items.total }));
+    await notifyOrder(row, String(result.id));
     return res.status(201).json({ ok: true, saved: true, id: String(result.id) });
   } catch (e) {
     const timedOut = e && e.name === "AbortError";
@@ -119,3 +149,6 @@ module.exports = async (req, res) => {
     clearTimeout(timer);
   }
 };
+
+module.exports.orderMessage = orderMessage;
+module.exports.notifyOrder = notifyOrder;
