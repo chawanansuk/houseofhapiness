@@ -454,4 +454,59 @@ console.log("GUIDES HUB TESTS PASSED");
     assert.ok(new RegExp(`"${k.replace(".", "\\.")}":`).test(i18n), `i18n.js ขาดคีย์ ${k}`);
   }
 }
+/* ── V2 ชั้นที่ 1: contrast ที่วัดได้จริง ไม่ใช่ความรู้สึก ──
+   ทุกค่าคำนวณด้วยสูตร WCAG relative luminance ในเทสต์นี้เอง ถ้าใครแก้สีแล้วตก เทสต์จะบอกตัวเลข */
+{
+  const css = read("assets/style.css");
+
+  const lum = (hex) => {
+    const h = hex.replace("#", "");
+    const c = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => {
+    const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+    return (x + 0.05) / (y + 0.05);
+  };
+  const tokenOf = (name) => {
+    const m = css.match(new RegExp("--" + name + ":\\s*(#[0-9a-fA-F]{6})"));
+    assert.ok(m, "style.css ต้องมี token --" + name);
+    return m[1].toLowerCase();
+  };
+
+  const cream = tokenOf("cream");
+  const card = tokenOf("card");
+
+  // ข้อความรอง: ต้องผ่าน WCAG 1.4.3 (4.5:1) บนพื้นที่ใช้คู่กันจริง
+  const muted = tokenOf("muted");
+  for (const [bg, label] of [[cream, "--cream"], [card, "--card"], ["#ffffff", "white"]]) {
+    const r = ratio(muted, bg);
+    assert.ok(r >= 4.5, `--muted (${muted}) บน ${label} ได้ ${r.toFixed(2)}:1 ต้อง >= 4.5`);
+  }
+
+  // ขอบ control: WCAG 1.4.11 กำหนด 3:1 — ช่องกรอกพื้นขาว
+  const ctrl = tokenOf("border-control");
+  for (const [bg, label] of [["#ffffff", "พื้นช่องกรอก"], [card, "--card"], [cream, "--cream"]]) {
+    const r = ratio(ctrl, bg);
+    assert.ok(r >= 3, `--border-control (${ctrl}) บน ${label} ได้ ${r.toFixed(2)}:1 ต้อง >= 3`);
+  }
+
+  // โทนเดิมเก็บไว้ได้ แต่ห้ามเอากลับมาใช้เป็น --muted
+  assert.notEqual(muted, "#8d7f70", "#8d7f70 ได้ 3.46:1 บนครีม ห้ามใช้เป็นสีข้อความรอง");
+  assert.match(css, /--muted-decor:\s*#8d7f70/, "เก็บโทนเดิมไว้เป็น --muted-decor สำหรับของตกแต่ง");
+
+  // ช่องกรอกต้องไม่ถูกลบ outline ทิ้ง — ของเดิมใช้ outline:none + วงแหวน 1.26:1 ซึ่งมองไม่เห็น
+  assert.ok(!/outline:\s*none/.test(css.replace(/\/\*[\s\S]*?\*\//g, "")),
+    "ห้ามมี outline:none ใน style.css — ถ้าจะลบต้องมีตัวแทนที่มองเห็นได้");
+  assert.match(css, /input:focus-visible[^{]*\{[^}]*outline:\s*2px solid/,
+    "ช่องกรอกต้องมี outline 2px ตอนโฟกัสด้วยคีย์บอร์ด");
+  assert.match(css, /:focus-visible\s*\{\s*outline:\s*2px solid/,
+    "ต้องคงกฎ :focus-visible รวมสำหรับลิงก์และปุ่มไว้");
+
+  // ขอบช่องกรอกต้องผูกกับ token ไม่ใช่ค่าดิบ (#ddcdb6 ของเดิมได้ 1.56:1)
+  assert.ok(!/#ddcdb6/.test(css), "#ddcdb6 ได้ 1.56:1 บนพื้นขาว เอาออกแล้วใช้ --border-control");
+}
+console.log("CONTRAST TESTS PASSED");
+
 console.log("ARTICLE TEMPLATE TESTS PASSED");
