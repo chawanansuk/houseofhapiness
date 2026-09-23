@@ -506,6 +506,20 @@ console.log("GUIDES HUB TESTS PASSED");
 
   // ขอบช่องกรอกต้องผูกกับ token ไม่ใช่ค่าดิบ (#ddcdb6 ของเดิมได้ 1.56:1)
   assert.ok(!/#ddcdb6/.test(css), "#ddcdb6 ได้ 1.56:1 บนพื้นขาว เอาออกแล้วใช้ --border-control");
+
+  // ปุ่มแชท: ตัวอักษรบนเขียว LINE / WhatsApp ต้องอ่านออก (ตัวหนา ~16px = ข้อความปกติ ต้อง 4.5:1)
+  const dark = tokenOf("dark");
+  const green = tokenOf("green");
+  assert.match(css, /\.btn-line\s*\{[^}]*color:\s*var\(--dark\)/, ".btn-line ต้องใช้ตัวอักษรสีเข้ม");
+  assert.match(css, /\.btn-wa\s*\{[^}]*color:\s*var\(--dark\)/, ".btn-wa ต้องใช้ตัวอักษรสีเข้ม");
+  for (const [bg, label] of [[green, "LINE"], ["#25d366", "WhatsApp"]]) {
+    const r = ratio(dark, bg);
+    assert.ok(r >= 4.5, `ตัวอักษรบนปุ่ม ${label} ได้ ${r.toFixed(2)}:1 ต้อง >= 4.5`);
+  }
+
+  // ความกว้างอ่านบทความ: ไทย 720px อังกฤษ 620px (วัดแล้ว 842px ได้ 90 / 108 ตัวอักษรต่อบรรทัด)
+  assert.match(css, /\.ld-wrap\s*\{\s*max-width:\s*720px/, ".ld-wrap ต้องกว้างไม่เกิน 720px");
+  assert.match(css, /html\[lang="en"\] \.ld-wrap\s*\{\s*max-width:\s*620px/, "หน้าอังกฤษต้องแคบกว่าเป็น 620px");
 }
 console.log("CONTRAST TESTS PASSED");
 
