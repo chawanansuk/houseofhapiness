@@ -59,7 +59,7 @@ assert.doesNotMatch(read("assets/i18n.js"), /ราคาดีที่สุ�
 const home = read("index.html");
 assert.doesNotMatch(home, /class="ico">[^<\s]/, "homepage icons must be line icons (data-icon), not emoji");
 assert.ok((home.match(/data-icon="/g) || []).length >= 20, "homepage must paint icons via data-icon");
-assert.match(read("assets/i18n.js").match(/"hero\.tagline":[\s\S]*?\},/)[0], /15 ห้อง[\s\S]*15 apartments/, "hero tagline must lead with real numbers, not adjectives");
+assert.match(read("assets/i18n.js").match(/"hero\.tagline":[\s\S]*?\},/)[0], /3 แบบ[\s\S]*~2 กม\.[\s\S]*3 layouts[\s\S]*~2 km/, "hero tagline must lead with real numbers, not adjectives");
 assert.ok(home.indexOf('id="numbers"') < home.indexOf('id="rooms"'), "proof strip (numbers) must sit right under the hero, before rooms");
 assert.match(home, /class="prov real"/, "own photos must carry the gold provenance chip");
 assert.match(read("room-deluxe.html"), /class="credit real"/, "room hero (own photo) must carry the gold provenance chip");
