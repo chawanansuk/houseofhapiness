@@ -301,4 +301,73 @@ assert.equal(sandbox.isArrivalsDigest_("Booking cancelled - 5566778899"), false)
   assert.equal(appended.length, 1, "อีเมลโปรโมชั่นต้องไม่สร้างแถวใหม่");
 }
 
+/* ── การจองที่ "อีเมลสรุปเช็คอิน" สร้างใหม่ ต้องถูกแจ้งเตือนด้วย ──
+   เคสจริง 24 ก.ย. 2569: จอง 02:35 เข้าพักวันรุ่งขึ้น อีเมลสรุปถูกอ่านก่อน → อีเมลจองใหม่เจอแถวเดิม → เงียบ */
+{
+  const appended = [];
+  sandbox.appendBooking_ = (b) => { appended.push(b); };
+  sandbox.readAll_ = () => [{ id: "BDC-1111111111", name: "Old Guest", checkin: "2026-09-25", checkout: "2026-09-27", status: "ยืนยันแล้ว", note: "" }];
+  sandbox.backfillBooking_ = () => [];
+  const html = `<table>
+    <tr><th>Reservation</th><th>Guest</th><th>Check-in</th><th>Check-out</th></tr>
+    <tr><td>6403247167</td><td>Jane Doe</td><td>25 Sep 2026</td><td>27 Sep 2026</td></tr>
+    <tr><td>1111111111</td><td>Old Guest</td><td>25 Sep 2026</td><td>27 Sep 2026</td></tr>
+  </table>`;
+  const created = [];
+  const n = sandbox.importArrivalRows_(html, created);
+  assert.equal(appended.length, 1, "สร้างเฉพาะรายการที่ยังไม่มี");
+  assert.equal(created.length, 1, "รายการใหม่จากอีเมลสรุปต้องถูกส่งออกไปให้แจ้งเตือน");
+  assert.equal(created[0].id, "BDC-6403247167");
+  assert.equal(created[0].checkin, "2026-09-25");
+  assert.equal(created[0].checkout, "2026-09-27");
+  assert.ok(n >= 1);
+  // ยังเรียกแบบเดิม (ไม่ส่ง created) ได้ — importArrivalDigests ใช้แบบนี้
+  appended.length = 0;
+  sandbox.importArrivalRows_(html);
+  assert.equal(appended.length, 1);
+
+  // processMessage_ ส่งรายการที่สร้างใหม่กลับไปให้ scanBookingEmails
+  appended.length = 0;
+  const res = sandbox.processMessage_({
+    getSubject: () => "Reservations with today's or tomorrow's arrival date",
+    getBody: () => html, getPlainBody: () => "", getDate: () => new Date(), getId: () => "msg-digest01",
+  });
+  assert.equal(res.kind, "digest");
+  assert.equal(res.created.length, 1);
+  assert.equal(res.created[0].id, "BDC-6403247167");
+}
+
+/* ── ทั้งรอบสแกน: อีเมลสรุปมาก่อน + อีเมลจองใหม่ตามมา → ต้องได้แจ้งเตือน 1 ฉบับ ไม่ซ้ำ ── */
+{
+  const rows = [];
+  sandbox.appendBooking_ = (b) => { rows.push(Object.assign({ _rowIndex: rows.length + 2 }, b)); };
+  sandbox.readAll_ = () => rows.slice();
+  sandbox.findById_ = (id) => rows.find((r) => r.id === id) || null;
+  sandbox.findByResNo_ = (no) => rows.find((r) => String(r.id).replace(/\D/g, "") === String(no)) || null;
+  sandbox.backfillBooking_ = () => [];
+  sandbox.isBookingComplete_ = () => true;
+  sandbox.setStatus_ = () => {};
+  sandbox.fmtDate_ = () => "2026-09-24 02:40";
+  const mails = [];
+  sandbox.MailApp = { sendEmail: (to, subject, body) => mails.push({ to, subject, body }) };
+  sandbox.Session = { getEffectiveUser: () => ({ getEmail: () => "owner@test" }) };
+  const msg = (subject, plain, html, id) => ({ getSubject: () => subject, getPlainBody: () => plain, getBody: () => html || "", getDate: () => new Date(), getId: () => id });
+  const thread = (m) => ({ getMessages: () => [m], addLabel: () => {} });
+  const digestHtml = `<table><tr><td>6403247167</td><td>Jane Doe</td><td>25 Sep 2026</td><td>27 Sep 2026</td></tr></table>`;
+  // Gmail เรียงใหม่สุดก่อน: อีเมลสรุป (02:40) ถูกอ่านก่อนอีเมลจองใหม่ (02:35)
+  sandbox.GmailApp = {
+    getUserLabelByName: () => ({}), createLabel: () => ({}),
+    search: () => [
+      thread(msg("Reservations with today's or tomorrow's arrival date", "", digestHtml, "m-digest")),
+      thread(msg("Booking.com - มีการจองใหม่ (6403247167, วันศุกร์ที่ 25 กันยายน ค.ศ. 2026)", "Booking confirmation — 6403247167", "", "m-new")),
+    ],
+  };
+  const out = sandbox.scanBookingEmails();
+  assert.equal(rows.length, 1, "บันทึกรายการเดียว");
+  assert.equal(out.newBookings, 1, "นับเป็นจองใหม่ 1 รายการ");
+  assert.equal(mails.length, 1, "ต้องส่งแจ้งเตือน 1 ฉบับ — ก่อนแก้ ส่ง 0 ฉบับ");
+  assert.equal(mails[0].subject, "[HOH] จองใหม่ — เข้า ศ. 25 ก.ย. 2569");
+  assert.ok(mails[0].body.includes("Jane Doe · #BDC-6403247167"));
+}
+
 console.log("Booking email parser tests passed");
