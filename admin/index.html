@@ -60,6 +60,7 @@
       <div class="nav-group">
         <div class="nav-label">หน้างาน</div>
         <a href="#today" data-view="today"><span class="ic" data-ic="sun"></span>วันนี้<span class="cnt" id="navTodayCnt"></span></a>
+        <a href="#orders" data-view="orders"><span class="ic" data-ic="bell"></span>รูมเซอร์วิส<span class="cnt" id="navOrdCnt"></span></a>
         <a href="#timeline" data-view="timeline"><span class="ic" data-ic="timeline"></span>ไทม์ไลน์</a>
         <a href="#rooms" data-view="rooms"><span class="ic" data-ic="grid"></span>ผังห้อง<span class="cnt" id="navRoomsCnt"></span></a>
       </div>
@@ -137,6 +138,11 @@
       </section>
 
       <!-- ================= TIMELINE ================= -->
+      <!-- ================= ROOM SERVICE ================= -->
+      <section class="view" id="view-orders">
+        <div class="card" id="ordersPage"></div>
+      </section>
+
       <section class="view" id="view-timeline">
         <div class="tl-tools">
           <button class="btn icon" id="tlPrev" aria-label="ก่อนหน้า"><span class="ic" data-ic="chevL"></span></button>
@@ -257,7 +263,7 @@
 
 <nav class="tabbar" aria-label="เมนูมือถือ" style="display:none" id="tabbar">
   <button data-view="today"><span class="ic" data-ic="sun"></span>วันนี้<span class="b hide" id="tabTodayB"></span></button>
-  <button data-view="timeline"><span class="ic" data-ic="timeline"></span>ไทม์ไลน์</button>
+  <button data-view="orders"><span class="ic" data-ic="bell"></span>รูมเซอร์วิส<span class="b hide" id="tabOrdB"></span></button>
   <button data-view="rooms"><span class="ic" data-ic="grid"></span>ห้อง</button>
   <button data-view="bookings"><span class="ic" data-ic="list"></span>รายการจอง<span class="b hide" id="tabBookB"></span></button>
   <button data-view="more"><span class="ic" data-ic="more"></span>เพิ่มเติม</button>

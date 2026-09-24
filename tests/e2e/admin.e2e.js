@@ -360,13 +360,23 @@ const server = http.createServer((req, res) => {
   await mob.locator('#tabbar button[data-view="bookings"]').click();
   await mob.waitForTimeout(400);
   check("แตะแท็บรายการจอง (แทนแม่บ้านเดิม) แล้วเปิดหน้ารายการจอง", await mob.locator("#view-bookings.on").count() === 1);
+  check("มือถือ: ป้ายรูมเซอร์วิสนับออเดอร์ค้าง 2 (RS-1 ยืนยันแล้ววันนี้ + RS-2 รอยืนยัน)", (await mob.locator("#tabOrdB").innerText()).trim() === "2");
+  await mob.locator('#tabbar button[data-view="orders"]').click();
+  await mob.waitForTimeout(400);
+  if (process.env.SHOT) await mob.screenshot({ path: process.env.SHOT, fullPage: true });
+  const ordTxt = await mob.locator("#ordersPage").innerText();
+  check("แตะแท็บรูมเซอร์วิส → เปิดหน้าออเดอร์ เห็นทั้ง RS-1 และ RS-2 ในกลุ่มต้องทำ", await mob.locator("#view-orders.on").count() === 1 && await mob.locator('#ordersPage .od-row[data-id="RS-1"]').count() === 1 && await mob.locator('#ordersPage .od-row[data-id="RS-2"]').count() === 1 && ordTxt.includes("ต้องทำ"));
+  await mob.locator('#ordersPage [data-act="order-done"][data-id="RS-1"]').click();
+  await mob.waitForTimeout(600);
+  check("กดส่งแล้ว → ป้ายลดเหลือ 1 และยอดเงินสดวันนี้ขึ้น ฿240", (await mob.locator("#tabOrdB").innerText()).trim() === "1" && (await mob.locator("#ordersPage").innerText()).includes("฿240"));
   await mob.locator('#tabbar button[data-view="more"]').click();
   await mob.waitForTimeout(300);
   check("แท็บ 'เพิ่มเติม' เปิด sheet เมนู (มีรายรับ-รายจ่ายสำหรับเจ้าของ)", (await mob.locator("#sheetBody").innerText()).includes("รายรับ-รายจ่าย"));
+  check("ไทม์ไลน์ย้ายมาอยู่ในเมนู 'เพิ่มเติม'", await mob.locator('#sheetBody [data-act="go"][data-v="timeline"]').count() === 1);
   await mob.keyboard.press("Escape");
   await mob.waitForTimeout(200);
   let overflow = 0;
-  for (const v of ["today", "timeline", "rooms", "calendar", "bookings"]) {
+  for (const v of ["today", "orders", "timeline", "rooms", "calendar", "bookings"]) {
     await mob.evaluate((vv) => { location.hash = "#" + vv; }, v);
     await mob.waitForTimeout(300);
     overflow += await mob.evaluate(() => Math.max(0, document.documentElement.scrollWidth - (window.innerWidth + 1)));
