@@ -68,6 +68,7 @@ function englishTitle(file, title) {
    (เคยหลุดเป็นคำบรรยายภาษาไทยบนหน้าอังกฤษ เวลาแชร์ลิงก์หรือขึ้นใน Google) */
 const EN_DESC = {
   "index.html": "Aparthotel in Khlong San, Bangkok, with three room layouts, a ฿5 ferry to Chinatown and the Gold Line nearby. Rated 8.8/10 on Booking.com.",
+  "ride-hailing-guide.html": "How to use Grab and Bolt in Bangkok: install, book step by step, pay, find the airport pickup point, and what to do when the driver can't find you.",
   "local.html": "Our insider guide: 13 places locals really eat around Soi Tha Din Daeng 16, plus a 10-stop Khlong San walk most visitors never find.",
 };
 
