@@ -460,6 +460,7 @@ function scanBookingEmails() {
       try {
         var res = processMessage_(msg);
         if (res && res.kind === "new") news.push(res);
+        if (res && res.kind === "digest" && res.created) news = news.concat(res.created);
       }
       catch (err) {
         appendBooking_({
@@ -476,8 +477,11 @@ function scanBookingEmails() {
 
   // แจ้งเตือนเจ้าของทันทีที่เจอจองใหม่ (ไม่ต้องรอสรุปเช้า)
   // ครอบ try ไว้เพราะการแจ้งเตือนพังต้องไม่ทำให้การบันทึกการจองพังตาม
-  try { notifyNewBookings_(news, failures); }
+  var sent = false;
+  try { sent = notifyNewBookings_(news, failures); }
   catch (err) { console.error("notifyNewBookings_ ล้มเหลว: " + err); }
+  // บรรทัดนี้โผล่ในหน้า Executions ของ Apps Script — ไว้ดูย้อนหลังว่ารอบไหนเจออะไร ส่งแจ้งเตือนหรือไม่
+  console.log("สแกน " + threads.length + " เธรด · จองใหม่ " + news.length + " · อ่านไม่ออก " + failures.length + " · ส่งแจ้งเตือน: " + (sent ? "ส่งแล้ว" : "ไม่ได้ส่ง"));
 
   return { newBookings: news.length, failures: failures.length };
 }
@@ -489,8 +493,11 @@ function processMessage_(msg) {
   // — มีเลขจอง + ชื่อแขก + วันเข้า-ออกครบเป็นตาราง แต่หัวข้อไม่เข้าเงื่อนไข
   // จองใหม่/ยกเลิก/แก้ไข ทำให้รุ่นก่อนข้ามไปเฉย ๆ ทั้งที่ข้อมูลดีที่สุด
   if (isArrivalsDigest_(subject)) {
-    importArrivalRows_(msg.getBody() || msg.getPlainBody() || "");
-    return { kind: "digest" };
+    // รายการที่อีเมลนี้สร้างใหม่ต้องแจ้งเตือนด้วย — ถ้าอีเมลสรุปถูกอ่านก่อนอีเมล "มีการจองใหม่"
+    // (เกิดได้ในรอบสแกนเดียวกัน เพราะ Gmail เรียงฉบับใหม่สุดก่อน) อีเมลจองใหม่จะเจอแถวเดิมแล้วเงียบไป
+    var created = [];
+    importArrivalRows_(msg.getBody() || msg.getPlainBody() || "", created);
+    return { kind: "digest", created: created };
   }
 
   var parsed = parseBookingEmail_(subject, msg.getPlainBody() || "");
@@ -735,7 +742,7 @@ function isArrivalsDigest_(subject) {
  * - แถวที่ไม่พบ → เพิ่มใหม่ กันการจองตกหล่น
  * อีเมลนี้มาทุกวัน — รันซ้ำได้ ไม่บันทึก/ไม่แก้ซ้ำ
  */
-function importArrivalRows_(html) {
+function importArrivalRows_(html, created) {
   var byDigits = {};
   readAll_().forEach(function (r) {
     var d = String(r.id || "").replace(/\D/g, "");
@@ -769,6 +776,7 @@ function importArrivalRows_(html) {
         checkin: ci, checkout: co, status: "ยืนยันแล้ว",
         note: "จากอีเมลสรุปเช็คอินวันนี้/พรุ่งนี้" + (guestNote ? " | คำขอแขก: " + guestNote : ""),
       });
+      if (created) created.push({ kind: "new", id: "BDC-" + resNo, name: name, checkin: ci, checkout: co });
       count++;
       continue;
     }
@@ -1097,6 +1105,15 @@ function setupTriggers() {
   });
   ScriptApp.newTrigger("scanBookingEmails").timeBased().everyMinutes(30).create();
   ScriptApp.newTrigger("dailyDigest").timeBased().everyDays(1).atHour(8).create();
+}
+
+/** ทดสอบการแจ้งเตือน: กด Run แล้วควรได้อีเมล "[HOH] จองใหม่ — ..." ภายในไม่กี่วินาที
+ *  ข้อมูลในอีเมลเป็นตัวอย่าง ไม่ได้บันทึกอะไรลงชีต */
+function testNotifyNow() {
+  var tmr = Utilities.formatDate(new Date(Date.now() + 86400000), "Asia/Bangkok", "yyyy-MM-dd");
+  var out = Utilities.formatDate(new Date(Date.now() + 3 * 86400000), "Asia/Bangkok", "yyyy-MM-dd");
+  var ok = notifyNewBookings_([{ id: "BDC-TEST", name: "(ทดสอบระบบ — ไม่ใช่การจองจริง)", checkin: tmr, checkout: out }], []);
+  console.log(ok ? "ส่งอีเมลทดสอบแล้ว ไปที่ " + Session.getEffectiveUser().getEmail() : "ไม่ได้ส่ง");
 }
 
 /** ทดสอบด้วยมือ: รัน scanBookingEmails ทันที แล้วเปิดชีตดูผล */
