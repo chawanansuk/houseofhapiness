@@ -737,3 +737,9 @@ body.offline .sync-chip i,body.offline .sync i{background:var(--dirty);box-shado
 
 .login-card .remember{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink-2);cursor:pointer;user-select:none}
 .login-card .remember input{width:16px;height:16px;accent-color:var(--brand)}
+/* รูมเซอร์วิส: ป้ายนับแยก — ส้ม = มีงานค้าง, แดง = เลยเวลารับอาหารแล้ว */
+.nav a .cnt.hot.late{background:var(--dirty);color:#fff}
+.tabbar button .b.warn{background:var(--arr);color:#1B120A}
+.od-row.late{box-shadow:inset 3px 0 0 var(--dirty);background:var(--dirty-bg)}
+.od-row.late:hover{background:var(--dirty-bg)}
+#view-orders .card-h .sub b{color:var(--ink);font-weight:600}
