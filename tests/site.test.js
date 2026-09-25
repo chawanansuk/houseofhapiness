@@ -524,3 +524,14 @@ console.log("GUIDES HUB TESTS PASSED");
 console.log("CONTRAST TESTS PASSED");
 
 console.log("ARTICLE TEMPLATE TESTS PASSED");
+
+// ความจุห้องบนหน้าจอง: Standard/Studio ห้องละ 2 ท่าน, Deluxe 3 ท่าน — เกินต้องจองเพิ่มห้อง
+{
+  const bk = read("booking.html");
+  for (const [id, n] of [["std", 2], ["stu", 2], ["dlx", 3]]) {
+    assert.match(bk, new RegExp(`id: "${id}",\\s*sleeps: ${n},`), `booking.html: ห้อง ${id} ต้องพักได้ ${n} ท่าน`);
+  }
+  assert.match(bk, /Math\.ceil\(guests \/ room\.sleeps\)/, "จำนวนห้องต้องคำนวณจากผู้เข้าพัก ÷ ความจุห้อง");
+  assert.doesNotMatch(bk + read("room-studio.html"), /Studio[^\n]{0,80}(สูงสุด 3|max 3)|"maxValue":3[^\n]*Studio/, "Studio พักได้ 2 ท่านเท่านั้น");
+  console.log("ROOM CAPACITY TESTS PASSED");
+}
