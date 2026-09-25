@@ -112,6 +112,7 @@
           </select>
         </div>
       </div>
+      <p class="hint rooms-hint" id="roomsHint" role="status" aria-live="polite" hidden></p>
     </div>
 
     <div class="card reveal">
@@ -191,6 +192,7 @@ const CONFIG = {
   rooms: [
     {
       id: "std",
+      sleeps: 2,
       name: { th: "ห้อง Standard — เตียงใหญ่", en: "Standard — Double Bed" },
       desc: {
         th: "เตียงใหญ่ 1 เตียง · พัก 2 ท่าน",
@@ -199,6 +201,7 @@ const CONFIG = {
     },
     {
       id: "stu",
+      sleeps: 2,
       name: { th: "ห้อง Studio — 2 เตียงแยก", en: "Studio — Twin Beds" },
       desc: {
         th: "2 เตียงแยก · พัก 2 ท่าน",
@@ -207,6 +210,7 @@ const CONFIG = {
     },
     {
       id: "dlx",
+      sleeps: 3,
       name: { th: "ห้อง Deluxe — ห้องใหญ่ พร้อมโซฟา", en: "Deluxe — Extra-Large with Sofa" },
       desc: {
         th: "เตียงใหญ่ + โซฟา · พัก 2 ท่าน (สูงสุด 3)",
@@ -315,7 +319,30 @@ function niceDate(iso, th) {
             : `${DOW_EN[dow]} ${d} ${MON_EN[mo - 1]} ${y}`;
 }
 
+// ห้อง Standard/Studio พักได้ห้องละ 2 ท่าน, Deluxe 3 ท่าน
+// ผู้เข้าพักเกินที่ห้องเดียวรับได้ = ต้องจองเพิ่มห้อง → ปรับจำนวนห้องให้เองและบอกแขกตรง ๆ
+let roomsAutoNote = "", roomsAutoSet = 0; // roomsAutoSet = จำนวนห้องที่เราตั้งให้เอง (0 = แขกเลือกเอง)
+function fitRooms() {
+  const roomId = document.querySelector('input[name="room"]:checked')?.value;
+  const room = CONFIG.rooms.find((r) => r.id === roomId);
+  const hint = $("roomsHint");
+  roomsAutoNote = "";
+  if (room && room.sleeps) {
+    const guests = +$("guests").value, need = Math.ceil(guests / room.sleeps);
+    const cur = +$("rooms").value;
+    if (roomsAutoSet && cur !== roomsAutoSet) roomsAutoSet = 0; // แขกเปลี่ยนเองแล้ว ไม่ไปยุ่ง
+    if (cur < need) { $("rooms").value = String(need); roomsAutoSet = need; }
+    else if (roomsAutoSet && need < cur) { $("rooms").value = String(need); roomsAutoSet = need > 1 ? need : 0; }
+    if (need > 1 && roomsAutoSet) {
+      roomsAutoNote = t("bk.roomsneed").replace("{cap}", room.sleeps).replace("{g}", guests).replace("{n}", need);
+    }
+  }
+  hint.textContent = roomsAutoNote;
+  hint.hidden = !roomsAutoNote;
+}
+
 function update() {
+  fitRooms();
   const s = getState();
   document.querySelectorAll(".room").forEach((el) =>
     el.classList.toggle("selected", el.querySelector("input").checked));

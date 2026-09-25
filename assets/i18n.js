@@ -278,6 +278,7 @@ const I18N = {
   "bk.guests":       { th: "จำนวนผู้เข้าพัก", en: "Guests" },
   "bk.guests.n":     { th: "ท่าน", en: "guest(s)" },
   "bk.rooms":        { th: "จำนวนห้อง", en: "Rooms" },
+  "bk.roomsneed":    { th: "ห้องนี้พักได้ห้องละ {cap} ท่าน — {g} ท่านจึงต้องจอง {n} ห้อง เราปรับให้แล้ว", en: "This room sleeps {cap} — {g} guests need {n} rooms, so we've set that for you" },
   "bk.rooms.n":      { th: "ห้อง", en: "room(s)" },
   "bk.name":         { th: "ชื่อ-นามสกุล", en: "Full name" },
   "bk.name.ph":      { th: "เช่น สมชาย ใจดี", en: "e.g. John Smith" },
