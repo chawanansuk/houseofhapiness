@@ -69,6 +69,7 @@
     <div class="card reveal">
       <h2><span class="step">1</span><span data-i18n="bk.step1">เลือกประเภทห้องพัก</span></h2>
       <div id="roomList"></div>
+      <p class="room-note" data-i18n="bk.roomnote">ทุกห้องมีระเบียง ตู้เย็น ห้องน้ำในตัว</p>
     </div>
 
     <div class="card reveal">
@@ -132,7 +133,6 @@
         <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">จองผ่าน LINE</a>
         <a class="btn btn-wa" id="btnWa" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendwa">จองผ่าน WhatsApp</a>
         <p class="alt-sep" id="altSep"><span data-i18n="bk.oralt">หรือช่องทางอื่น</span></p>
-        <a class="btn btn-mail" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอจองทางอีเมล</a>
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
         <p class="booking-save-status" id="bookingSaveStatus" role="status" aria-live="polite" hidden></p>
@@ -188,30 +188,29 @@ const CONFIG = {
   // ปล่อยว่าง "" = ซ่อนปุ่ม LINE (ลูกค้าจะเห็นเฉพาะปุ่มอีเมล)
   lineId: "@060hvzok",
   waNumber: "66994419465",              // เบอร์ WhatsApp รูปแบบสากล (ไม่มี + ไม่มีเว้นวรรค) ปล่อยว่าง "" = ซ่อนปุ่ม
-  email: "houseofhapinessbangkok@gmail.com",    // อีเมลรับคำขอจอง
   rooms: [
     {
       id: "std",
       name: { th: "ห้อง Standard — เตียงใหญ่", en: "Standard — Double Bed" },
       desc: {
-        th: "เตียงใหญ่ 1 เตียง · ระเบียง · ตู้เย็น · พัก 2 ท่าน",
-        en: "1 double bed · balcony · fridge · sleeps 2",
+        th: "เตียงใหญ่ 1 เตียง · พัก 2 ท่าน",
+        en: "1 double bed · sleeps 2",
       },
     },
     {
       id: "stu",
       name: { th: "ห้อง Studio — 2 เตียงแยก", en: "Studio — Twin Beds" },
       desc: {
-        th: "2 เตียงแยก เหมาะเพื่อน/พี่น้อง · ระเบียง · ตู้เย็น · พัก 2 ท่าน (สูงสุด 3)",
-        en: "2 single beds · balcony · fridge · sleeps 2 (max 3)",
+        th: "2 เตียงแยก · พัก 2 ท่าน (สูงสุด 3)",
+        en: "2 single beds · sleeps 2 (max 3)",
       },
     },
     {
       id: "dlx",
       name: { th: "ห้อง Deluxe — ห้องใหญ่ พร้อมโซฟา", en: "Deluxe — Extra-Large with Sofa" },
       desc: {
-        th: "ห้องใหญ่พิเศษ เตียงใหญ่ + มุมโซฟา · ระเบียง · ตู้เย็น · พัก 2 ท่าน (สูงสุด 3)",
-        en: "Extra-large room, double bed + sofa corner · balcony · fridge · sleeps 2 (max 3)",
+        th: "เตียงใหญ่ + โซฟา · พัก 2 ท่าน (สูงสุด 3)",
+        en: "Double bed + sofa · sleeps 2 (max 3)",
       },
     },
   ],
@@ -231,8 +230,7 @@ function renderRooms() {
     div.className = "room";
     div.innerHTML = `
       <input type="radio" name="room" value="${r.id}">
-      <span><span class="name">${r.name[lang()]}</span><br><span class="desc">${r.desc[lang()]}</span></span>
-      <span class="price" style="font-size:0.8rem">${t("bk.askprice")}</span>`;
+      <span class="txt"><span class="name">${r.name[lang()]}</span><span class="desc">${r.desc[lang()]}</span></span>`;
     roomList.appendChild(div);
   });
   const keep = selected || (CONFIG.rooms.length === 1 ? CONFIG.rooms[0].id : null);
@@ -355,7 +353,7 @@ function update() {
 ${L ? "รบกวนแจ้งราคารวมและวิธีชำระเงินด้วยนะครับ/ค่ะ 🙏" : "Could you let me know the total price and how to pay? 🙏"}`;
   lastMsg = msg;
 
-  const btnLine = $("btnLine"), btnWa = $("btnWa"), btnMail = $("btnMail");
+  const btnLine = $("btnLine"), btnWa = $("btnWa");
   const hasLine = !!CONFIG.lineId, hasWa = !!CONFIG.waNumber;
   btnLine.style.display = hasLine ? "" : "none";
   btnWa.style.display = hasWa ? "" : "none";
@@ -369,24 +367,21 @@ ${L ? "รบกวนแจ้งราคารวมและวิธีช�
 
   [btnLine, btnWa].forEach((b) => b.classList.remove("btn-primary-action"));
   if (primary) primary.classList.add("btn-primary-action");
-  // จัดลำดับด้วย CSS order: หลัก=1, เส้นคั่น=2, รอง=3, อีเมล=4, คัดลอก=5
+  // จัดลำดับด้วย CSS order: หลัก=1, เส้นคั่น=2, รอง=3, คัดลอก=5
   btnLine.style.order = primary === btnLine ? "1" : "3";
   btnWa.style.order = primary === btnWa ? "1" : "3";
   $("altSep").style.order = "2";
-  btnMail.style.order = "4";
   $("btnCopy").style.order = "5";
   $("altSep").style.display = primary ? "" : "none"; // ไม่มีปุ่มแชทเลยก็ไม่ต้องมีเส้นคั่น
 
   btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
   btnWa.setAttribute("aria-disabled", ready ? "false" : "true");
-  btnMail.setAttribute("aria-disabled", ready ? "false" : "true");
   $("btnCopy").setAttribute("aria-disabled", ready ? "false" : "true");
   if (ready) {
     // สำคัญ: ต้องวาง @id ดิบ ๆ ในพาธ ห้าม encode ตัว "@" เป็น %40
     // ไม่งั้น LINE หาบัญชีไม่เจอ แล้วเด้งไปหน้าแรก line.me แทนที่จะเปิดแชท
     btnLine.href = `https://line.me/R/oaMessage/${CONFIG.lineId}/?${encodeURIComponent(msg)}`;
     btnWa.href = `https://wa.me/${CONFIG.waNumber}?text=${encodeURIComponent(msg)}`;
-    btnMail.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent((L ? "คำขอจองห้องพัก - " : "Booking request - ") + s.name)}&body=${encodeURIComponent(msg)}`;
   }
 
   const hint = $("readyHint");
@@ -522,7 +517,7 @@ async function logBooking() {
   bookingSavePromise = request;
   return bookingSavePromise;
 }
-["btnLine", "btnWa", "btnMail", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
+["btnLine", "btnWa", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
 document.addEventListener("langchange", renderBookingSaveStatus);
 function resetBookingSaveStatusIfChanged() {
   if (!loggedSig || bookingSignature(getState()) === loggedSig) return;
