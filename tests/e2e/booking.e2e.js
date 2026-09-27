@@ -126,6 +126,26 @@ async function launch() {
   assert.ok(savedText.includes("WEB-E2E-1"), "ต้องแสดงเลขที่จองจากระบบ");
   ok("กดจองแล้วบันทึกเข้าระบบ + โชว์เลขที่จอง WEB-E2E-1");
 
+  // ── 5.5) แขกไม่มี LINE/WhatsApp: ปุ่มส่งคำขอทางอีเมล เปิดเมื่อใส่อีเมลถูกรูปแบบเท่านั้น ──
+  // ปิดกล่อง "ถ้า LINE ไม่เปิด" ที่เด้งจากขั้นก่อน
+  if (await page.locator(".line-fb").count()) { await page.keyboard.press("Escape"); await page.waitForSelector(".line-fb", { state: "detached", timeout: 3000 }).catch(() => {}); }
+  const mailDisabled = () => page.getAttribute("#btnMail", "aria-disabled");
+  assert.equal(await mailDisabled(), "true", "ไม่มีอีเมล ปุ่มอีเมลต้องปิด");
+  await page.dispatchEvent("#btnMail", "click"); // aria-disabled ยังกดได้จริง ต้องพาแขกไปช่องอีเมล
+  assert.equal(bookCalls.length, 1, "กดปุ่มอีเมลตอนไม่มีอีเมล ต้องไม่ยิง /api/book");
+  assert.equal(await page.evaluate(() => document.activeElement.id), "email", "ต้องพาไปช่องอีเมล");
+  await page.fill("#email", "not-an-email");
+  await page.dispatchEvent("#email", "input");
+  assert.equal(await mailDisabled(), "true", "อีเมลผิดรูปแบบ ปุ่มต้องปิด");
+  await page.fill("#email", "guest@example.com");
+  await page.dispatchEvent("#email", "input");
+  await page.waitForFunction(() => document.getElementById("btnMail").getAttribute("aria-disabled") === "false");
+  await page.click("#btnMail");
+  await page.waitForFunction(() => /guest@example\.com/.test(document.getElementById("bookingSaveStatus").textContent));
+  assert.equal(bookCalls.length, 2, "ปุ่มอีเมลต้องยิง /api/book");
+  assert.equal(bookCalls[1].email, "guest@example.com", "ต้องส่งอีเมลเข้าระบบ");
+  ok("ปุ่มส่งคำขอทางอีเมล: ปิดจนกว่าอีเมลถูกต้อง · ส่งอีเมลเข้าระบบ · บอกแขกว่าจะตอบทางอีเมล");
+
   // ── 6) พรีฟิลจาก URL แบบ 1 คืน → ต้องไม่รับค่าเช็คเอาต์ (ต่ำกว่าขั้นต่ำ) ──
   await page.goto(`${BASE}/booking.html?checkin=${ymd(14)}&checkout=${ymd(15)}`, { waitUntil: "networkidle" });
   assert.equal(await page.inputValue("#checkin"), ymd(14));
