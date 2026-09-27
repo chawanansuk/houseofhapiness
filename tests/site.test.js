@@ -535,3 +535,15 @@ console.log("ARTICLE TEMPLATE TESTS PASSED");
   assert.doesNotMatch(bk + read("room-studio.html"), /Studio[^\n]{0,80}(สูงสุด 3|max 3)|"maxValue":3[^\n]*Studio/, "Studio พักได้ 2 ท่านเท่านั้น");
   console.log("ROOM CAPACITY TESTS PASSED");
 }
+
+// หัวเรื่องบทความบนมือถือไม่ควรเกิน ~3 บรรทัด — ส่วนขยายยาว ๆ อยู่ใน og:title / Article headline ได้
+{
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) {
+    const raw = read(f);
+    if (!raw.includes('<div class="ld-wrap">')) continue;
+    const h1 = (raw.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || "";
+    const text = h1.replace(/<[^>]+>/g, "").trim();
+    assert.ok(text.length <= 75, `${f}: หัวเรื่อง h1 ยาว ${text.length} ตัวอักษร (ไม่ควรเกิน 75)`);
+  }
+  console.log("ARTICLE H1 LENGTH TESTS PASSED");
+}
