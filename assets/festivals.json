@@ -6,10 +6,10 @@
       "id": "vegetarian-2026",
       "slug": "chinatown-festivals.html",
       "label": { "th": "เทศกาลกินเจเยาวราช", "en": "Vegetarian Festival, Yaowarat" },
-      "start": null,
-      "end": null,
-      "confirmed": false,
-      "todo": "TODO-OWNER: กินเจเป็นวันทางจันทรคติ เลื่อนทุกปี — ใส่วันเริ่ม-จบของปี 2569 (ราวเดือนตุลาคม) ตามประกาศของศาลเจ้า"
+      "start": "2026-10-09",
+      "end": "2026-10-18",
+      "confirmed": true,
+      "todo": "เจ้าของยืนยัน 27 ก.ย. 2569: กินเจปี 2569 คือ 9–18 ต.ค. · ปีหน้าวันเลื่อนตามจันทรคติ ต้องใส่ใหม่"
     },
     {
       "id": "loy-krathong-2026",
