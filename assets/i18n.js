@@ -141,6 +141,8 @@ const I18N = {
   "nb.hr":           { th: "ชม.", en: "h" },
   "nb.l5":           { th: "ยืนยันการจองภายใน", en: "booking confirmed within" },
   "prov.real":       { th: "ภาพถ่ายจริงจากที่พัก", en: "Photographed on site" },
+  "prov.team":       { th: "ภาพถ่ายโดยทีม House of Happiness", en: "Photo: House of Happiness team" },
+  "ph.songwat":      { th: "ภาพวาดช้างบนตึกเก่าริมถนนทรงวาด", en: "Elephant mural on an old building on Song Wat Road" },
   "prov.stock":      { th: "ภาพประกอบ · Wikimedia Commons", en: "Illustration · Wikimedia Commons" },
 
   /* ── จุดเด่นห้องพัก (about) ── */
