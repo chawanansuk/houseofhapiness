@@ -121,6 +121,9 @@
       <input type="text" id="name" data-i18n="bk.name.ph" data-i18n-attr="placeholder" autocomplete="name" maxlength="120" required>
       <label for="phone" data-i18n="bk.phone">เบอร์โทรศัพท์</label>
       <input type="tel" id="phone" placeholder="08x-xxx-xxxx" autocomplete="tel" inputmode="tel" maxlength="40" required>
+      <label for="email" data-i18n="bk.email">อีเมล (ไม่บังคับ)</label>
+      <input type="email" id="email" placeholder="name@example.com" autocomplete="email" inputmode="email" maxlength="120" aria-describedby="emailHint">
+      <p class="field-note" id="emailHint" data-i18n="bk.email.hint">ไม่มี LINE หรือ WhatsApp? ใส่อีเมลแล้วกด "ส่งคำขอ ตอบทางอีเมล" ด้านล่าง เราจะตอบกลับทางอีเมล</p>
       <label for="note" data-i18n="bk.note">ความต้องการเพิ่มเติม (ถ้ามี)</label>
       <textarea id="note" data-i18n="bk.note.ph" data-i18n-attr="placeholder" maxlength="500"></textarea>
     </div>
@@ -134,6 +137,7 @@
         <a class="btn btn-line" id="btnLine" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendline">จองผ่าน LINE</a>
         <a class="btn btn-wa" id="btnWa" aria-disabled="true" target="_blank" rel="noopener" data-i18n="bk.sendwa">จองผ่าน WhatsApp</a>
         <p class="alt-sep" id="altSep"><span data-i18n="bk.oralt">หรือช่องทางอื่น</span></p>
+        <button type="button" class="btn btn-copy" id="btnMail" aria-disabled="true" data-i18n="bk.sendmail">ส่งคำขอ ตอบทางอีเมล</button>
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
         <p class="booking-save-status" id="bookingSaveStatus" role="status" aria-live="polite" hidden></p>
@@ -295,9 +299,12 @@ function getState() {
     guests: +$("guests").value,
     name: $("name").value.trim(),
     phone: $("phone").value.trim(),
+    email: $("email").value.trim(),
     note: $("note").value.trim(),
   };
 }
+
+const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString(lang() === "th" ? "th-TH" : "en-GB",
@@ -376,7 +383,7 @@ function update() {
 • ${L ? "เช็คเอาท์" : "Check-out"}: ${niceDate(s.co, L)} (${s.nights} ${t("bk.nights")})
 • ${L ? "ผู้เข้าพัก" : "Guests"}: ${s.guests}
 • ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
-• ${L ? "โทร" : "Phone"}: ${s.phone}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}
+• ${L ? "โทร" : "Phone"}: ${s.phone}${s.email ? `\n• ${L ? "อีเมล" : "Email"}: ${s.email}` : ""}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}
 ${L ? "รบกวนแจ้งราคารวมและวิธีชำระเงินด้วยนะครับ/ค่ะ 🙏" : "Could you let me know the total price and how to pay? 🙏"}`;
   lastMsg = msg;
 
@@ -398,12 +405,14 @@ ${L ? "รบกวนแจ้งราคารวมและวิธีช�
   btnLine.style.order = primary === btnLine ? "1" : "3";
   btnWa.style.order = primary === btnWa ? "1" : "3";
   $("altSep").style.order = "2";
+  $("btnMail").style.order = "4";
   $("btnCopy").style.order = "5";
   $("altSep").style.display = primary ? "" : "none"; // ไม่มีปุ่มแชทเลยก็ไม่ต้องมีเส้นคั่น
 
   btnLine.setAttribute("aria-disabled", ready ? "false" : "true");
   btnWa.setAttribute("aria-disabled", ready ? "false" : "true");
   $("btnCopy").setAttribute("aria-disabled", ready ? "false" : "true");
+  $("btnMail").setAttribute("aria-disabled", ready && isEmail(s.email) ? "false" : "true");
   if (ready) {
     // สำคัญ: ต้องวาง @id ดิบ ๆ ในพาธ ห้าม encode ตัว "@" เป็น %40
     // ไม่งั้น LINE หาบัญชีไม่เจอ แล้วเด้งไปหน้าแรก line.me แทนที่จะเปิดแชท
@@ -485,16 +494,17 @@ update = function () { _update(); checkAvailability(); };
 // แขกถามราคาในแชท — ทีมงานตอบตามเรทจริง (รวมเรทเทศกาลจากชีต) ได้เอง
 
 // บันทึกคำขอจองเข้าระบบหลังบ้าน — แสดงว่าบันทึกแล้วเฉพาะเมื่อ API ส่ง id กลับมา
-let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSaveId = "";
+let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSaveId = "", bookingSaveEmail = "";
 function bookingSignature(s) {
-  return [s.room && s.room.id, s.name, s.phone, s.ci, s.co, s.guests, s.numRooms, s.note].join("|");
+  return [s.room && s.room.id, s.name, s.phone, s.email, s.ci, s.co, s.guests, s.numRooms, s.note].join("|");
 }
 function renderBookingSaveStatus() {
   const el = $("bookingSaveStatus");
   el.hidden = !bookingSaveState;
   el.className = `booking-save-status ${bookingSaveState}`;
   if (bookingSaveState === "saving") el.textContent = t("bk.save.saving");
-  if (bookingSaveState === "saved") el.textContent = `${t("bk.save.saved")} ${bookingSaveId}`;
+  if (bookingSaveState === "saved") el.textContent = `${t("bk.save.saved")} ${bookingSaveId}` +
+    (bookingSaveEmail ? ` · ${t("bk.save.mail").replace("{email}", bookingSaveEmail)}` : "");
   if (bookingSaveState === "failed") el.textContent = t("bk.save.failed");
 }
 async function logBooking() {
@@ -516,7 +526,7 @@ async function logBooking() {
       headers: { "Content-Type": "application/json" },
       keepalive: true,
       body: JSON.stringify({
-        name: s.name, phone: s.phone, checkin: s.ci, checkout: s.co,
+        name: s.name, phone: s.phone, email: isEmail(s.email) ? s.email : "", checkin: s.ci, checkout: s.co,
         guests: s.guests, rooms: s.numRooms, total: "",
         room: s.room.name.th, note: s.note,
       }),
@@ -544,13 +554,26 @@ async function logBooking() {
   bookingSavePromise = request;
   return bookingSavePromise;
 }
-["btnLine", "btnWa", "btnCopy"].forEach((id) => $(id).addEventListener("click", logBooking));
+["btnLine", "btnWa", "btnCopy"].forEach((id) => $(id).addEventListener("click", () => { bookingSaveEmail = ""; logBooking(); }));
+
+// แขกที่ไม่มี LINE/WhatsApp: ส่งคำขอเข้าระบบหลังบ้านอย่างเดียว ทีมงานตอบกลับทางอีเมล
+$("btnMail").addEventListener("click", () => {
+  const s = getState();
+  if ($("btnMail").getAttribute("aria-disabled") === "true") {
+    if (s.email && !isEmail(s.email)) { $("email").focus(); $("readyHint").hidden = false; $("readyHint").textContent = t("bk.email.bad"); }
+    else if (!s.email) { $("email").focus(); $("readyHint").hidden = false; $("readyHint").textContent = t("bk.email.need"); }
+    return;
+  }
+  bookingSaveEmail = s.email;
+  logBooking();
+});
 document.addEventListener("langchange", renderBookingSaveStatus);
 function resetBookingSaveStatusIfChanged() {
   if (!loggedSig || bookingSignature(getState()) === loggedSig) return;
   loggedSig = "";
   bookingSaveState = "";
   bookingSaveId = "";
+  bookingSaveEmail = "";
   renderBookingSaveStatus();
 }
 document.addEventListener("input", resetBookingSaveStatusIfChanged);

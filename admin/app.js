@@ -53,6 +53,7 @@ const ICONS = {
   move:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
   more:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
   broom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 3-9 9"/><path d="M11 12 7.5 8.5a2 2 0 0 0-2.8 0L3 10.2a1 1 0 0 0 0 1.4L12.4 21a1 1 0 0 0 1.4 0l1.7-1.7a2 2 0 0 0 0-2.8z"/></svg>',
   file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>',
@@ -141,6 +142,8 @@ const isConfirmedSt = b => !isCancelled(b) && !isInhouse(b) && !isCheckedOut(b) 
 const active = b => !isCancelled(b);
 const isDirect = b => !/booking\.com/i.test(String(b.source||''));
 const guestReqOf = b => { const m = String(b.note||'').match(/คำขอแขก:\s*([^|]*)/); return m ? m[1].trim() : ''; };
+const guestEmailOf = b => { const m = String(b.note||'').match(/อีเมล:\s*([^\s@|·]+@[^\s@|·]+\.[^\s@|·)]+)/); return m ? m[1] : ''; };
+const mailtoOf = b => `mailto:${guestEmailOf(b)}?subject=${encodeURIComponent('House of Happiness — booking request #' + String(b.id||''))}`;
 const noteWithoutReq = b => String(b.note||'').split('|').map(s=>s.trim()).filter(s=>s && s.indexOf('คำขอแขก:')!==0).join(' | ');
 
 /* ---------- derived ---------- */
@@ -881,6 +884,7 @@ function openBooking(id){
       <dl class="kv"><dt>ห้อง</dt><dd>${String(b.room_no||'').trim() ? `${esc(roomLabel(b.room_no))} <span class="faint" style="font-weight:400">· ${esc(r?r.type:'')}${CLEAN[b.room_no]==='dirty'?' · <span class="pill dirty">รอทำความสะอาด</span>':''}</span>` : (active(b)&&!isCheckedOut(b)?`<span class="pill arr">ยังไม่จัดห้อง</span>`:'—')}</dd>
       <dt>ผู้เข้าพัก</dt><dd>${String(b.guests||'').trim()?esc(b.guests)+' คน':'<span class="faint">ไม่ระบุ</span>'}${roomsCount(b)>1?` · ${roomsCount(b)} ห้อง`:''}</dd>
       <dt>เบอร์โทร</dt><dd>${String(b.phone||'').trim()?`<a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a><div class="contact-row"><a class="btn sm" href="tel:${esc(b.phone)}">${ic('phone')}โทร</a><a class="btn sm wa" href="https://wa.me/${waNum(b.phone)}" target="_blank" rel="noopener">${ic('whatsapp')}WhatsApp</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(b.phone)}">${ic('copy')}คัดลอกเบอร์</button></div>`:'<span class="faint">—</span>'}</dd>
+      ${guestEmailOf(b)?`<dt>อีเมล</dt><dd><a href="${esc(mailtoOf(b))}" class="mono">${esc(guestEmailOf(b))}</a><div class="contact-row"><a class="btn sm" href="${esc(mailtoOf(b))}">${ic('mail')}ตอบทางอีเมล</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(guestEmailOf(b))}">${ic('copy')}คัดลอกอีเมล</button></div></dd>`:''}
       ${isStaff()?'':`<dt>ยอด</dt><dd class="num">${hasAmt(b)?'฿'+baht(bahtNum(b.amount))+(isYMD(b.checkout)?` <span class="faint">(฿${baht(Math.round(bahtNum(b.amount)/nightsOf(b)))}/คืน)</span>`:''):'<span class="faint">ไม่ระบุ</span>'}</dd>`}
       ${isStaff()||!hasAmt(b)?'':`<dt>ชำระ</dt><dd>${payPill(b)}${bahtNum(b.paid)?` <span class="faint" style="font-weight:400">รับแล้ว ฿${baht(bahtNum(b.paid))}${bahtNum(b.amount)>bahtNum(b.paid)?` · ค้าง ฿${baht(bahtNum(b.amount)-bahtNum(b.paid))}`:''}</span>`:''}${['unpaid','deposit'].includes(payState(b))?`<div class="contact-row"><button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับเงินครบแล้ว</button></div>`:''}</dd>`}
       <dt>ช่องทาง</dt><dd>${esc(b.source||'—')}</dd></dl>

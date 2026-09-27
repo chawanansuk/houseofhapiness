@@ -46,6 +46,9 @@ module.exports = async (req, res) => {
   const clean = (v, max) => String(v == null ? "" : v).replace(/[\r\n]+/g, " ").trim().slice(0, max);
   const room = clean(b.room, 120);
   const note = clean(b.note, 500);
+  // อีเมล (ไม่บังคับ) — แขกที่ไม่มี LINE/WhatsApp ขอให้ตอบทางอีเมล เก็บไว้ต้นหมายเหตุ หลังบ้านทำปุ่มตอบกลับให้
+  const emailRaw = clean(b.email, 120);
+  const email = /^[^\s@|·]+@[^\s@|·]+\.[^\s@|·]{2,}$/.test(emailRaw) ? emailRaw : "";
   const row = {
     action: "add",
     token,
@@ -57,7 +60,7 @@ module.exports = async (req, res) => {
     guests: clean(b.guests, 5),
     rooms: clean(b.rooms, 5),
     amount: clean(b.total, 20),
-    note: [room ? `ประเภทห้อง: ${room}` : "", note].filter(Boolean).join(" · ").slice(0, 500),
+    note: [email ? `อีเมล: ${email} (ตอบทางอีเมล)` : "", room ? `ประเภทห้อง: ${room}` : "", note].filter(Boolean).join(" · ").slice(0, 500),
     status: "รอยืนยัน",
   };
 

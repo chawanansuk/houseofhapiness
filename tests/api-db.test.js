@@ -41,7 +41,7 @@ const d = (off) => new Date(Date.now() + off * 86400000).toISOString().slice(0, 
   assert.equal(r.code, 200); assert.equal(r.body.rooms.length, 18); assert.equal(r.body.sources.db, true); assert.deepEqual(r.body.orders, []);
 
   // 2) จองตรงจากเว็บ → บันทึกในฐานข้อมูล
-  r = await call(book, { method: "POST", body: { name: "Somchai Web", phone: "0812345678", checkin: d(5), checkout: d(7), guests: "2", rooms: "1", room: "Standard", note: "มาถึง 15:00", total: "" } });
+  r = await call(book, { method: "POST", body: { name: "Somchai Web", phone: "0812345678", checkin: d(5), checkout: d(7), guests: "2", rooms: "1", room: "Standard", note: "มาถึง 15:00", total: "", email: "guest@example.com" } });
   assert.equal(r.code, 201); assert.match(r.body.id, /^WEB-/);
   const webId = r.body.id;
 
@@ -73,6 +73,7 @@ const d = (off) => new Date(Date.now() + off * 86400000).toISOString().slice(0, 
   const b = r.body.bookings.find((x) => x.id === webId);
   assert.equal(b.room_no, "704"); assert.equal(b.status, "เข้าพักอยู่"); assert.equal(b.amount, "1400", "พนักงานส่ง amount มาต้องถูกตัดออก ค่าที่เจ้าของใส่ต้องอยู่"); assert.equal(b.pay_status, "จ่ายครบ");
   assert.equal(r.body.rooms.find((x) => x.room === "704").clean, "รอทำความสะอาด");
+  assert.match(b.note, /^อีเมล: guest@example\.com \(ตอบทางอีเมล\) · ประเภทห้อง: Standard · มาถึง 15:00$/, "อีเมลแขกต้องอยู่ต้นหมายเหตุ ให้หลังบ้านทำปุ่มตอบกลับ");
   assert.equal(r.body.orders[0].status, "ส่งแล้ว");
   assert.equal(r.body.expenses.length, 1);
   r = await call(data, { headers: staff });
