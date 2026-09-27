@@ -69,6 +69,17 @@ function englishTitle(file, title) {
    (เคยหลุดเป็นคำบรรยายภาษาไทยบนหน้าอังกฤษ เวลาแชร์ลิงก์หรือขึ้นใน Google) */
 const EN_DESC = {
   "index.html": "Aparthotel in Khlong San, Bangkok, with three room layouts, a ฿5 ferry to Chinatown and the Gold Line nearby. Rated 8.8/10 on Booking.com.",
+  "chao-phraya-boat-guide.html": "The Chao Phraya boats made simple: the ฿5 cross-river ferry at our lane, express boats by flag colour, tourist boats and free shuttles, and which to take.",
+  "family-river-day.html": "A low-walking family day from Khlong San: a flat Sky Park you can push a stroller across, a short ฿5 ferry, then a cool mall for the hot afternoon.",
+  "getting-around-bangkok.html": "Getting around Bangkok from Khlong San: the Gold Line two stops to the Silom Line, the ฿5 ferry to Chinatown, and when a Grab or taxi makes more sense.",
+  "iconsiam-asiatique-boat.html": "A river afternoon from Khlong San: the Gold Line one stop to ICONSIAM, then free shuttles and express boats downriver to Asiatique for the evening.",
+  "loy-krathong.html": "Loy Krathong 2026 falls on Wednesday 25 November. Where to float a krathong on the Khlong San riverside near us, with lights on both banks of the river.",
+  "near-iconsiam.html": "Stay near ICONSIAM in Khlong San: about 2 km away, 5 minutes by car or one BTS Gold Line stop, with the Chao Phraya Sky Park a short walk from our door.",
+  "rainy-day-indoor.html": "A rainy-day plan from Khlong San: the Gold Line to a cool riverside mall, a café while the rain is heaviest, and covered temple halls if it eases.",
+  "room-deluxe.html": "Our biggest room in Khlong San: a double bed plus a sofa corner in one generous space, sleeps 2 (max 3), with balcony, fridge and private bathroom.",
+  "song-wat-road.html": "Song Wat Road, the creative street closest to us: a ฿5 ferry to Ratchawong, then wholesale shops, old shophouses, cafés and galleries on one walk.",
+  "sunrise-alms-market.html": "Dawn on the Chao Phraya from Khlong San: monks on the alms round, the morning market and first light on the river, back in about 2 hours for breakfast.",
+  "yaowarat-night-walk.html": "A 2-hour Yaowarat night food walk from across the river: a 3-minute ferry to the start of the street, 6 stops, 4 or 5 tastes, last boat back at 8:30 PM.",
   "ride-hailing-guide.html": "How to use Grab and Bolt in Bangkok: install, book step by step, pay, find the airport pickup point, and what to do when the driver can't find you.",
   "local.html": "Our insider guide: 13 places locals really eat around Soi Tha Din Daeng 16, plus a 10-stop Khlong San walk most visitors never find.",
 };
