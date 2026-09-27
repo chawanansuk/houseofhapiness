@@ -15,6 +15,7 @@ import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
+import { faqEntities, applyFaqToDoc } from "./faq-schema.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
@@ -172,6 +173,9 @@ for (const file of [...pages].sort()) {
   const forced = doc.createElement("script");
   forced.textContent = 'window.HOH_LANG = "en";';
   head.appendChild(forced);
+
+  /* 6.5) FAQ schema ต้องตรงกับถามบ่อยภาษาอังกฤษที่แสดงบนหน้านี้ (ดู scripts/faq-schema.mjs) */
+  applyFaqToDoc(doc, faqEntities(doc, I18N, "en"));
 
   /* 7) schema: ภาษา อังกฤษ และ URL ชี้มาที่หน้านี้
         BreadcrumbList เก็บชื่อไว้เป็นข้อความไทย ต้องหาคู่ภาษาอังกฤษจากพจนานุกรมของหน้าเอง
