@@ -120,6 +120,9 @@
       <label for="email">Email (optional)</label>
       <input type="email" id="email" placeholder="name@example.com" autocomplete="email" inputmode="email" maxlength="120" aria-describedby="emailHint">
       <p class="field-note" id="emailHint">No LINE or WhatsApp? Add your email and tap "Send request, reply by email" below. We'll reply by email.</p>
+      <label for="arrival">Expected arrival time</label>
+      <select id="arrival" aria-describedby="arrivalHint"></select>
+      <p class="field-note" id="arrivalHint" hidden=""></p>
       <label for="note">Special requests (optional)</label>
       <textarea id="note" maxlength="500" placeholder="e.g. upper floor / late check-in / receipt needed"></textarea>
     </div>
@@ -296,9 +299,24 @@ function getState() {
     name: $("name").value.trim(),
     phone: $("phone").value.trim(),
     email: $("email").value.trim(),
+    arrival: $("arrival").value,
     note: $("note").value.trim(),
   };
 }
+
+// ช่วงเวลามาถึง: ค่าที่ส่งเข้าระบบเป็นรหัส ป้ายภาษาตามหน้า ("" = ยังไม่แน่ใจ)
+// หลัง 18:00 พนักงานไม่อยู่ → เช็คอินด้วยตัวเอง, หลัง 22:00 เกินเวลาเช็คอิน ต้องถามเราก่อน
+const ARRIVALS = ["", "before14", "14-16", "16-18", "18-20", "20-22", "after22"];
+function renderArrival() {
+  const sel = $("arrival"), keep = sel.value;
+  sel.innerHTML = ARRIVALS.map((v) => `<option value="${v}">${t("bk.arrival." + (v || "unsure"))}</option>`).join("");
+  sel.value = ARRIVALS.includes(keep) ? keep : "";
+  const hint = $("arrivalHint");
+  const msg = sel.value === "after22" ? t("bk.arrival.late") : ["18-20", "20-22"].includes(sel.value) ? t("bk.arrival.self") : "";
+  hint.textContent = msg;
+  hint.hidden = !msg;
+}
+$("arrival").addEventListener("change", renderArrival);
 
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 
@@ -379,7 +397,8 @@ function update() {
 • ${L ? "เช็คเอาท์" : "Check-out"}: ${niceDate(s.co, L)} (${s.nights} ${t("bk.nights")})
 • ${L ? "ผู้เข้าพัก" : "Guests"}: ${s.guests}
 • ${L ? "ชื่อผู้จอง" : "Name"}: ${s.name}
-• ${L ? "โทร" : "Phone"}: ${s.phone}${s.email ? `\n• ${L ? "อีเมล" : "Email"}: ${s.email}` : ""}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}
+• ${L ? "โทร" : "Phone"}: ${s.phone}
+• ${L ? "เวลามาถึง" : "Arrival time"}: ${t("bk.arrival." + (s.arrival || "unsure"))}${s.email ? `\n• ${L ? "อีเมล" : "Email"}: ${s.email}` : ""}${s.note ? `\n• ${L ? "หมายเหตุ" : "Note"}: ${s.note}` : ""}
 ${L ? "รบกวนแจ้งราคารวมและวิธีชำระเงินด้วยนะครับ/ค่ะ 🙏" : "Could you let me know the total price and how to pay? 🙏"}`;
   lastMsg = msg;
 
@@ -492,7 +511,7 @@ update = function () { _update(); checkAvailability(); };
 // บันทึกคำขอจองเข้าระบบหลังบ้าน — แสดงว่าบันทึกแล้วเฉพาะเมื่อ API ส่ง id กลับมา
 let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSaveId = "", bookingSaveEmail = "";
 function bookingSignature(s) {
-  return [s.room && s.room.id, s.name, s.phone, s.email, s.ci, s.co, s.guests, s.numRooms, s.note].join("|");
+  return [s.room && s.room.id, s.name, s.phone, s.email, s.arrival, s.ci, s.co, s.guests, s.numRooms, s.note].join("|");
 }
 function renderBookingSaveStatus() {
   const el = $("bookingSaveStatus");
@@ -524,7 +543,7 @@ async function logBooking() {
       body: JSON.stringify({
         name: s.name, phone: s.phone, email: isEmail(s.email) ? s.email : "", checkin: s.ci, checkout: s.co,
         guests: s.guests, rooms: s.numRooms, total: "",
-        room: s.room.name.th, note: s.note,
+        room: s.room.name.th, note: s.note, arrival: s.arrival,
       }),
       });
       const j = await r.json().catch(() => null);
@@ -620,8 +639,8 @@ function prefillFromQuery() {
 
 document.addEventListener("input", update);
 document.addEventListener("change", update);
-document.addEventListener("langchange", () => { renderRooms(); applyChipLabels(); update(); });
-document.addEventListener("DOMContentLoaded", () => { renderRooms(); applyChipLabels(); prefillFromQuery(); update(); });
+document.addEventListener("langchange", () => { renderRooms(); applyChipLabels(); renderArrival(); update(); });
+document.addEventListener("DOMContentLoaded", () => { renderRooms(); applyChipLabels(); renderArrival(); prefillFromQuery(); update(); });
 </script>
 
 

@@ -45,6 +45,9 @@ module.exports = async (req, res) => {
   const b = (req.body && typeof req.body === "object") ? req.body : {};
   const clean = (v, max) => String(v == null ? "" : v).replace(/[\r\n]+/g, " ").trim().slice(0, max);
   const room = clean(b.room, 120);
+  // ช่วงเวลามาถึงจากหน้าจอง — รับเฉพาะรหัสที่รู้จัก แล้วเก็บเป็นข้อความไทยไว้ต้นหมายเหตุ
+  const ARRIVAL = { before14: "ก่อน 14:00", "14-16": "14:00–16:00", "16-18": "16:00–18:00", "18-20": "18:00–20:00", "20-22": "20:00–22:00", after22: "หลัง 22:00 (ต้องยืนยัน)" };
+  const arrival = ARRIVAL[clean(b.arrival, 20)] || "";
   const note = clean(b.note, 500);
   // อีเมล (ไม่บังคับ) — แขกที่ไม่มี LINE/WhatsApp ขอให้ตอบทางอีเมล เก็บไว้ต้นหมายเหตุ หลังบ้านทำปุ่มตอบกลับให้
   const emailRaw = clean(b.email, 120);
@@ -60,7 +63,7 @@ module.exports = async (req, res) => {
     guests: clean(b.guests, 5),
     rooms: clean(b.rooms, 5),
     amount: clean(b.total, 20),
-    note: [email ? `อีเมล: ${email} (ตอบทางอีเมล)` : "", room ? `ประเภทห้อง: ${room}` : "", note].filter(Boolean).join(" · ").slice(0, 500),
+    note: [arrival ? `มาถึง: ${arrival}` : "", email ? `อีเมล: ${email} (ตอบทางอีเมล)` : "", room ? `ประเภทห้อง: ${room}` : "", note].filter(Boolean).join(" · ").slice(0, 500),
     status: "รอยืนยัน",
   };
 

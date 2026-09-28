@@ -91,6 +91,10 @@ async function launch() {
   await page.fill("#name", "E2E ทดสอบ");
   await page.fill("#phone", "0812345678");
   await page.dispatchEvent("#phone", "input");
+  assert.equal(await page.locator("#arrival option").count(), 7, "ช่องเวลามาถึงต้องมี 7 ตัวเลือก");
+  assert.equal(await page.isHidden("#arrivalHint"), true, "ยังไม่เลือกเวลา ไม่ต้องมีคำอธิบาย");
+  await page.selectOption("#arrival", "20-22");
+  assert.ok((await page.locator("#arrivalHint").innerText()).length > 0, "เลือกหลัง 18:00 ต้องบอกเรื่องเช็คอินด้วยตัวเอง");
   await page.waitForFunction(() => document.getElementById("btnLine").getAttribute("aria-disabled") === "false");
   const lineHref = await page.getAttribute("#btnLine", "href");
   assert.ok(lineHref.includes("line.me/R/oaMessage/@060hvzok/"), "ลิงก์ LINE ต้องมี @ ดิบ");
@@ -121,6 +125,8 @@ async function launch() {
   assert.equal(b.name, "E2E ทดสอบ");
   assert.equal(b.checkin, ymd(7));
   assert.equal(b.checkout, ymd(10));
+  assert.equal(b.arrival, "20-22", "ต้องส่งช่วงเวลามาถึงเข้าระบบ");
+  assert.ok(lineMsg.includes("เวลามาถึง") || lineMsg.includes("Arrival time"), "ข้อความจองต้องมีเวลามาถึง");
   assert.equal(b.total, "", "โหมดไม่แสดงราคา: ยอดที่ส่งเข้าระบบต้องว่าง (ทีมงานใส่ราคาเองตอนคอนเฟิร์ม)");
   const savedText = await page.locator("#bookingSaveStatus").innerText();
   assert.ok(savedText.includes("WEB-E2E-1"), "ต้องแสดงเลขที่จองจากระบบ");
