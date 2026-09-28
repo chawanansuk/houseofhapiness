@@ -1583,6 +1583,9 @@ html[lang="en"] .ld-wrap { max-width: 620px; }
 .ld-hero.cover img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .ld-hero.cover::after { content: ""; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(62,47,35,.34) 0%, rgba(62,47,35,.42) 40%, rgba(46,33,22,.94) 100%); }
+/* ปกที่ด้านบนสีสดมาก (เช่นป้ายผ้าเหลืองกินเจ) ต้องมีแถบเงาบนเข้มขึ้น ไม่งั้นอ่าน kicker ไม่ออก */
+.ld-hero.cover.busy::after { background: linear-gradient(180deg, rgba(46,33,22,.72) 0%, rgba(46,33,22,.58) 45%, rgba(46,33,22,.94) 100%); }
+.ld-hero.cover.busy .kicker { text-shadow: 0 1px 8px rgba(0,0,0,.6); }
 .ld-hero.cover .in { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; width: 100%; padding: 2.6rem 1.4rem 2.2rem; }
 html[lang="en"] .ld-hero.cover .in { max-width: 620px; } /* หัวเรื่องชิดแนวเดียวกับเนื้อหา */
 .ld-hero.cover .kicker { font-family: "Prompt", sans-serif; font-size: .74rem; letter-spacing: .3em; text-transform: uppercase;

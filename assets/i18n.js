@@ -175,7 +175,11 @@ const I18N = {
   "rl.three-temples-boat.d": { th: "วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร จากท่าเรือท้ายซอย", en: "Wat Pho, Wat Arun and Wat Kalayanamit from our pier" },
   "prov.team":       { th: "ภาพถ่ายโดยทีม House of Happiness", en: "Photo: House of Happiness team" },
   "ph.yaowaratgate": { th: "ซุ้มประตูเฉลิมพระเกียรติ หัวถนนเยาวราช กับยอดมณฑปวัดไตรมิตร", en: "Chinatown Gate at the head of Yaowarat Road, with Wat Traimit behind" },
+  "ph.vegfest":      { th: "ป้ายผ้าเหลืองงานกินเจเยาวราช 9–18 ตุลาคม 2569 ขึงข้ามถนน ตุ๊กตุ๊กวิ่งผ่านหน้าร้านทอง", en: "Yellow Vegetarian Festival banners for 9–18 October 2026 strung across Yaowarat Road, with tuk-tuks passing the gold shops" },
+  "ph.vegfestbanners": { th: "ป้ายผ้าเหลืองงานกินเจเรียงเต็มถนนเยาวราช ถ่ายก่อนงานกินเจปี 2569", en: "Yellow Vegetarian Festival banners lining Yaowarat Road, photographed just before the 2026 festival" },
+  "ph.yaowaratroad": { th: "ถนนเยาวราชช่วงเย็น ป้ายภัตตาคารจีนเรียงสองฝั่งถนน", en: "Yaowarat Road in the early evening, Chinese restaurant signs on both sides" },
   "ph.songwat":      { th: "ภาพวาดช้างบนตึกเก่าริมถนนทรงวาด", en: "Elephant mural on an old building on Song Wat Road" },
+  "prov.mix1":       { th: "ภาพแรกโดยทีม House of Happiness · ภาพอื่นจาก Wikimedia Commons", en: "First photo: House of Happiness team · others from Wikimedia Commons" },
   "prov.stock":      { th: "ภาพประกอบ · Wikimedia Commons", en: "Illustration · Wikimedia Commons" },
 
   /* ── จุดเด่นห้องพัก (about) ── */

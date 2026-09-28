@@ -231,7 +231,7 @@ console.log("SITE TESTS PASSED");
       if (jpg.includes("${")) continue; // สร้างจาก JS — เช็กด้วยเทสต์อื่น
       const webp = jpg.replace(/\.jpg$/, ".webp");
       assert.ok(fs.existsSync(path.join(root, webp)), `${f}: ${jpg} ยังไม่มีไฟล์ ${webp} — รัน python3 tools/make-webp.py`);
-      const before = raw.slice(Math.max(0, m.index - 260), m.index);
+      const before = raw.slice(Math.max(0, m.index - 420), m.index); // ปกที่มี source มือถือ + source ปกติ ยาวเกิน 260
       assert.ok(/<picture\b[^>]*>\s*(<source[^>]*>\s*)+$/.test(before),
         `${f}: <img src="${jpg}"> ต้องอยู่ใน <picture> พร้อม <source type="image/webp">`);
       wrapped++;
