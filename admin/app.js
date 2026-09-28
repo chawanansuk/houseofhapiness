@@ -143,6 +143,7 @@ const active = b => !isCancelled(b);
 const isDirect = b => !/booking\.com/i.test(String(b.source||''));
 const guestReqOf = b => { const m = String(b.note||'').match(/คำขอแขก:\s*([^|]*)/); return m ? m[1].trim() : ''; };
 const guestEmailOf = b => { const m = String(b.note||'').match(/อีเมล:\s*([^\s@|·]+@[^\s@|·]+\.[^\s@|·)]+)/); return m ? m[1] : ''; };
+const arrivalOf = b => { const m = String(b.note||'').match(/มาถึง:\s*([^|·]+)/); return m ? m[1].trim() : ''; };
 const mailtoOf = b => `mailto:${guestEmailOf(b)}?subject=${encodeURIComponent('House of Happiness — booking request #' + String(b.id||''))}`;
 const noteWithoutReq = b => String(b.note||'').split('|').map(s=>s.trim()).filter(s=>s && s.indexOf('คำขอแขก:')!==0).join(' | ');
 
@@ -525,6 +526,7 @@ function bookingRow(b, acts, opts={}){
   if(String(b.guests||'').trim()) meta.push(`<span>${ic('users')}${esc(b.guests)} คน</span>`);
   if(roomsCount(b) > 1) meta.push(`<span>× ${roomsCount(b)} ห้อง</span>`);
   if(String(b.phone||'').trim()) meta.push(`<span>${ic('phone')}${esc(b.phone)}</span>`);
+  if(arrivalOf(b)) meta.push(`<span>${ic('clock')}มาถึง ${esc(arrivalOf(b))}</span>`);
   if(opts.amount && hasAmt(b) && !isStaff()) meta.push(`<span class="num">฿${baht(bahtNum(b.amount))}</span>`);
   const req = guestReqOf(b);
   if(req) meta.push(reqBadge(b));
@@ -884,6 +886,7 @@ function openBooking(id){
       <dl class="kv"><dt>ห้อง</dt><dd>${String(b.room_no||'').trim() ? `${esc(roomLabel(b.room_no))} <span class="faint" style="font-weight:400">· ${esc(r?r.type:'')}${CLEAN[b.room_no]==='dirty'?' · <span class="pill dirty">รอทำความสะอาด</span>':''}</span>` : (active(b)&&!isCheckedOut(b)?`<span class="pill arr">ยังไม่จัดห้อง</span>`:'—')}</dd>
       <dt>ผู้เข้าพัก</dt><dd>${String(b.guests||'').trim()?esc(b.guests)+' คน':'<span class="faint">ไม่ระบุ</span>'}${roomsCount(b)>1?` · ${roomsCount(b)} ห้อง`:''}</dd>
       <dt>เบอร์โทร</dt><dd>${String(b.phone||'').trim()?`<a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a><div class="contact-row"><a class="btn sm" href="tel:${esc(b.phone)}">${ic('phone')}โทร</a><a class="btn sm wa" href="https://wa.me/${waNum(b.phone)}" target="_blank" rel="noopener">${ic('whatsapp')}WhatsApp</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(b.phone)}">${ic('copy')}คัดลอกเบอร์</button></div>`:'<span class="faint">—</span>'}</dd>
+      ${arrivalOf(b)?`<dt>เวลามาถึง</dt><dd>${esc(arrivalOf(b))}${/^(18|20|หลัง)/.test(arrivalOf(b))?' <span class="faint" style="font-weight:400">· เช็คอินด้วยตัวเอง</span>':''}</dd>`:''}
       ${guestEmailOf(b)?`<dt>อีเมล</dt><dd><a href="${esc(mailtoOf(b))}" class="mono">${esc(guestEmailOf(b))}</a><div class="contact-row"><a class="btn sm" href="${esc(mailtoOf(b))}">${ic('mail')}ตอบทางอีเมล</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(guestEmailOf(b))}">${ic('copy')}คัดลอกอีเมล</button></div></dd>`:''}
       ${isStaff()?'':`<dt>ยอด</dt><dd class="num">${hasAmt(b)?'฿'+baht(bahtNum(b.amount))+(isYMD(b.checkout)?` <span class="faint">(฿${baht(Math.round(bahtNum(b.amount)/nightsOf(b)))}/คืน)</span>`:''):'<span class="faint">ไม่ระบุ</span>'}</dd>`}
       ${isStaff()||!hasAmt(b)?'':`<dt>ชำระ</dt><dd>${payPill(b)}${bahtNum(b.paid)?` <span class="faint" style="font-weight:400">รับแล้ว ฿${baht(bahtNum(b.paid))}${bahtNum(b.amount)>bahtNum(b.paid)?` · ค้าง ฿${baht(bahtNum(b.amount)-bahtNum(b.paid))}`:''}</span>`:''}${['unpaid','deposit'].includes(payState(b))?`<div class="contact-row"><button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับเงินครบแล้ว</button></div>`:''}</dd>`}
