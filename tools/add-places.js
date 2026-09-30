@@ -55,7 +55,7 @@ ${links}
     <a class="ld-plroute" href="${dirUrl(names, city)}" target="_blank" rel="noopener" data-i18n="pl.route">เปิดเส้นทางทั้งหมดจากที่พัก →</a>
   </section>\n`;
 
-  raw = raw.replace(BLOCK, "\n");
+  raw = raw.replace(BLOCK, ""); // ไม่ทิ้งบรรทัดว่างไว้ ไม่งั้นรันซ้ำแล้วบรรทัดว่างงอกทุกครั้ง
   // วางไว้ก่อนปุ่ม CTA ท้ายบทความ ถ้าไม่มีก็ก่อน </div> ที่ปิด .ld-wrap
   let at = raw.indexOf('  <div class="ld-cta"');
   if (at < 0) { const fi = raw.indexOf("<footer"); at = fi > -1 ? raw.lastIndexOf("</div>", fi) : -1; }
