@@ -319,6 +319,15 @@ console.log("IMAGE PIPELINE TESTS PASSED");
   assert.match(read("attractions.html"), /@media \(max-width:640px\)\{\.atr-group h2\{white-space:normal\}\}/,
     "attractions.html ต้องปล่อยให้หัวข้อตัดบรรทัดบนมือถือ");
 }
+// สคริปต์ในหน้าทุกก้อนต้อง parse ได้ — ถ้าข้อความใน I18N มีเครื่องหมายคำพูดที่ไม่ได้ escape ทั้งบล็อกจะพัง
+// แล้วทุกข้อความของหน้านั้นหายเงียบ ๆ (เคยเกิดกับหมายเหตุในคู่มือเรือ ก.ย. 2569)
+{
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) {
+    for (const m of read(f).matchAll(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g)) {
+      assert.doesNotThrow(() => new Function(m[1]), `${f}: มีสคริปต์ในหน้าที่ parse ไม่ได้ (เช็กเครื่องหมายคำพูดในข้อความ I18N)`);
+    }
+  }
+}
 console.log("UX TESTS PASSED");
 
 // ── Phase 3: หน้ารวมไกด์ + ส่วนไกด์ในหน้าแรก ──

@@ -314,6 +314,10 @@ new-year-countdown, rainy-day-indoor, sunrise-alms-market, near-chinatown, near-
 | 10 | หน้าศาลเจ้าหรือถนนเยาวราชวันเทศกาล (ธงเหลืองกินเจ / โคมตรุษจีน) | chinatown-festivals | yaowarat |
 | 11 | ทางเข้าซอย + ป้ายท่าดินแดง 16 จากถนนใหญ่ | ride-hailing-guide (จุดบอกคนขับ), airport-guide | entrance ×2 |
 | 12 | โถงหรือมุมนั่งเล่นในที่พักตอนฝนตก | rainy-day-indoor | iconsiam |
+| 13 | เอเชียทีค / ชิงช้าสวรรค์ จากบนเรือ | asiatique | riverboat (ชั่วคราว) |
+| 14 | เรือท่องเที่ยวธงฟ้าที่ท่า + ป้ายราคาตั๋ว | chao-phraya-tourist-boat | watarun (ชั่วคราว) |
+| 15 | เรือไฟฟ้าที่ท่าราชวงศ์ + ป้ายสาย/ราคา | electric-boats-bangkok | riverboat (ชั่วคราว) |
+| 16 | ตุ๊กตุ๊ก MuvMi จอดแถวที่พัก/ICONSIAM | muvmi-guide | entrance (ชั่วคราว) |
 
 ข้อควรจำตอนถ่าย: ไม่ให้เห็นหน้าคนแปลกหน้าชัด ไม่ให้เห็นทะเบียนรถ (ถ้าติดมาผมเบลอให้ได้) ห้ามส่งรูปที่โหลดจากอินเทอร์เน็ต
 

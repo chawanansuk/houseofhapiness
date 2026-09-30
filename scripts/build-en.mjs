@@ -80,6 +80,10 @@ const EN_DESC = {
   "song-wat-road.html": "Song Wat Road, the creative street closest to us: a ฿5 ferry to Ratchawong, then wholesale shops, old shophouses, cafés and galleries on one walk.",
   "sunrise-alms-market.html": "Dawn on the Chao Phraya from Khlong San: monks on the alms round, the morning market and first light on the river, back in about 2 hours for breakfast.",
   "yaowarat-night-walk.html": "A 2-hour Yaowarat night food walk from across the river: a 3-minute ferry to the start of the street, 6 stops, 4 or 5 tastes, last boat back at 8:30 PM.",
+  "asiatique.html": "How to reach Asiatique The Riverfront from Khlong San by train, free shuttle boat or Grab, when it gets lively, and how to get back after dark.",
+  "chao-phraya-tourist-boat.html": "The Chao Phraya hop-on hop-off tourist boat: when a day ticket pays off, how it differs from the express boat, and how to board it from Khlong San.",
+  "electric-boats-bangkok.html": "Bangkok's electric boats from Khlong San: river e-boats calling on the Chinatown bank and app-booked canal boat taxis, with how to board and pay.",
+  "muvmi-guide.html": "How to use MuvMi electric tuk-tuks from Khlong San: signing up, the service areas, paying in the app, and when Grab or the ferry is the better choice.",
   "ride-hailing-guide.html": "How to use Grab and Bolt in Bangkok: install, book step by step, pay, find the airport pickup point, and what to do when the driver can't find you.",
   "local.html": "Our insider guide: 13 places locals really eat around Soi Tha Din Daeng 16, plus a 10-stop Khlong San walk most visitors never find.",
 };

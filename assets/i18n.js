@@ -141,6 +141,20 @@ const I18N = {
   "nb.hr":           { th: "ชม.", en: "h" },
   "nb.l5":           { th: "ยืนยันการจองภายใน", en: "booking confirmed within" },
   "prov.real":       { th: "ภาพถ่ายจริงจากที่พัก", en: "Photographed on site" },
+  "rl.asiatique.t": { th: "เอเชียทีค ไปยังไงจากคลองสาน", en: "Asiatique from Khlong San" },
+  "rl.asiatique.d": { th: "ตลาดริมน้ำยามเย็น ไปรถไฟฟ้าต่อเรือฟรี กลับ Grab", en: "The riverside market by evening — train and free boat there, Grab back" },
+  "rl.chao-phraya-tourist-boat.t": { th: "เรือท่องเที่ยว Hop-on Hop-off", en: "The hop-on hop-off tourist boat" },
+  "rl.chao-phraya-tourist-boat.d": { th: "ตั๋ววันเดียว แวะวัดอรุณ ท่ามหาราช ปากคลองตลาด", en: "One day ticket for Wat Arun, Tha Maharaj and Pak Khlong Talat" },
+  "rl.electric-boats-bangkok.t": { th: "เรือไฟฟ้าในกรุงเทพ", en: "Bangkok's electric boats" },
+  "rl.electric-boats-bangkok.d": { th: "เรือไฟฟ้าในแม่น้ำและเรือแท็กซี่ในคลองเก่า", en: "River e-boats and canal boat taxis" },
+  "rl.muvmi-guide.t": { th: "วิธีใช้ MuvMi ตุ๊กตุ๊กไฟฟ้า", en: "How to use MuvMi" },
+  "rl.muvmi-guide.d": { th: "ตุ๊กตุ๊กไฟฟ้าเรียกผ่านแอป ใช้จากฝั่งเราได้แค่ไหน", en: "App-booked electric tuk-tuks, and how far they work from our side" },
+  "rl.chao-phraya-boat-guide.t": { th: "คู่มือเรือเจ้าพระยา", en: "The Chao Phraya boat guide" },
+  "rl.chao-phraya-boat-guide.d": { th: "เรือแต่ละประเภท สีธง ขึ้นท่าไหน จ่ายยังไง", en: "Every kind of boat, the flag colours, which pier, how to pay" },
+  "rl.getting-around-bangkok.t": { th: "เดินทางในกรุงเทพจากคลองสาน", en: "Getting around Bangkok from Khlong San" },
+  "rl.getting-around-bangkok.d": { th: "รถไฟฟ้า เรือ หรือรถ เลือกให้ถูกจังหวะ", en: "Train, boat or car — picking the right one" },
+  "rl.near-iconsiam.t": { th: "ที่พักใกล้ ICONSIAM", en: "Staying near ICONSIAM" },
+  "rl.near-iconsiam.d": { th: "สายสีทองสถานีเดียว ห้างริมน้ำฝั่งเดียวกับเรา", en: "One Gold Line stop to the riverside mall on our bank" },
   "rl.airport-guide.t": { th: "วิธีเดินทางจากสนามบิน", en: "Getting here from the airport" },
   "rl.airport-guide.d": { th: "แท็กซี่ Grab และรถไฟฟ้าทีละขั้น", en: "Taxi, Grab and the trains, step by step" },
   "rl.ayutthaya-day-trip.t": { th: "อยุธยาไปกลับวันเดียว", en: "Ayutthaya day trip" },
@@ -413,14 +427,14 @@ const I18N = {
 
   /* ส่วนไกด์เที่ยวในหน้าแรก */
   "hg.title": { th: "ไกด์เที่ยวจากคนพื้นที่", en: "Local guides, written by us" },
-  "hg.lead": { th: "เราอยู่คลองสานมาทั้งชีวิต — 24 ไกด์ที่เราเขียนเอง ไม่ได้ลอกมาจากที่ไหน", en: "We have lived in Khlong San all our lives. All 24 guides are ours, not copied from anywhere." },
+  "hg.lead": { th: "เราอยู่คลองสานมาทั้งชีวิต — 29 ไกด์ที่เราเขียนเอง ไม่ได้ลอกมาจากที่ไหน", en: "We have lived in Khlong San all our lives. All 29 guides are ours, not copied from anywhere." },
   "hg.1t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท", en: "The Chinatown heritage walk, one ฿5 ferry away" },
   "hg.1d": { th: "ครึ่งวัน 8 จุด เริ่มที่ท่าเรือท้ายซอย", en: "Half a day, eight stops, starting at the pier down our lane" },
   "hg.2t": { th: "ถนนทรงวาด ย่านสร้างสรรค์ที่ใกล้เราที่สุด", en: "Song Wat Road, the creative district closest to us" },
   "hg.2d": { th: "ข้ามเรือ 5 บาท 3 นาที ขึ้นตรงหัวถนน", en: "A ฿5 ferry, three minutes, landing at the head of the road" },
   "hg.3t": { th: "เดินทางในกรุงเทพจากคลองสาน", en: "Getting around Bangkok from Khlong San" },
   "hg.3d": { th: "สายสีทอง เรือข้ามฟาก หรือเรียกรถ เลือกให้ถูกจังหวะ", en: "The Gold Line, the ferry or a car, and when each one wins" },
-  "hg.all": { th: "ดูไกด์ทั้งหมด 24 เรื่อง", en: "See all 24 guides" },
+  "hg.all": { th: "ดูไกด์ทั้งหมด 29 เรื่อง", en: "See all 29 guides" },
 
 
   /* บล็อกจุดบนแผนที่ · บรรทัดผู้เขียน/วันที่ · สารบัญ */
