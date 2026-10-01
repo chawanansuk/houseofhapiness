@@ -183,6 +183,15 @@ const server = http.createServer((req, res) => {
   await dt.keyboard.press("Escape");
   await dt.waitForTimeout(300);
 
+  // 8.7) หน้ารายรับ: tile "จองตรง" บอกสัดส่วนและค่าคอมฯ ที่ไม่ต้องจ่าย
+  await dt.evaluate(() => { location.hash = "#money"; });
+  await dt.waitForTimeout(500);
+  const moneyTxt = await dt.locator("#moneyTiles").innerText();
+  check("tile จองตรงแสดงสัดส่วน % และจำนวนรายการ", /จองตรง[\s\S]*\d+%[\s\S]*จาก \d+ รายการ/.test(moneyTxt));
+  check("tile จองตรงบอกค่าคอมฯ ที่ไม่ต้องจ่าย", moneyTxt.includes("ไม่เสียค่าคอมฯ"));
+  await dt.evaluate(() => { location.hash = "#bookings"; });
+  await dt.waitForTimeout(500);
+
   // 9) ยกเลิกการจองต้องกดสองครั้ง (ไม่ใช้ confirm())
   await dt.locator('#bkList [data-act="open-booking"][data-id="WEB-2002"]').first().click();
   await dt.waitForTimeout(300);
@@ -332,6 +341,15 @@ const server = http.createServer((req, res) => {
   await dt.locator('#tiles [data-act="unpaid"]').click();
   await dt.waitForTimeout(300);
   check("แผงค้างชำระมีธนากร ฿2,700", (await dt.locator("#sheetBody").innerText()).includes("ธนากร"));
+  // แขก Booking.com มีปุ่ม "ผ่าน Booking" (จองตรงไม่มี) + ปุ่มตั้งทั้งหมดเมื่อมี ≥2 รายการ
+  check("แถว Booking.com มีปุ่ม 'ผ่าน Booking' ส่วนจองตรงไม่มี", await dt.locator('#sheet [data-act="pay-ota"][data-id="BDC-2001"]').count() === 1 && await dt.locator('#sheet [data-act="pay-ota"][data-id="WEB-2005"]').count() === 0);
+  check("มีปุ่มตั้ง Booking.com ทั้งหมดเป็นจ่ายผ่าน Booking", await dt.locator('#sheet [data-act="pay-ota-all"]').count() === 1);
+  await dt.locator('#sheet [data-act="pay-ota"][data-id="BDC-2001"]').click();
+  await dt.waitForTimeout(700);
+  const ota = updates.find((u) => u.action === "update" && u.id === "BDC-2001" && u.fields && u.fields.pay_status === "จ่ายผ่าน Booking");
+  check("กด 'ผ่าน Booking' ส่ง pay_status=จ่ายผ่าน Booking (ไม่แตะยอด)", Boolean(ota) && !("paid" in ota.fields) && !("amount" in ota.fields));
+  await dt.waitForTimeout(400);
+  if (!(await dt.locator("#sheet.on").count())) { await dt.locator('#tiles [data-act="unpaid"]').click(); await dt.waitForTimeout(300); }
   await dt.locator('#sheet [data-act="pay-full"][data-id="WEB-2005"]').click();
   await dt.waitForTimeout(700);
   const pay = updates.find((u) => u.action === "update" && u.id === "WEB-2005" && u.fields && u.fields.pay_status);

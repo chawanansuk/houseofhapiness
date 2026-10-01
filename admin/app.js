@@ -16,6 +16,7 @@ const LAST_IMPORT = "hoh-last-import"; // วันที่นำเข้า�
 const THEME_KEY = "hoh-admin-theme";
 const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
 const SITE_URL = "https://houseofhappinessbangkok.com";
+const OTA_COMMISSION = 0.20; // ค่าคอมมิชชั่น Booking.com โดยประมาณ (ใช้คำนวณ "ไม่เสียค่าคอมฯ" ในหน้ารายรับ) — เจ้าของแก้ตัวเลขนี้ได้
 const MAP_LINK = "https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok";
 const $ = (id) => document.getElementById(id);
 
@@ -347,9 +348,27 @@ async function setOrder(id, fields, msg){
 }
 function openUnpaid(){
   const list = unpaidList();
-  openSheet({ title:'ค้างชำระ', sub:'<span class="faint">การจองที่มียอดแต่ยังไม่ได้รับเงินครบ · เข้าพักภายใน 7 วัน — ถ้าแขก Booking.com จ่ายออนไลน์แล้ว ตั้งสถานะ "จ่ายผ่าน Booking" ในหน้าแก้ไข</span>',
-    body: list.length ? list.map(b => bookingRow(b, `${payPill(b)}<button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับครบ ฿${baht(bahtNum(b.amount))}</button>`, {amount:true})).join('') : `<div class="q-empty">${ic('checkCircle')}ไม่มีรายการค้างชำระ</div>`,
-    foot: `<button class="btn" data-act="close-sheet">ปิด</button>` });
+  const ota = list.filter(b => !isDirect(b));
+  openSheet({ title:'ค้างชำระ', sub:`<span class="faint">การจองที่มียอดแต่ยังไม่ได้รับเงินครบ · เข้าพักภายใน 7 วัน${ota.length ? ' — แขก Booking.com ที่จ่ายออนไลน์แล้ว กด "ผ่าน Booking" รายการจะหายจากค้างชำระ' : ''}</span>`,
+    body: list.length ? list.map(b => bookingRow(b, `${payPill(b)}${isDirect(b) ? '' : `<button class="btn sm" data-act="pay-ota" data-id="${esc(b.id)}">${ic('check')}ผ่าน Booking</button>`}<button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับครบ ฿${baht(bahtNum(b.amount))}</button>`, {amount:true})).join('') : `<div class="q-empty">${ic('checkCircle')}ไม่มีรายการค้างชำระ</div>`,
+    foot: `${ota.length >= 2 ? `<button class="btn" data-act="pay-ota-all" data-n="${ota.length}">${ic('check')}Booking.com ทั้ง ${ota.length} รายการจ่ายผ่าน Booking</button>` : ''}<button class="btn" data-act="close-sheet">ปิด</button>` });
+}
+// แขก Booking.com จ่ายออนไลน์แล้ว (Payments by Booking) — ไม่ต้องตามเก็บที่โรงแรม
+async function payOta(id){
+  const b = bookingById(id); if(!b) return;
+  const fields = { pay_status: 'จ่ายผ่าน Booking' };
+  const r1 = await apiUpdate({ action:'update', id: b.id, fields });
+  if(!r1) return;
+  await afterAction(() => Object.assign(b, fields), `${displayName(b)} — จ่ายผ่าน Booking แล้ว`);
+  if ($('sheet').classList.contains('on')) openUnpaid();
+}
+async function payOtaAll(){
+  const list = unpaidList().filter(b => !isDirect(b));
+  if (!list.length) return;
+  let ok = 0;
+  for (const b of list) { const r1 = await apiUpdate({ action:'update', id: b.id, fields: { pay_status: 'จ่ายผ่าน Booking' } }); if (r1) { ok++; b.pay_status = 'จ่ายผ่าน Booking'; } }
+  closeSheet();
+  await afterAction(() => {}, `ตั้ง "จ่ายผ่าน Booking" ให้ ${ok}/${list.length} รายการ`);
 }
 async function payFull(id){
   const b = bookingById(id); if(!b) return;
@@ -778,11 +797,16 @@ function renderMoney(){
   const expSum = exp.reduce((s,e)=>s+bahtNum(e.amount),0);
   const roomInc = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
   const rsInc = rsIncome(ym), income = roomInc + rsInc;
+  // เป้าหมายหลักของเจ้าของ: เพิ่มสัดส่วนจองตรง — นับจากรายการเดือนนี้ (ตามเดือนเช็คอิน) และคิดค่าคอมฯ ที่ไม่ต้องจ่าย
+  const monthBk = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym));
+  const direct = monthBk.filter(isDirect), directInc = direct.reduce((s,b)=>s+bahtNum(b.amount),0);
+  const share = monthBk.length ? Math.round(direct.length / monthBk.length * 100) : 0;
   $('moneyTiles').innerHTML = [
-    ['รายรับ', income, `ห้องพัก ฿${baht(roomInc)} (ตามเดือนเช็คอิน) · รูมเซอร์วิส ฿${baht(rsInc)}`],
-    ['รายจ่าย', expSum, `${exp.length} รายการ`],
-    ['คงเหลือ', income-expSum, `กำไรขั้นต้น ${income?Math.round((income-expSum)/income*100):0}%`],
-  ].map(([l,v,h]) => `<div class="tile"><span class="lbl">${l}</span><span class="val num">฿${baht(v)}</span><span class="hint">${h}</span></div>`).join('');
+    ['รายรับ', `฿${baht(income)}`, `ห้องพัก ฿${baht(roomInc)} (ตามเดือนเช็คอิน) · รูมเซอร์วิส ฿${baht(rsInc)}`],
+    ['รายจ่าย', `฿${baht(expSum)}`, `${exp.length} รายการ`],
+    ['คงเหลือ', `฿${baht(income-expSum)}`, `กำไรขั้นต้น ${income?Math.round((income-expSum)/income*100):0}%`],
+    ['จองตรง', monthBk.length ? `${share}%` : '—', monthBk.length ? `${direct.length} จาก ${monthBk.length} รายการ · ฿${baht(directInc)}${directInc ? ` · ไม่เสียค่าคอมฯ ≈ ฿${baht(Math.round(directInc*OTA_COMMISSION))} (คิด ${Math.round(OTA_COMMISSION*100)}%)` : ''}` : 'ยังไม่มีการจองเดือนนี้'],
+  ].map(([l,v,h]) => `<div class="tile"><span class="lbl">${l}</span><span class="val num">${v}</span><span class="hint">${h}</span></div>`).join('');
   // กราฟแท่งคู่ 6 เดือน (SVG ล้วน ไม่ใช้ไลบรารี)
   const MONTHLY = monthlySeries();
   const W = 560, H = 220, padL = 44, padB = 28, padT = 14;
@@ -1269,6 +1293,8 @@ function findImportCols(header){
     name:     find(/guest.?name|booker|ชื่อผู้เข้าพัก|ชื่อลูกค้า|^ชื่อ/),
     status:   find(/^status|สถานะ/),
     price:    find(/^price|total.?(price|amount)|ราคา|ยอดรวม/),
+    // คอลัมน์สถานะการชำระ (Payment status / Paid) — ถ้าแขกจ่ายผ่าน Booking.com แล้ว จะได้ไม่ค้างอยู่ใน "ค้างชำระ"
+    pay:      find(/payment.?status|^paid|สถานะการชำระ|การชำระเงิน|ชำระเงิน/),
   };
 }
 let _xlsxPromise = null;
@@ -1331,6 +1357,11 @@ async function handleImportFile(file){
       if (amt && !String(b.amount||'').trim()) fields.amount = Math.round(Number(amt)).toLocaleString();
     }
     if (cols.status >= 0 && /cancel|ยกเลิก/i.test(String(r[cols.status]||'')) && !isCancelled(b)) fields.status = 'ยกเลิก';
+    // แขก Booking.com ที่ไฟล์บอกว่าจ่ายแล้ว (Payments by Booking / virtual card / fully paid) → ตั้ง "จ่ายผ่าน Booking" ให้เอง (เฉพาะที่ยังไม่มีสถานะชำระ)
+    if (cols.pay >= 0 && !isStaff() && !isDirect(b)) {
+      const pv = String(r[cols.pay]||'');
+      if (/paid|fully|ชำระแล้ว|จ่ายแล้ว|virtual.?card|payments? by booking/i.test(pv) && !/not.?paid|unpaid|ยังไม่|pay.?at/i.test(pv) && ['unpaid','none'].includes(payState(b)) && !String(b.pay_status||'').trim()) fields.pay_status = 'จ่ายผ่าน Booking';
+    }
     const willHaveDates = (fields.checkin || b.checkin) && (fields.checkout || b.checkout);
     if (willHaveDates && /อ่านวันที่จากอีเมลไม่ได้/.test(String(b.note||''))) fields.note = '';
     if (Object.keys(fields).length) jobs.push({ id: b.id, fields });
@@ -1481,6 +1512,8 @@ document.addEventListener('click', e => {
   else if(act==='order-restore'){ e.stopPropagation(); setOrder(id, { status:'ยืนยันแล้ว' }, 'กู้คืนออเดอร์แล้ว'); }
   else if(act==='unpaid'){ openUnpaid(); }
   else if(act==='pay-full'){ e.stopPropagation(); payFull(id); }
+  else if(act==='pay-ota'){ e.stopPropagation(); payOta(id); }
+  else if(act==='pay-ota-all'){ e.stopPropagation(); if(el.dataset.armed){ payOtaAll(); } else { el.dataset.armed='1'; el.classList.add('warn'); toast(`แตะอีกครั้งเพื่อยืนยัน — ${el.dataset.n} รายการจะหายจากค้างชำระ`); setTimeout(()=>{ if(el.isConnected){ delete el.dataset.armed; el.classList.remove('warn'); } }, 3000); } }
   else if(act==='hk-toggle'){ state.hkFlag = !state.hkFlag; $('hkFlag').classList.toggle('hide', !state.hkFlag); }
   else if(act==='copy-sum'){ copyText($('sumBox').value, 'คัดลอกแล้ว — ไปวางในกลุ่ม LINE ได้เลย', $('sumBox')); }
   else if(act==='share-sum'){ const t = $('sumBox').value; if(navigator.share) navigator.share({ text: t }).catch(()=>{}); else copyText(t, null, $('sumBox')); }
