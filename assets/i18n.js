@@ -155,6 +155,12 @@ const I18N = {
   "rl.getting-around-bangkok.d": { th: "รถไฟฟ้า เรือ หรือรถ เลือกให้ถูกจังหวะ", en: "Train, boat or car — picking the right one" },
   "rl.near-iconsiam.t": { th: "ที่พักใกล้ ICONSIAM", en: "Staying near ICONSIAM" },
   "rl.near-iconsiam.d": { th: "สายสีทองสถานีเดียว ห้างริมน้ำฝั่งเดียวกับเรา", en: "One Gold Line stop to the riverside mall on our bank" },
+  "rl.heritage-walk.t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท", en: "The Chinatown heritage walk, one ฿5 ferry away" },
+  "rl.heritage-walk.d": { th: "ครึ่งวัน 8 จุด เริ่มที่ท่าเรือท้ายซอย", en: "Half a day, 8 stops, starting at the pier down our lane" },
+  "rm.go.t": { th: "พักห้องนี้แล้วไปไหนได้บ้าง", en: "Where to go from this room" },
+  "f48.t": { th: "48 ชั่วโมงแรกของคุณที่คลองสาน", en: "Your first 48 hours in Khlong San" },
+  "f48.d": { th: "ไกด์ที่เราเขียนให้แขกเราโดยเฉพาะ — มาถึงยังไง วันแรกไปไหน และช่วงนี้มีอะไร", en: "Guides we wrote just for our guests — how to get here, where to go on day one, and what's on right now" },
+  "bk.ww.t": { th: "ระหว่างรอเรายืนยัน (ไม่เกิน 24 ชม.) อ่าน 3 อันนี้ก่อนได้", en: "While you wait for our confirmation (within 24 hours), start with these three" },
   "rl.airport-guide.t": { th: "วิธีเดินทางจากสนามบิน", en: "Getting here from the airport" },
   "rl.airport-guide.d": { th: "แท็กซี่ Grab และรถไฟฟ้าทีละขั้น", en: "Taxi, Grab and the trains, step by step" },
   "rl.ayutthaya-day-trip.t": { th: "อยุธยาไปกลับวันเดียว", en: "Ayutthaya day trip" },
@@ -431,6 +437,10 @@ const I18N = {
   /* แถบปุ่มติดขอบล่างของหน้าบทความบนมือถือ */
   "sb.rates": { th: "เช็คห้องว่าง", en: "Check rates" },
   "sb.line": { th: "ถามทางไลน์", en: "Ask on LINE" },
+  "sb.share": { th: "ส่งเข้า LINE", en: "Share" },
+  "st.voice.walk": { th: "✍️ ทีม House of Happiness · เดินเส้นนี้เอง · ปรับปรุง {d}", en: "✍️ The House of Happiness team · we walked this route ourselves · updated {d}" },
+  "st.voice.prac": { th: "✍️ ทีม House of Happiness · เขียนจากที่แขกถามเราจริง · ปรับปรุง {d}", en: "✍️ The House of Happiness team · written from what guests really ask us · updated {d}" },
+  "st.voice.base": { th: "✍️ ทีม House of Happiness · ปรับปรุง {d}", en: "✍️ The House of Happiness team · updated {d}" },
 
   /* ส่วนไกด์เที่ยวในหน้าแรก */
   "hg.title": { th: "ไกด์เที่ยวจากคนพื้นที่", en: "Local guides, written by us" },

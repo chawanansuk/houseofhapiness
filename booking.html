@@ -144,6 +144,10 @@
         <button type="button" class="btn btn-copy" id="btnCopy" aria-disabled="true" data-i18n="bk.copy">คัดลอกข้อความจอง</button>
         <p class="hint" id="readyHint" hidden></p>
         <p class="booking-save-status" id="bookingSaveStatus" role="status" aria-live="polite" hidden></p>
+        <div class="while-wait" id="whileWait" hidden>
+          <p class="ww-t" data-i18n="bk.ww.t">ระหว่างรอเรายืนยัน (ไม่เกิน 24 ชม.) อ่าน 3 อันนี้ก่อนได้</p>
+          <div class="ww-list" id="wwList"></div>
+        </div>
       </div>
       <ul class="trust">
         <li>⚡ <span data-i18n="bk.trust.2">ยืนยันการจองภายใน 24 ชั่วโมง</span></li>
@@ -517,8 +521,22 @@ let loggedSig = "", bookingSavePromise = null, bookingSaveState = "", bookingSav
 function bookingSignature(s) {
   return [s.room && s.room.id, s.name, s.phone, s.email, s.arrival, s.ci, s.co, s.guests, s.numRooms, s.note].join("|");
 }
+// ไกด์ให้อ่านระหว่างรอยืนยัน — โชว์เฉพาะหลังบันทึกสำเร็จ จะได้ไม่เบี่ยงความสนใจตอนกำลังจอง
+let seasonSlugs = [];
+if (typeof hohSeason === "function") hohSeason((s) => { seasonSlugs = s; });
+function renderWhileWait(show) {
+  const box = $("whileWait"); if (!box) return;
+  box.hidden = !show;
+  if (!show || !$("wwList").childElementCount && typeof hohGuideCard !== "function") return;
+  if (!$("wwList").childElementCount) {
+    const picks = ["airport-guide", "getting-around-bangkok", seasonSlugs[0] || "rainy-day-indoor"];
+    $("wwList").innerHTML = picks.map((slug) => hohGuideCard(slug, "ww-card", "booking")).join("");
+    if (typeof applyLang === "function") applyLang();
+  }
+}
 function renderBookingSaveStatus() {
   const el = $("bookingSaveStatus");
+  renderWhileWait(bookingSaveState === "saved");
   el.hidden = !bookingSaveState;
   el.className = `booking-save-status ${bookingSaveState}`;
   if (bookingSaveState === "saving") el.textContent = t("bk.save.saving");

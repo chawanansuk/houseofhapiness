@@ -56,6 +56,18 @@
 .gd-sec-h h2{font-family:"Prompt",sans-serif; font-size:1.15rem; color:var(--dark); white-space:nowrap}
 .gd-sec-h .cnt{font-size:0.75rem; font-weight:700; color:var(--gold-dark); background:var(--gold-soft); border-radius:999px; padding:0.15rem 0.6rem}
 .gd-sec-h::after{content:""; flex:1; height:1px; background:var(--line)}
+/* ใบกลาง: เรื่องที่แขกใช้บ่อย กว้าง 2 คอลัมน์บนจอใหญ่ */
+@media (min-width:761px){
+  .gd-card.lg{grid-column:span 2}
+  .gd-card.lg .pic{aspect-ratio:16/8}
+  .gd-card.lg h2{font-size:1.18rem}
+  .gd-card.lg p{font-size:.9rem}
+}
+/* เวลาอ่าน + ปรับปรุงเมื่อไหร่ (ข้อความสร้างจาก ui.js ตามภาษา) */
+.gd-rt{font-size:.74rem; color:var(--muted); margin-top:-.1rem}
+.gd-rt:empty{display:none}
+.gd-fest .lb.now{color:var(--muted)}
+.gd-fest a.season .when{color:var(--muted); font-weight:500}
 /* การ์ด */
 .gd-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.1rem}
 .gd-card{background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; text-decoration:none; color:var(--text);
@@ -126,10 +138,11 @@
 /* ── เริ่มจาก 3 อันนี้ ── */
 .gd-start{margin-top:1.8rem}
 .gd-startgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.8rem}
-.gd-scard{display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:.1rem .7rem;
+.gd-scard{display:grid; grid-template-columns:auto auto 1fr; grid-template-rows:auto auto; gap:.1rem .7rem;
   text-decoration:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:.9rem 1rem;
   transition:transform .18s ease, border-color .18s ease}
 .gd-scard:hover{transform:translateY(-2px); border-color:var(--gold)}
+.gd-scard img{grid-row:1 / span 2; width:56px; height:56px; border-radius:10px; object-fit:cover; align-self:center}
 .gd-scard b{grid-row:1 / span 2; align-self:center; font-family:var(--font-display); font-size:1.5rem; color:var(--gold)}
 .gd-scard .t{font-family:"Prompt",sans-serif; font-size:.95rem; color:var(--dark)}
 .gd-scard .d{font-size:.82rem; color:var(--muted); line-height:1.5}
@@ -198,22 +211,23 @@
   <section class="gd-start" id="gdStart">
     <div class="gd-sec-h"><h2 data-i18n="gd.start.t">เพิ่งจองเสร็จ? เริ่มจาก 3 อันนี้</h2></div>
     <div class="gd-startgrid">
-      <a class="gd-scard" href="airport-guide.html"><b>1</b><span class="t" data-i18n="gd.start.1t">มาจากสนามบินยังไง</span><span class="d" data-i18n="gd.start.1d">แท็กซี่ราคาจริง กับรถไฟฟ้าทีละขั้น</span></a>
-      <a class="gd-scard" href="getting-around-bangkok.html"><b>2</b><span class="t" data-i18n="gd.start.2t">เดินทางในเมืองยังไง</span><span class="d" data-i18n="gd.start.2d">สายสีทอง เรือข้ามฟาก หรือเรียกรถ</span></a>
-      <a class="gd-scard" href="heritage-walk.html"><b>3</b><span class="t" data-i18n="gd.start.3t">วันแรกไปไหนดี</span><span class="d" data-i18n="gd.start.3d">เส้นทางเดินครึ่งวัน เริ่มที่ท่าเรือท้ายซอย</span></a>
+      <a class="gd-scard" href="airport-guide.html"><b>1</b><img src="images/entrance-800.webp" alt="" width="56" height="56" loading="lazy" decoding="async"><span class="t" data-i18n="gd.start.1t">มาจากสนามบินยังไง</span><span class="d" data-i18n="gd.start.1d">แท็กซี่ราคาจริง กับรถไฟฟ้าทีละขั้น</span></a>
+      <a class="gd-scard" href="getting-around-bangkok.html"><b>2</b><img src="images/attractions/skypark-800.webp" alt="" width="56" height="56" loading="lazy" decoding="async"><span class="t" data-i18n="gd.start.2t">เดินทางในเมืองยังไง</span><span class="d" data-i18n="gd.start.2d">สายสีทอง เรือข้ามฟาก หรือเรียกรถ</span></a>
+      <a class="gd-scard" href="heritage-walk.html"><b>3</b><img src="images/attractions/yaowarat-road-800.webp" alt="" width="56" height="56" loading="lazy" decoding="async"><span class="t" data-i18n="gd.start.3t">วันแรกไปไหนดี</span><span class="d" data-i18n="gd.start.3d">เส้นทางเดินครึ่งวัน เริ่มที่ท่าเรือท้ายซอย</span></a>
     </div>
   </section>
 
   <a class="gd-feat" href="heritage-walk.html">
     <div class="pic"><picture><source type="image/webp" srcset="images/attractions/riverboat-800.webp 800w, images/attractions/riverboat.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="images/attractions/riverboat.jpg" alt="เรือข้ามฟากแม่น้ำเจ้าพระยา — จุดเริ่มต้นเส้นทางเดินเที่ยวมรดกไชน่าทาวน์" width="960" height="720" loading="eager" decoding="async"></picture></div>
     <div class="body">
-      <div class="tags"><span class="gd-meta"><span data-i18n="gd.feat.tag">✨ ไกด์ใหม่ล่าสุด</span></span></div>
+      <div class="tags"><span class="gd-meta"><span data-i18n="gd.feat.tag">✨ ช่วงนี้แนะนำ</span></span></div>
       <h2 data-i18n="gd.hw.t">เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท</h2>
       <p data-i18n="gd.hw.d">เส้นทางครึ่งวัน 8 จุด: ศาลเจ้ากวนอูฝั่งเรา → เรือข้ามฟาก → สำเพ็ง → เล่งเน่ยยี่ → ทรงวาด → ตลาดน้อย → มื้อค่ำเยาวราช พร้อมของกินมรดกและมารยาท 4 ศาสนา</p>
       <div class="gd-meta">
         <span data-i18n="gd.feat.m1">🚤 เรือ 5 บาท</span><span data-i18n="gd.feat.m2">🚶 ~4 กม. · 3–4 ชม.</span><span data-i18n="gd.feat.m3">🕒 ดีสุด 15:00–20:00</span>
       </div>
       <div class="gd-chips"><span data-i18n="gd.m.heritagewalk.1">⏱ ~4 กม. · 4–5 ชม.</span><span data-i18n="gd.m.heritagewalk.2">💸 เรือข้ามฟาก 5 บาท</span><span data-i18n="gd.m.heritagewalk.3">🕒 15:00–20:00</span></div>
+          <span class="gd-rt" data-rt="7" data-upd="2026-09-28"></span>
       <span class="go" data-i18n="gd.read.feat">อ่านไกด์ฉบับเต็ม</span>
     </div>
   </a>
@@ -221,12 +235,13 @@
   <section class="gd-sec" data-cat="area">
     <div class="gd-sec-h"><h2 data-i18n="gd.area.t">เที่ยวย่านนี้</h2><span class="cnt"></span></div>
     <div class="gd-grid">
-      <a class="gd-card" href="yaowarat-night-walk.html">
+      <a class="gd-card lg" href="yaowarat-night-walk.html">
         <div class="pic"><picture><source type="image/webp" srcset="images/attractions/yaowarat-night-800.webp 800w, images/attractions/yaowarat-night.webp 1600w" sizes="(max-width: 760px) 100vw, 380px"><img src="images/attractions/yaowarat-night.jpg" alt="Rows of lit shop signs down both sides of Yaowarat Road at night, traffic backed up in between" width="1600" height="1066" loading="lazy" decoding="async"></picture><span class="em">🌙</span></div>
         <div class="body">
           <h2 data-i18n="gd.c9.t">เที่ยวเยาวราชกลางคืน 2 ชั่วโมง</h2>
           <p data-i18n="gd.c9.d">เส้นทางเดินกิน 6 จุด ~3 กม. เรือ 5 บาท ของกิน 6 อย่างพร้อมราคา งบ ~350 บาท/คน และ 3 วิธีกลับหลังเรือหมดรอบ</p>
           <div class="gd-chips"><span data-i18n="gd.m.yaowaratnightwalk.1">⏱ ~3 กม. · 2 ชม.</span><span data-i18n="gd.m.yaowaratnightwalk.2">💸 ~฿300–500/คน</span><span data-i18n="gd.m.yaowaratnightwalk.3">🕒 ออก 18:30</span></div>
+          <span class="gd-rt" data-rt="7" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -236,6 +251,7 @@
           <h2 data-i18n="gd.c3.t">เที่ยวฝั่งธนฯ 1 วันเต็ม</h2>
           <p data-i18n="gd.c3.d">เส้นทางเช้าจรดค่ำ: ตลาดเช้า → วัดอรุณ → กุฎีจีน → สวนลอยฟ้า → ICONSIAM → เยาวราช</p>
           <div class="gd-chips"><span data-i18n="gd.m.thonburioneday.1">⏱ เช้าจรดค่ำ</span><span data-i18n="gd.m.thonburioneday.2">💸 ค่าเดินทาง ~฿150–350</span></div>
+          <span class="gd-rt" data-rt="3" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -260,6 +276,7 @@
         <div class="body">
           <h2 data-i18n="gd.c8.t">ที่พักใกล้เยาวราช</h2>
           <p data-i18n="gd.c8.d">ข้ามสะพานเดียวถึงไชน่าทาวน์ กินตอนค่ำกลับดึกสะดวก ย่านเราเงียบนอนสบาย</p>
+          <span class="gd-rt" data-rt="2" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -275,6 +292,7 @@
           <h2 data-i18n="gd.n5.t">ถนนทรงวาด — ย่านสร้างสรรค์ที่ใกล้ที่พักเราที่สุด ข้ามเรือ 5 บาทก็ถึงหัวถนน</h2>
           <p data-i18n="gd.n5.d">ข้ามเรือ 5 บาท 3 นาที ขึ้นตรงหัวถนนทรงวาด — ย่านสร้างสรรค์ที่ใกล้เราที่สุด</p>
           <div class="gd-chips"><span data-i18n="gd.m.songwatroad.1">⏱ บ่ายแก่–หัวค่ำ</span><span data-i18n="gd.m.songwatroad.2">💸 เรือข้ามฟาก 5 บาท</span><span data-i18n="gd.m.songwatroad.3">🕒 หลายร้านปิดวันจันทร์</span></div>
+          <span class="gd-rt" data-rt="8" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -284,6 +302,7 @@
           <h2 data-i18n="gd.r1.t">ตลาดสำเพ็งตอนเช้า — ข้ามเรือ 5 บาท ซื้อของ 4 ซอย กลับที่พักก่อนเที่ยง</h2>
           <p data-i18n="gd.r1.d">ข้ามเรือ 5 บาทไปเดินตลาดสำเพ็งตอนเช้า ซื้อของ กลับก่อนเที่ยง</p>
           <div class="gd-chips"><span data-i18n="gd.m.sampengmorning.1">⏱ เช้าตรู่–ก่อนเที่ยง</span><span data-i18n="gd.m.sampengmorning.2">💸 เรือ 5 บาท · พกเงินสด</span><span data-i18n="gd.m.sampengmorning.3">🕒 ยิ่งเช้ายิ่งดี</span></div>
+          <span class="gd-rt" data-rt="5" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -293,6 +312,7 @@
           <h2 data-i18n="gd.r2.t">วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร — 3 วัดครึ่งวันทางเรือจากที่พัก</h2>
           <p data-i18n="gd.r2.d">วัดโพธิ์ → วัดอรุณ → วัดกัลยาณมิตร ครึ่งวันทางเรือ แล้วกลับที่พัก</p>
           <div class="gd-chips"><span data-i18n="gd.m.threetemplesboat.1">⏱ ~4–5 ชม.</span><span data-i18n="gd.m.threetemplesboat.2">💸 ค่าเรือหลักบาท</span><span data-i18n="gd.m.threetemplesboat.3">🕒 ไปเช้า วัดยังไม่แน่น</span></div>
+          <span class="gd-rt" data-rt="5" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -302,6 +322,7 @@
           <h2 data-i18n="gd.r3.t">เช้าตรู่ริมเจ้าพระยา — ใส่บาตร เดินตลาดเช้า ดูพระอาทิตย์ขึ้น กลับมากินข้าวเช้า</h2>
           <p data-i18n="gd.r3.d">เช้าตรู่: ใส่บาตร ตลาดเช้า วิวแม่น้ำ แล้วกลับมากินข้าวเช้า</p>
           <div class="gd-chips"><span data-i18n="gd.m.sunrisealmsmarket.1">⏱ ~2 ชม.</span><span data-i18n="gd.m.sunrisealmsmarket.2">🕒 ก่อนฟ้าสว่าง</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -311,6 +332,7 @@
           <h2 data-i18n="gd.r4.t">คาเฟ่ริมน้ำ สวนลอยฟ้า ล้ง 1919 — ครึ่งวันเย็นฝั่งธน</h2>
           <p data-i18n="gd.r4.d">คาเฟ่ริมน้ำ · สวนลอยฟ้าตอนแดดอ่อน · ล้ง 1919 — ครึ่งวันเย็นฝั่งธนจากหน้าบ้านเรา</p>
           <div class="gd-chips"><span data-i18n="gd.m.thonbuririversideevening.1">⏱ ~3–4 ชม.</span><span data-i18n="gd.m.thonbuririversideevening.2">💸 ไม่ต้องข้ามแม่น้ำ</span><span data-i18n="gd.m.thonbuririversideevening.3">🕒 บ่ายแก่จรดค่ำ</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -320,6 +342,7 @@
           <h2 data-i18n="gd.r5.t">ICONSIAM ถึงเอเชียทีค — วันเที่ยวทางเรือฟรีและเรือด่วน</h2>
           <p data-i18n="gd.r5.d">จาก ICONSIAM ฝั่งเรา ล่องเรือลงเจ้าพระยาสู่เอเชียทีค — เรือฟรีและเรือด่วน ในวันเดียว</p>
           <div class="gd-chips"><span data-i18n="gd.m.iconsiamasiatiqueboat.1">⏱ ทั้งวัน</span><span data-i18n="gd.m.iconsiamasiatiqueboat.2">💸 เรือรับส่งฟรี</span><span data-i18n="gd.m.iconsiamasiatiqueboat.3">🕒 ยืดหยุ่นตามรอบเรือ</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -329,6 +352,7 @@
           <h2 data-i18n="gd.r10.t">เอเชียทีค เดอะ ริเวอร์ฟร้อนท์ — ไปยังไงจากคลองสาน เที่ยวตอนไหนดี</h2>
           <p data-i18n="gd.r10.d">ตลาดริมน้ำยามเย็น ไปรถไฟฟ้าต่อเรือฟรีท่าสาทร หรือ Grab ข้ามสะพาน แล้วกลับมานอนฝั่งเงียบ</p>
           <div class="gd-chips"><span data-i18n="gd.m.asiatique.1">⏱ ครึ่งวันเย็น</span><span data-i18n="gd.m.asiatique.2">🚕 Grab ~15–20 นาที</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -338,6 +362,7 @@
           <h2 data-i18n="gd.r11.t">เรือท่องเที่ยว Hop-on Hop-off เจ้าพระยา — คุ้มไหม ขึ้นใกล้ที่พักตรงไหน</h2>
           <p data-i18n="gd.r11.d">ตั๋ววันเดียว แวะวัดอรุณ ท่ามหาราช ปากคลองตลาด ICONSIAM คุ้มเมื่อไหร่ ต่างจากเรือด่วนยังไง</p>
           <div class="gd-chips"><span data-i18n="gd.m.chaophrayatouristboat.1">⏱ ครึ่งวัน</span><span data-i18n="gd.m.chaophrayatouristboat.2">🎫 ตั๋ววัน</span></div>
+          <span class="gd-rt" data-rt="3" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -347,6 +372,7 @@
           <h2 data-i18n="gd.r6.t">ปั่นจักรยานฝั่งธน — ตรอกซอกซอย วัดริมน้ำ และแม่น้ำเจ้าพระยา</h2>
           <p data-i18n="gd.r6.d">ปั่นจักรยานลัดเลาะตรอกฝั่งธน ผ่านวัดริมน้ำและแม่น้ำเจ้าพระยา — ทางเลือกช้า ๆ จากคลองสาน</p>
           <div class="gd-chips"><span data-i18n="gd.m.thonburibybike.1">⏱ ครึ่งวัน–ทั้งวัน</span><span data-i18n="gd.m.thonburibybike.2">💸 ต้องจัดจักรยานล่วงหน้า</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -356,6 +382,7 @@
           <h2 data-i18n="gd.r7.t">เที่ยวริมน้ำแบบครอบครัว — สวนลอยฟ้า เรือข้ามฟาก แล้วเข้าห้างเย็น ๆ ไม่ต้องเดินไกล</h2>
           <p data-i18n="gd.r7.d">เที่ยวริมน้ำแบบครอบครัว เดินน้อย — สวนลอยฟ้า เรือ 5 บาท แล้วเข้าห้างเย็น ๆ</p>
           <div class="gd-chips"><span data-i18n="gd.m.familyriverday.1">⏱ เดินน้อย · เข็นรถเข็นเด็กได้</span><span data-i18n="gd.m.familyriverday.2">💸 เรือข้ามฟาก 5 บาท</span><span data-i18n="gd.m.familyriverday.3">🕒 บ่ายเข้าห้างแอร์เย็น</span></div>
+          <span class="gd-rt" data-rt="5" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -365,15 +392,17 @@
           <h2 data-i18n="gd.r8.t">วันฝนตกก็เที่ยวได้ — แผนในร่มทั้งวัน ห้าง คาเฟ่ วิหารมีหลังคา เปียกน้อยที่สุด</h2>
           <p data-i18n="gd.r8.d">วันฝนตก แผนในร่มทั้งวัน — ห้าง คาเฟ่ วิหารมีหลังคา เดินให้เปียกน้อยที่สุด</p>
           <div class="gd-chips"><span data-i18n="gd.m.rainydayindoor.1">⏱ ทั้งวันในร่ม</span><span data-i18n="gd.m.rainydayindoor.2">🕒 วันที่ฝนไม่หยุด</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
-      <a class="gd-card" href="chinatown-festivals.html">
+      <a class="gd-card lg" href="chinatown-festivals.html">
         <div class="pic"><picture><source type="image/webp" srcset="images/attractions/yaowarat-vegfest-800.webp 800w, images/attractions/yaowarat-vegfest.webp 1440w" sizes="(max-width: 760px) 100vw, 380px"><img src="images/attractions/yaowarat-vegfest.jpg" alt="Yaowarat by the season — the Vegetarian Festival (around October) and Chinese New Year (late Jan or Feb)" width="1440" height="1041" loading="lazy" decoding="async"></picture><span class="em">🏮</span></div>
         <div class="body">
           <h2 data-i18n="gd.r9.t">ตามเทศกาลเยาวราช — เทศกาลกินเจ (ราวตุลาคม) และตรุษจีน (ปลายมกราฯ–กุมภาฯ)</h2>
           <p data-i18n="gd.r9.d">ตามเทศกาลเยาวราช — กินเจ (ราวตุลาคม) และตรุษจีน (ปลายมกราฯ–กุมภาฯ) ข้ามเรือ 5 บาท</p>
           <div class="gd-chips"><span data-i18n="gd.m.chinatownfestivals.1">💸 เรือข้ามฟาก 5 บาท</span><span data-i18n="gd.m.chinatownfestivals.2">🕒 กินเจ ~ต.ค. · ตรุษจีน ม.ค.–ก.พ.</span></div>
+          <span class="gd-rt" data-rt="5" data-upd="2026-09-28"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -389,6 +418,7 @@
           <h2 data-i18n="gd.n1.t">เที่ยวอยุธยา 1 วันจากกรุงเทพฯ — ออกเช้าจากคลองสาน กลับมานอนริมแม่น้ำ</h2>
           <p data-i18n="gd.n1.d">อยุธยา 1 วันจากคลองสาน (~80 กม. ทางเหนือ) — ไปเช้า เก็บวัดหลัก กลับค่ำมานอนริมน้ำ</p>
           <div class="gd-chips"><span data-i18n="gd.m.ayutthayadaytrip.1">⏱ ไปกลับวันเดียว · 1–2 ชม./เที่ยว</span><span data-i18n="gd.m.ayutthayadaytrip.2">🕒 ออก 06:30 กลับ ~19:00</span></div>
+          <span class="gd-rt" data-rt="7" data-upd="2026-09-19"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -404,6 +434,7 @@
           <h2 data-i18n="gd.n2.t">สงกรานต์ริมเจ้าพระยา ฉบับคลองสาน — เลือกได้ว่าจะเปียกแค่ไหน แล้วกลับมานอนฝั่งที่เงียบกว่า</h2>
           <p data-i18n="gd.n2.d">สงกรานต์ 13–15 เมษายน จากฝั่งคลองสาน — เช้าทำบุญ บ่ายเล่นน้ำ ค่ำกลับมาฝั่งเงียบ</p>
           <div class="gd-chips"><span data-i18n="gd.m.songkranriverside.1">⏱ 13–15 เมษายน</span><span data-i18n="gd.m.songkranriverside.2">💸 เรือข้ามฟาก 5 บาท</span><span data-i18n="gd.m.songkranriverside.3">🕒 เช้าทำบุญ บ่ายเล่นน้ำ</span></div>
+          <span class="gd-rt" data-rt="7" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -413,6 +444,7 @@
           <h2 data-i18n="gd.c1.t">ลอยกระทงริมเจ้าพระยา ฝั่งธนฯ</h2>
           <p data-i18n="gd.c1.d">จุดลอยกระทงใกล้ที่พัก ทั้งท่าน้ำชุมชนและงานใหญ่ริมน้ำ พร้อมทริคเลี่ยงคนแน่น</p>
           <div class="gd-chips"><span data-i18n="gd.m.loykrathong.1">⏱ คืนวันเพ็ญเดือน 12</span><span data-i18n="gd.m.loykrathong.2">🕒 พุธ 25 พ.ย. 2569</span></div>
+          <span class="gd-rt" data-rt="3" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -422,6 +454,7 @@
           <h2 data-i18n="gd.c2.t">เคาท์ดาวน์ปีใหม่ — ดูพลุ ICONSIAM</h2>
           <p data-i18n="gd.c2.d">จุดดูพลุฟรีฝั่งคลองสาน เดินกลับที่พักได้หลังเที่ยงคืน ไม่ต้องรอรถเป็นชั่วโมง</p>
           <div class="gd-chips"><span data-i18n="gd.m.newyearcountdown.1">⏱ คืน 31 ธันวาคม</span><span data-i18n="gd.m.newyearcountdown.2">🕒 จุดดูพลุเดินถึง</span></div>
+          <span class="gd-rt" data-rt="3" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -431,30 +464,33 @@
   <section class="gd-sec" data-cat="prac">
     <div class="gd-sec-h"><h2 data-i18n="gd.prac.t">ข้อมูลก่อนมาพัก</h2><span class="cnt"></span></div>
     <div class="gd-grid">
-      <a class="gd-card" href="chao-phraya-boat-guide.html">
+      <a class="gd-card lg" href="chao-phraya-boat-guide.html">
         <div class="pic"><picture><source type="image/webp" srcset="images/attractions/cross-river-ferry-800.webp 800w, images/attractions/cross-river-ferry.webp 1280w" sizes="(max-width: 760px) 100vw, 380px"><img src="images/attractions/cross-river-ferry.jpg" alt="The Chao Phraya boat guide, made simple — which boat, which pier, how to pay" width="1280" height="800" loading="lazy" decoding="async"></picture><span class="em">⛴️</span></div>
         <div class="body">
           <h2 data-i18n="gd.n3.t">คู่มือเรือเจ้าพระยา ฉบับเข้าใจง่าย — เรือมีกี่แบบ ขึ้นท่าไหน จ่ายยังไง</h2>
           <p data-i18n="gd.n3.d">คู่มือเรือเจ้าพระยา ฉบับเข้าใจง่าย — เรือสี่แบบ ท่าเรือ และวิธีจ่าย</p>
           <div class="gd-chips"><span data-i18n="gd.m.chaophrayaboatguide.1">💸 เรือข้ามฟาก 5 บาท</span><span data-i18n="gd.m.chaophrayaboatguide.2">🕒 อ่านก่อนลงเรือครั้งแรก</span></div>
+          <span class="gd-rt" data-rt="7" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
-      <a class="gd-card" href="getting-around-bangkok.html">
+      <a class="gd-card lg" href="getting-around-bangkok.html">
         <div class="pic"><picture><source type="image/webp" srcset="images/attractions/skypark-800.webp 800w, images/attractions/skypark.webp 960w" sizes="(max-width: 760px) 100vw, 380px"><img src="images/attractions/skypark.jpg" alt="Getting around Bangkok from Khlong San — picking the train, the boat or the car at the right moment" width="960" height="720" loading="lazy" decoding="async"></picture><span class="em">🚈</span></div>
         <div class="body">
           <h2 data-i18n="gd.n4.t">เดินทางในกรุงเทพจากคลองสาน — เลือกรถไฟฟ้า เรือ หรือรถ ให้ถูกจังหวะ</h2>
           <p data-i18n="gd.n4.d">เดินทางในกรุงเทพจากคลองสาน — รถไฟฟ้า เรือ Grab และวิน</p>
           <div class="gd-chips"><span data-i18n="gd.m.gettingaroundbangkok.1">⏱ สายสีทอง 2 สถานีต่อสีลม</span><span data-i18n="gd.m.gettingaroundbangkok.2">💸 เรือข้ามฟาก 5 บาท</span></div>
+          <span class="gd-rt" data-rt="7" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
-      <a class="gd-card" href="airport-guide.html">
+      <a class="gd-card lg" href="airport-guide.html">
         <div class="pic"><picture><source type="image/webp" srcset="images/entrance-800.webp 800w, images/entrance.webp 1024w" sizes="(max-width: 760px) 100vw, 380px"><img src="images/entrance.jpg" alt="ทางเข้าที่พัก House of Happiness" width="1024" height="683" loading="lazy" decoding="async"></picture><span class="em">✈️</span></div>
         <div class="body">
           <h2 data-i18n="gd.c6.t">วิธีเดินทางจากสนามบิน</h2>
           <p data-i18n="gd.c6.d">สุวรรณภูมิ/ดอนเมือง: แท็กซี่ราคาจริง รถไฟฟ้าทีละขั้น + ที่อยู่ภาษาไทยให้คนขับ</p>
           <div class="gd-chips"><span data-i18n="gd.m.airportguide.1">⏱ 40–60 นาที</span><span data-i18n="gd.m.airportguide.2">💸 แท็กซี่ ~฿250–450</span></div>
+          <span class="gd-rt" data-rt="3" data-upd="2026-09-27"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -464,6 +500,7 @@
           <h2 data-i18n="gd.c10.t">วิธีใช้ Grab และ Bolt</h2>
           <p data-i18n="gd.c10.d">โหลดแอป เรียกรถทีละขั้น จ่ายเงิน จุดรับที่สนามบิน และทำยังไงเมื่อคนขับหาไม่เจอ</p>
           <div class="gd-chips"><span data-i18n="gd.m.ridehailing.1">📱 ใช้ได้ทั้งสองแอป</span><span data-i18n="gd.m.ridehailing.2">💸 เห็นราคาก่อนกด</span></div>
+          <span class="gd-rt" data-rt="5" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -473,6 +510,7 @@
           <h2 data-i18n="gd.c11.t">เรือไฟฟ้าในกรุงเทพ — สายไหนใช้ได้จริงจากคลองสาน</h2>
           <p data-i18n="gd.c11.d">เรือไฟฟ้าในแม่น้ำที่แวะฝั่งเยาวราช และเรือแท็กซี่ไฟฟ้าในคลองเก่าที่เรียกผ่านแอป</p>
           <div class="gd-chips"><span data-i18n="gd.m.electricboatsbangkok.1">💳 จ่ายบัตรได้หลายสาย</span><span data-i18n="gd.m.electricboatsbangkok.2">⛴️ เริ่มจากข้ามเรือ 5 บาท</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -482,14 +520,16 @@
           <h2 data-i18n="gd.c12.t">วิธีใช้ MuvMi ตุ๊กตุ๊กไฟฟ้า</h2>
           <p data-i18n="gd.c12.d">ตุ๊กตุ๊กไฟฟ้าเรียกผ่านแอป ใช้จากฝั่งเราได้แค่ไหน สมัคร จ่าย และเมื่อไหร่ควรใช้ Grab แทน</p>
           <div class="gd-chips"><span data-i18n="gd.m.muvmiguide.1">📱 ต้องมีแอป</span><span data-i18n="gd.m.muvmiguide.2">💬 ไม่ต้องต่อราคา</span></div>
+          <span class="gd-rt" data-rt="4" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
-      <a class="gd-card" href="near-iconsiam.html">
+      <a class="gd-card lg" href="near-iconsiam.html">
         <div class="pic"><picture><source type="image/webp" srcset="images/attractions/iconsiam.webp 704w"><img src="images/attractions/iconsiam.jpg" alt="ICONSIAM ริมแม่น้ำเจ้าพระยา" width="704" height="1251" loading="lazy" decoding="async"></picture><span class="em">🛍️</span></div>
         <div class="body">
           <h2 data-i18n="gd.c7.t">ที่พักใกล้ ICONSIAM</h2>
           <p data-i18n="gd.c7.d">ห่าง ~2 กม. รถ 5 นาที Gold Line สถานีเดียว — เดินห้างเสร็จกลับมานอนใกล้ ๆ</p>
+          <span class="gd-rt" data-rt="2" data-upd="2026-09-30"></span>
           <span class="go" data-i18n="gd.read">อ่านไกด์</span>
         </div>
       </a>
@@ -586,6 +626,11 @@ Object.assign(I18N, {
   "gd.start.3d": { th: "เส้นทางเดินครึ่งวัน เริ่มที่ท่าเรือท้ายซอย", en: "A half-day walk that starts at the pier down our lane" },
   "gd.rs.t": { th: "ไม่ได้ออกไปไหนวันนี้", en: "Staying in today" },
   "gd.ask.map": { th: "แผนที่ย่านคลองสานวาดมือ", en: "A hand-drawn map of the Khlong San neighbourhood" },
+  "gd.now.t": { th: "ตอนนี้ควรอ่าน", en: "Read this now" },
+  "gd.season.rainy": { th: "ช่วงฝน", en: "rainy season" },
+  "gd.season.cool": { th: "ช่วงอากาศดี", en: "cool season" },
+  "gd.season.hot": { th: "ช่วงร้อน", en: "hot season" },
+  "gd.rt": { th: "อ่าน ~{n} นาที · ปรับปรุง {d}", en: "~{n} min read · updated {d}" },
   "gd.fest.t": { th: "ใกล้ถึงแล้ว", en: "Coming up" },
   "gd.fest.in": { th: "อีก {n} วัน", en: "in {n} days" },
   "gd.fest.tmr": { th: "พรุ่งนี้", en: "tomorrow" },
@@ -697,7 +742,7 @@ Object.assign(I18N, {
   "gd.st1": { th: "✍️ 29 ไกด์ เขียนเองทั้งหมด", en: "✍️ 29 guides, all written by us" },
   "gd.st2": { th: "🚶 ทุกจุดเดิน/เรือ/รถไฟฟ้าจากที่พักไม่เกิน 15 นาที", en: "🚶 Everything within 15 min by foot, boat or train" },
   "gd.st3": { th: "🌐 ไทย · English", en: "🌐 ไทย · English" },
-  "gd.feat.tag": { th: "✨ ไกด์ใหม่ล่าสุด", en: "✨ Newest guide" },
+  "gd.feat.tag": { th: "✨ ช่วงนี้แนะนำ", en: "✨ Recommended right now" },
   "gd.feat.m1": { th: "🚤 เรือ 5 บาท", en: "🚤 ฿5 ferry" },
   "gd.feat.m2": { th: "🚶 ~4 กม. · 3–4 ชม.", en: "🚶 ~4 km · 3–4 h" },
   "gd.feat.m3": { th: "🕒 ดีสุด 15:00–20:00", en: "🕒 Best 3–8 PM" },
@@ -853,7 +898,10 @@ Object.assign(I18N, {
       var d = days(s, today);
       return d <= WINDOW_DAYS && (WINDOW_DAYS > 1000 || days(e, today) >= 0);
     }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
-    if (!items.length) return;
+    // ไม่มีเทศกาล → แนะนำตามฤดูแทน (ตัวช่วยอยู่ใน ui.js) จะได้ไม่ว่างเกือบทั้งปี
+    var festSlugs = items.map(function (f) { return f.slug.replace(/\.html$/, ""); });
+    var season = (typeof hohSeasonSlugs === "function" ? hohSeasonSlugs(data.festivals) : []).filter(function (s) { return festSlugs.indexOf(s) < 0; }).slice(0, items.length ? 1 : 2);
+    if (!items.length && !season.length) return;
     function label(f) {
       var d = days(new Date(f.start + "T00:00:00"), today);
       if (d < 0) return t("gd.fest.now");
@@ -863,16 +911,45 @@ Object.assign(I18N, {
     }
     function paint() {
       var lang = typeof getLang === "function" ? getLang() : "th";
-      box.innerHTML = '<span class="lb">' + t("gd.fest.t") + "</span>" +
+      var seasonName = typeof hohSeasonName === "function" ? hohSeasonName(today) : "rainy";
+      box.innerHTML = '<span class="lb' + (items.length ? "" : " now") + '">' + t(items.length ? "gd.fest.t" : "gd.now.t") + "</span>" +
         items.map(function (f) {
           return '<a href="' + f.slug + '">' + (f.label[lang] || f.label.th) +
             ' <span class="when">' + label(f) + "</span>" +
             (f.confirmed ? "" : ' <span class="unconf">· ' + t("gd.fest.unconf") + "</span>") + "</a>";
+        }).join("") +
+        season.map(function (slug) {
+          return '<a class="season" href="' + slug + '.html">' + t("rl." + slug + ".t") + ' <span class="when">' + t("gd.season." + seasonName) + "</span></a>";
         }).join("");
       box.hidden = false;
     }
     paint();
     document.addEventListener("langchange", paint);
+    swapFeatured(season.length && !items.length ? season[0] : (festSlugs[0] || season[0]));
+  }
+  /* ใบเด่นสลับตามฤดู/เทศกาล — HTML เริ่มต้นเป็น heritage-walk เผื่อ JS ไม่ทำงาน */
+  function swapFeatured(slug) {
+    var feat = document.querySelector(".gd-feat");
+    if (!feat || !slug || typeof HOH_GUIDE_IMG === "undefined" || !HOH_GUIDE_IMG[slug] || feat.getAttribute("href") === slug + ".html") return;
+    var im = HOH_GUIDE_IMG[slug];
+    feat.setAttribute("href", slug + ".html");
+    var pic = document.createElement("picture"), so = document.createElement("source"), img = document.createElement("img");
+    so.type = "image/webp"; so.srcset = im[1]; so.sizes = "(max-width: 760px) 100vw, 380px";
+    img.src = im[0]; img.alt = ""; img.width = im[2]; img.height = im[3]; img.loading = "eager"; img.decoding = "async";
+    pic.appendChild(so); pic.appendChild(img);
+    var box = feat.querySelector(".pic"); box.textContent = ""; box.appendChild(pic);
+    feat.querySelector("h2").setAttribute("data-i18n", "rl." + slug + ".t");
+    feat.querySelector(".body > p").setAttribute("data-i18n", "rl." + slug + ".d");
+    /* ข้อมูลประกอบ: ยืม chips + เวลาอ่านจากการ์ดของหน้านั้นในหน้านี้ ซ่อนเฉพาะแถวที่เขียนไว้สำหรับ heritage-walk */
+    var srcCard = document.querySelector('.gd-card[href="' + slug + '.html"]');
+    [].forEach.call(feat.querySelectorAll(".body > .gd-meta"), function (el) { el.hidden = true; });
+    [".gd-chips", ".gd-rt"].forEach(function (sel) {
+      var dst = feat.querySelector(".body > " + sel), src = srcCard && srcCard.querySelector(sel);
+      if (!dst) return;
+      if (src) { dst.replaceWith(src.cloneNode(true)); } else { dst.hidden = true; }
+    });
+    if (typeof applyLang === "function") applyLang();
+    document.dispatchEvent(new Event("hoh:feat-swapped"));
   }
   fetch("/assets/festivals.json").then(function (r) { return r.json(); }).then(renderFest).catch(function () {});
 
