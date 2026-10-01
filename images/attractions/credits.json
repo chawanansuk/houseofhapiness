@@ -96,5 +96,26 @@
     "filePage": "https://commons.wikimedia.org/wiki/File:Mine_Smart_Ferry_July_2020.jpg",
     "artist": "Elbow24",
     "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "ratchawong-pier",
+    "file": "Ratchawong Pier.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Ratchawong_Pier.jpg",
+    "artist": "Phoebus 28",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "cross-river-ferry",
+    "file": "Cross River Ferry (17984331392).jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Cross_River_Ferry_(17984331392).jpg",
+    "artist": "Michael Coghlan from Adelaide, Australia",
+    "license": "CC BY-SA 2.0"
+  },
+  {
+    "slug": "krathong",
+    "file": "Loi Krathong banana offerings.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Loi_Krathong_banana_offerings.jpg",
+    "artist": "Megan Smith",
+    "license": "CC BY 2.0"
   }
 ]

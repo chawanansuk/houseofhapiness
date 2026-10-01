@@ -421,6 +421,9 @@ const I18N = {
   "ph.asiatiquewheel": { th: "ชิงช้าสวรรค์ Asiatique Sky ที่เอเชียทีค เดอะ ริเวอร์ฟร้อนท์ ตัดกับท้องฟ้า", en: "The Asiatique Sky Ferris wheel at Asiatique The Riverfront against the sky" },
   "ph.muvmi": { th: "ตุ๊กตุ๊กไฟฟ้า MuvMi สีแดงบนถนนร่มไม้ในกรุงเทพ", en: "A red MuvMi electric tuk-tuk on a tree-lined Bangkok street" },
   "ph.mineferry": { th: "เรือไฟฟ้า MINE Smart Ferry ลำสีขาวบนแม่น้ำเจ้าพระยา (ภาพปี 2563)", en: "A white MINE Smart Ferry electric boat on the Chao Phraya (2020 photo)" },
+  "ph.ratchawongpier": { th: "ป้ายท่าเรือราชวงศ์ ท่าฝั่งเยาวราชที่เรือข้ามฟากจากท่าดินแดงมาเทียบ", en: "The Ratchawong Pier sign on the Chinatown bank, where the ferry from Tha Din Daeng lands" },
+  "ph.crossferry": { th: "เรือข้ามฟากลำเตี้ยเต็มไปด้วยผู้โดยสาร กำลังข้ามแม่น้ำเจ้าพระยา", en: "A low cross-river ferry full of passengers crossing the Chao Phraya" },
+  "ph.krathong": { th: "กระทงใบตองประดับกล้วยไม้และดาวเรือง พร้อมธูปเทียน", en: "A banana-leaf krathong decorated with orchids and marigolds, with incense and a candle" },
   "ph.kudichin": { th: "โบสถ์ซางตาครู้สในชุมชนกุฎีจีน", en: "Santa Cruz Church in the Kudi Chin quarter" },
   "ph.pakkhlong": { th: "ตลาดดอกไม้ปากคลองตลาดตอนเช้ามืด", en: "Pak Khlong flower market in the early morning" },
 
