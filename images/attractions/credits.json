@@ -1,31 +1,10 @@
 [
   {
-    "slug": "iconsiam",
-    "file": "Magnolias_Waterfront_Residences_Iconsiam.jpg",
-    "filePage": "https://commons.wikimedia.org/wiki/File:Magnolias_Waterfront_Residences_Iconsiam.jpg",
-    "license": "CC BY-SA 4.0",
-    "artist": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images,"
-  },
-  {
-    "slug": "skypark",
-    "file": "Chao_Phraya_Sky_Park_เจ้าพระยาสกายปาร์ค_สวนลอยฟ้าเจ้าพระยา_(October_2021)_-_img_19.jpg",
-    "filePage": "https://commons.wikimedia.org/wiki/File:Chao_Phraya_Sky_Park_%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%81%E0%B8%B2%E0%B8%A2%E0%B8%9B%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%84_%E0%B8%AA%E0%B8%A7%E0%B8%99%E0%B8%A5%E0%B8%AD%E0%B8%A2%E0%B8%9F%E0%B9%89%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2_(October_2021)_-_img_19.jpg",
-    "license": "CC BY-SA 4.0",
-    "artist": "Chainwit."
-  },
-  {
     "slug": "watarun",
     "file": "027-Wat Arun Ratchawararam.jpg",
     "filePage": "https://commons.wikimedia.org/wiki/File:027-Wat_Arun_Ratchawararam.jpg",
     "license": "CC BY-SA 4.0",
     "artist": "Nawit science"
-  },
-  {
-    "slug": "watpho",
-    "file": "พระพุทธไสยาสวัดพระเชตุพน.jpg",
-    "filePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg",
-    "license": "CC BY-SA 4.0",
-    "artist": "Mastertongapollo"
   },
   {
     "slug": "grandpalace",
@@ -40,27 +19,6 @@
     "filePage": "https://commons.wikimedia.org/wiki/File:(2022)_%E0%B8%95%E0%B8%B6%E0%B8%81%E0%B9%81%E0%B8%96%E0%B8%A7%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%96%E0%B8%99%E0%B8%99%E0%B9%80%E0%B8%A2%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%8A_%E0%B9%80%E0%B8%82%E0%B8%95%E0%B8%AA%E0%B8%B1%E0%B8%A1%E0%B8%9E%E0%B8%B1%E0%B8%99%E0%B8%98%E0%B8%A7%E0%B8%87%E0%B8%A8%E0%B9%8C_%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3_(4).jpg",
     "license": "CC BY-SA 4.0",
     "artist": "กสิณธร ราชโอรส"
-  },
-  {
-    "slug": "pakkhlong",
-    "file": "Flowermarket.jpg",
-    "filePage": "https://commons.wikimedia.org/wiki/File:Flowermarket.jpg",
-    "license": "CC BY 2.0",
-    "artist": "eric molina from San Francisco, United States"
-  },
-  {
-    "slug": "riverboat",
-    "file": "Lunch_at_Rongros,_Bangkok_(Jan_2021)_-_img_05.jpg",
-    "filePage": "https://commons.wikimedia.org/wiki/File:Lunch_at_Rongros%2C_Bangkok_(Jan_2021)_-_img_05.jpg",
-    "license": "CC BY-SA 4.0",
-    "artist": "Chainwit."
-  },
-  {
-    "slug": "kudichin",
-    "file": "Santacruise_Church,_BKK_(IV).jpg",
-    "filePage": "https://commons.wikimedia.org/wiki/File:Santacruise_Church%2C_BKK_(IV).jpg",
-    "license": "CC BY 4.0",
-    "artist": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images,"
   },
   {
     "slug": "ayutthaya",
@@ -124,5 +82,89 @@
     "filePage": "https://commons.wikimedia.org/wiki/File:Sathon_Pier_Bangkok_2019_hoponhopoff_boat.jpg",
     "artist": "Chainwit.",
     "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "iconsiam",
+    "file": "Iconsiam at Day.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Iconsiam_at_Day.jpg",
+    "artist": "This Photo was taken by Supanut Arunoprayote.\n\nFeel free",
+    "license": "CC BY 4.0"
+  },
+  {
+    "slug": "skypark",
+    "file": "Chao Phraya Sky Park เจ้าพระยาสกายปาร์ค สวนลอยฟ้าเจ้าพระยา (October 2021) - img 20.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Chao_Phraya_Sky_Park_%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%81%E0%B8%B2%E0%B8%A2%E0%B8%9B%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%84_%E0%B8%AA%E0%B8%A7%E0%B8%99%E0%B8%A5%E0%B8%AD%E0%B8%A2%E0%B8%9F%E0%B9%89%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B2_(October_2021)_-_img_20.jpg",
+    "artist": "Chainwit.",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "watpho",
+    "file": "เจดีย์วัดโพธิ์.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%9E%E0%B8%98%E0%B8%B4%E0%B9%8C.jpg",
+    "artist": "Wiwutsungtong",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "kudichin",
+    "file": "Santa Cruz Church Bangkok Thailand3.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Santa_Cruz_Church_Bangkok_Thailand3.jpg",
+    "artist": "Philip Nalangan",
+    "license": "CC BY 4.0"
+  },
+  {
+    "slug": "riverboat",
+    "file": "On the Chao Phraya. (11426411713).jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:On_the_Chao_Phraya._(11426411713).jpg",
+    "artist": "Bernard Spragg. NZ from Christchurch, New Zealand",
+    "license": "CC0"
+  },
+  {
+    "slug": "pakkhlong",
+    "file": "Thailand Bangkok Pak Khlong Talat - flower market ovedc 08.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Thailand_Bangkok_Pak_Khlong_Talat_-_flower_market_ovedc_08.jpg",
+    "artist": "Ovedc",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "iconsiam-night",
+    "file": "Iconsiam at Night.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Iconsiam_at_Night.jpg",
+    "artist": "This Photo was taken by Supanut Arunoprayote.\n\nFeel free",
+    "license": "CC BY 4.0"
+  },
+  {
+    "slug": "sooksiam",
+    "file": "Sooksiam Indoor Floating Market.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Sooksiam_Indoor_Floating_Market.jpg",
+    "artist": "Jpatokal",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "iconsiam-river",
+    "file": "Chao Phraya river from Iconsiam, Bangkok.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Chao_Phraya_river_from_Iconsiam,_Bangkok.jpg",
+    "artist": "Slyronit",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "goldline",
+    "file": "Gold Line train at Krung Thon Buri station.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:Gold_Line_train_at_Krung_Thon_Buri_station.jpg",
+    "artist": "Matthewmayer",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "bike",
+    "file": "ปั่นจักรยานบางกะเจ้า สมุทรปราการ.jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9B%E0%B8%B1%E0%B9%88%E0%B8%99%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B8%9A%E0%B8%B2%E0%B8%87%E0%B8%81%E0%B8%B0%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%B2_%E0%B8%AA%E0%B8%A1%E0%B8%B8%E0%B8%97%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3.jpg",
+    "artist": "Naludon77",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "slug": "lhong1919",
+    "file": "LHONG 1919 (II).jpg",
+    "filePage": "https://commons.wikimedia.org/wiki/File:LHONG_1919_(II).jpg",
+    "artist": "This Photo was taken by Supanut Arunoprayote.\n\nFeel free",
+    "license": "CC BY 4.0"
   }
 ]

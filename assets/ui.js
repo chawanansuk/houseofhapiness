@@ -148,14 +148,14 @@ document.addEventListener("DOMContentLoaded", () => {
 var HOH_GUIDE_IMG = {
   "airport-guide":              ["/images/entrance.jpg", "/images/entrance-800.webp 800w, /images/entrance.webp 1024w", 1024, 683],
   "heritage-walk":              ["/images/attractions/yaowarat-road.jpg", "/images/attractions/yaowarat-road-800.webp 800w, /images/attractions/yaowarat-road.webp 1440w", 1440, 957],
-  "getting-around-bangkok":     ["/images/attractions/skypark.jpg", "/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w", 960, 720],
-  "rainy-day-indoor":           ["/images/attractions/iconsiam.jpg", "/images/attractions/iconsiam.webp 704w", 704, 1251],
-  "thonburi-riverside-evening": ["/images/attractions/skypark.jpg", "/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w", 960, 720],
+  "getting-around-bangkok":     ["/images/attractions/goldline.jpg", "/images/attractions/goldline-800.webp 800w, /images/attractions/goldline.webp 1280w", 1280, 961],
+  "rainy-day-indoor":           ["/images/attractions/sooksiam.jpg", "/images/attractions/sooksiam-800.webp 800w, /images/attractions/sooksiam.webp 1280w", 1280, 960],
+  "thonburi-riverside-evening": ["/images/attractions/lhong1919.jpg", "/images/attractions/lhong1919-800.webp 800w, /images/attractions/lhong1919.webp 1280w", 1280, 694],
   "chao-phraya-boat-guide":     ["/images/attractions/cross-river-ferry.jpg", "/images/attractions/cross-river-ferry-800.webp 800w, /images/attractions/cross-river-ferry.webp 1280w", 1280, 800],
   "chinatown-festivals":        ["/images/attractions/yaowarat-vegfest.jpg", "/images/attractions/yaowarat-vegfest-800.webp 800w, /images/attractions/yaowarat-vegfest.webp 1440w", 1440, 1041],
   "loy-krathong":               ["/images/attractions/krathong.jpg", "/images/attractions/krathong-800.webp 800w, /images/attractions/krathong.webp 1280w", 1280, 931],
-  "new-year-countdown":         ["/images/attractions/iconsiam.jpg", "/images/attractions/iconsiam.webp 704w", 704, 1251],
-  "songkran-riverside":         ["/images/attractions/riverboat.jpg", "/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w", 960, 720]
+  "new-year-countdown":         ["/images/attractions/iconsiam-night.jpg", "/images/attractions/iconsiam-night-800.webp 800w, /images/attractions/iconsiam-night.webp 1280w", 1280, 960],
+  "songkran-riverside":         ["/images/attractions/riverboat.jpg", "/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 1280w", 1280, 862]
 };
 function hohSeasonName(d) { var m = (d || new Date()).getMonth() + 1; return m >= 5 && m <= 10 ? "rainy" : (m >= 11 || m <= 2) ? "cool" : "hot"; }
 function hohSeasonSlugs(festivals) {
