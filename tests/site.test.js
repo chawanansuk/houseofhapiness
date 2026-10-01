@@ -256,7 +256,7 @@ console.log("SITE TESTS PASSED");
     const raw = read(f);
     const hero = raw.match(/<img class="bg"[^>]*>/) || raw.match(/<img[^>]*class="bg"[^>]*>/);
     if (!hero || !/images\/attractions\//.test(hero[0])) continue;
-    const key = (hero[0].match(/data-i18n="(ph\.[a-z]+)"/) || [])[1];
+    const key = (hero[0].match(/data-i18n="(ph\.[a-z0-9]+)"/) || [])[1];
     assert.ok(key, `${f}: hero ต้องมี data-i18n="ph.*" สำหรับ alt สองภาษา`);
     assert.ok(new RegExp(`"${key.replace(".", "\\.")}":`).test(i18nSrc), `i18n.js ขาดคีย์ ${key}`);
     assert.match(hero[0], /data-i18n-attr="alt"/, `${f}: hero ต้องมี data-i18n-attr="alt"`);
