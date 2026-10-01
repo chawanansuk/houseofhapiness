@@ -57,6 +57,8 @@ function parseDbUrl(raw) {
 }
 function dbConfigError() { const p = parseDbUrl(process.env.DATABASE_URL); return p.error || null; }
 
+function addDays(ymd, n) { const d = new Date(ymd + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+
 function createStore(query) {
   let schemaReady = null;
   const ensureSchema = () => {
@@ -84,6 +86,24 @@ function createStore(query) {
     query("INSERT INTO audit_log (actor, action, target, fields) VALUES ($1, $2, $3, $4)", [str(actor), str(action), str(target), fields ? JSON.stringify(fields) : null]).catch(() => {});
 
   const pick = (cols, row) => cols.map((c) => str(row[c]));
+
+  // ห้องนี้มีการจองอื่นที่ยังไม่ยกเลิก/ยังไม่เช็คเอาต์ ทับช่วงคืน [ci, co) อยู่ไหม — กฎเดียวกับ roomFreeFor() ในหน้า /admin
+  // ทำที่ฝั่งเซิร์ฟเวอร์เพราะพนักงานสองคนอาจจัดห้องเดียวกันพร้อมกันคนละเครื่อง
+  async function roomConflict(room, ci, co, excludeId) {
+    if (!str(room) || !/^\d{4}-\d{2}-\d{2}$/.test(str(ci))) return null;
+    const end = /^\d{4}-\d{2}-\d{2}$/.test(str(co)) && str(co) > str(ci) ? str(co) : addDays(str(ci), 1);
+    const r = await query(
+      `SELECT id, name, checkin, checkout, status FROM bookings
+        WHERE room_no = $1 AND id <> $2
+          AND status !~* '(ยกเลิก|cancel|เช็คเอาต์|checked.?out)'
+          AND checkin ~ '^\\d{4}-\\d{2}-\\d{2}$' AND checkin < $4
+          AND (CASE WHEN checkout ~ '^\\d{4}-\\d{2}-\\d{2}$' AND checkout > checkin THEN checkout ELSE to_char(to_date(checkin, 'YYYY-MM-DD') + 1, 'YYYY-MM-DD') END) > $3
+        LIMIT 1`,
+      [str(room), str(excludeId), str(ci), end],
+    );
+    return r.rows[0] || null;
+  }
+
 
   // เพิ่มแถวใหม่แบบ atomic: id แบบเดิม (WEB-yyMMddHHmmss) แต่ถ้าชนกัน (สองคนจองวินาทีเดียวกัน)
   // จะลองต่อท้าย -2, -3, … จน INSERT สำเร็จจริง — ห้ามคืน id ที่ไม่ได้เขียน มิฉะนั้นการจองจะหายเงียบ ๆ
@@ -153,9 +173,20 @@ function createStore(query) {
       return { bookings: b.rows, rooms: r.rows, expenses: e.rows, orders: o.rows };
     },
 
+    // ประวัติการแก้ล่าสุด (ใครทำอะไรกับรายการไหน) — หน้า /admin ใช้แสดงในแผงการจอง
+    async listAudit(limit = 400) {
+      await ensureSchema();
+      const r = await query("SELECT at, actor, action, target, fields FROM audit_log ORDER BY id DESC LIMIT $1", [Math.max(1, Math.min(2000, Number(limit) || 400))]);
+      return r.rows.map((x) => ({ at: x.at instanceof Date ? x.at.toISOString() : String(x.at || ""), actor: x.actor, action: x.action, target: x.target, fields: typeof x.fields === "string" ? (() => { try { return JSON.parse(x.fields); } catch { return null; } })() : x.fields }));
+    },
+
     async addBooking(row, actor) {
       await ensureSchema();
       const rec = { ...row, nights: nightsOf(str(row.checkin), str(row.checkout)) || str(row.nights), created: str(row.created) || stamp(), rooms: str(row.rooms) || "1", status: str(row.status) || "รอยืนยัน" };
+      if (str(rec.room_no) && !/ยกเลิก|cancel/i.test(rec.status)) {
+        const c = await roomConflict(rec.room_no, rec.checkin, rec.checkout, "");
+        if (c) { const e = new Error("room-taken"); e.code = "room-taken"; e.conflict = c; throw e; }
+      }
       const id = await insertWithFreshId("bookings", BOOKING_COLS, rec, "WEB");
       await audit(actor || "web", "add", id, { source: rec.source, checkin: rec.checkin, checkout: rec.checkout });
       return id;
@@ -167,10 +198,17 @@ function createStore(query) {
       if (!keys.length) return { ok: true, changed: 0 };
       const vals = keys.map((k) => str(fields[k]));
       // เปลี่ยนวันเข้า/ออก → คำนวณจำนวนคืนใหม่ให้เอง
-      const cur = await query("SELECT checkin, checkout FROM bookings WHERE id = $1", [str(id)]);
+      const cur = await query("SELECT checkin, checkout, room_no, status FROM bookings WHERE id = $1", [str(id)]);
       if (!cur.rows.length) return { ok: false, error: "not-found" };
       const ci = keys.includes("checkin") ? str(fields.checkin) : cur.rows[0].checkin;
       const co = keys.includes("checkout") ? str(fields.checkout) : cur.rows[0].checkout;
+      // กันห้องซ้อน: เมื่อจัด/ย้ายห้อง หรือเลื่อนวันของรายการที่มีห้องแล้ว (ไม่เช็กตอนยกเลิก/เช็คเอาต์)
+      const room = keys.includes("room_no") ? str(fields.room_no) : str(cur.rows[0].room_no);
+      const nextStatus = keys.includes("status") ? str(fields.status) : str(cur.rows[0].status);
+      if (room && !/ยกเลิก|cancel|เช็คเอาต์|checked.?out/i.test(nextStatus) && (keys.includes("room_no") || keys.includes("checkin") || keys.includes("checkout"))) {
+        const c = await roomConflict(room, ci, co, str(id));
+        if (c) return { ok: false, error: "room-taken", conflict: { id: c.id, name: c.name, checkin: c.checkin, checkout: c.checkout } };
+      }
       const sets = keys.map((k, i) => `${k} = $${i + 2}`);
       if (keys.includes("checkin") || keys.includes("checkout")) { sets.push(`nights = $${keys.length + 2}`); vals.push(nightsOf(ci, co)); }
       sets.push("updated_at = now()");

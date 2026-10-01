@@ -25,6 +25,14 @@ function call(body = { action: "roomclean", room: "101", clean: true }) {
 }
 
 (async () => {
+  // รหัสผิด → 401 (เทียบแบบ timing-safe ใน api/_auth.js) และต้องไม่ยิงไปชีต
+  global.fetch = async () => { throw new Error("must not reach storage"); };
+  const bad = await new Promise((resolve) => {
+    const res = { code: 200, setHeader() {}, status(c) { this.code = c; return this; }, json(v) { resolve({ code: this.code, body: v }); } };
+    update({ method: "POST", headers: { "x-admin-key": "nope" }, body: { action: "roomclean", room: "101", clean: true } }, res);
+  });
+  assert.equal(bad.code, 401); assert.equal(bad.body.error, "unauthorized");
+
   global.fetch = async () => ({
     ok: true, status: 200, text: async () => JSON.stringify({ ok: true }),
   });

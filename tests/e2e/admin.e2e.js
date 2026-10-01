@@ -52,7 +52,7 @@ const server = http.createServer((req, res) => {
     const role = key === "staffpass" ? "staff" : "admin";
     let bookings = DB.bookings.map((b) => role === "staff" ? { ...b, amount: "" } : b);
     if (staleNext) { bookings = bookings.map((b) => b.id === staleNext.id ? { ...b, room_no: staleNext.room_no } : b); staleNext = null; }
-    return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, orders: DB.orders, sources: { sheet: true, ical: false } }));
+    return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, orders: DB.orders, audit: role === "admin" ? [{ at: today + "T07:30:00.000Z", actor: "staff", action: "update", target: "BDC-2001", fields: { room_no: "716" } }, { at: today + "T01:00:00.000Z", actor: "script", action: "add", target: "BDC-2001", fields: { source: "Booking.com" } }] : [], sources: { sheet: true, ical: false } }));
   }
   if (url === "/api/update") {
     let body = ""; req.on("data", (c) => body += c);
@@ -172,6 +172,16 @@ const server = http.createServer((req, res) => {
   await dt.keyboard.press("Escape");
   await dt.waitForTimeout(300);
   check("Esc ปิด sheet", await dt.locator("#sheet.on").count() === 0);
+
+  // 8.5) ประวัติการแก้ (audit_log) ในแผงการจอง — เจ้าของเห็นว่าใครจัดห้องเมื่อไหร่
+  await dt.locator('#bkList [data-act="open-booking"][data-id="BDC-2001"]').first().click();
+  await dt.waitForTimeout(300);
+  const sheetTxt = await dt.locator("#sheet").innerText();
+  check("แผงการจองแสดง 'ประวัติการแก้' จาก audit_log", sheetTxt.includes("ประวัติการแก้"));
+  check("ประวัติบอกว่าพนักงานจัดห้อง 716", /พนักงาน[^\n]*จัดห้อง 716/.test(sheetTxt));
+  check("ประวัติบอกว่าระบบสร้างรายการจาก Booking.com", /ระบบ[^\n]*สร้างรายการ[^\n]*Booking\.com/.test(sheetTxt));
+  await dt.keyboard.press("Escape");
+  await dt.waitForTimeout(300);
 
   // 9) ยกเลิกการจองต้องกดสองครั้ง (ไม่ใช้ confirm())
   await dt.locator('#bkList [data-act="open-booking"][data-id="WEB-2002"]').first().click();

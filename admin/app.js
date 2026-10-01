@@ -105,6 +105,7 @@ let ROOMS = [];           // [{no,label,type,twin,tag}]
 let CLEAN = {};           // {no:'dirty'}
 let ROOM_NOTES = {};      // {no: note}
 let ORDERS = [];          // ออเดอร์รูมเซอร์วิสจากเว็บ (แท็บ Orders)
+let AUDIT = [];           // ประวัติการแก้จาก audit_log (เจ้าของเท่านั้น)
 let SYNC_AT = '';
 let SYNC_TS = 0;          // เวลาซิงก์ล่าสุด (ms) — ใช้ตัดสินว่าข้อมูลเก่าพอจะดึงใหม่ไหม
 
@@ -119,6 +120,7 @@ function adopt(j){
   TODAY = j.today || toYMD(new Date());
   BOOKINGS = j.bookings || [];
   ORDERS = j.orders || [];
+  AUDIT = Array.isArray(j.audit) ? j.audit : [];
   ROOMS = (j.rooms || []).map(r => roomMeta(String(r.room || '').trim())).filter(r => r.no);
   CLEAN = {}; ROOM_NOTES = {};
   (j.rooms || []).forEach(r => {
@@ -444,6 +446,13 @@ async function apiUpdate(body){
       body: JSON.stringify(body),
     });
     const j = await r.json().catch(() => ({}));
+    if (r.status === 409 && j.error === 'room-taken') {
+      const c = j.conflict || {};
+      toast(`ห้องนี้มี ${c.name ? c.name : 'การจองอื่น'} อยู่แล้ว${c.checkin ? ` (${fmtD(c.checkin)} – ${fmtD(c.checkout || '')})` : ''} — เลือกห้องอื่น`, true);
+      reload();
+      return null;
+    }
+    if (r.status === 429) { toast('ใส่รหัสผิดหลายครั้ง — รอ 10 นาทีแล้วลองใหม่', true); return null; }
     if (!r.ok || !j.ok) { toast(j.error || 'บันทึกไม่สำเร็จ', true); return null; }
     notePending(body);
     return j;
@@ -864,6 +873,27 @@ async function doAssign(no){
 function renderAssignBar(){ const bar = $('assignBar'); const b = state.assign && bookingById(state.assign); if(!b){ bar.classList.remove('on'); bar.innerHTML=''; return; } bar.innerHTML = `${ic('move')}<span>กำลังจัดห้องให้ <b>${esc(displayName(b))}</b> · ${fmtD(b.checkin)}–${fmtD(effCheckout(b))} (${nightsOf(b)} คืน) — แตะห้องที่ขึ้นเส้นประ</span><button class="btn sm" data-act="cancel-assign">ยกเลิก</button>`; bar.classList.add('on'); paintIcons(bar); }
 
 /* ---------- sheets ---------- */
+/* ประวัติการแก้จาก audit_log (เจ้าของเท่านั้น) — แปลงเป็นประโยคอ่านง่าย */
+const ACTOR_LABEL = { admin:'เจ้าของ', staff:'พนักงาน', web:'แขก (เว็บ)', script:'ระบบ (อีเมล/ชีต)' };
+function auditLine(a){
+  const f = a.fields || {}; const parts = [];
+  if (a.action === 'add') parts.push('สร้างรายการ' + (f.source ? ` · ${f.source}` : ''));
+  else if (a.action === 'sync') parts.push('เติมข้อมูลจากอีเมล' + (f.status ? ` · สถานะ ${f.status}` : ''));
+  else if (a.action === 'update') {
+    if ('room_no' in f) parts.push(f.room_no ? `จัดห้อง ${roomLabel(String(f.room_no))}` : 'เอาห้องออก');
+    if ('status' in f) parts.push(`สถานะ → ${f.status || '—'}`);
+    if ('checkin' in f || 'checkout' in f) parts.push(`วัน → ${f.checkin ? fmtD(f.checkin) : '…'} – ${f.checkout ? fmtD(f.checkout) : '…'}`);
+    if ('amount' in f && !isStaff()) parts.push(`ยอด → ฿${baht(bahtNum(f.amount))}`);
+    if ('paid' in f || 'pay_status' in f) parts.push(`ชำระ → ${f.pay_status || (f.paid ? '฿'+baht(bahtNum(f.paid)) : '—')}`);
+    for (const k of ['name','phone','guests','note']) if (k in f) parts.push({name:'ชื่อ',phone:'เบอร์',guests:'ผู้พัก',note:'โน้ต'}[k] + ' แก้ไข');
+    if (!parts.length) parts.push('แก้ไขข้อมูล');
+  } else parts.push(a.action);
+  return parts.join(' · ');
+}
+function auditFor(id, limit=8){
+  return AUDIT.filter(a => String(a.target) === String(id) && ['add','update','sync'].includes(a.action)).slice(0, limit);
+}
+function fmtAt(iso){ const d = new Date(iso); if (isNaN(d)) return String(iso||'').slice(0,16); return d.toLocaleString('th-TH', { timeZone:'Asia/Bangkok', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); }
 function openBooking(id){
   const b = bookingById(id); if(!b) return;
   const r = String(b.room_no||'').trim() ? roomOf(b.room_no) : null;
@@ -879,6 +909,9 @@ function openBooking(id){
   if(k==='inhouse'||k==='out') log.push(`<div><b>เช็คอิน</b> ห้อง ${esc(roomLabel(b.room_no))}<div class="t">${fmtDY(b.checkin)}</div></div>`);
   if(k==='out') log.push(`<div><b>เช็คเอาต์</b><div class="t">${fmtDY(effCheckout(b))}</div></div>`);
   if(k==='cancel') log.push(`<div><b>ยกเลิก</b><div class="t">${esc(noteWithoutReq(b))}</div></div>`);
+  // ประวัติจริงจากฐานข้อมูล (ใครแก้อะไรเมื่อไหร่) — มีเฉพาะเจ้าของและเมื่อใช้ฐานข้อมูล
+  const hist = auditFor(b.id);
+  if (hist.length) log.push(`<div><b>ประวัติการแก้</b>${hist.map(a => `<div class="t">${esc(fmtAt(a.at))} · ${esc(ACTOR_LABEL[a.actor] || a.actor || '—')} · ${esc(auditLine(a))}</div>`).join('')}</div>`);
   const req = guestReqOf(b), nt = noteWithoutReq(b);
   openSheet({
     title: esc(displayName(b)),
