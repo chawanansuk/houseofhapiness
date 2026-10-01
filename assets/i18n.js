@@ -418,6 +418,9 @@ const I18N = {
   "ph.watarun": { th: "พระปรางค์วัดอรุณส่องไฟยามพระอาทิตย์ตก มองข้ามแม่น้ำเจ้าพระยา ฟ้าสีส้มชมพู", en: "The lit prang of Wat Arun at sunset, seen across the Chao Phraya under an orange sky" },
   "ph.grandpalace": { th: "พระบรมมหาราชวังเปิดไฟยามค่ำ มองข้ามแม่น้ำเจ้าพระยา", en: "The Grand Palace lit up at night, seen across the Chao Phraya" },
   "ph.watpho": { th: "พระพุทธไสยาสน์ปิดทองที่วัดโพธิ์ ยาวราว 46 เมตร", en: "The gilded Reclining Buddha at Wat Pho, about 46 metres long" },
+  "ph.asiatiquewheel": { th: "ชิงช้าสวรรค์ Asiatique Sky ที่เอเชียทีค เดอะ ริเวอร์ฟร้อนท์ ตัดกับท้องฟ้า", en: "The Asiatique Sky Ferris wheel at Asiatique The Riverfront against the sky" },
+  "ph.muvmi": { th: "ตุ๊กตุ๊กไฟฟ้า MuvMi สีแดงบนถนนร่มไม้ในกรุงเทพ", en: "A red MuvMi electric tuk-tuk on a tree-lined Bangkok street" },
+  "ph.mineferry": { th: "เรือไฟฟ้า MINE Smart Ferry ลำสีขาวบนแม่น้ำเจ้าพระยา (ภาพปี 2563)", en: "A white MINE Smart Ferry electric boat on the Chao Phraya (2020 photo)" },
   "ph.kudichin": { th: "โบสถ์ซางตาครู้สในชุมชนกุฎีจีน", en: "Santa Cruz Church in the Kudi Chin quarter" },
   "ph.pakkhlong": { th: "ตลาดดอกไม้ปากคลองตลาดตอนเช้ามืด", en: "Pak Khlong flower market in the early morning" },
 
