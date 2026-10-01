@@ -85,7 +85,7 @@ assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becom
 assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
 assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
 assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
-assert.match(admin, /app\.js\?v=28/, "admin cache-bust version must be bumped with app changes");
+assert.match(admin, /app\.js\?v=29/, "admin cache-bust version must be bumped with app changes");
 // เจ้าของยืนยัน (ก.ย. 2569): ไม่มีมัดจำกุญแจ ฿1,000 — ห้ามโผล่ที่ไหนอีก (เว็บ · ข้อความยืนยัน · ป้ายในห้อง · llms)
 for (const f of ["index.html", "room-standard.html", "room-studio.html", "room-deluxe.html", "booking.html", "assets/i18n.js", "admin/app.js", "llms.txt", "print/guest-board.html"]) {
   assert.doesNotMatch(read(f), /มัดจำกุญแจ|key deposit|มัดจำ (<b>)?฿1,000|฿1,000<\/b> refundable deposit|฿1,000 (refundable )?deposit|มีมัดจำ 1,000/i, f + " must not mention the ฿1,000 key deposit (there is none)");
@@ -391,6 +391,19 @@ console.log("UX TESTS PASSED");
   assert.ok(voiced.length >= 25, `หน้าบทความที่มี data-voice ต้องมีอย่างน้อย 25 หน้า เจอ ${voiced.length}`);
   const i18n = read("assets/i18n.js");
   for (const k of ["st.voice.walk", "st.voice.prac", "sb.share", "f48.t", "rm.go.t", "bk.ww.t", "gd.rt", "gd.now.t"]) assert.ok(i18n.includes(`"${k}":`) || gd.includes(`"${k}":`), `ขาดคีย์ภาษา ${k}`);
+  // V2 — ของที่ไม่ต้องรอเจ้าของ: ลิงก์ไกด์ในข้อความยืนยันหลังบ้าน · การ์ด QR A6 · กล่อง "เขียนโดย" · ตัวนับ ?src=
+  const adminJs2 = read("admin/app.js");
+  for (const slug of ["airport-guide", "getting-around-bangkok", "heritage-walk"]) assert.ok(adminJs2.includes(`g('${slug}')`), `ข้อความยืนยันหลังบ้านต้องมีลิงก์ไกด์ ${slug}`);
+  assert.match(adminJs2, /\?src=line/, "ลิงก์ไกด์ในข้อความยืนยันต้องมี ?src=line ให้นับที่มาได้");
+  const qrCard = read("print/guides-qr-card.html");
+  assert.match(qrCard, /<meta name="robots" content="noindex, nofollow">/, "การ์ด QR ต้อง noindex");
+  assert.ok((qrCard.match(/<svg /g) || []).length === 4, "การ์ด QR A6 ต้องมี QR 4 ใบ (4 การ์ดต่อ A4)");
+  assert.match(qrCard, /guides\.html\?src=room/, "การ์ด QR ต้องบอกว่า QR ชี้ไป guides.html?src=room");
+  const uiJs = read("assets/ui.js");
+  assert.match(uiJs, /hohTrack\("guide_src"/, "ui.js ต้องนับ ?src= เป็นเหตุการณ์ guide_src");
+  assert.match(uiJs, /className = "ld-author"/, "ui.js ต้องฉีดกล่อง 'เขียนโดย' ท้ายบทความ");
+  for (const k of ["au.name", "au.body", "au.line", "au.all"]) assert.ok(i18n.includes(`"${k}":`), `ขาดคีย์ภาษา ${k}`);
+  assert.match(read("assets/style.css"), /\.ld-author \{/, "ต้องมีสไตล์ .ld-author");
 }
 console.log("GUIDES HUB TESTS PASSED");
 

@@ -1,0 +1,78 @@
+# ข้อความ LINE / WhatsApp มาตรฐาน (V2.4) — ร่างรอเจ้าของอนุมัติ
+
+ใช้ยังไง: ข้อความ **หลังยืนยันจอง** อยู่ในหลังบ้านแล้ว (ปุ่ม "ข้อความยืนยัน" ในแถวการจอง → ตั้งแต่ 1 ต.ค. 2569 มีลิงก์ไกด์ 3 เรื่องต่อท้ายอัตโนมัติ ทั้งไทย/อังกฤษ) ส่วนข้อความด้านล่างเป็นชุดเสริมสำหรับก๊อปวางเอง
+ลิงก์ทุกอันมี `?src=line` ต่อท้าย — ไม่กระทบแขก แต่ทำให้ Analytics บอกได้ว่าคนอ่านมาจากข้อความ LINE (ต้องเปิด Web Analytics ก่อน ดู V2.6)
+
+## 1. หลังยืนยันจอง (อยู่ในหลังบ้านแล้ว — ตัวอย่างผลลัพธ์)
+
+```
+สวัสดีค่ะ คุณ<ชื่อ> 🙏 ขอยืนยันการจองที่ House of Happiness ค่ะ
+
+📅 เช็คอิน: <วัน> (14:00 เป็นต้นไป — พนักงานอยู่ถึง 18:00 หลังจากนั้นเช็คอินด้วยตัวเอง)
+📅 เช็คเอาต์: <วัน> (ภายใน 12:00)
+🛏 <n> คืน · ห้อง <เลขห้อง> · ผู้เข้าพัก <n> ท่าน
+💰 ยอดชำระ: ฿<ยอด> — ชำระที่โรงแรม (เงินสด / โอน / พร้อมเพย์)
+🔖 หมายเลขการจอง: <id>
+📍 แผนที่: <ลิงก์>
+
+📖 ระหว่างรอวันเดินทาง อ่านไกด์ที่เราเขียนให้แขกได้เลยค่ะ
+• มาจากสนามบิน: https://houseofhappinessbangkok.com/airport-guide.html?src=line
+• เดินทางในกรุงเทพจากคลองสาน: https://houseofhappinessbangkok.com/getting-around-bangkok.html?src=line
+• วันแรกไปไหนดี ข้ามเรือ 5 บาทไปเยาวราช: https://houseofhappinessbangkok.com/heritage-walk.html?src=line
+
+รบกวนแจ้งเวลาที่จะมาถึงล่วงหน้านะคะ ทีมงานจะเตรียมห้องรอ แล้วเจอกันค่ะ 😊
+```
+
+ภาษาอังกฤษใช้ลิงก์ `/en/…?src=line` (หลังบ้านสลับให้เองตามปุ่มภาษา)
+
+## 2. วันก่อนเดินทาง 1 วัน (ส่งเอง · ≤ 6 บรรทัด)
+
+**ไทย**
+```
+พรุ่งนี้เจอกันแล้วนะคะ คุณ<ชื่อ> 🙏
+ถ้ามาจากสนามบิน ดูวิธีเดินทาง+ราคาแท็กซี่ที่นี่ค่ะ https://houseofhappinessbangkok.com/airport-guide.html?src=line
+ถึงกี่โมงบอกเราได้เลย ถ้าหลัง 18:00 เราจะส่งวิธีเช็คอินด้วยตัวเองให้ก่อนค่ะ
+```
+
+**English**
+```
+See you tomorrow, <name>! 🙏
+Coming from the airport? Routes and taxi prices are here: https://houseofhappinessbangkok.com/en/airport-guide.html?src=line
+Just tell us your arrival time — if it's after 18:00 we'll send self check-in steps ahead.
+```
+
+## 3. เช้าวันแรกของการพัก (ส่งเอง)
+
+**ไทย**
+```
+อรุณสวัสดิ์ค่ะ 🌤 วันนี้อยากเดินเล่นใกล้ ๆ ลองเส้นนี้ค่ะ — ข้ามเรือ 5 บาทจากท่าท้ายซอยไปเยาวราช
+https://houseofhappinessbangkok.com/heritage-walk.html?src=line
+ไกด์ทั้งหมด 29 เรื่อง: https://houseofhappinessbangkok.com/guides.html?src=line
+```
+
+**English**
+```
+Good morning! 🌤 For an easy first day nearby, try this — a ฿5 ferry from the pier at the end of our lane to Chinatown:
+https://houseofhappinessbangkok.com/en/heritage-walk.html?src=line
+All 29 guides: https://houseofhappinessbangkok.com/en/guides.html?src=line
+```
+
+## 4. ฝนตก / ช่วงเทศกาล (ส่งเฉพาะวันที่เข้าเงื่อนไข)
+
+**ฝนตก (ไทย)**
+```
+วันนี้ฝนมาแต่เช้า ☔ มีแผนในร่มทั้งวันให้ค่ะ (สายสีทองมีหลังคาตลอด → สุขสยามชั้นล่าง ICONSIAM)
+https://houseofhappinessbangkok.com/rainy-day-indoor.html?src=line
+พกร่มพับไปด้วยนะคะ ร้านสะดวกซื้อใกล้ ๆ มีขาย
+```
+
+**เทศกาลกินเจ (ไทย · ใช้ 9–18 ต.ค. 2569)**
+```
+ช่วงนี้เยาวราชมีเทศกาลกินเจ 🏮 ธงเหลืองทั้งถนน ของกินเจอร่อยมาก ข้ามเรือจากหน้าซอยไป 3 นาที
+https://houseofhappinessbangkok.com/chinatown-festivals.html?src=line
+```
+
+## กติกาที่ใช้ร่าง
+- ไม่สัญญาสิ่งที่ไม่มี (ไม่มีร่มให้ยืม ไม่มีรถรับส่ง ไม่มีอาหารเช้า) · ราคาห้องไม่อยู่ในข้อความไกด์ · ใช้ "ค่ะ/นะคะ" ตามทีม
+- ทุกข้อความปิดด้วยสิ่งที่แขกทำได้ 1 อย่าง (บอกเวลาถึง / เปิดลิงก์)
+- ถ้าเจ้าของอยากเปลี่ยนไกด์ 3 เรื่องในข้อความยืนยัน แก้ที่ `admin/app.js` ฟังก์ชัน `buildConfirmMsg` (รายการ `g('…')`)

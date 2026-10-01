@@ -15,6 +15,7 @@ const DATA_CACHE = "hoh-admin-data";   // ข้อมูลรอบล่า�
 const LAST_IMPORT = "hoh-last-import"; // วันที่นำเข้าไฟล์ Booking ครั้งล่าสุด (เตือนให้ทำรายสัปดาห์)
 const THEME_KEY = "hoh-admin-theme";
 const EXP_CATS = ["ค่าน้ำ", "ค่าไฟ", "เน็ต/เคเบิล", "เงินเดือน", "แม่บ้าน/ของใช้", "ซ่อมบำรุง", "ค่าคอม OTA", "การตลาด", "อื่นๆ"];
+const SITE_URL = "https://houseofhappinessbangkok.com";
 const MAP_LINK = "https://maps.google.com/?q=House%20of%20Happiness%20558%2F1%20Tha%20Din%20Daeng%20Khlong%20San%20Bangkok";
 const $ = (id) => document.getElementById(id);
 
@@ -1034,7 +1035,20 @@ function buildConfirmMsg(b, lang, payLink){
   lines.push(
     lang === 'en' ? `🔖 Booking no.: ${b.id || '-'}` : `🔖 หมายเลขการจอง: ${b.id || '-'}`,
     `📍 ${lang === 'en' ? 'Map' : 'แผนที่'}: ${MAP_LINK}`,
-    ``,
+    ``);
+  // ไกด์ 3 เรื่องที่แขกใหม่ใช้บ่อยสุด — ?src=line ให้รู้ว่ามาจากข้อความนี้ (ดูใน Analytics)
+  const g = (slug) => `${SITE_URL}/${lang === 'en' ? 'en/' : ''}${slug}.html?src=line`;
+  lines.push(...(lang === 'en' ? [
+    `📖 While you wait, three guides we wrote for our guests:`,
+    `• From the airport: ${g('airport-guide')}`,
+    `• Getting around from Khlong San: ${g('getting-around-bangkok')}`,
+    `• Your first day — a ฿5 ferry to Chinatown: ${g('heritage-walk')}`,
+  ] : [
+    `📖 ระหว่างรอวันเดินทาง อ่านไกด์ที่เราเขียนให้แขกได้เลยค่ะ`,
+    `• มาจากสนามบิน: ${g('airport-guide')}`,
+    `• เดินทางในกรุงเทพจากคลองสาน: ${g('getting-around-bangkok')}`,
+    `• วันแรกไปไหนดี ข้ามเรือ 5 บาทไปเยาวราช: ${g('heritage-walk')}`,
+  ]), ``,
     lang === 'en'
       ? `Please let us know your arrival time so we can be ready for you. See you soon! 😊`
       : `รบกวนแจ้งเวลาที่จะมาถึงล่วงหน้านะคะ ทีมงานจะเตรียมห้องรอ แล้วเจอกันค่ะ 😊`);
