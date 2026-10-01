@@ -569,6 +569,18 @@ footer.site a:hover { color: #f5d9b8; text-decoration: underline; }
 .ld-stamp { margin: 2.2rem auto 0; max-width: 880px; padding: .9rem 1.2rem 0;
   border-top: 1px solid var(--line); font-size: .82rem; color: var(--muted); }
 
+/* ── กล่อง "เขียนโดย" ท้ายบทความ (ฉีดจาก ui.js) ── */
+.ld-author { max-width: 880px; margin: 2rem auto 0; padding: 0 1.2rem; display: flex; gap: 1rem; align-items: flex-start; }
+.ld-author .av { flex: none; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
+.ld-author .av.mono { display: grid; place-items: center; background: var(--gold); color: #fff8ef; font-family: "Playfair Display", serif; font-size: 1.7rem; font-weight: 700; }
+.ld-author .b { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: .9rem 1.1rem; flex: 1; }
+.ld-author .nm { font-family: "Prompt", sans-serif; font-weight: 600; font-size: .92rem; margin: 0 0 .25rem; color: var(--dark); }
+.ld-author .tx { margin: 0 0 .5rem; font-size: .9rem; line-height: 1.7; color: var(--text); }
+.ld-author .lk { margin: 0; font-size: .86rem; }
+.ld-author .lk a { color: var(--gold-dark); font-weight: 600; text-decoration: none; }
+.ld-author .lk a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .ld-author { padding: 0 1.1rem; gap: .7rem; } .ld-author .av { width: 48px; height: 48px; font-size: 1.3rem; } }
+
 /* ── สารบัญ (สร้างจาก ui.js เมื่อหน้ามีหัวข้อ h2 ตั้งแต่ 4 อันขึ้นไป) ── */
 .ld-toc { max-width: 880px; margin: 1.4rem auto 0; padding: 0 1.2rem; }
 .ld-toc > div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: .9rem 1.1rem; }

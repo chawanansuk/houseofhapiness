@@ -231,6 +231,29 @@ document.addEventListener("DOMContentLoaded", function () {
   };
   paint(); document.addEventListener("langchange", paint); document.addEventListener("hoh:feat-swapped", paint);
 });
+/* แขกมาจากไหน: ลิงก์ไกด์ที่เราแจกมี ?src=line|room|booking|home — Vercel ตัด query ทิ้งจาก path จึงส่งเป็นเหตุการณ์แยก
+   ไม่มีข้อมูลส่วนตัว มีแค่ชื่อแหล่งกับหน้า */
+document.addEventListener("DOMContentLoaded", function () {
+  var src = new URLSearchParams(location.search).get("src");
+  if (src && /^[a-z0-9_-]{1,20}$/.test(src)) hohTrack("guide_src", { src: src, page: location.pathname.split("/").pop() || "index.html" });
+});
+
+/* กล่อง "เขียนโดย" ท้ายทุกบทความ (หน้าที่มี .ld-stamp) — รูปทีมใส่ที่ HOH_TEAM_PHOTO เมื่อได้รูปจริง ตอนนี้ใช้อักษรย่อ
+   ข้อความมาจากคีย์ au.* ไม่พิมพ์คำโฆษณาเพิ่ม */
+var HOH_TEAM_PHOTO = "";
+document.addEventListener("DOMContentLoaded", function () {
+  var stamp = document.querySelector(".ld-stamp");
+  if (!stamp || document.querySelector(".ld-author")) return;
+  var box = document.createElement("aside"); box.className = "ld-author";
+  var av = HOH_TEAM_PHOTO ? '<img class="av" src="' + HOH_TEAM_PHOTO + '" alt="" width="64" height="64" loading="lazy">' : '<span class="av mono" aria-hidden="true">H</span>';
+  box.innerHTML = av +
+    '<div class="b"><p class="nm" data-i18n="au.name">ทีม House of Happiness</p>' +
+    '<p class="tx" data-i18n="au.body">เราอยู่คลองสานมาทั้งชีวิต ไกด์ทุกเรื่องเดินเอง ถามเอง และแก้ทันทีเมื่อของจริงเปลี่ยน มีอะไรสงสัยทักเราได้เลย</p>' +
+    '<p class="lk"><a href="https://line.me/R/ti/p/@060hvzok" target="_blank" rel="noopener" data-i18n="au.line">ถามเราทาง LINE</a> · <a href="guides.html" data-i18n="au.all">ไกด์ทั้งหมด</a></p></div>';
+  stamp.insertAdjacentElement("beforebegin", box);
+  if (typeof applyLang === "function") applyLang();
+});
+
 /* สารบัญอัตโนมัติสำหรับหน้าบทความที่ยาวพอ (หัวข้อ h2 ตั้งแต่ 4 อันขึ้นไป)
    id ของหัวข้อมาจากคีย์ภาษา ไม่ใช่ข้อความ — ลิงก์จึงไม่พังเวลาสลับไทย/อังกฤษ */
 document.addEventListener("DOMContentLoaded", () => {
