@@ -150,7 +150,7 @@ var HOH_GUIDE_IMG = {
   "heritage-walk":              ["/images/attractions/yaowarat-road.jpg", "/images/attractions/yaowarat-road-800.webp 800w, /images/attractions/yaowarat-road.webp 1440w", 1440, 957],
   "getting-around-bangkok":     ["/images/attractions/goldline.jpg", "/images/attractions/goldline-800.webp 800w, /images/attractions/goldline.webp 1280w", 1280, 961],
   "rainy-day-indoor":           ["/images/attractions/sooksiam.jpg", "/images/attractions/sooksiam-800.webp 800w, /images/attractions/sooksiam.webp 1280w", 1280, 960],
-  "thonburi-riverside-evening": ["/images/attractions/lhong1919.jpg", "/images/attractions/lhong1919-800.webp 800w, /images/attractions/lhong1919.webp 1280w", 1280, 694],
+  "thonburi-riverside-evening": ["/images/attractions/skypark.jpg", "/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 1280w", 1280, 960],
   "chao-phraya-boat-guide":     ["/images/attractions/cross-river-ferry.jpg", "/images/attractions/cross-river-ferry-800.webp 800w, /images/attractions/cross-river-ferry.webp 1280w", 1280, 800],
   "chinatown-festivals":        ["/images/attractions/yaowarat-vegfest.jpg", "/images/attractions/yaowarat-vegfest-800.webp 800w, /images/attractions/yaowarat-vegfest.webp 1440w", 1440, 1041],
   "loy-krathong":               ["/images/attractions/krathong.jpg", "/images/attractions/krathong-800.webp 800w, /images/attractions/krathong.webp 1280w", 1280, 931],
