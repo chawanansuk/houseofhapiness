@@ -437,6 +437,7 @@ const I18N = {
   "ph.goldline": { th: "รถไฟฟ้าสายสีทองเทียบชานชาลาสถานีกรุงธนบุรี", en: "A BTS Gold Line train at the Krung Thon Buri station platform" },
   "ph.bike": { th: "จักรยานเช่าจอดใต้ร่มไม้ในสวน (ภาพประกอบ ถ่ายที่บางกะเจ้า)", en: "Rental bicycles parked under trees in a park (illustration, taken at Bang Krachao)" },
   "ph.lhong1919": { th: "ลานกลางล้ง 1919 ร่มแดงและอาคารจีนโบราณริมเจ้าพระยา", en: "The courtyard of Lhong 1919, red umbrellas and old Chinese-style buildings by the Chao Phraya" },
+  "ph.songnam": { th: "สรงน้ำพระช่วงสงกรานต์ที่วัดราชบพิธ กรุงเทพฯ (ภาพประกอบ)", en: "Bathing a Buddha image at Songkran, Wat Ratchabophit, Bangkok (illustration)" },
   "ph.kudichin": { th: "โบสถ์ซางตาครู้ส ย่านกุฎีจีน โดมสีแดงอมชมพูและผนังสีครีม", en: "Santa Cruz Church in Kudi Chin, with its cream walls and rose-red dome" },
   "ph.pakkhlong": { th: "กล้วยไม้สีม่วงมัดเป็นช่อวางขายที่ปากคลองตลาด", en: "Bundles of purple orchids for sale at Pak Khlong Talat flower market" },
 
