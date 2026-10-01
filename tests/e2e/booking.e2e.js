@@ -116,6 +116,7 @@ async function launch() {
   ok("ไม่มีราคาห้องบนหน้าจอง · ข้อความจองขอราคาจากที่พักแทน");
 
   // ── 5) กดปุ่ม LINE → ต้องยิง /api/book ครบถ้วน (กันเปิด line.me จริงด้วย preventDefault) ──
+  assert.equal(await page.isHidden("#whileWait"), true, "ก่อนบันทึก บล็อก 'ระหว่างรอ' ต้องซ่อนอยู่");
   await page.evaluate(() => document.getElementById("btnLine").addEventListener("click", (e) => e.preventDefault()));
   await page.click("#btnLine");
   // รอจนระบบตอบกลับจริง (สถานะ "กำลังบันทึก" โผล่ก่อน แล้วค่อยเปลี่ยนเป็นเลขที่จอง — อ่านเร็วไปจะได้ข้อความกลาง ๆ)
@@ -131,6 +132,12 @@ async function launch() {
   const savedText = await page.locator("#bookingSaveStatus").innerText();
   assert.ok(savedText.includes("WEB-E2E-1"), "ต้องแสดงเลขที่จองจากระบบ");
   ok("กดจองแล้วบันทึกเข้าระบบ + โชว์เลขที่จอง WEB-E2E-1");
+  await page.waitForSelector("#whileWait:not([hidden])");
+  const wwCards = await page.locator("#wwList .ww-card").count();
+  assert.equal(wwCards, 3, "หลังบันทึกต้องมีการ์ดไกด์ 'ระหว่างรอ' 3 ใบ");
+  const wwImgs = await page.$$eval("#wwList img", (els) => els.map((i) => i.complete && i.naturalWidth > 0));
+  assert.ok(wwImgs.length === 3 && wwImgs.every(Boolean), "รูปการ์ด 'ระหว่างรอ' ต้องโหลดได้ครบ");
+  ok("บล็อก 'ระหว่างรอเรายืนยัน' โผล่หลังบันทึก พร้อมไกด์ 3 ใบ รูปโหลดครบ");
 
   // ── 5.5) แขกไม่มี LINE/WhatsApp: ปุ่มส่งคำขอทางอีเมล เปิดเมื่อใส่อีเมลถูกรูปแบบเท่านั้น ──
   // ปิดกล่อง "ถ้า LINE ไม่เปิด" ที่เด้งจากขั้นก่อน

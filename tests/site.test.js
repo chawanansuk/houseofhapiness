@@ -337,11 +337,11 @@ console.log("UX TESTS PASSED");
   assert.ok(!/<span class="cnt">\d/.test(gd), "guides.html ห้ามมีเลขนับคงที่ใน HTML — ให้ JS นับจากการ์ดจริง");
   assert.match(gd, /cnt\.textContent = String\(n\)/, "ต้องมีโค้ดเขียนเลขนับจากจำนวนการ์ดจริง");
   assert.equal((gd.match(/<section class="gd-sec" data-cat="/g) || []).length, 5, "หมวดไกด์ 5 หมวด ต้องมี data-cat ครบ");
-  const cards = (gd.match(/<a class="gd-card"/g) || []).length + (gd.match(/<a class="gd-feat"/g) || []).length;
+  const cards = (gd.match(/<a class="gd-card(?: lg)?"/g) || []).length + (gd.match(/<a class="gd-feat"/g) || []).length;
   assert.ok(cards >= 24, `คาดว่ามีการ์ดไกด์อย่างน้อย 24 ใบ เจอ ${cards}`);
   // ข้อความจำนวนไกด์ต้องตรงกับจำนวนการ์ดในหมวดจริง (ไม่นับการ์ดรูมเซอร์วิส)
   const inCats = [...gd.matchAll(/<section class="gd-sec" data-cat="[^"]+">([\s\S]*?)<\/section>/g)]
-    .reduce((n, m) => n + (m[1].match(/<a class="gd-card"/g) || []).length, 0) + 1;
+    .reduce((n, m) => n + (m[1].match(/<a class="gd-card(?: lg)?"/g) || []).length, 0) + 1;
   assert.ok(new RegExp(`✍️ ${inCats} ไกด์`).test(gd), `ข้อความสถิติต้องบอก ${inCats} ไกด์ ให้ตรงกับการ์ดจริง`);
   const pracSec = (gd.match(/<section class="gd-sec" data-cat="prac">([\s\S]*?)<\/section>/) || [])[1] || "";
   assert.ok(pracSec && !pracSec.includes("services.html"), "รูมเซอร์วิสต้องไม่อยู่ในหมวดไกด์แล้ว");
@@ -368,6 +368,29 @@ console.log("UX TESTS PASSED");
   assert.match(idx, /<section id="guides" class="reveal">/, "หน้าแรกต้องมีส่วนไกด์เที่ยว");
   assert.equal((idx.match(/<a class="hg-card"/g) || []).length, 3, "ส่วนไกด์ในหน้าแรกมี 3 การ์ด");
   assert.match(idx, /href="guides\.html" data-i18n="hg\.all"/, "ต้องมีปุ่มไปหน้ารวมไกด์");
+
+  // V1 — ดันไกด์ให้เห็น: แถบ 48 ชั่วโมงแรกใต้ฮีโร่ ต้องมาก่อนตัวเลข/ห้องพัก และมี 3 การ์ด (ใบที่ 3 สลับตามฤดู)
+  const f48 = idx.indexOf('<section id="first48"');
+  assert.ok(f48 > -1 && f48 < idx.indexOf('id="numbers"'), "หน้าแรกต้องมี #first48 ก่อนส่วนตัวเลข");
+  assert.match(idx, /id="f48Season"/, "การ์ดใบที่ 3 ใน #first48 ต้องสลับตามฤดูได้ (id=f48Season)");
+  // ทุกการ์ดในหน้ารวมไกด์ที่ชี้ไปบทความต้องมีเวลาอ่าน/วันที่ (ฝังโดย build-guides-meta ตรวจด้วย --check แล้ว)
+  for (const m of gd.matchAll(/<a class="gd-card(?: lg)?" href="([^"]+)">([\s\S]*?)<\/a>/g)) {
+    if (/<p class="ld-stamp">/.test(read(m[1]))) assert.ok(m[2].includes('class="gd-rt"'), `การ์ด ${m[1]} ต้องมีเวลาอ่าน/วันที่ปรับปรุง`);
+  }
+  assert.match(gd, /\.gd-card\.lg\{grid-column:span 2/, "การ์ดชั้นหนึ่ง (lg) ต้องกินสองคอลัมน์บนจอใหญ่");
+  assert.ok((gd.match(/class="gd-card lg"/g) || []).length >= 4, "ต้องมีการ์ดชั้นหนึ่งอย่างน้อย 4 ใบ");
+  // หน้าจอง: บล็อก "ระหว่างรอ" ต้องซ่อนไว้ก่อน แล้วค่อยโชว์หลังบันทึกสำเร็จ (ตรวจพฤติกรรมใน e2e)
+  const bk = read("booking.html");
+  assert.match(bk, /<div class="while-wait" id="whileWait" hidden>/, "หน้าจองต้องมี #whileWait ที่ซ่อนไว้ก่อน");
+  assert.match(bk, /renderWhileWait\(bookingSaveState === "saved"\)/, "#whileWait ต้องเปิดเฉพาะเมื่อบันทึกสำเร็จ");
+  // หน้าห้องทั้ง 3 ต้องมีบล็อกไกด์ และหน้าบทความต้องประกาศเสียงผู้เขียน (data-voice) ให้ ui.js ใส่บรรทัดใต้ชื่อเรื่อง
+  for (const r of ["room-standard.html", "room-studio.html", "room-deluxe.html"]) {
+    assert.ok((read(r).match(/<a class="ld-room" href="[^"]+\.html">/g) || []).length >= 3, `${r} ต้องมีการ์ดไกด์อย่างน้อย 3 ใบ`);
+  }
+  const voiced = fs.readdirSync(root).filter((x) => x.endsWith(".html") && /<body data-voice="(walk|prac)">/.test(read(x)));
+  assert.ok(voiced.length >= 25, `หน้าบทความที่มี data-voice ต้องมีอย่างน้อย 25 หน้า เจอ ${voiced.length}`);
+  const i18n = read("assets/i18n.js");
+  for (const k of ["st.voice.walk", "st.voice.prac", "sb.share", "f48.t", "rm.go.t", "bk.ww.t", "gd.rt", "gd.now.t"]) assert.ok(i18n.includes(`"${k}":`) || gd.includes(`"${k}":`), `ขาดคีย์ภาษา ${k}`);
 }
 console.log("GUIDES HUB TESTS PASSED");
 

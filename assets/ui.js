@@ -123,8 +123,15 @@ document.addEventListener("DOMContentLoaded", () => {
   bar.className = "ld-bar";
   bar.innerHTML =
     '<a class="btn btn-gold btn-sm" href="booking.html" data-i18n="sb.rates">เช็คห้องว่าง</a>' +
-    '<a class="btn bar-line btn-sm" href="https://line.me/R/ti/p/@060hvzok" target="_blank" rel="noopener" data-i18n="sb.line">ถามทางไลน์</a>';
+    '<a class="btn bar-line btn-sm" href="https://line.me/R/ti/p/@060hvzok" target="_blank" rel="noopener" data-i18n="sb.line">ถามทางไลน์</a>' +
+    '<button type="button" class="btn bar-share btn-sm" data-i18n="sb.share">ส่งเข้า LINE</button>';
   document.body.appendChild(bar);
+  // แขกเก็บไกด์ไว้อ่านตอนอยู่ที่นั่นจริง: ใช้ share sheet ของเครื่องถ้ามี ไม่งั้นส่งลิงก์เข้า LINE
+  bar.querySelector(".bar-share").addEventListener("click", function () {
+    var url = location.href.split("#")[0], title = document.title;
+    if (navigator.share) { navigator.share({ title: title, url: url }).catch(function () {}); return; }
+    window.open("https://line.me/R/share?text=" + encodeURIComponent(title + " " + url), "_blank", "noopener");
+  });
   if (typeof applyLang === "function") applyLang();
 
   const cta = document.querySelector(".ld-cta");
@@ -135,6 +142,95 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cta) new IntersectionObserver(([e]) => { ctaIn = e.isIntersecting; update(); }, { threshold: 0 }).observe(cta);
 });
 
+/* ── ไกด์ตามฤดู — ใช้ร่วมกันในหน้าแรก (48 ชั่วโมงแรก) หน้าจอง (ระหว่างรอยืนยัน) และหน้ารวมไกด์ (ตอนนี้ควรอ่าน)
+   เลือกจาก assets/festivals.json ถ้ามีเทศกาลใน 45 วัน ไม่งั้นเลือกตามเดือน (ฝน พ.ค.–ต.ค. · หนาว พ.ย.–ก.พ. · ร้อน มี.ค.–เม.ย.)
+   รูปการ์ดต้องเป็นรูปปกของหน้าปลายทางเท่านั้น (กติกาเดียวกับบล็อกไกด์ที่เกี่ยวกัน) */
+var HOH_GUIDE_IMG = {
+  "airport-guide":              ["/images/entrance.jpg", "/images/entrance-800.webp 800w, /images/entrance.webp 1024w", 1024, 683],
+  "heritage-walk":              ["/images/attractions/yaowarat-road.jpg", "/images/attractions/yaowarat-road-800.webp 800w, /images/attractions/yaowarat-road.webp 1440w", 1440, 957],
+  "getting-around-bangkok":     ["/images/attractions/skypark.jpg", "/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w", 960, 720],
+  "rainy-day-indoor":           ["/images/attractions/iconsiam.jpg", "/images/attractions/iconsiam.webp 704w", 704, 1251],
+  "thonburi-riverside-evening": ["/images/attractions/skypark.jpg", "/images/attractions/skypark-800.webp 800w, /images/attractions/skypark.webp 960w", 960, 720],
+  "chao-phraya-boat-guide":     ["/images/attractions/cross-river-ferry.jpg", "/images/attractions/cross-river-ferry-800.webp 800w, /images/attractions/cross-river-ferry.webp 1280w", 1280, 800],
+  "chinatown-festivals":        ["/images/attractions/yaowarat-vegfest.jpg", "/images/attractions/yaowarat-vegfest-800.webp 800w, /images/attractions/yaowarat-vegfest.webp 1440w", 1440, 1041],
+  "loy-krathong":               ["/images/attractions/krathong.jpg", "/images/attractions/krathong-800.webp 800w, /images/attractions/krathong.webp 1280w", 1280, 931],
+  "new-year-countdown":         ["/images/attractions/iconsiam.jpg", "/images/attractions/iconsiam.webp 704w", 704, 1251],
+  "songkran-riverside":         ["/images/attractions/riverboat.jpg", "/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 960w", 960, 720]
+};
+function hohSeasonName(d) { var m = (d || new Date()).getMonth() + 1; return m >= 5 && m <= 10 ? "rainy" : (m >= 11 || m <= 2) ? "cool" : "hot"; }
+function hohSeasonSlugs(festivals) {
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var days = function (a) { return Math.round((new Date(a + "T00:00:00") - today) / 86400000); };
+  var out = [];
+  (festivals || []).forEach(function (f) {
+    if (!f.start) return;
+    var d = days(f.start), e = days(f.end || f.start);
+    if (d <= 45 && e >= 0) out.push(f.slug.replace(/\.html$/, ""));
+  });
+  var byMonth = { rainy: ["rainy-day-indoor", "chao-phraya-boat-guide"], cool: ["thonburi-riverside-evening", "heritage-walk"], hot: ["chao-phraya-boat-guide", "rainy-day-indoor"] }[hohSeasonName(today)];
+  byMonth.forEach(function (s) { if (out.indexOf(s) < 0) out.push(s); });
+  return out;
+}
+function hohSeason(cb) {
+  var done = function (list) { try { cb(hohSeasonSlugs(list)); } catch (e) { /* ข้าม */ } };
+  if (!window.fetch) return done([]);
+  fetch("/assets/festivals.json").then(function (r) { return r.json(); }).then(function (d) { done(d.festivals || []); }).catch(function () { done([]); });
+}
+function hohGuideCard(slug, cls, src) {
+  var im = HOH_GUIDE_IMG[slug]; if (!im) return "";
+  var href = slug + ".html" + (src ? "?src=" + src : "");
+  var title = typeof t === "function" ? t("rl." + slug + ".t") : slug, desc = typeof t === "function" ? t("rl." + slug + ".d") : "";
+  return '<a class="' + cls + '" href="' + href + '"><picture><source type="image/webp" srcset="' + im[1] + '" sizes="(max-width: 760px) 100vw, 330px">' +
+    '<img src="' + im[0] + '" alt="' + title.replace(/"/g, "&quot;") + '" width="' + im[2] + '" height="' + im[3] + '" loading="lazy" decoding="async"></picture>' +
+    '<span class="b"><span class="t" data-i18n="rl.' + slug + '.t">' + title + '</span><span class="d" data-i18n="rl.' + slug + '.d">' + desc + '</span></span></a>';
+}
+/* หน้าแรก: การ์ดที่ 3 ของ "48 ชั่วโมงแรก" สลับตามฤดู (HTML มีการ์ดเริ่มต้นไว้แล้ว เผื่อ JS ไม่ทำงาน) */
+document.addEventListener("DOMContentLoaded", function () {
+  var slot = document.getElementById("f48Season");
+  if (!slot) return;
+  hohSeason(function (slugs) {
+    var slug = slugs[0];
+    if (!slug || slot.getAttribute("href") === slug + ".html" || !HOH_GUIDE_IMG[slug]) return;
+    var tmp = document.createElement("div"); tmp.innerHTML = hohGuideCard(slug, "hg-card", "home");
+    var card = tmp.firstChild; card.id = "f48Season";
+    slot.parentNode.replaceChild(card, slot);
+    if (typeof applyLang === "function") applyLang();
+  });
+});
+
+/* บรรทัดใต้ชื่อเรื่อง: ใครเขียน และปรับปรุงเมื่อไหร่ — วันที่มาจาก .ld-stamp ของหน้าเดียวกัน ไม่พิมพ์เอง
+   <body data-voice="walk"> = เส้นทาง/ย่านที่เราไปเอง · "prac" = เขียนจากที่แขกถามเราจริง · ไม่มี = บอกแค่ทีมและวันที่ */
+document.addEventListener("DOMContentLoaded", function () {
+  var h1 = document.querySelector(".ld-hero.cover .in h1"), time = document.querySelector(".ld-stamp time[datetime]");
+  if (!h1 || !time || document.querySelector(".ld-voice")) return;
+  var m = /^(\d{4})-(\d{2})-\d{2}$/.exec(time.getAttribute("datetime")); if (!m) return;
+  var MON_TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  var MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var kind = document.body.getAttribute("data-voice"); var key = kind === "walk" ? "st.voice.walk" : kind === "prac" ? "st.voice.prac" : "st.voice.base";
+  var el = document.createElement("p"); el.className = "ld-voice"; h1.insertAdjacentElement("afterend", el);
+  var paint = function () {
+    var th = (typeof getLang === "function" ? getLang() : "th") === "th", y = +m[1], mo = +m[2] - 1;
+    var d = th ? MON_TH[mo] + " " + (y + 543) : MON_EN[mo] + " " + y;
+    el.textContent = (typeof t === "function" ? t(key) : "").replace("{d}", d);
+  };
+  paint(); document.addEventListener("langchange", paint);
+});
+
+/* หน้ารวมไกด์: เวลาอ่าน + วันที่ปรับปรุงบนการ์ด (ตัวเลขฝังไว้โดย scripts/build-guides-meta.mjs) */
+document.addEventListener("DOMContentLoaded", function () {
+  if (!document.querySelector(".gd-rt[data-rt]")) return;
+  var MON_TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  var MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var paint = function () {
+    var th = (typeof getLang === "function" ? getLang() : "th") === "th";
+    [].forEach.call(document.querySelectorAll(".gd-rt[data-rt]"), function (el) {
+      var m = /^(\d{4})-(\d{2})/.exec(el.getAttribute("data-upd") || ""); if (!m) return;
+      var d = th ? MON_TH[+m[2] - 1] + " " + (+m[1] + 543) : MON_EN[+m[2] - 1] + " " + m[1];
+      el.textContent = (typeof t === "function" ? t("gd.rt") : "").replace("{n}", el.getAttribute("data-rt")).replace("{d}", d);
+    });
+  };
+  paint(); document.addEventListener("langchange", paint); document.addEventListener("hoh:feat-swapped", paint);
+});
 /* สารบัญอัตโนมัติสำหรับหน้าบทความที่ยาวพอ (หัวข้อ h2 ตั้งแต่ 4 อันขึ้นไป)
    id ของหัวข้อมาจากคีย์ภาษา ไม่ใช่ข้อความ — ลิงก์จึงไม่พังเวลาสลับไทย/อังกฤษ */
 document.addEventListener("DOMContentLoaded", () => {
