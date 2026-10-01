@@ -1,6 +1,6 @@
 // Service worker ของหน้าหลังบ้าน — ให้ติดตั้งเป็นแอปได้และเปิดได้ไวขึ้น
 // กลยุทธ์: network-first เสมอ (ข้อมูลการจองต้องสดใหม่) แล้วเก็บสำเนาไว้เปิดตอนเน็ตล่ม
-const CACHE = "hoh-admin-v8";
+const CACHE = "hoh-admin-v9";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();

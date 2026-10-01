@@ -1101,10 +1101,51 @@ function fmtDate_(d) { return Utilities.formatDate(d, "Asia/Bangkok", "yyyy-MM-d
 function setupTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     var h = t.getHandlerFunction();
-    if (h === "scanBookingEmails" || h === "dailyDigest") ScriptApp.deleteTrigger(t);
+    if (h === "scanBookingEmails" || h === "dailyDigest" || h === "monthlyBackup") ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger("scanBookingEmails").timeBased().everyMinutes(30).create();
   ScriptApp.newTrigger("dailyDigest").timeBased().everyDays(1).atHour(8).create();
+  // สำรองข้อมูลทั้งระบบทุกวันที่ 1 เวลา ~9 โมง (ต้องตั้ง ADMIN_KEY ใน Script Properties ก่อน — ดู SETUP.md v10)
+  ScriptApp.newTrigger("monthlyBackup").timeBased().onMonthDay(1).atHour(9).create();
+}
+
+/* ═══ v10: สำรองข้อมูลรายเดือนจากฐานข้อมูลจริง (/api/data) → Google Drive + อีเมล ═══
+ * ทำไมไม่ใช้ชีต: ตั้งแต่ย้ายไป Postgres การแก้ในหลังบ้าน (จัดห้อง เช็คอิน ชำระ) เขียนลงฐานข้อมูลอย่างเดียว
+ * ชีตจึงไม่ครบ — ตัวสำรองต้องดึงจาก /api/data ด้วยรหัสเจ้าของ
+ * ตั้งค่า: Apps Script → ⚙️ Project Settings → Script Properties → เพิ่ม ADMIN_KEY = รหัสผ่านเจ้าของของหน้า /admin
+ * ผลลัพธ์: โฟลเดอร์ "HOH Backups" ใน Drive มีไฟล์ CSV 3 ไฟล์ต่อเดือน (bookings / expenses / orders) + อีเมลแนบไฟล์หาเจ้าของ
+ * ทดสอบ: เลือก monthlyBackup แล้วกด Run */
+function monthlyBackup() {
+  var key = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
+  if (!key) { console.log("ยังไม่ได้ตั้ง ADMIN_KEY ใน Script Properties — ข้ามการสำรอง"); return; }
+  var res = UrlFetchApp.fetch("https://houseofhappinessbangkok.com/api/data", { headers: { "x-admin-key": key }, muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) { console.log("ดึงข้อมูลไม่ได้ HTTP " + res.getResponseCode()); return; }
+  var d = JSON.parse(res.getContentText());
+  if (!d || !d.ok) { console.log("ข้อมูลตอบกลับไม่ถูกต้อง"); return; }
+  var stamp = Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd");
+  var csv = function (rows, cols) {
+    var esc = function (v) { var s = String(v == null ? "" : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    return "\uFEFF" + [cols.join(",")].concat(rows.map(function (r) { return cols.map(function (c) { return esc(r[c]); }).join(","); })).join("\n");
+  };
+  var files = [
+    ["hoh-bookings-" + stamp + ".csv", csv(d.bookings || [], ["id", "source", "name", "checkin", "checkout", "nights", "guests", "rooms", "phone", "amount", "status", "note", "created", "room_no", "paid", "pay_status"])],
+    ["hoh-expenses-" + stamp + ".csv", csv(d.expenses || [], ["id", "date", "amount", "category", "method", "vendor", "note", "created"])],
+    ["hoh-orders-" + stamp + ".csv", csv(d.orders || [], ["id", "created", "name", "room", "date", "time", "items", "total", "note", "status", "paid", "lang"])],
+  ];
+  var folders = DriveApp.getFoldersByName("HOH Backups");
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder("HOH Backups");
+  var blobs = files.map(function (f) {
+    var blob = Utilities.newBlob(f[1], "text/csv", f[0]);
+    folder.createFile(blob);
+    return blob;
+  });
+  MailApp.sendEmail({
+    to: Session.getEffectiveUser().getEmail(),
+    subject: "[HOH] สำรองข้อมูลประจำเดือน " + stamp + " — จอง " + (d.bookings || []).length + " · รายจ่าย " + (d.expenses || []).length + " · ออเดอร์ " + (d.orders || []).length,
+    body: "ไฟล์สำรองจากฐานข้อมูลหลังบ้าน (เฉพาะเจ้าของ) แนบมากับอีเมลนี้ และเก็บไว้ที่ Google Drive โฟลเดอร์ HOH Backups\nเปิดด้วย Excel/Google Sheets ได้เลย (UTF-8)\n\nหลังบ้าน: https://houseofhappinessbangkok.com/admin/",
+    attachments: blobs,
+  });
+  console.log("สำรองแล้ว " + files.map(function (f) { return f[0]; }).join(", "));
 }
 
 /** ทดสอบการแจ้งเตือน: กด Run แล้วควรได้อีเมล "[HOH] จองใหม่ — ..." ภายในไม่กี่วินาที

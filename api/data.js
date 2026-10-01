@@ -16,9 +16,8 @@
  * รหัสเจ้าของ → role "admin" / รหัสพนักงาน → role "staff" (ยอดเงินถูกตัดออกฝั่งเซิร์ฟเวอร์)
  */
 
-const DEMO_KEY = "demo1234";
-const DEMO_STAFF_KEY = "staff1234";
 const { dbEnabled, getStore } = require("./_store.js");
+const { resolveRole } = require("./_auth.js");
 
 // ผังจริง ส.ค. 2026: เปลี่ยนชื่อห้องสองเตียง + ถอดงิ้ว1/งิ้ว4 ออก
 // ชีตอาจยังใช้ชื่อเก่าอยู่ (จนกว่าเจ้าของจะรัน applyRealRoomList ในสคริปต์ใหม่)
@@ -47,16 +46,9 @@ module.exports = async (req, res) => {
     return res.status(405).json({ ok: false, error: "method-not-allowed" });
   }
 
-  const adminPass = (process.env.ADMIN_PASSWORD || "").trim();
-  const staffPass = (process.env.STAFF_PASSWORD || "").trim();
-  const demoMode = !adminPass;
-  const key = String(req.headers["x-admin-key"] || "");
-
-  const role = demoMode
-    ? (key === DEMO_KEY ? "admin" : key === DEMO_STAFF_KEY ? "staff" : null)
-    : (key === adminPass ? "admin" : staffPass && key === staffPass ? "staff" : null);
-
+  const { role, demoMode, blocked } = await resolveRole(req);
   if (!role) {
+    if (blocked) return res.status(429).json({ ok: false, error: "too-many-attempts", demo: demoMode });
     // demo: true บอกหน้า login ว่ายังไม่ได้ตั้งรหัสจริง จะได้แสดงคำใบ้โหมดตัวอย่าง
     return res.status(401).json({ ok: false, error: "unauthorized", demo: demoMode });
   }
@@ -83,7 +75,7 @@ module.exports = async (req, res) => {
       await getStore().bootstrapFromSheet(); // ครั้งแรกเท่านั้น (ฐานข้อมูลว่าง) — ดึงข้อมูลเดิมจากชีตมาให้เอง
       // ซิงก์ชีตทำเบื้องหลัง ไม่ await — ไม่งั้นคำขอที่โชคร้ายทุก 2 นาทีจะช้าเท่าชีต (1-3 วิ) ซึ่งเป็นสิ่งที่เราย้ายมาเพื่อหนี
       getStore().syncFromSheetIfStale().catch(() => {});
-      const d = await getStore().listAll();
+      const [d, audit] = await Promise.all([getStore().listAll(), role === "admin" ? getStore().listAudit(400).catch(() => []) : Promise.resolve([])]);
       return res.status(200).json({
         ok: true, demo: false, today, role,
         bookings: forRole(d.bookings.map((b) => ({ ...b, room_no: roomName(b.room_no) }))),
@@ -91,6 +83,8 @@ module.exports = async (req, res) => {
         ical: [],
         expenses: role === "staff" ? [] : d.expenses,
         orders: d.orders,
+        // ประวัติการแก้ (ใครทำอะไรเมื่อไหร่) — เจ้าของเท่านั้น
+        audit,
         sources: { db: true, sheet: true, ical: false },
       });
     } catch (e) {

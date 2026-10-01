@@ -2,10 +2,9 @@
  * POST /api/update — write admin actions to Google Sheets through Apps Script.
  */
 
-const DEMO_KEY = "demo1234";
-const DEMO_STAFF_KEY = "staff1234";
 const SHEET_TIMEOUT_MS = 12000;
 const { dbEnabled, getStore } = require("./_store.js");
+const { resolveRole } = require("./_auth.js");
 
 // ชื่อห้องใหม่ → ชื่อเดิมในชีต: ชีตที่ยังไม่ได้รัน applyRealRoomList ใช้ชื่อเก่าอยู่
 // ถ้าอัปเดตสถานะห้องด้วยชื่อใหม่ไม่เจอ จะลองชื่อเดิมให้อีกครั้งอัตโนมัติ
@@ -17,14 +16,9 @@ module.exports = async (req, res) => {
     return res.status(405).json({ ok: false, error: "method-not-allowed" });
   }
 
-  const adminPass = (process.env.ADMIN_PASSWORD || "").trim();
-  const staffPass = (process.env.STAFF_PASSWORD || "").trim();
-  const demoMode = !adminPass;
-  const key = String(req.headers["x-admin-key"] || "");
-  const role = demoMode
-    ? (key === DEMO_KEY ? "admin" : key === DEMO_STAFF_KEY ? "staff" : null)
-    : (key === adminPass ? "admin" : staffPass && key === staffPass ? "staff" : null);
+  const { role, demoMode, blocked } = await resolveRole(req);
   if (!role) {
+    if (blocked) return res.status(429).json({ ok: false, error: "too-many-attempts", demo: demoMode });
     return res.status(401).json({ ok: false, error: "unauthorized", demo: demoMode });
   }
 
@@ -60,9 +54,13 @@ module.exports = async (req, res) => {
       else if (action === "expadd") out = (!b.amount || !b.date) ? { ok: false, error: "missing-fields" } : { ok: true, id: await st.addExpense(b, role) };
       else if (action === "expdel") out = await st.deleteExpense(b.id, role);
       else if (action === "orderupdate") out = await st.updateOrder(b.id, b.fields || {}, role);
+      // ห้องชนกับการจองอื่น → 409 พร้อมบอกว่าชนกับใคร (ฝั่งหลังบ้านแสดงข้อความให้ผู้ใช้)
+      if (out && out.error === "room-taken") return res.status(409).json({ ok: false, saved: false, error: "room-taken", conflict: out.conflict || null });
       if (!out || out.ok !== true) return res.status(502).json({ ok: false, saved: false, error: (out && out.error) || "update-storage-failed" });
       return res.status(200).json({ ok: true, saved: true, id: out.id });
     } catch (e) {
+      // เพิ่มการจองพร้อมระบุห้องที่ชนกับรายการอื่น → ไม่ใช่ความผิดพลาดของฐานข้อมูล ห้ามไหลไปเขียนชีต
+      if (e && e.code === "room-taken") return res.status(409).json({ ok: false, saved: false, error: "room-taken", conflict: e.conflict ? { id: e.conflict.id, name: e.conflict.name, checkin: e.conflict.checkin, checkout: e.conflict.checkout } : null });
       // ฐานข้อมูลต่อไม่ได้ → เขียนลงชีตแทนชั่วคราว (จะถูกดึงเข้าฐานข้อมูลตอน bootstrap ครั้งแรก)
       console.error(JSON.stringify({ event: "db_write_failed_fallback_sheet", action, reason: String((e && e.message) || e).slice(0, 160) }));
     }

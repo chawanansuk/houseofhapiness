@@ -42,6 +42,29 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   r = await store.updateBooking("NOPE", { status: "x" });
   assert.equal(r.ok, false);
 
+  // 4.5) กันห้องซ้อนฝั่งเซิร์ฟเวอร์: id อยู่ห้อง 704 คืน 1–5 ต.ค. → อีกรายการจะจัดห้อง 704 คืน 3–6 ต.ค. ต้องถูกปฏิเสธ
+  const id3 = await store.addBooking({ name: "คนที่สาม", checkin: "2026-10-03", checkout: "2026-10-06" }, "web");
+  r = await store.updateBooking(id3, { room_no: "704" }, "staff");
+  assert.equal(r.ok, false); assert.equal(r.error, "room-taken"); assert.equal(r.conflict.id, id);
+  // ติดกันพอดี (เข้า 5 ต.ค. วันที่อีกคนออก) → ได้
+  r = await store.updateBooking(id3, { checkin: "2026-10-05", checkout: "2026-10-07", room_no: "704" }, "staff");
+  assert.equal(r.ok, true, "เข้าวันเดียวกับที่คนก่อนเช็คเอาต์ต้องจัดได้");
+  // เลื่อนวันเข้าให้ซ้อน → ปฏิเสธ · ย้ายห้องอื่น → ได้ · รายการที่ยกเลิก/เช็คเอาต์แล้วไม่บล็อก
+  r = await store.updateBooking(id3, { checkin: "2026-10-04" }, "admin");
+  assert.equal(r.error, "room-taken");
+  r = await store.updateBooking(id3, { room_no: "705" }, "admin"); assert.equal(r.ok, true);
+  await store.updateBooking(id, { status: "เช็คเอาต์แล้ว" }, "admin");
+  r = await store.updateBooking(id3, { room_no: "704", checkin: "2026-10-03" }, "admin");
+  assert.equal(r.ok, true, "รายการที่เช็คเอาต์แล้วต้องไม่บล็อกห้อง");
+  await store.updateBooking(id, { status: "เข้าพักอยู่" }, "admin");
+  // เพิ่มรายการใหม่พร้อมห้องที่ชน → โยน error code room-taken
+  await assert.rejects(store.addBooking({ name: "คนที่สี่", checkin: "2026-10-04", checkout: "2026-10-05", room_no: "704", status: "ยืนยันแล้ว" }, "admin"), (e) => e.code === "room-taken");
+  // listAudit: มีประวัติของ id3 ครบและเรียงล่าสุดก่อน
+  const au = await store.listAudit(50);
+  assert.ok(au.length >= 5, "audit log ต้องมีรายการ");
+  assert.ok(au[0].at && au[0].actor && au[0].action, "แต่ละแถวมี at/actor/action");
+  assert.ok(au.some((a) => a.target === id3 && a.action === "update" && a.fields && a.fields.room_no === "705"), "ประวัติต้องบันทึกการย้ายห้อง 705 ของ id3");
+
   // 5) ชำระเงิน (paid / pay_status) บันทึกได้
   await store.updateBooking(id, { paid: "1400", pay_status: "จ่ายครบ" });
   assert.equal((await store.listAll()).bookings.find((x) => x.id === id).pay_status, "จ่ายครบ");
