@@ -155,7 +155,7 @@ var HOH_GUIDE_IMG = {
   "chinatown-festivals":        ["/images/attractions/yaowarat-vegfest.jpg", "/images/attractions/yaowarat-vegfest-800.webp 800w, /images/attractions/yaowarat-vegfest.webp 1440w", 1440, 1041],
   "loy-krathong":               ["/images/attractions/krathong.jpg", "/images/attractions/krathong-800.webp 800w, /images/attractions/krathong.webp 1280w", 1280, 931],
   "new-year-countdown":         ["/images/attractions/iconsiam-night.jpg", "/images/attractions/iconsiam-night-800.webp 800w, /images/attractions/iconsiam-night.webp 1280w", 1280, 960],
-  "songkran-riverside":         ["/images/attractions/riverboat.jpg", "/images/attractions/riverboat-800.webp 800w, /images/attractions/riverboat.webp 1280w", 1280, 862]
+  "songkran-riverside":         ["/images/attractions/songnam.jpg", "/images/attractions/songnam-800.webp 800w, /images/attractions/songnam.webp 1280w", 1280, 960]
 };
 function hohSeasonName(d) { var m = (d || new Date()).getMonth() + 1; return m >= 5 && m <= 10 ? "rainy" : (m >= 11 || m <= 2) ? "cool" : "hot"; }
 function hohSeasonSlugs(festivals) {
