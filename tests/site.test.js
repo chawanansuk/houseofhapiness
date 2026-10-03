@@ -85,8 +85,8 @@ assert.match(adminJs, /visibilitychange/, "admin must re-sync when the tab becom
 assert.match(adminJs, /function buildDailySummary/, "admin must offer a daily summary text for the staff LINE group");
 assert.match(admin, /id="pwEye"/, "login must have a show-password toggle");
 assert.match(admin, /id="offlineBar"/, "admin must show an offline banner");
-assert.match(admin, /app\.js\?v=30/, "admin cache-bust version must be bumped with app changes");
-assert.match(read("admin/sw.js"), /hoh-admin-v9/, "service worker CACHE ต้องบัมป์คู่กับ ?v= (README หลังบ้าน)");
+assert.match(admin, /app\.js\?v=31/, "admin cache-bust version must be bumped with app changes");
+assert.match(read("admin/sw.js"), /hoh-admin-v10/, "service worker CACHE ต้องบัมป์คู่กับ ?v= (README หลังบ้าน)");
 // เจ้าของยืนยัน (ก.ย. 2569): ไม่มีมัดจำกุญแจ ฿1,000 — ห้ามโผล่ที่ไหนอีก (เว็บ · ข้อความยืนยัน · ป้ายในห้อง · llms)
 for (const f of ["index.html", "room-standard.html", "room-studio.html", "room-deluxe.html", "booking.html", "assets/i18n.js", "admin/app.js", "llms.txt", "print/guest-board.html"]) {
   assert.doesNotMatch(read(f), /มัดจำกุญแจ|key deposit|มัดจำ (<b>)?฿1,000|฿1,000<\/b> refundable deposit|฿1,000 (refundable )?deposit|มีมัดจำ 1,000/i, f + " must not mention the ฿1,000 key deposit (there is none)");
@@ -126,51 +126,37 @@ function call(handler, { method = "GET" } = {}) {
 }
 
 module.exports = (async () => {
-  // 1) ยังไม่ตั้งค่าชีต → default ครบทั้ง 3 ราคา + rates ว่าง เว็บไม่พัง
+  // 1) ยังไม่ตั้งค่าชีต → ประกาศว่าง เว็บไม่พัง
   delete process.env.SHEET_WEBAPP_URL;
   let r = await call(site);
   assert.equal(r.code, 200);
-  assert.deepEqual(r.body.prices, { std: 700, stu: 800, dlx: 850 });
-  assert.deepEqual(r.body.rates, []);
+  assert.deepEqual(r.body.ann, { th: "", en: "" });
   assert.equal(r.body.source, "default");
 
-  // 2) อ่านราคาจากชีต + กรองแถวเรทที่เสีย (วันที่ผิด/ห้องมั่ว/ราคาติดลบ) ทิ้ง
+  // 2) อ่านประกาศจากชีต — และห้ามส่งราคาห้อง/เรทเทศกาลออกสาธารณะ (rate parity)
   process.env.SHEET_WEBAPP_URL = "https://sheet.fixture/exec";
   process.env.SHEET_TOKEN = "tok";
   global.fetch = async () => ({
     ok: true,
     json: async () => ({
-      site: { price_per_night: "750", price_studio: "฿850", price_deluxe: "900 บาท", announcement_th: "ประกาศ" },
-      rates: [
-        { from: "2026-12-30", to: "2027-01-01", room: "all", price: "1,200", note: "ปีใหม่" },
-        { from: "2026-11-25", to: "2026-11-25", room: "dlx", price: 1500, note: "ลอยกระทง" },
-        { from: "ไม่ใช่วันที่", to: "2026-12-31", room: "all", price: 999 },   // วันที่เสีย
-        { from: "2026-12-01", to: "2026-12-02", room: "penthouse", price: 999 }, // ห้องไม่มีจริง
-        { from: "2026-12-05", to: "2026-12-01", room: "all", price: 999 },     // from > to
-        { from: "2026-12-01", to: "2026-12-02", room: "all", price: -5 },      // ราคาเพี้ยน
-      ],
+      site: { price_per_night: "750", price_studio: "฿850", price_deluxe: "900 บาท", announcement_th: "ประกาศ", announcement_en: "Notice" },
+      rates: [{ from: "2026-12-30", to: "2027-01-01", room: "all", price: "1,200", note: "ปีใหม่" }],
     }),
   });
   r = await call(site);
   assert.equal(r.body.source, "sheet");
-  assert.deepEqual(r.body.prices, { std: 750, stu: 850, dlx: 900 });
-  assert.equal(r.body.price, 750, "ต้องคง j.price ไว้ให้โค้ดรุ่นเก่า");
-  assert.equal(r.body.rates.length, 2, "แถวเรทเสีย 4 แถวต้องถูกกรองทิ้ง");
-  assert.deepEqual(r.body.rates[0], { from: "2026-12-30", to: "2027-01-01", room: "all", price: 1200, note: "ปีใหม่" });
-  assert.equal(r.body.rates[1].room, "dlx");
-  assert.equal(r.body.ann.th, "ประกาศ");
+  assert.equal(r.body.ann.th, "ประกาศ"); assert.equal(r.body.ann.en, "Notice");
+  for (const k of ["price", "prices", "rates"]) assert.ok(!(k in r.body), `/api/site ห้ามส่ง ${k} ออกสาธารณะ (rate parity)`);
+  assert.ok(!/750|850|900|1,?200/.test(JSON.stringify(r.body)), "ตัวเลขราคาห้องต้องไม่หลุดใน /api/site");
 
-  // 3) สคริปต์เก่าไม่ส่ง rates → ต้องได้ [] ไม่ throw
-  global.fetch = async () => ({ ok: true, json: async () => ({ site: { price_per_night: "700" } }) });
-  r = await call(site);
-  assert.deepEqual(r.body.rates, []);
-  assert.equal(r.body.source, "sheet");
-
-  // 4) ชีตล่ม → ตอบ default เว็บโชว์ราคาปกติต่อได้
+  // 3) ชีตล่ม → ตอบ default เว็บไม่พัง
   global.fetch = async () => { throw new Error("offline"); };
   r = await call(site);
   assert.equal(r.body.source, "default");
-  assert.deepEqual(r.body.prices, { std: 700, stu: 800, dlx: 850 });
+
+  // rate parity ครอบไฟล์สาธารณะที่ไม่ใช่ HTML ด้วย (llms.txt คือไฟล์ที่ AI อ่าน)
+  const llms = read("llms.txt");
+  assert.ok(!/฿\s?(700|750|800|850|900)\b|\b(700|800|850)\s?(บาท|THB|baht)|best rates?/i.test(llms), "llms.txt ห้ามมีราคาห้องหรือคำว่า best rate");
 
   // ไกด์เยาวราชกลางคืน: ไม่มีคำซ้ำผิด + หน้าไกด์พี่น้องลิงก์กลับมา (internal linking สองทาง)
 {
@@ -194,6 +180,60 @@ module.exports = (async () => {
   assert.match(read("local.html"), /href="guides\.html"/, "local must link back to the guides hub");
   assert.match(read("attractions.html"), /href="guides\.html"/, "attractions must link back to the guides hub");
 }
+
+// ── ตรวจทั้งระบบ 3 ต.ค. 2569 ──
+{
+  // รูปที่สร้างในสคริปต์ต้องใช้ path แบบเริ่มด้วย / — หน้า /en/ คัดลอกสคริปต์ไปตรง ๆ ถ้าเป็น "images/…" จะกลายเป็น /en/images/… (404)
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) {
+    for (const m of read(f).matchAll(/<script(?![^>]*\bsrc=)(?![^>]*ld\+json)[^>]*>([\s\S]*?)<\/script>/g)) {
+      const rel = m[1].match(/["'`]images\/[^"'`]*/g);
+      assert.ok(!rel, `${f}: path รูปในสคริปต์ต้องขึ้นต้นด้วย /images/ (เจอ ${rel && rel[0]})`);
+    }
+  }
+  // CSS ใน <style> และ style="" ก็เหมือนกัน: url(images/…) จะกลายเป็น /en/images/… ในหน้าอังกฤษ
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) {
+    const rel = read(f).match(/url\(\s*["']?images\//g);
+    assert.ok(!rel, `${f}: url() ของรูปใน CSS ต้องขึ้นต้นด้วย /images/`);
+  }
+  // แกลเลอรี: รูปย่อ WebP ต้องมีครบทุกรูป ไม่งั้น <picture> จะไม่ถอยไปใช้ JPG และรูปหายจากหน้า
+  for (const m of read("gallery.html").matchAll(/f: "\/(images\/[^"]+)\.jpg"/g)) {
+    assert.ok(fs.existsSync(path.join(root, m[1] + "-thumb.webp")), `gallery: ไม่มีรูปย่อ ${m[1]}-thumb.webp`);
+  }
+  // การ์ดหน้าที่เที่ยวใช้รูป 800 px (ไม่ใช่รูปเต็ม 1280 กับช่องเล็ก)
+  assert.match(read("attractions.html"), /\$\{a\.slug\}-800\.webp 800w/, "attractions: การ์ดต้องใช้ -800.webp");
+  // หน้ารูมเซอร์วิสภาษาอังกฤษ: มีจริง ภาษา en และข้อความเมนูหลักเป็นอังกฤษ
+  const enRs = read("en/services.html");
+  assert.match(enRs, /<html lang="en"/, "en/services.html ต้องเป็น lang=en");
+  assert.match(enRs, />Room Service — In-Room Dining</, "en/services.html หัวเรื่องต้องเป็นอังกฤษตั้งแต่ HTML");
+  assert.match(enRs, /window\.HOH_LANG = "en"/, "en/services.html ต้องบังคับภาษาอังกฤษให้สคริปต์เมนู");
+  assert.match(read("services.html"), /hreflang="en" href="https:\/\/houseofhappinessbangkok\.com\/en\/services\.html"/, "services.html ต้องมี hreflang ชี้หน้าอังกฤษ");
+  // ไลบรารีแผนที่ต้องอยู่ในเว็บเอง ไม่โหลดสคริปต์จาก CDN ภายนอก
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) assert.ok(!/<script[^>]+src="https?:\/\/(unpkg|cdn\.jsdelivr|cdnjs)/.test(read(f)), `${f}: ห้ามโหลดสคริปต์จาก CDN ภายนอก`);
+  assert.ok(fs.existsSync(path.join(root, "assets/vendor/leaflet/leaflet.js")), "ต้องมี Leaflet ในเว็บเอง");
+  // header ความปลอดภัย: หลังบ้าน/หน้าพิมพ์ห้ามถูกฝังในเว็บอื่น
+  const vc = JSON.parse(read("vercel.json"));
+  const hdr = (src) => ((vc.headers.find((h) => h.source === src) || {}).headers || []).reduce((o, h) => (o[h.key] = h.value, o), {});
+  assert.equal(hdr("/admin/(.*)")["X-Frame-Options"], "DENY", "/admin ต้องมี X-Frame-Options: DENY");
+  assert.match(hdr("/admin/(.*)")["Content-Security-Policy"] || "", /frame-ancestors 'none'/, "/admin ต้องมี CSP frame-ancestors 'none'");
+  assert.equal(hdr("/print/(.*)")["X-Frame-Options"], "DENY", "/print ต้องมี X-Frame-Options: DENY");
+  assert.ok(!fs.existsSync(path.join(root, "admin/legacy.html")), "หลังบ้านรุ่นเก่าต้องถูกลบ");
+  // หน้าแรก: ปุ่มจองตรงเป็นปุ่มหลัก Booking.com เป็นลิงก์รอง
+  const home = read("index.html");
+  assert.ok(!/class="btn[^"]*" href="https:\/\/www\.booking\.com/.test(home), "หน้าแรกต้องไม่มีปุ่มใหญ่ไป Booking.com (ใช้ .alt-link)");
+  // ตรุษจีน 2570 ยืนยันแล้ว
+  const cny = JSON.parse(read("assets/festivals.json")).festivals.find((x) => x.id === "chinese-new-year-2027");
+  assert.equal(cny.start, "2027-02-06"); assert.equal(cny.confirmed, true);
+  // ชื่อหน้าไม่ยาวเกิน 65 ตัวอักษร (Google ตัดทิ้ง)
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) {
+    const t = (read(f).match(/<title>([^<]*)<\/title>/) || [])[1] || "";
+    assert.ok(t.replace(/&amp;/g, "&").length <= 65, `${f}: title ยาว ${t.length} ตัวอักษร (เกิน 65)`);
+  }
+  // หลังบ้าน: ข้อความขอบคุณหลังเช็คเอาต์มีลิงก์รีวิว Google และชวนทักตรง
+  const aj = read("admin/app.js");
+  assert.match(aj, /function buildThanksMsg/, "หลังบ้านต้องมีข้อความขอบคุณหลังเช็คเอาต์");
+  assert.match(aj, /GOOGLE_REVIEW_URL/, "ข้อความขอบคุณต้องมีลิงก์รีวิว Google");
+}
+console.log("AUDIT 2569-10 TESTS PASSED");
 console.log("SITE TESTS PASSED");
   return "SITE TESTS PASSED";
 })().catch((e) => {
@@ -406,6 +446,8 @@ console.log("UX TESTS PASSED");
   for (const k of ["au.name", "au.body", "au.line", "au.all"]) assert.ok(i18n.includes(`"${k}":`), `ขาดคีย์ภาษา ${k}`);
   assert.match(read("assets/style.css"), /\.ld-author \{/, "ต้องมีสไตล์ .ld-author");
 }
+  // Google ไม่ให้ดาวกับคะแนนที่ธุรกิจใส่เอง (self-serving reviews) — ห้ามใส่ aggregateRating ใน schema ของโรงแรม
+  for (const f of fs.readdirSync(root).filter((x) => x.endsWith(".html"))) assert.ok(!read(f).includes('"aggregateRating"'), `${f}: ห้ามมี aggregateRating ใน JSON-LD`);
 console.log("GUIDES HUB TESTS PASSED");
 
 // ── Phase 4: เทมเพลตบทความ ──

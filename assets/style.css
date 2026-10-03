@@ -241,7 +241,12 @@ picture { display: contents; }
   font-size: clamp(1rem, 2.6vw, 1.15rem);
   color: #6b5d4d;
 }
-.hero .cta-row { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+.hero .cta-row { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; align-items: center; }
+/* ลิงก์ไป Booking.com เป็นทางเลือกรอง — ปุ่มจองตรงต้องเด่นกว่า (จองตรงไม่เสียค่าคอมฯ ~20%) */
+.alt-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 .4rem; font-size: .92rem; color: var(--gold-dark); text-decoration: underline; text-underline-offset: 3px; }
+.alt-link:hover { color: var(--dark); }
+.cta-strip .alt-link { color: #f3e4cf; }
+.cta-strip .alt-link:hover { color: #fff; }
 .rating-pill {
   display: inline-flex;
   align-items: center;

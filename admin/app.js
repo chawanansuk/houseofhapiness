@@ -925,10 +925,10 @@ function openBooking(id){
   const A = (act, label, cls='', icon='') => acts.push(`<button class="btn ${cls}" data-act="${act}" data-id="${esc(b.id)}" data-label="${esc(label)}">${icon?ic(icon):''}${label}</button>`);
   const k = stKey(b);
   if(k==='confirmed'){ if(b.checkin<=TODAY) A('checkin','เช็คอิน','primary','login'); A('assign', String(b.room_no||'').trim()?'ย้ายห้อง':'จัดห้อง', String(b.room_no||'').trim()?'':'warn','move'); A('msg','ข้อความยืนยัน','','message'); A('edit','แก้ไข','','edit'); A('cancel','ยกเลิกการจอง','danger'); }
-  else if(k==='inhouse'){ A('checkout','เช็คเอาต์','primary','logout'); A('extend','ต่ออีก 1 คืน','','plus'); A('assign','ย้ายห้อง','','move'); A('edit','แก้ไข','','edit'); }
+  else if(k==='inhouse'){ A('checkout','เช็คเอาต์','primary','logout'); A('extend','ต่ออีก 1 คืน','','plus'); A('assign','ย้ายห้อง','','move'); A('thanks','ข้อความขอบคุณ + ขอรีวิว','','message'); A('edit','แก้ไข','','edit'); }
   else if(k==='pending'){ A('confirm-open','ยืนยันการจอง','good','check'); A('msg','ส่งข้อความ','','message'); A('edit','แก้ไข','','edit'); A('cancel','ปฏิเสธ/ยกเลิก','danger'); }
   else if(k==='needsinfo'){ A('edit','เติมข้อมูลจาก Pulse','primary','edit'); A('cancel','ยกเลิกการจอง','danger'); }
-  else { A('edit','แก้ไข','','edit'); if(k==='cancel') A('restore','กู้คืนเป็นยืนยันแล้ว','soft'); }
+  else { if(k==='out') A('thanks','ข้อความขอบคุณ + ขอรีวิว','','message'); A('edit','แก้ไข','','edit'); if(k==='cancel') A('restore','กู้คืนเป็นยืนยันแล้ว','soft'); }
   const log = [`<div><b>สร้างรายการ</b> ${isDirect(b)?'จองตรง / เว็บไซต์ / LINE':'นำเข้าจากอีเมล Booking.com'}${b.created?`<div class="t">${esc(String(b.created).slice(0,16))}</div>`:''}</div>`];
   if(k==='inhouse'||k==='out') log.push(`<div><b>เช็คอิน</b> ห้อง ${esc(roomLabel(b.room_no))}<div class="t">${fmtDY(b.checkin)}</div></div>`);
   if(k==='out') log.push(`<div><b>เช็คเอาต์</b><div class="t">${fmtDY(effCheckout(b))}</div></div>`);
@@ -1110,6 +1110,38 @@ function buildConfirmMsg(b, lang, payLink){
       ? `Please let us know your arrival time so we can be ready for you. See you soon! 😊`
       : `รบกวนแจ้งเวลาที่จะมาถึงล่วงหน้านะคะ ทีมงานจะเตรียมห้องรอ แล้วเจอกันค่ะ 😊`);
   return lines.join('\n');
+}
+// ข้อความหลังเช็คเอาต์: ขอบคุณ + ขอรีวิว Google + ครั้งหน้าทักเราตรง (ไม่มีส่วนลดราคา — ไม่ขัด rate parity)
+// GOOGLE_REVIEW_URL: ตอนนี้เป็นลิงก์ค้นหาที่พักใน Google Maps (แขกกดแท็บรีวิวต่อได้)
+// ถ้าเจ้าของมีลิงก์ "ขอรีวิว" จาก Google Business Profile (g.page/r/…/review) ให้วางแทนที่นี่ — แขกจะเปิดหน้าเขียนรีวิวทันที
+const GOOGLE_REVIEW_URL = "https://www.google.com/maps/search/?api=1&query=House%20of%20Happiness%20Khlong%20San%20Bangkok";
+function buildThanksMsg(b, lang){
+  const nm = String(b.name||'').trim();
+  return (lang === 'en' ? [
+    `Thank you for staying with us${nm ? ', ' + nm : ''}! 🙏`,
+    `If you have a minute, a short Google review helps a small family place like ours a lot: ${GOOGLE_REVIEW_URL}`,
+    `Next time, message us directly on LINE @060hvzok or WhatsApp +66 99 441 9465 — you'll talk to the owners.`,
+    `Safe travels! 😊`,
+  ] : [
+    `ขอบคุณที่มาพักกับเรานะคะ${nm ? ' คุณ' + nm : ''} 🙏`,
+    `ถ้าสะดวก ช่วยรีวิวสั้น ๆ บน Google ให้หน่อยนะคะ ช่วยที่พักเล็ก ๆ อย่างเรามากค่ะ: ${GOOGLE_REVIEW_URL}`,
+    `ครั้งหน้าทักเราตรงที่ LINE @060hvzok หรือ WhatsApp 099-441-9465 ได้เลย คุยกับเจ้าของโดยตรงค่ะ`,
+    `เดินทางปลอดภัยนะคะ 😊`,
+  ]).join('\n');
+}
+function openThanks(id){
+  const b = bookingById(id); if(!b) return;
+  msgCtx = { b, lang: isDirect(b) && !/[a-z]/i.test(String(b.name||'')) ? 'th' : 'en' };
+  openSheet({
+    title: 'ข้อความขอบคุณหลังเช็คเอาต์',
+    sub: '<span class="faint">ระบบไม่ได้ส่งเอง — คัดลอกไปวางในแชทของแขก · ส่งวันเช็คเอาต์หรือวันถัดไป แขกมักรีวิวตอนยังจำได้</span>',
+    body: `<div class="seg" style="margin-bottom:12px"><button class="${msgCtx.lang==='th'?'on':''}" data-act="msg-lang" data-l="th">ภาษาไทย</button><button class="${msgCtx.lang==='en'?'on':''}" data-act="msg-lang" data-l="en">English</button></div>
+      <div class="f"><label for="msgBox">ข้อความ (แก้ก่อนคัดลอกได้)</label><textarea id="msgBox" rows="8" style="min-height:170px;font-family:var(--mono);font-size:12.5px"></textarea></div>`,
+    foot: `<button class="btn primary" data-act="copy-msg">${ic('copy')}คัดลอกข้อความ</button><button class="btn" data-act="close-sheet">ปิด</button>`,
+  });
+  const refresh = () => { $('msgBox').value = buildThanksMsg(msgCtx.b, msgCtx.lang); };
+  refresh();
+  msgCtx.refresh = refresh;
 }
 let msgCtx = null;
 /* ---------- ติดต่อแขก / คัดลอก ---------- */
@@ -1500,6 +1532,7 @@ document.addEventListener('click', e => {
   else if(act==='new-at'){ e.stopPropagation(); openNew(no, el.dataset.d); }
   else if(act==='save-new') saveNew();
   else if(act==='msg'){ e.stopPropagation(); openMsg(id); }
+  else if(act==='thanks'){ e.stopPropagation(); openThanks(id); }
   else if(act==='msg-lang'){ document.querySelectorAll('[data-act="msg-lang"]').forEach(b => b.classList.toggle('on', b===el)); if(msgCtx){ msgCtx.lang = el.dataset.l; msgCtx.refresh(); } }
   else if(act==='copy-msg'){ const t = $('msgBox').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย')).catch(()=>{ try { $('msgBox').select(); document.execCommand('copy'); toast('คัดลอกแล้ว'); } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } }); }
   else if(act==='close-sheet') closeSheet();

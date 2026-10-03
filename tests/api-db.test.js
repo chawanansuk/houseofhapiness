@@ -87,7 +87,7 @@ const d = (off) => new Date(Date.now() + off * 86400000).toISOString().slice(0, 
 
   // 7) /api/site จากฐานข้อมูล
   r = await call(site);
-  assert.equal(r.body.source, "db"); assert.equal(r.body.prices.std, 700);
+  assert.equal(r.body.source, "db"); assert.ok(r.body.ann && !("prices" in r.body), "ฐานข้อมูล: ส่งเฉพาะประกาศ ไม่ส่งราคา");
 
   // 8) health ตัดสินจากฐานข้อมูล
   r = await call(health);

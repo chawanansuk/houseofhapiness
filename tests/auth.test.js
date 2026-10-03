@@ -26,5 +26,11 @@ const req = (key, ip = "1.2.3.4") => ({ headers: key == null ? { "x-forwarded-fo
   const blocked = await resolveRole(req("owner-secret", "5.5.5.5"));
   assert.equal(blocked.role, null); assert.equal(blocked.blocked, true);
   assert.equal((await resolveRole(req("owner-secret", "6.6.6.6"))).role, "admin");
+  // /api/migrate ใช้ตัวตรวจเดียวกัน: เจ้าของเท่านั้น
+  delete process.env.DATABASE_URL;
+  const migrate = require("../api/migrate.js");
+  const mcall = (key) => new Promise((r) => { const res = { c: 200, setHeader() {}, status(c) { this.c = c; return this; }, json(b) { r({ c: this.c, b }); } }; migrate({ method: "GET", headers: key ? { "x-admin-key": key, "x-forwarded-for": "8.8.4.4" } : {} }, res); });
+  assert.equal((await mcall("staff-secret")).c, 401, "พนักงานใช้ /api/migrate ไม่ได้");
+  assert.equal((await mcall("owner-secret")).b.error, "database-not-configured", "เจ้าของผ่านการตรวจรหัส");
   console.log("AUTH TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });

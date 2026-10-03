@@ -31,12 +31,12 @@
 <meta name="theme-color" content="#f7f1e6">
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><!-- Leaflet 1.9.4 (BSD-2) เก็บในเว็บเอง ไม่พึ่ง CDN ภายนอก -->
 <link rel="preload" as="image" href="images/local/satay.webp" type="image/webp" fetchpriority="high">
 <style>
 /* ── สไตล์เฉพาะหน้า "กิน-เที่ยวรอบซอย" ── */
 .lc-hero{position:relative; padding:5.4rem 1.2rem 2.8rem; text-align:center; overflow:hidden; color:#fff8ef; border-radius:0 0 28px 28px}
-.lc-hero::before{content:""; position:absolute; inset:0; background:url("images/local/satay.webp") center 40%/cover; z-index:-2}
+.lc-hero::before{content:""; position:absolute; inset:0; background:url("/images/local/satay.webp") center 40%/cover; z-index:-2}
 .lc-hero::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(62,47,35,.28),rgba(62,47,35,.45) 45%,rgba(46,33,22,.93)); z-index:-1}
 .lc-kicker{font-family:"Prompt",sans-serif; font-size:.74rem; letter-spacing:.3em; text-transform:uppercase; color:#e9cfa8; font-weight:600; margin-bottom:.7rem}
 .lc-hero h1{font-family:var(--font-display); font-size:clamp(1.8rem,4.8vw,3rem); color:#fff8ef; margin-bottom:0.6rem; text-shadow:0 2px 18px rgba(0,0,0,.35)}
@@ -211,7 +211,7 @@
 </script>
 <script src="assets/i18n.js"></script>
 <script src="assets/ui.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script src="/assets/vendor/leaflet/leaflet.js" defer></script>
 <script>
 "use strict";
 /* ═══ ข้อมูลจาก The Foodie's Guide ของที่พัก + คู่มือเดินเที่ยวท่าดินแดง-คลองสาน ═══
@@ -425,7 +425,7 @@ function renderFood(){
       ? `<span class="lc-open yes">● ${lang === "th" ? "เปิดอยู่ตอนนี้" : "Open now"}</span>`
       : `<span class="lc-open no">${lang === "th" ? "ปิดอยู่" : "Closed"}${st.next ? (lang === "th" ? " · เปิด " : " · opens ") + st.next : ""}</span>`;
     return `<article class="lc-food">
-      <div class="lc-fimg"><img src="images/local/${f.img}.webp" alt="${esc(f.name[lang])}" width="960" height="660" loading="lazy" decoding="async" onerror="this.remove()">${badge}</div>
+      <div class="lc-fimg"><img src="/images/local/${f.img}.webp" alt="${esc(f.name[lang])}" width="960" height="660" loading="lazy" decoding="async" onerror="this.remove()">${badge}</div>
       <div class="lc-fbody">
         <h3>${esc(f.name[lang])}</h3>
         <div class="sub">${esc(f.sub[lang])}</div>

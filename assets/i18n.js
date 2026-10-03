@@ -26,7 +26,7 @@ const I18N = {
   "hero.tagline":    { th: "อพาร์ตโฮเทลห้องพัก 3 แบบ ในคลองสาน ฝั่งธนบุรี · BTS สายสีทองสถานีคลองสาน · ~2 กม. ถึง ICONSIAM · ข้ามเรือ 5 บาทถึงเยาวราชและวัดโพธิ์",
                        en: "Apartments in 3 layouts in Khlong San, Thonburi side · Gold Line BTS at Khlong San station · ~2 km to ICONSIAM · a ฿5 ferry to Chinatown and Wat Pho" },
   "hero.direct":     { th: "จองตรงกับเรา — คุยกับเราโดยตรง", en: "Book Direct — Talk to Us Directly" },
-  "hero.booking":    { th: "จองผ่าน Booking.com", en: "Book on Booking.com" },
+  "hero.booking":    { th: "หรือจองผ่าน Booking.com", en: "or book on Booking.com" },
   "hero.rating":     { th: "คะแนนรีวิว <strong>8.8 / 10</strong> จากผู้เข้าพักจริงกว่า 770 รีวิวบน Booking.com",
                        en: "Rated <strong>8.8 / 10</strong> from 770+ verified guest reviews on Booking.com" },
   "about.title":     { th: "เกี่ยวกับเรา", en: "About" },
@@ -94,7 +94,7 @@ const I18N = {
   "cta.body":        { th: "จองตรงกับเรา สอบถามราคาทาง LINE/WhatsApp — หรือเช็คห้องว่างบน Booking.com",
                        en: "Book direct and ask our rates on LINE/WhatsApp — or check availability on Booking.com." },
   "cta.direct":      { th: "จองตรงกับเรา", en: "Book Direct" },
-  "cta.booking":     { th: "ดูบน Booking.com", en: "Check on Booking.com" },
+  "cta.booking":     { th: "หรือดูบน Booking.com", en: "or see us on Booking.com" },
 
   /* ── แถบจุดเด่นใต้ hero ── */
   "hl.1":            { th: "คะแนนรีวิว 8.8/10", en: "Rated 8.8/10" },
