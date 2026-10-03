@@ -113,50 +113,53 @@
 // รูปทั้งหมด จัดตามหมวด — คำบรรยายไทย/อังกฤษอยู่ในหน้านี้เลย (ไม่ต้องเพิ่มคีย์ i18n กลาง)
 var GROUPS = [
   { th: "ห้องนอน", en: "Bedrooms", items: [
-    { f: "images/bedroom.jpg",          th: "ห้อง Standard — เตียงใหญ่ พร้อมระเบียง", en: "Standard room — double bed with balcony" },
-    { f: "images/gallery/bedroom3.jpg", th: "ห้องนอนเตียงใหญ่ พร้อมโต๊ะทำงาน", en: "Double bedroom with work desk" },
-    { f: "images/gallery/bedroom4.jpg", th: "ห้องนอนพร้อมทีวีติดผนัง", en: "Bedroom with wall-mounted TV" },
-    { f: "images/gallery/bedroom5.jpg", th: "ห้องนอนโทนขาวเรียบง่าย", en: "Bedroom in minimal white tones" },
-    { f: "images/gallery/bedroom6.jpg", th: "ห้องนอนริมหน้าต่างบานใหญ่", en: "Bedroom by a large window" },
-    { f: "images/gallery/bedroom7.jpg", th: "ห้องนอนพร้อมราวแขวนเสื้อและทางออกระเบียง", en: "Bedroom with clothes rack and balcony access" },
-    { f: "images/gallery/bedroom8.jpg", th: "ห้องนอนพร้อมโต๊ะทำงานและภาพประดับ", en: "Bedroom with desk and framed art" },
-    { f: "images/gallery/bedroom9.jpg", th: "เตียงใหญ่ผ้าปูขาว พร้อมผ้าขนหนู", en: "King bed with fresh white linens" },
-    { f: "images/twin.jpg",             th: "ห้อง Studio — 2 เตียงแยก", en: "Studio room — twin beds" },
-    { f: "images/gallery/twin2.jpg",    th: "ห้องเตียงคู่ พร้อมทีวีติดผนัง", en: "Twin room with wall-mounted TV" },
-    { f: "images/gallery/twin3.jpg",    th: "ห้องเตียงคู่ อีกมุมหนึ่ง", en: "Twin room from another angle" }
+    { f: "/images/bedroom.jpg",          th: "ห้อง Standard — เตียงใหญ่ พร้อมระเบียง", en: "Standard room — double bed with balcony" },
+    { f: "/images/gallery/bedroom3.jpg", th: "ห้องนอนเตียงใหญ่ พร้อมโต๊ะทำงาน", en: "Double bedroom with work desk" },
+    { f: "/images/gallery/bedroom4.jpg", th: "ห้องนอนพร้อมทีวีติดผนัง", en: "Bedroom with wall-mounted TV" },
+    { f: "/images/gallery/bedroom5.jpg", th: "ห้องนอนโทนขาวเรียบง่าย", en: "Bedroom in minimal white tones" },
+    { f: "/images/gallery/bedroom6.jpg", th: "ห้องนอนริมหน้าต่างบานใหญ่", en: "Bedroom by a large window" },
+    { f: "/images/gallery/bedroom7.jpg", th: "ห้องนอนพร้อมราวแขวนเสื้อและทางออกระเบียง", en: "Bedroom with clothes rack and balcony access" },
+    { f: "/images/gallery/bedroom8.jpg", th: "ห้องนอนพร้อมโต๊ะทำงานและภาพประดับ", en: "Bedroom with desk and framed art" },
+    { f: "/images/gallery/bedroom9.jpg", th: "เตียงใหญ่ผ้าปูขาว พร้อมผ้าขนหนู", en: "King bed with fresh white linens" },
+    { f: "/images/twin.jpg",             th: "ห้อง Studio — 2 เตียงแยก", en: "Studio room — twin beds" },
+    { f: "/images/gallery/twin2.jpg",    th: "ห้องเตียงคู่ พร้อมทีวีติดผนัง", en: "Twin room with wall-mounted TV" },
+    { f: "/images/gallery/twin3.jpg",    th: "ห้องเตียงคู่ อีกมุมหนึ่ง", en: "Twin room from another angle" }
   ]},
   { th: "มุมนั่งเล่น", en: "Lounge corner", items: [
-    { f: "images/living.jpg", th: "มุมโซฟาในห้องพัก", en: "Sofa corner in the room" },
-    { f: "images/deluxe.jpg", th: "ห้อง Deluxe — เตียงใหญ่พร้อมมุมโซฟา", en: "Deluxe room — double bed with sofa corner" }
+    { f: "/images/living.jpg", th: "มุมโซฟาในห้องพัก", en: "Sofa corner in the room" },
+    { f: "/images/deluxe.jpg", th: "ห้อง Deluxe — เตียงใหญ่พร้อมมุมโซฟา", en: "Deluxe room — double bed with sofa corner" }
   ]},
   { th: "ห้องน้ำ", en: "Bathrooms", items: [
-    { f: "images/bathroom.jpg",      th: "ห้องน้ำในห้องพัก", en: "En-suite bathroom" },
-    { f: "images/gallery/bath2.jpg", th: "ห้องน้ำโทนขาวดำ พร้อมอ่างล้างหน้าและกระจก", en: "Black-and-white bathroom with basin and mirror" },
-    { f: "images/gallery/bath3.jpg", th: "ห้องน้ำพร้อมฉากกั้นอาบน้ำ", en: "Bathroom with glass shower partition" },
-    { f: "images/gallery/shower.jpg", th: "มุมอาบน้ำพร้อมเครื่องทำน้ำอุ่น", en: "Shower area with water heater" },
-    { f: "images/gallery/bath4.jpg", th: "ห้องน้ำกระเบื้องโมเสกขาวดำ", en: "Mosaic-tiled bathroom" },
-    { f: "images/gallery/bath5.jpg", th: "อ่างล้างหน้า กระจก และฝักบัว", en: "Basin, mirror and shower" },
-    { f: "images/gallery/bath6.jpg", th: "ห้องน้ำโมเสก อีกมุมหนึ่ง", en: "Mosaic bathroom from another angle" }
+    { f: "/images/bathroom.jpg",      th: "ห้องน้ำในห้องพัก", en: "En-suite bathroom" },
+    { f: "/images/gallery/bath2.jpg", th: "ห้องน้ำโทนขาวดำ พร้อมอ่างล้างหน้าและกระจก", en: "Black-and-white bathroom with basin and mirror" },
+    { f: "/images/gallery/bath3.jpg", th: "ห้องน้ำพร้อมฉากกั้นอาบน้ำ", en: "Bathroom with glass shower partition" },
+    { f: "/images/gallery/shower.jpg", th: "มุมอาบน้ำพร้อมเครื่องทำน้ำอุ่น", en: "Shower area with water heater" },
+    { f: "/images/gallery/bath4.jpg", th: "ห้องน้ำกระเบื้องโมเสกขาวดำ", en: "Mosaic-tiled bathroom" },
+    { f: "/images/gallery/bath5.jpg", th: "อ่างล้างหน้า กระจก และฝักบัว", en: "Basin, mirror and shower" },
+    { f: "/images/gallery/bath6.jpg", th: "ห้องน้ำโมเสก อีกมุมหนึ่ง", en: "Mosaic bathroom from another angle" }
   ]},
   { th: "ภายในอาคารและบริการ", en: "Inside the building & facilities", items: [
-    { f: "images/reception.jpg",       th: "จุดต้อนรับ / เช็คอิน", en: "Reception / check-in" },
-    { f: "images/entrance.jpg",        th: "ทางเข้าที่พัก", en: "The entrance" },
-    { f: "images/gallery/hallway.jpg", th: "โถงทางเดินและบันไดภายในอาคาร", en: "Interior hallway and staircase" },
-    { f: "images/gallery/lounge.jpg",  th: "มุมนั่งเล่นหน้าห้องพัก", en: "Seating corner in the hallway" },
-    { f: "images/gallery/laundry.jpg", th: "เครื่องซักผ้าหยอดเหรียญ (เหรียญ 10 บาท)", en: "Coin-operated washing machine (10-baht coins)" },
-    { f: "images/gallery/keybox.jpg",  th: "กล่องคืนกุญแจ สำหรับเช็คเอาท์เช้าตรู่", en: "Key drop box for early check-out" }
+    { f: "/images/reception.jpg",       th: "จุดต้อนรับ / เช็คอิน", en: "Reception / check-in" },
+    { f: "/images/entrance.jpg",        th: "ทางเข้าที่พัก", en: "The entrance" },
+    { f: "/images/gallery/hallway.jpg", th: "โถงทางเดินและบันไดภายในอาคาร", en: "Interior hallway and staircase" },
+    { f: "/images/gallery/lounge.jpg",  th: "มุมนั่งเล่นหน้าห้องพัก", en: "Seating corner in the hallway" },
+    { f: "/images/gallery/laundry.jpg", th: "เครื่องซักผ้าหยอดเหรียญ (เหรียญ 10 บาท)", en: "Coin-operated washing machine (10-baht coins)" },
+    { f: "/images/gallery/keybox.jpg",  th: "กล่องคืนกุญแจ สำหรับเช็คเอาท์เช้าตรู่", en: "Key drop box for early check-out" }
   ]},
   { th: "ตัวอาคารและรอบบ้าน", en: "Building & surroundings", items: [
-    { f: "images/building.jpg",       th: "ตัวอาคารที่พัก", en: "The building" },
-    { f: "images/gallery/facade.jpg", th: "ด้านหน้าอาคาร (ป้ายบ้านมั่งมีทวีสุข)", en: "Building facade with the house-name sign" },
-    { f: "images/gallery/spirit.jpg", th: "ทางเข้าพร้อมศาลพระภูมิ", en: "Entrance with the spirit house" },
-    { f: "images/balcony.jpg",        th: "วิวจากระเบียงส่วนตัว", en: "View from a private balcony" }
+    { f: "/images/building.jpg",       th: "ตัวอาคารที่พัก", en: "The building" },
+    { f: "/images/gallery/facade.jpg", th: "ด้านหน้าอาคาร (ป้ายบ้านมั่งมีทวีสุข)", en: "Building facade with the house-name sign" },
+    { f: "/images/gallery/spirit.jpg", th: "ทางเข้าพร้อมศาลพระภูมิ", en: "Entrance with the spirit house" },
+    { f: "/images/balcony.jpg",        th: "วิวจากระเบียงส่วนตัว", en: "View from a private balcony" }
   ]}
 ];
 
 var FLAT = [];
 GROUPS.forEach(function (g) { g.items.forEach(function (it) { FLAT.push(it); }); });
 
+// รูปย่อ WebP ~600 px สำหรับตาราง (ไฟล์ *-thumb.webp ข้างรูปจริง) — เปิดดูใหญ่ค่อยโหลด JPG เต็ม
+function thumbOf(f) { return f.replace(/\.jpg$/, "-thumb.webp"); }
+function q(v) { return '"' + v + '"'; }
 function render() {
   var lang = getLang();
   var idx = 0;
@@ -165,8 +168,8 @@ function render() {
       var i = idx++;
       var caption = lang === "en" ? it.en : it.th;
       return '<figure data-idx="' + i + '" role="button" tabindex="0" aria-label="' +
-        (lang === "en" ? "Open photo: " : "เปิดรูป: ") + caption + '"><img src="' + it.f + '" alt="' + caption +
-        '" width="1024" height="768" loading="lazy" decoding="async" onerror="this.parentElement.remove()">' +
+        (lang === "en" ? "Open photo: " : "เปิดรูป: ") + caption + '"><picture><source type="image/webp" srcset=' + q(thumbOf(it.f)) + '><img src="' + it.f + '" alt="' + caption +
+        '" width="1024" height="768" loading="lazy" decoding="async" onerror="this.closest(\'figure\').remove()"></picture>' +
         '<span class="prov real">' + (lang === "en" ? "Photographed on site" : "ภาพถ่ายจริงจากที่พัก") + '</span>' +
         '<figcaption>' + caption + '</figcaption></figure>';
     }).join("");

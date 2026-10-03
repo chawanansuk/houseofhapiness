@@ -5,7 +5,10 @@
     {
       "id": "vegetarian-2026",
       "slug": "chinatown-festivals.html",
-      "label": { "th": "เทศกาลกินเจเยาวราช", "en": "Vegetarian Festival, Yaowarat" },
+      "label": {
+        "th": "เทศกาลกินเจเยาวราช",
+        "en": "Vegetarian Festival, Yaowarat"
+      },
       "start": "2026-10-09",
       "end": "2026-10-18",
       "confirmed": true,
@@ -14,7 +17,10 @@
     {
       "id": "loy-krathong-2026",
       "slug": "loy-krathong.html",
-      "label": { "th": "ลอยกระทง", "en": "Loy Krathong" },
+      "label": {
+        "th": "ลอยกระทง",
+        "en": "Loy Krathong"
+      },
       "start": "2026-11-25",
       "end": "2026-11-25",
       "confirmed": false,
@@ -23,7 +29,10 @@
     {
       "id": "countdown-2026",
       "slug": "new-year-countdown.html",
-      "label": { "th": "เคานต์ดาวน์ปีใหม่ริมเจ้าพระยา", "en": "New Year countdown on the river" },
+      "label": {
+        "th": "เคานต์ดาวน์ปีใหม่ริมเจ้าพระยา",
+        "en": "New Year countdown on the river"
+      },
       "start": "2026-12-31",
       "end": "2027-01-01",
       "confirmed": true,
@@ -32,16 +41,22 @@
     {
       "id": "chinese-new-year-2027",
       "slug": "chinatown-festivals.html",
-      "label": { "th": "ตรุษจีนเยาวราช", "en": "Chinese New Year, Yaowarat" },
-      "start": null,
-      "end": null,
-      "confirmed": false,
-      "todo": "TODO-OWNER: ตรุษจีนเป็นวันทางจันทรคติ ปลายมกราคม–กุมภาพันธ์ — ใส่วันของปี 2570"
+      "label": {
+        "th": "ตรุษจีนเยาวราช",
+        "en": "Chinese New Year, Yaowarat"
+      },
+      "start": "2027-02-06",
+      "end": "2027-02-07",
+      "confirmed": true,
+      "todo": "ยืนยันจากปฏิทินสาธารณะ 3 ต.ค. 2569: ตรุษจีน 2570 = เสาร์ 6 ก.พ. 2570 (end = วันถัดไป ช่วงที่เยาวราชคึกคักสุด) · กิจกรรม/ปิดถนนของปีนั้นยังไม่ประกาศ"
     },
     {
       "id": "songkran-2027",
       "slug": "songkran-riverside.html",
-      "label": { "th": "สงกรานต์ริมเจ้าพระยา", "en": "Songkran on the river" },
+      "label": {
+        "th": "สงกรานต์ริมเจ้าพระยา",
+        "en": "Songkran on the river"
+      },
       "start": "2027-04-13",
       "end": "2027-04-15",
       "confirmed": true,

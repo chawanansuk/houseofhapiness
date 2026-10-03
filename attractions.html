@@ -193,8 +193,8 @@ function card(a){
   return `<article class="atr-card">
     <div class="atr-img">
       <span class="ph">✦</span>
-      <picture><source type="image/webp" srcset="images/attractions/${a.slug}.webp">
-      <img src="images/attractions/${a.slug}.jpg" alt="${a.dest}" width="960" height="600" loading="lazy" decoding="async"
+      <picture><source type="image/webp" srcset="/images/attractions/${a.slug}-800.webp 800w, /images/attractions/${a.slug}.webp 1280w" sizes="(max-width: 760px) 100vw, 400px">
+      <img src="/images/attractions/${a.slug}.jpg" alt="${a.dest}" width="960" height="600" loading="lazy" decoding="async"
            onerror="this.remove()"></picture>
     </div>
     <div class="atr-body">

@@ -23,10 +23,9 @@ const SITE = "https://houseofhappinessbangkok.com";
 const OUT = path.join(root, "en");
 
 /* หน้าที่ไม่ต้องทำเวอร์ชันอังกฤษ: 404 จัดการด้วย Vercel, credits เป็นหน้า noindex */
-/* services.html ยังเป็นเมนูอาหารภาษาไทยล้วน (ข้อความ ~90 จุดไม่ได้อยู่ในระบบ data-i18n)
-   ถ้าปล่อยให้มี /en/services.html จะกลายเป็นหน้าที่บอกว่าเป็นอังกฤษแต่เนื้อหาเป็นไทย
-   ซึ่งแย่กว่าการไม่มีหน้านั้นเลย — รอแปลงหน้านั้นเป็น data-i18n ก่อนค่อยเปิด */
-const SKIP = new Set(["404.html", "services.html"]);
+/* services.html (เมนูรูมเซอร์วิส) ใช้คำแปลแบบ data-th / data-en ในตัว element (ไม่ใช่ data-i18n)
+   — ข้อ 1b ด้านล่างใส่ข้อความ data-en ให้ตั้งแต่ตอนสร้าง สคริปต์ของหน้ายังสลับภาษาเองได้ตามเดิม (ต.ค. 2569) */
+const SKIP = new Set(["404.html"]);
 
 const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
 
@@ -84,6 +83,7 @@ const EN_DESC = {
   "chao-phraya-tourist-boat.html": "The Chao Phraya hop-on hop-off tourist boat: when a day ticket pays off, how it differs from the express boat, and how to board it from Khlong San.",
   "electric-boats-bangkok.html": "Bangkok's electric boats from Khlong San: river e-boats calling on the Chinatown bank and app-booked canal boat taxis, with how to board and pay.",
   "muvmi-guide.html": "How to use MuvMi electric tuk-tuks from Khlong San: signing up, the service areas, paying in the app, and when Grab or the ferry is the better choice.",
+  "services.html": "Room service at House of Happiness: massaman and green curry, pad Thai, Thai desserts and iced coffee, from ฿40. Order a day ahead on LINE or WhatsApp; free delivery to your room, pay cash on delivery.",
   "ride-hailing-guide.html": "How to use Grab and Bolt in Bangkok: install, book step by step, pay, find the airport pickup point, and what to do when the driver can't find you.",
   "local.html": "Our insider guide: 13 places locals really eat around Soi Tha Din Daeng 16, plus a 10-stop Khlong San walk most visitors never find.",
 };
@@ -128,6 +128,10 @@ for (const file of [...pages].sort()) {
     el.removeAttribute("data-i18n");
     el.removeAttribute("data-i18n-attr");
   }
+
+  /* 1b) หน้าที่ใช้ data-th / data-en (รูมเซอร์วิส): ใส่ข้อความอังกฤษลงไปเลย ให้ Google และคนที่ปิด JS เห็นอังกฤษ
+         คง attribute ไว้ — สคริปต์ของหน้าใช้สลับภาษาต่อ (HOH_LANG = "en" บังคับให้เป็นอังกฤษ) */
+  for (const el of doc.querySelectorAll("[data-th][data-en]")) el.textContent = el.getAttribute("data-en");
 
   doc.documentElement.lang = "en";
 

@@ -6,11 +6,15 @@
  * ใช้ตอนสลับระบบครั้งเดียว (รันบน Vercel ที่มีทั้ง SHEET_WEBAPP_URL และ DATABASE_URL อยู่แล้ว — ไม่ต้องส่ง token ผ่านแชท)
  */
 const { dbEnabled, getStore } = require("./_store.js");
+const { resolveRole } = require("./_auth.js");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
-  const adminPass = (process.env.ADMIN_PASSWORD || "").trim();
-  if (!adminPass || String(req.headers["x-admin-key"] || "") !== adminPass) {
+  // เจ้าของเท่านั้น และต้องตั้งรหัสจริงแล้ว (โหมดตัวอย่าง demo1234 ใช้ย้ายข้อมูลไม่ได้)
+  // เทียบรหัสแบบ timing-safe + กันเดารหัสผ่าน api/_auth.js เหมือน /api/data
+  const { role, demoMode, blocked } = await resolveRole(req);
+  if (blocked) return res.status(429).json({ ok: false, error: "too-many-attempts" });
+  if (demoMode || role !== "admin") {
     return res.status(401).json({ ok: false, error: "unauthorized" });
   }
   if (!dbEnabled()) return res.status(503).json({ ok: false, error: "database-not-configured", hint: "ตั้ง DATABASE_URL ใน Vercel ก่อน" });

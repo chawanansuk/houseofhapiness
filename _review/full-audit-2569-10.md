@@ -59,4 +59,25 @@
 1. **ทำได้เลยไม่ต้องรอ:** ก1 ก2 ก4 ก5 · ข1–ข4 · ค (attractions, gallery) · title 2 หน้า · ง8
 2. **รอพี่ตอบ:** ก3 (วันลอยกระทง) · ง2 ง3 (ตัดสินใจเชิงธุรกิจ) · ง1 ง4–ง7 (สิทธิ์/ลิงก์)
 
+## ผลการแก้รอบ "จัดการได้หมดเลย" (3 ต.ค. 2569)
+
+| # | สถานะ | ทำอะไรไป |
+|---|---|---|
+| ก1 | ✅ แก้แล้ว | path รูปที่สร้างในสคริปต์และใน CSS เปลี่ยนเป็น `/images/…` (แกลเลอรี · ที่เที่ยว · กิน-เที่ยวรอบซอย รวมรูปปกหน้า local ที่หายในหน้าอังกฤษ) · เทสต์กันไว้ทั้งในสคริปต์และ `url()` |
+| ก2 | ✅ แก้แล้ว | `llms.txt` และ `/api/site` ไม่มีราคาห้อง / "best rate" แล้ว · เทสต์กันราคาหลุดกลับมา |
+| ก3 | ⏳ รอพี่ | วันลอยกระทง 24 หรือ 25 พ.ย. 2569 ยังไม่ได้แตะ |
+| ก4 | ✅ แก้แล้ว | ตรุษจีน 2570 = ส. 6 ก.พ. ใส่ในหน้าเทศกาล (ไทย/อังกฤษ) และ `festivals.json` |
+| ก5 | ✅ แก้แล้ว | เอา `aggregateRating` ออกจาก schema · เทสต์ห้ามใส่กลับ |
+| ข1 | ✅ แก้แล้ว | `X-Frame-Options` ทั้งเว็บ · หลังบ้านและหน้าพิมพ์ใช้ DENY + `frame-ancestors 'none'` + noindex · `Permissions-Policy` |
+| ข2 | ✅ แก้แล้ว | ลบ `admin/legacy.html` |
+| ข3 | ✅ แก้แล้ว | `/api/migrate` ใช้ตัวตรวจรหัสเดียวกับ API อื่น (กันเดารหัส · เฉพาะเจ้าของ) |
+| ข4 | ✅ แก้แล้ว | Leaflet 1.9.4 อยู่ในเว็บเอง `assets/vendor/leaflet/` ไม่โหลดจาก CDN |
+| ข5 | ⏳ ไม่จำเป็นต้องรีบ | ถ้าพี่วาง `DATABASE_URL` ใหม่แบบ encode แล้ว ระบบจะไม่ต้องซ่อมทุกครั้ง |
+| ค | ✅ แก้แล้ว | ที่เที่ยวใช้รูป 800 px · แกลเลอรีใช้รูปย่อ WebP 600 px (30 รูป 1.6 MB → 0.6 MB) |
+| title | ✅ แก้แล้ว | 2 หน้าเหลือ ≤ 65 ตัวอักษร |
+| ง3 | ✅ ทำส่วนที่ไม่ต้องรอ | ปุ่ม Booking.com ในหน้าแรกเปลี่ยนเป็นลิงก์ข้อความรอง ("หรือจองผ่าน Booking.com") ปุ่มหลักเหลือจองตรงอย่างเดียว |
+| ง5 | ✅ ทำแล้ว (รอลิงก์) | หลังบ้าน: ปุ่ม "ข้อความขอบคุณ + ขอรีวิว" ในแถวการจองที่เข้าพักอยู่/เช็คเอาต์แล้ว (ไทย/อังกฤษ) · ตอนนี้ลิงก์ชี้ค้นหา Google Maps — แทนด้วยลิงก์รีวิวจาก GBP ที่ `GOOGLE_REVIEW_URL` ใน `admin/app.js` |
+| ง8 | ✅ ทำแล้ว | หน้า `/en/services.html` เมนูอังกฤษตั้งแต่ HTML (ชื่ออาหารไทยแสดงเป็นบรรทัดรองให้ชี้สั่งได้) · มี hreflang · อยู่ใน sitemap |
+| ง1 ง2 ง4 ง6 ง7 | ⏳ รอพี่ | ต้องใช้บัญชี/สิทธิ์/การตัดสินใจของเจ้าของ |
+
 แหล่งที่ใช้ยืนยันวันที่: [Chinese New Year 2027 — publicholidays.sg](https://publicholidays.sg/?p=87) · [chinatravel.com](https://www.chinatravel.com/chinese-new-year/date) · [Loy Krathong festival Sukhothai — thailand.go.th](https://www.thailand.go.th/event-detail/loy-krathong-burning-candles-and-playing-with-fire-festival-in-sukhothai) · [Loy Krathong 2026 — thailandhighlights.com](https://www.thailandhighlights.com/thailand/loy-krathong-festival)

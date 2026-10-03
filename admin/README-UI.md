@@ -6,7 +6,7 @@
 - `index.html` — โครงหน้า: login + shell (sidebar / header / 7 views / tabbar มือถือ / sheet / toast)
 - `app.css` — design tokens + สไตล์ทั้งหมด (light บน `:root`, dark ซ้ำสองที่: media query + `[data-theme="dark"]`)
 - `app.js` — logic ทั้งหมด: อ่าน `GET /api/data` · เขียน `POST /api/update` (payload เดิมทุก action)
-- `legacy.html` — หลังบ้านเวอร์ชันเก่าทั้งหน้า เผื่อกลับไปใช้ชั่วคราว (เปิด /admin/legacy.html)
+- (ลบ `legacy.html` หลังบ้านรุ่นเก่าออกแล้ว 3 ต.ค. 2569 — ถ้าต้องการดูโค้ดเดิม ดูประวัติ git)
 - `sw.js`, `manifest.webmanifest` — PWA เดิม (network-first)
 
 ## แนวคิด
