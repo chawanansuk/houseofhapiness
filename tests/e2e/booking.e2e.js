@@ -22,7 +22,13 @@ const bookCalls = []; // เก็บทุก POST /api/book ที่หน้
 
 const server = http.createServer((req, res) => {
   const p = decodeURIComponent(req.url.split("?")[0]);
-  if (p === "/api/availability") { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, demo: false, total: 20, available: 9, nights: 2, full: false })); }
+  if (p === "/api/availability") {
+    const q = new URL(req.url, "http://x").searchParams;
+    res.writeHead(200, { "Content-Type": "application/json" });
+    // วันเต็ม (เช็คอิน +20) → ตอบ full พร้อมวันใกล้เคียง (+23 ถึง +25)
+    if (q.get("checkin") === ymd(20)) return res.end(JSON.stringify({ ok: true, demo: false, total: 20, available: 0, nights: 2, full: true, alternatives: q.get("suggest") === "1" ? [{ checkin: ymd(23), checkout: ymd(25) }] : undefined }));
+    return res.end(JSON.stringify({ ok: true, demo: false, total: 20, available: 9, nights: 2, full: false }));
+  }
   if (p === "/api/site") {
     res.writeHead(200, { "Content-Type": "application/json" });
     // จำลองเรทเทศกาล: คืน ymd(9) ห้อง Standard คิด ฿1,200 (คืนอื่นราคาปกติ)
@@ -171,6 +177,18 @@ async function launch() {
   await page.dispatchEvent("#hbIn", "change");
   assert.equal(await page.locator("#hbOut").getAttribute("min"), ymd(9));
   ok("กล่องหน้าแรกบังคับขั้นต่ำ 2 คืน");
+
+  // ── 8) ห้องเต็ม → ปุ่มวันใกล้เคียง กดแล้วเปลี่ยนวันและเช็คใหม่เป็นว่าง ──
+  await page.goto(`${BASE}/booking.html?checkin=${ymd(20)}&checkout=${ymd(22)}`, { waitUntil: "networkidle" });
+  await page.waitForSelector("#availBadge.full .alt-date");
+  const altBtn = page.locator("#availBadge .alt-date").first();
+  const box = await altBtn.boundingBox();
+  assert.ok(box.height >= 44, "ปุ่มวันใกล้เคียงต้องสูง ≥ 44px");
+  await altBtn.click();
+  assert.equal(await page.inputValue("#checkin"), ymd(23));
+  assert.equal(await page.inputValue("#checkout"), ymd(25));
+  await page.waitForSelector("#availBadge.ok");
+  ok("ห้องเต็ม: เสนอวันใกล้เคียง กดแล้วเปลี่ยนวันและเช็คใหม่เป็นว่าง");
 
   await browser.close();
   server.close();

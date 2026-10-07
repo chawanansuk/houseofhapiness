@@ -473,7 +473,7 @@ function checkAvailability() {
     try {
       if (availCtrl) availCtrl.abort();
       availCtrl = new AbortController();
-      const r = await fetch(`/api/availability?checkin=${s.ci}&checkout=${s.co}`, { signal: availCtrl.signal });
+      const r = await fetch(`/api/availability?checkin=${s.ci}&checkout=${s.co}&suggest=1`, { signal: availCtrl.signal });
       const j = await r.json();
       if (!r.ok || !j.ok) {
         if (sig !== availSig) return;
@@ -489,6 +489,7 @@ function checkAvailability() {
       } else if (j.full) {
         badge.className = "avail-badge full";
         badge.textContent = t("av.full");
+        renderAlternatives(badge, j.alternatives);
       } else if (j.available <= 2) {
         badge.className = "avail-badge low";
         badge.innerHTML = `${t("av.low.pre")}${j.available}${t("av.low.post")} <small>· ${t("av.note")}</small>`;
@@ -503,6 +504,31 @@ function checkAvailability() {
       badge.textContent = t("av.unavailable");
     }
   }, 350);
+}
+// ห้องเต็ม → ปุ่มวันใกล้เคียงที่ยังว่าง (จาก API) กดแล้วเปลี่ยนวันให้เลย ไม่ต้องลองสุ่มเอง
+function renderAlternatives(badge, alts) {
+  if (!Array.isArray(alts) || !alts.length) return;
+  const loc = lang() === "en" ? "en-GB" : "th-TH";
+  const fmt = (ymd) => new Date(ymd + "T00:00:00").toLocaleDateString(loc, { day: "numeric", month: "short" });
+  const wrap = document.createElement("span");
+  wrap.className = "alt-dates";
+  const lbl = document.createElement("small");
+  lbl.textContent = t("av.alt");
+  wrap.appendChild(lbl);
+  for (const a of alts) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "alt-date";
+    b.textContent = `${fmt(a.checkin)} – ${fmt(a.checkout)}`;
+    b.addEventListener("click", () => {
+      $("checkin").value = a.checkin;
+      $("checkin").dispatchEvent(new Event("change", { bubbles: true }));
+      $("checkout").value = a.checkout;
+      $("checkout").dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    wrap.appendChild(b);
+  }
+  badge.appendChild(wrap);
 }
 // เรียกจาก update() ทุกครั้ง — sig guard ทำให้ยิง API เฉพาะตอน "ช่วงวัน" เปลี่ยนจริง
 document.addEventListener("langchange", () => { availSig = ""; checkAvailability(); });

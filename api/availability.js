@@ -105,20 +105,23 @@ module.exports = async (req, res) => {
   };
   const countRooms = (entries) => entries.reduce((sum, booking) => sum + roomCount(booking), 0);
 
-  let minAvail = total;
-  for (let d = ci; d < co; d = shiftDate(d, 1)) {
+  const nightAvail = (d) => {
     const stay = active.filter((b) => b.checkin <= d && d < b.checkout);
     const direct = countRooms(stay.filter((b) => !isBdc(b)));
     const bdcSheet = countRooms(stay.filter(isBdc));
     const bdcIcal = ical.filter((e) => e.start <= d && d < e.end).length;
     const occupied = direct + Math.max(bdcSheet, bdcIcal);
-    minAvail = Math.min(minAvail, Math.max(0, total - occupied));
-  }
-
+    return Math.max(0, total - occupied);
+  };
   const rawStr = (process.env.SAFETY_BUFFER || "").trim();
   const rawBuffer = rawStr === "" ? NaN : Number(rawStr); // ระวัง: Number("") = 0 ไม่ใช่ NaN
   const buffer = Number.isFinite(rawBuffer) && rawBuffer >= 0 ? Math.floor(rawBuffer) : 1;
-  const available = Math.max(0, minAvail - (demoMode ? 0 : buffer));
+  const rangeAvail = (from, to) => {
+    let min = total;
+    for (let d = from; d < to; d = shiftDate(d, 1)) min = Math.min(min, nightAvail(d));
+    return Math.max(0, min - (demoMode ? 0 : buffer));
+  };
+  const available = rangeAvail(ci, co);
 
   const out = {
     ok: true, demo: demoMode, total, nights,
@@ -126,6 +129,21 @@ module.exports = async (req, res) => {
     full: available <= 0 && unknown === 0,
   };
   if (unknown > 0) { out.unknown = unknown; out.warning = "uncertain"; }
+  // ห้องเต็ม → เสนอวันใกล้เคียง (จำนวนคืนเท่าเดิม เลื่อนไม่เกิน ±7 วัน ไม่ย้อนก่อนวันนี้) สูงสุด 3 ช่วง
+  // ตอบแค่ช่วงวันที่ ไม่มีจำนวนห้องหรือข้อมูลแขก · ไม่เสนอเมื่อมีการจองไม่รู้วันที่ (ตัวเลขไม่แน่นอน)
+  if (out.full && String((req.query && req.query.suggest) || "") === "1") {
+    const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+    const alts = [];
+    for (let k = 1; k <= 7 && alts.length < 3; k++) {
+      for (const off of [k, -k]) {
+        const a = shiftDate(ci, off);
+        if (a < today || alts.length >= 3) continue;
+        const b = shiftDate(co, off);
+        if (rangeAvail(a, b) > 0) alts.push({ checkin: a, checkout: b });
+      }
+    }
+    out.alternatives = alts;
+  }
   res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
   return res.status(200).json(out);
 };
