@@ -1553,6 +1553,11 @@ section { margin-bottom: clamp(4.5rem, 11vw, 7.5rem); }
 .avail-badge.ok { background: #e8f7ec; color: #1e7e3a; border: 1px solid #bfe5c8; }
 .avail-badge.low { background: #fdf3dc; color: #9a6b12; border: 1px solid #f0dcae; }
 .avail-badge.full { background: #fdeceb; color: #b3362a; border: 1px solid #f3cdc8; }
+.alt-dates { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.alt-dates small { flex-basis: 100%; opacity: 0.9; }
+.alt-date { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #e3b3ab; background: #fff; color: #8e2a20; font: inherit; font-weight: 600; cursor: pointer; }
+.alt-date:hover { background: #fff6f4; }
+.alt-date:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
 .avail-badge.uncertain { background: var(--gold-soft, #f6efe6); color: var(--ink, #40342a); border: 1px solid var(--line, #e4d9c8); }
 
 /* แถบประกาศจากแผงตั้งค่าในชีต (หน้าแรก) */

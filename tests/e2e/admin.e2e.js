@@ -382,6 +382,35 @@ const server = http.createServer((req, res) => {
 
   /* ── มือถือ: tabbar นำทาง + ไม่มี horizontal scroll ── */
   resetDB();
+  /* ── คิวข้อความถึงแขก: พรุ่งนี้เข้า (ยืนยันแล้ว) + เช็คเอาต์วันนี้/เมื่อวาน ── */
+  DB.bookings.push(mkB("WEB-2009", "สมหญิง ใจดี", -2, 0, "เว็บไซต์ (จองตรง)", "เช็คเอาต์แล้ว", { room_no: "701", phone: "081-234-5678" }));
+  const gmCtx = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "th-TH" });
+  await gmCtx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: "http://127.0.0.1:8899" });
+  const gm = await gmCtx.newPage();
+  gm.on("pageerror", (e) => pageErrors.push(String(e)));
+  await login(gm, "x");
+  const gmText = await gm.locator("#g-msg").innerText();
+  check("คิวข้อความ: มีแขกพรุ่งนี้ (Sofia · ยืนยันแล้ว) และแขกเช็คเอาต์วันนี้ (สมหญิง)", gmText.includes("Sofia Marchetti") && gmText.includes("พรุ่งนี้เข้า") && gmText.includes("สมหญิง") && gmText.includes("ขอบคุณ + รีวิว"));
+  check("คิวข้อความ: ไม่รวมการจองที่ยังรอยืนยัน (ธนากร)", !gmText.includes("ธนากร"));
+  await gm.locator('#g-msg [data-act="guest-msg"][data-id="BDC-2004"]').click();
+  await gm.waitForSelector("#msgBox");
+  const preMsg = await gm.inputValue("#msgBox");
+  check("ข้อความก่อนวันเข้าพัก: ชื่ออังกฤษ → อังกฤษ · มีเวลาเช็คอินและลิงก์ไกด์สนามบิน", preMsg.startsWith("See you tomorrow, Sofia Marchetti") && preMsg.includes("14:00") && preMsg.includes("/en/airport-guide.html?src=line"));
+  check("แขก Booking.com ไม่มีเบอร์ → ไม่มีปุ่ม WhatsApp และบอกให้วางในแชท Booking.com", await gm.locator('[data-act="wa-msg"]').count() === 0 && (await gm.locator("body").innerText()).includes("คัดลอกไปวางในแชทของ Booking.com"));
+  await gm.locator('[data-act="close-sheet"]').first().click();
+  await gm.waitForTimeout(300);
+  await gm.locator('#g-msg [data-act="guest-msg"][data-id="WEB-2009"]').click();
+  await gm.waitForTimeout(300);
+  check("ข้อความขอบคุณ: ชื่อไทยจองตรง → ภาษาไทย + มีปุ่ม WhatsApp", (await gm.inputValue("#msgBox")).startsWith("ขอบคุณที่มาพักกับเรา") && await gm.locator('[data-act="wa-msg"]').count() === 1);
+  await gm.locator('[data-act="copy-msg"]').click();
+  await gm.waitForTimeout(400);
+  check("คัดลอกแล้ว → แถวขึ้น 'ส่งแล้ว' และจำไว้ในเครื่อง", (await gm.locator('#g-msg [data-act="guest-msg"][data-id="WEB-2009"]').innerText()).includes("ส่งแล้ว") && (await gm.evaluate(() => localStorage.getItem("hoh-msg-sent") || "")).includes("thx:WEB-2009"));
+  const lateMsgs = await gm.evaluate(() => [buildPreArrivalMsg({ name: "เอ", checkin: "2026-10-08", note: "มาถึง: 20-22" }, "th"), buildPreArrivalMsg({ name: "A", checkin: "2026-10-08", note: "มาถึง: after22" }, "en"), buildPreArrivalMsg({ name: "บี", checkin: "2026-10-08", note: "" }, "th")]);
+  check("ข้อความก่อนวันเข้าพักปรับตามเวลามาถึง (หลัง 18:00 → เช็คอินเอง · หลัง 22:00 → ขอเวลาจริง · ไม่ระบุ → ถามเวลา)", lateMsgs[0].includes("เช็คอินด้วยตัวเอง") && lateMsgs[0].includes("20:00–22:00") && lateMsgs[1].includes("after 10 PM") && lateMsgs[1].includes("22:00") && lateMsgs[2].includes("ถึงกี่โมงบอกเราได้เลย"));
+  check("คิวข้อความ: ไม่มี JavaScript error", pageErrors.length === 0);
+  await gmCtx.close();
+  DB.bookings = DB.bookings.filter((b) => b.id !== "WEB-2009");
+
   const mob = await (await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "th-TH", hasTouch: true })).newPage();
   await login(mob, "x");
   check("มือถือ: เห็น tabbar 5 ปุ่ม", await mob.locator("#tabbar button").count() === 5);

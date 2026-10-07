@@ -595,6 +595,7 @@ function renderToday(){
       : `<button class="btn sm warn" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`, {note:true})), 'ไม่มีแขกเข้าวันนี้');
   g('g-dep','ออกวันนี้', q.departures.map(b => bookingRow(b, `<button class="btn sm primary" data-act="checkout" data-id="${esc(b.id)}">เช็คเอาต์</button>`, {note:true})), 'ไม่มีแขกออกวันนี้');
   g('g-pend','จองตรงรอยืนยัน', q.pending.slice().sort((a,b)=>String(a.checkin)<String(b.checkin)?-1:1).map(b => bookingRow(b, `<button class="btn sm ghost" data-act="msg" data-id="${esc(b.id)}" aria-label="ข้อความยืนยัน">${ic('message')}</button><button class="btn sm good" data-act="confirm-open" data-id="${esc(b.id)}">${ic('check')}ยืนยัน</button>`, {amount:true, note:true})), 'ไม่มีรายการรอยืนยัน');
+  g('g-msg','ข้อความถึงแขก (ก่อนวันเข้าพัก · ขอบคุณหลังเช็คเอาต์)', guestMsgQueue().map(({b, kind}) => { const sent = isMsgSent(b, kind); return bookingRow(b, `<span class="pill ${kind==='pre'?'arr':'done'} plain">${GUEST_MSG[kind].tag}</span><button class="btn sm ${sent?'ghost':'primary'}" data-act="guest-msg" data-kind="${kind}" data-id="${esc(b.id)}">${sent ? `${ic('check')}ส่งแล้ว` : `${ic('message')}เขียนข้อความ`}</button>`); }), 'ไม่มีข้อความที่ต้องส่งวันนี้');
   g('g-un','รอจัดห้อง (ยืนยันแล้ว · วันถัดไป)', q.unassigned.map(b => bookingRow(b, `<span class="faint" style="font-size:12px">${relDay(b.checkin)}</span><button class="btn sm" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`)), 'จัดห้องครบทุกรายการ');
   g('g-info','รอเติมข้อมูลจาก Pulse', q.needsInfo.map(b => bookingRow(b, `<button class="btn sm soft" data-act="edit" data-id="${esc(b.id)}">${ic('edit')}เติมข้อมูล</button>`, {note:true, pill:true})), 'ข้อมูลครบทุกรายการ');
   $('queue').innerHTML = `<div class="card-h" style="padding-bottom:6px"><h2>คิวงานวันนี้</h2><span class="sub">เรียงตามความเร่งด่วน</span><span class="grow"></span><button class="btn ghost sm" data-act="summary" title="สรุปงานวันนี้เป็นข้อความ — คัดลอกไปวางในกลุ่ม LINE ทีมงาน">${ic('copy')}สรุปส่ง LINE</button></div>` + groups.join('');
@@ -944,7 +945,7 @@ function openBooking(id){
       <dl class="kv"><dt>ห้อง</dt><dd>${String(b.room_no||'').trim() ? `${esc(roomLabel(b.room_no))} <span class="faint" style="font-weight:400">· ${esc(r?r.type:'')}${CLEAN[b.room_no]==='dirty'?' · <span class="pill dirty">รอทำความสะอาด</span>':''}</span>` : (active(b)&&!isCheckedOut(b)?`<span class="pill arr">ยังไม่จัดห้อง</span>`:'—')}</dd>
       <dt>ผู้เข้าพัก</dt><dd>${String(b.guests||'').trim()?esc(b.guests)+' คน':'<span class="faint">ไม่ระบุ</span>'}${roomsCount(b)>1?` · ${roomsCount(b)} ห้อง`:''}</dd>
       <dt>เบอร์โทร</dt><dd>${String(b.phone||'').trim()?`<a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a><div class="contact-row"><a class="btn sm" href="tel:${esc(b.phone)}">${ic('phone')}โทร</a><a class="btn sm wa" href="https://wa.me/${waNum(b.phone)}" target="_blank" rel="noopener">${ic('whatsapp')}WhatsApp</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(b.phone)}">${ic('copy')}คัดลอกเบอร์</button></div>`:'<span class="faint">—</span>'}</dd>
-      ${arrivalOf(b)?`<dt>เวลามาถึง</dt><dd>${esc(arrivalOf(b))}${/^(18|20|หลัง)/.test(arrivalOf(b))?' <span class="faint" style="font-weight:400">· เช็คอินด้วยตัวเอง</span>':''}</dd>`:''}
+      ${arrivalOf(b)?`<dt>เวลามาถึง</dt><dd>${esc(arrivalOf(b))}${isSelfCheckin(arrivalOf(b))?' <span class="faint" style="font-weight:400">· เช็คอินด้วยตัวเอง</span>':''}</dd>`:''}
       ${guestEmailOf(b)?`<dt>อีเมล</dt><dd><a href="${esc(mailtoOf(b))}" class="mono">${esc(guestEmailOf(b))}</a><div class="contact-row"><a class="btn sm" href="${esc(mailtoOf(b))}">${ic('mail')}ตอบทางอีเมล</a><button class="btn sm ghost" data-act="copy-text" data-text="${esc(guestEmailOf(b))}">${ic('copy')}คัดลอกอีเมล</button></div></dd>`:''}
       ${isStaff()?'':`<dt>ยอด</dt><dd class="num">${hasAmt(b)?'฿'+baht(bahtNum(b.amount))+(isYMD(b.checkout)?` <span class="faint">(฿${baht(Math.round(bahtNum(b.amount)/nightsOf(b)))}/คืน)</span>`:''):'<span class="faint">ไม่ระบุ</span>'}</dd>`}
       ${isStaff()||!hasAmt(b)?'':`<dt>ชำระ</dt><dd>${payPill(b)}${bahtNum(b.paid)?` <span class="faint" style="font-weight:400">รับแล้ว ฿${baht(bahtNum(b.paid))}${bahtNum(b.amount)>bahtNum(b.paid)?` · ค้าง ฿${baht(bahtNum(b.amount)-bahtNum(b.paid))}`:''}</span>`:''}${['unpaid','deposit'].includes(payState(b))?`<div class="contact-row"><button class="btn sm good" data-act="pay-full" data-id="${esc(b.id)}">${ic('check')}รับเงินครบแล้ว</button></div>`:''}</dd>`}
@@ -1129,19 +1130,67 @@ function buildThanksMsg(b, lang){
     `เดินทางปลอดภัยนะคะ 😊`,
   ]).join('\n');
 }
-function openThanks(id){
-  const b = bookingById(id); if(!b) return;
-  msgCtx = { b, lang: isDirect(b) && !/[a-z]/i.test(String(b.name||'')) ? 'th' : 'en' };
+/* ---------- คิวข้อความถึงแขก: ก่อนวันเข้าพัก (พรุ่งนี้เข้า) + ขอบคุณหลังเช็คเอาต์ ----------
+   ระบบไม่ได้ส่งเอง — ทีมงานคัดลอก/เปิด WhatsApp แล้วกดส่งเอง
+   "ส่งแล้ว" จำไว้ในเครื่องนี้ (localStorage) 14 วัน — คนละเครื่องจะไม่เห็นเครื่องหมายของกันและกัน */
+const MSG_SENT_KEY = 'hoh-msg-sent';
+const ARRIVAL_LABEL = { before14:['ก่อน 14:00','before 2 PM'], '14-16':['14:00–16:00','2–4 PM'], '16-18':['16:00–18:00','4–6 PM'], '18-20':['18:00–20:00','6–8 PM'], '20-22':['20:00–22:00','8–10 PM'], after22:['หลัง 22:00','after 10 PM'] };
+const isSelfCheckin = a => /^(18-20|20-22|after22)$/.test(a) || /^(18|20|หลัง)/.test(a);
+function msgSentMap(){ try { return JSON.parse(localStorage.getItem(MSG_SENT_KEY) || '{}') || {}; } catch(_) { return {}; } }
+function isMsgSent(b, kind){ return !!msgSentMap()[kind + ':' + b.id]; }
+function markMsgSent(b, kind){
+  try {
+    const m = msgSentMap(); m[kind + ':' + b.id] = TODAY;
+    for (const k in m) if (!isYMD(m[k]) || diffDays(m[k], TODAY) > 14) delete m[k];
+    localStorage.setItem(MSG_SENT_KEY, JSON.stringify(m));
+  } catch(_) {}
+}
+function guestMsgQueue(){
+  const tmr = addDays(TODAY, 1), yst = addDays(TODAY, -1);
+  const pre = BOOKINGS.filter(b => isConfirmedSt(b) && b.checkin === tmr).map(b => ({ b, kind: 'pre' }));
+  const thx = BOOKINGS.filter(b => active(b) && isCheckedOut(b) && [TODAY, yst].includes(effCheckout(b))).map(b => ({ b, kind: 'thx' }));
+  return [...pre, ...thx].sort((x, y) => isMsgSent(x.b, x.kind) - isMsgSent(y.b, y.kind));
+}
+const guestLang = b => isDirect(b) && !/[a-z]/i.test(String(b.name||'')) ? 'th' : 'en';
+// ข้อความก่อนวันเข้าพัก 1 วัน — ข้อเท็จจริงเดียวกับข้อความยืนยัน (เช็คอิน 14:00 · พนักงานถึง 18:00 · หลังจากนั้นเช็คอินเอง · ปกติถึง 22:00)
+function buildPreArrivalMsg(b, lang){
+  const nm = String(b.name||'').trim(), en = lang === 'en';
+  const arr = arrivalOf(b), lbl = ARRIVAL_LABEL[arr] ? ARRIVAL_LABEL[arr][en ? 1 : 0] : arr;
+  const L = [en ? `See you tomorrow${nm ? ', ' + nm : ''}! 🙏` : `พรุ่งนี้เจอกันแล้วนะคะ${nm ? ' คุณ' + nm : ''} 🙏`,
+    en ? `📅 Check-in ${fmtEN(b.checkin)} from 14:00 · staff on site until 18:00` : `📅 เช็คอิน ${fmtD(b.checkin)} ตั้งแต่ 14:00 · พนักงานอยู่ถึง 18:00`];
+  if (arr === 'after22') L.push(en ? `You mentioned arriving ${lbl} — regular check-in ends at 22:00, so please tell us your flight or arrival time and we'll confirm the arrangements.` : `แจ้งไว้ว่าจะถึง${lbl} — เช็คอินปกติถึง 22:00 รบกวนบอกเวลาที่จะถึงจริงหรือเที่ยวบิน เราจะยืนยันวิธีเข้าพักให้ก่อนนะคะ`);
+  else if (arr && isSelfCheckin(arr)) L.push(en ? `You mentioned arriving ${lbl} — that's after 18:00, so we'll send the self check-in steps ahead.` : `แจ้งไว้ว่าจะถึงช่วง ${lbl} — หลัง 18:00 เป็นเช็คอินด้วยตัวเอง เราจะส่งขั้นตอนให้ก่อนนะคะ`);
+  else if (arr) L.push(en ? `Thanks for letting us know you'll arrive ${lbl}. If that changes, just message us.` : `ขอบคุณที่แจ้งว่าจะถึงช่วง ${lbl} นะคะ ถ้าเวลาเปลี่ยนทักบอกเราได้เลยค่ะ`);
+  else L.push(en ? `Just tell us your arrival time — if it's after 18:00 we'll send self check-in steps ahead.` : `ถึงกี่โมงบอกเราได้เลย ถ้าหลัง 18:00 เราจะส่งวิธีเช็คอินด้วยตัวเองให้ก่อนค่ะ`);
+  L.push(en ? `✈️ Coming from the airport? Routes and taxi prices: ${SITE_URL}/en/airport-guide.html?src=line` : `✈️ มาจากสนามบิน ดูวิธีเดินทาง+ราคาแท็กซี่: ${SITE_URL}/airport-guide.html?src=line`,
+    `📍 ${en ? 'Map' : 'แผนที่'}: ${MAP_LINK}`);
+  return L.join('\n');
+}
+const GUEST_MSG = {
+  pre: { title: 'ข้อความก่อนวันเข้าพัก', tag: 'พรุ่งนี้เข้า', when: 'ส่งวันนี้ (ก่อนวันเข้าพัก 1 วัน) — แขกจะได้วางแผนเดินทางและบอกเวลามาถึง', build: buildPreArrivalMsg },
+  thx: { title: 'ข้อความขอบคุณหลังเช็คเอาต์', tag: 'ขอบคุณ + รีวิว', when: 'ส่งวันเช็คเอาต์หรือวันถัดไป แขกมักรีวิวตอนยังจำได้', build: buildThanksMsg },
+};
+function openGuestMsg(id, kind){
+  const b = bookingById(id), K = GUEST_MSG[kind]; if(!b || !K) return;
+  msgCtx = { b, kind, lang: guestLang(b) };
+  const phone = String(b.phone||'').trim();
   openSheet({
-    title: 'ข้อความขอบคุณหลังเช็คเอาต์',
-    sub: '<span class="faint">ระบบไม่ได้ส่งเอง — คัดลอกไปวางในแชทของแขก · ส่งวันเช็คเอาต์หรือวันถัดไป แขกมักรีวิวตอนยังจำได้</span>',
+    title: K.title,
+    sub: `<span class="faint">ระบบไม่ได้ส่งเอง — ${isDirect(b) ? 'คัดลอกไปวางในแชท LINE / WhatsApp ของแขก' : 'คัดลอกไปวางในแชทของ Booking.com (แขกจองผ่าน Booking.com)'} · ${K.when}</span>`,
     body: `<div class="seg" style="margin-bottom:12px"><button class="${msgCtx.lang==='th'?'on':''}" data-act="msg-lang" data-l="th">ภาษาไทย</button><button class="${msgCtx.lang==='en'?'on':''}" data-act="msg-lang" data-l="en">English</button></div>
-      <div class="f"><label for="msgBox">ข้อความ (แก้ก่อนคัดลอกได้)</label><textarea id="msgBox" rows="8" style="min-height:170px;font-family:var(--mono);font-size:12.5px"></textarea></div>`,
-    foot: `<button class="btn primary" data-act="copy-msg">${ic('copy')}คัดลอกข้อความ</button><button class="btn" data-act="close-sheet">ปิด</button>`,
+      <div class="f"><label for="msgBox">ข้อความ (แก้ก่อนส่งได้)</label><textarea id="msgBox" rows="8" style="min-height:170px;font-family:var(--mono);font-size:12.5px"></textarea></div>`,
+    foot: `<button class="btn primary" data-act="copy-msg">${ic('copy')}คัดลอกข้อความ</button>${phone && waNum(phone).length >= 10 ? `<button class="btn good" data-act="wa-msg">${ic('message')}เปิด WhatsApp ${esc(phone)}</button>` : ''}<button class="btn" data-act="close-sheet">ปิด</button>`,
   });
-  const refresh = () => { $('msgBox').value = buildThanksMsg(msgCtx.b, msgCtx.lang); };
+  const refresh = () => { $('msgBox').value = K.build(msgCtx.b, msgCtx.lang); };
   refresh();
   msgCtx.refresh = refresh;
+}
+function openThanks(id){ openGuestMsg(id, 'thx'); }
+// หลังคัดลอก/เปิด WhatsApp จากคิวข้อความ → ทำเครื่องหมายส่งแล้ว แล้ววาดหน้าวันนี้ใหม่
+function noteGuestMsgSent(){
+  if (!msgCtx || !msgCtx.kind) return;
+  markMsgSent(msgCtx.b, msgCtx.kind);
+  if (document.getElementById('g-msg')) renderToday();
 }
 let msgCtx = null;
 /* ---------- ติดต่อแขก / คัดลอก ---------- */
@@ -1533,8 +1582,10 @@ document.addEventListener('click', e => {
   else if(act==='save-new') saveNew();
   else if(act==='msg'){ e.stopPropagation(); openMsg(id); }
   else if(act==='thanks'){ e.stopPropagation(); openThanks(id); }
+  else if(act==='guest-msg'){ e.stopPropagation(); openGuestMsg(id, el.dataset.kind); }
+  else if(act==='wa-msg'){ if(msgCtx){ window.open(`https://wa.me/${waNum(msgCtx.b.phone)}?text=${encodeURIComponent($('msgBox').value)}`, '_blank', 'noopener'); noteGuestMsgSent(); } }
   else if(act==='msg-lang'){ document.querySelectorAll('[data-act="msg-lang"]').forEach(b => b.classList.toggle('on', b===el)); if(msgCtx){ msgCtx.lang = el.dataset.l; msgCtx.refresh(); } }
-  else if(act==='copy-msg'){ const t = $('msgBox').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย')).catch(()=>{ try { $('msgBox').select(); document.execCommand('copy'); toast('คัดลอกแล้ว'); } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } }); }
+  else if(act==='copy-msg'){ const t = $('msgBox').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>{ toast('คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย'); noteGuestMsgSent(); }).catch(()=>{ try { $('msgBox').select(); document.execCommand('copy'); toast('คัดลอกแล้ว'); } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } }); }
   else if(act==='close-sheet') closeSheet();
   else if(act==='summary'){ e.stopPropagation(); openSummary(); }
   else if(act==='open-order'){ e.stopPropagation(); openOrder(id); }

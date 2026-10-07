@@ -219,6 +219,7 @@ const I18N = {
   "av.low.pre":      { th: "⚡ ใกล้เต็ม! เหลือเพียง ", en: "⚡ Almost full! Only " },
   "av.low.post":     { th: " ห้องสุดท้าย", en: " room(s) left" },
   "av.full":         { th: "ขออภัย วันที่เลือกห้องเต็ม — ลองเลื่อนวันดูนะครับ", en: "Sorry, we're fully booked on those dates — try different dates" },
+  "av.alt":          { th: "วันใกล้เคียงที่ยังว่าง (แตะเพื่อเปลี่ยนวัน):", en: "Nearby dates with rooms (tap to switch):" },
   "av.note":         { th: "ตามข้อมูลระบบ ยืนยันแน่นอนอีกครั้งเมื่อเราตอบกลับ", en: "Based on live data — final confirmation in our reply" },
   "av.uncertain":    { th: "ส่งคำขอมาได้เลย — เราจะเช็คห้องว่างและยืนยันให้ภายใน 24 ชม.", en: "Send your request — we'll check availability and confirm within 24 hrs" },
 

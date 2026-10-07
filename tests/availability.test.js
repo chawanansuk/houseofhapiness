@@ -209,6 +209,30 @@ module.exports = (async () => {
   assert.equal(r.body.ok, false);
   assert.equal(r.body.checks.sheet, "unavailable");
 
+  // 11) ห้องเต็ม + suggest=1 → เสนอช่วงวันใกล้เคียงที่ว่าง (คืนเท่าเดิม ใกล้สุดก่อน สูงสุด 3) ไม่มีข้อมูลแขกหลุด
+  process.env.SAFETY_BUFFER = "0";
+  global.fetch = async () => ({
+    ok: true, status: 200, text: async () => "",
+    json: async () => ({
+      bookings: [{ id: "WEB-F", name: "แขกลับ", phone: "0812345678", source: "เว็บไซต์", status: "ยืนยันแล้ว", checkin: "2027-03-10", checkout: "2027-03-14", rooms: "3" }],
+      rooms: [{ room: "701" }, { room: "702" }, { room: "703" }],
+    }),
+  });
+  r = await call(availability, { query: { checkin: "2027-03-11", checkout: "2027-03-13", suggest: "1" } });
+  assert.equal(r.body.full, true);
+  assert.deepEqual(r.body.alternatives, [
+    { checkin: "2027-03-14", checkout: "2027-03-16" },
+    { checkin: "2027-03-08", checkout: "2027-03-10" },
+    { checkin: "2027-03-15", checkout: "2027-03-17" },
+  ], "ต้องเรียงใกล้สุดก่อน และข้ามช่วงที่ทับคืนเต็ม");
+  assert.ok(!/แขกลับ|0812345678|WEB-F/.test(JSON.stringify(r.body)), "ห้ามมีข้อมูลแขกในคำตอบ");
+  r = await call(availability, { query: { checkin: "2027-03-11", checkout: "2027-03-13" } });
+  assert.equal(r.body.alternatives, undefined, "ไม่ขอ suggest ต้องไม่คำนวณ");
+  r = await call(availability, { query: { checkin: "2027-03-20", checkout: "2027-03-22", suggest: "1" } });
+  assert.equal(r.body.full, false); assert.equal(r.body.alternatives, undefined, "ไม่เต็มไม่ต้องเสนอ");
+  delete process.env.SAFETY_BUFFER;
+  global.fetch = fetchFixture;
+
   console.log("ALL TESTS PASSED");
   return "ALL TESTS PASSED";
 })().catch((e) => {
