@@ -857,6 +857,14 @@ async function doCancel(id){
   closeSheet();
   await afterAction(() => { b.status = 'ยกเลิก'; if(wasIn && room) CLEAN[room] = 'dirty'; }, `ยกเลิกการจอง ${b.id} แล้ว`);
 }
+// กดยืนยันไปก่อนคุยกับแขก → ย้อนกลับเป็นรอยืนยัน (ห้องที่จัดไว้ยังกันไว้ให้ เผื่อแขกตกลง)
+async function doUnconfirm(id){
+  const b = bookingById(id); if(!b) return;
+  const r1 = await apiUpdate({ action: 'update', id: b.id, fields: { status: 'รอยืนยัน' } });
+  if(!r1) return;
+  closeSheet();
+  await afterAction(() => { b.status = 'รอยืนยัน'; }, `${displayName(b)} กลับเป็นรอยืนยันแล้ว${String(b.room_no||'').trim() ? ` (ห้อง ${roomLabel(b.room_no)} ยังกันไว้)` : ''}`);
+}
 async function doRestore(id){
   const b = bookingById(id); if(!b) return;
   const r1 = await apiUpdate({ action: 'update', id: b.id, fields: { status: 'ยืนยันแล้ว' } });
@@ -925,7 +933,7 @@ function openBooking(id){
   const acts = [];
   const A = (act, label, cls='', icon='') => acts.push(`<button class="btn ${cls}" data-act="${act}" data-id="${esc(b.id)}" data-label="${esc(label)}">${icon?ic(icon):''}${label}</button>`);
   const k = stKey(b);
-  if(k==='confirmed'){ if(b.checkin<=TODAY) A('checkin','เช็คอิน','primary','login'); A('assign', String(b.room_no||'').trim()?'ย้ายห้อง':'จัดห้อง', String(b.room_no||'').trim()?'':'warn','move'); A('msg','ข้อความยืนยัน','','message'); A('edit','แก้ไข','','edit'); A('cancel','ยกเลิกการจอง','danger'); }
+  if(k==='confirmed'){ if(b.checkin<=TODAY) A('checkin','เช็คอิน','primary','login'); A('assign', String(b.room_no||'').trim()?'ย้ายห้อง':'จัดห้อง', String(b.room_no||'').trim()?'':'warn','move'); A('msg','ข้อความยืนยัน','','message'); A('edit','แก้ไข','','edit'); if(isDirect(b)) A('unconfirm','กลับเป็นรอยืนยัน','soft'); A('cancel','ยกเลิกการจอง','danger'); }
   else if(k==='inhouse'){ A('checkout','เช็คเอาต์','primary','logout'); A('extend','ต่ออีก 1 คืน','','plus'); A('assign','ย้ายห้อง','','move'); A('thanks','ข้อความขอบคุณ + ขอรีวิว','','message'); A('edit','แก้ไข','','edit'); }
   else if(k==='pending'){ A('confirm-open','ยืนยันการจอง','good','check'); A('msg','ส่งข้อความ','','message'); A('edit','แก้ไข','','edit'); A('cancel','ปฏิเสธ/ยกเลิก','danger'); }
   else if(k==='needsinfo'){ A('edit','เติมข้อมูลจาก Pulse','primary','edit'); A('cancel','ยกเลิกการจอง','danger'); }
@@ -1052,12 +1060,15 @@ function openConfirm(id){
       <dl class="kv"><dt>ผู้จอง</dt><dd>${esc(displayName(b))}${String(b.phone||'').trim()?` · <a href="tel:${esc(b.phone)}" class="mono">${esc(b.phone)}</a>`:''}</dd>
       ${isStaff()||!hasAmt(b)?'':`<dt>ยอด</dt><dd class="num">฿${baht(bahtNum(b.amount))}</dd>`}</dl>
       ${b.note?`<div class="notebox">${esc(b.note)}</div>`:''}
-      <div class="f" style="margin-top:14px"><label for="cfRoom">จัดห้องให้ (เลือกภายหลังได้)</label><select id="cfRoom">${roomOpts}</select></div>`,
-    foot: `<button class="btn good" data-act="confirm-save" data-id="${esc(b.id)}">${ic('check')}ยืนยันการจอง</button><button class="btn danger" data-act="cancel" data-id="${esc(b.id)}" data-label="ปฏิเสธ/ยกเลิก">ปฏิเสธ/ยกเลิก</button><button class="btn" data-act="close-sheet">ปิด</button>`,
+      <div class="f" style="margin-top:14px"><label for="cfRoom">จัดห้องให้ (เลือกภายหลังได้)</label><select id="cfRoom">${roomOpts}</select></div>
+      <label class="cf-agree"><input type="checkbox" id="cfAgree" data-act="cf-agree"><span>คุยกับแขกแล้ว — แจ้งราคาและแขกตกลงจองวันนี้</span></label>
+      <p class="faint" style="font-size:12.5px;margin:6px 0 0">ยังไม่ได้คุย → ปิดหน้านี้แล้วกดไอคอนข้อความในแถวการจอง ทักแขกเพื่อแจ้งราคาก่อน</p>`,
+    foot: `<button class="btn good" data-act="confirm-save" data-id="${esc(b.id)}" disabled>${ic('check')}ยืนยันการจอง</button><button class="btn danger" data-act="cancel" data-id="${esc(b.id)}" data-label="ปฏิเสธ/ยกเลิก">ปฏิเสธ/ยกเลิก</button><button class="btn" data-act="close-sheet">ปิด</button>`,
   });
 }
 async function saveConfirm(id){
   const b = bookingById(id); if(!b) return;
+  if(!$('cfAgree') || !$('cfAgree').checked){ toast('ติ๊กก่อนว่าคุยกับแขกและแขกตกลงแล้ว', true); return; }
   const room = $('cfRoom').value;
   const fields = { status: 'ยืนยันแล้ว' };
   if(String(room) !== String(b.room_no||'')) fields.room_no = room;
@@ -1570,6 +1581,8 @@ document.addEventListener('click', e => {
   else if(act==='confirm-save') saveConfirm(id);
   else if(act==='cancel'){ if(el.dataset.armed){ doCancel(id); } else { el.dataset.armed='1'; el.textContent='แตะอีกครั้งเพื่อยืนยันการยกเลิก'; el.classList.add('primary'); setTimeout(()=>{ if(el.isConnected){ delete el.dataset.armed; el.textContent = el.dataset.label || 'ยกเลิกการจอง'; el.classList.remove('primary'); } }, 4000); } }
   else if(act==='restore') doRestore(id);
+  else if(act==='unconfirm') doUnconfirm(id);
+  else if(act==='cf-agree'){ const btn = document.querySelector('[data-act="confirm-save"]'); if(btn) btn.disabled = !el.checked; }
   else if(act==='extend') doExtend(id);
   else if(act==='assign'){ e.stopPropagation(); if(state.assign===id) cancelAssign(); else startAssign(id); }
   else if(act==='assign-to'){ e.stopPropagation(); doAssign(no); }
