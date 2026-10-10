@@ -407,6 +407,28 @@ const server = http.createServer((req, res) => {
   check("คัดลอกแล้ว → แถวขึ้น 'ส่งแล้ว' และจำไว้ในเครื่อง", (await gm.locator('#g-msg [data-act="guest-msg"][data-id="WEB-2009"]').innerText()).includes("ส่งแล้ว") && (await gm.evaluate(() => localStorage.getItem("hoh-msg-sent") || "")).includes("thx:WEB-2009"));
   const lateMsgs = await gm.evaluate(() => [buildPreArrivalMsg({ name: "เอ", checkin: "2026-10-08", note: "มาถึง: 20-22" }, "th"), buildPreArrivalMsg({ name: "A", checkin: "2026-10-08", note: "มาถึง: after22" }, "en"), buildPreArrivalMsg({ name: "บี", checkin: "2026-10-08", note: "" }, "th")]);
   check("ข้อความก่อนวันเข้าพักปรับตามเวลามาถึง (หลัง 18:00 → เช็คอินเอง · หลัง 22:00 → ขอเวลาจริง · ไม่ระบุ → ถามเวลา)", lateMsgs[0].includes("เช็คอินด้วยตัวเอง") && lateMsgs[0].includes("20:00–22:00") && lateMsgs[1].includes("after 10 PM") && lateMsgs[1].includes("22:00") && lateMsgs[2].includes("ถึงกี่โมงบอกเราได้เลย"));
+  // ยืนยันจองตรง: ต้องติ๊ก "คุยกับแขกแล้ว" ก่อน · ยืนยันพลาดแล้วย้อนกลับเป็นรอยืนยันได้
+  await gm.locator('[data-act="close-sheet"]').first().click();
+  await gm.waitForTimeout(300);
+  await gm.locator('#g-pend [data-act="confirm-open"][data-id="WEB-2005"]').click();
+  await gm.waitForSelector("#cfAgree");
+  const nUp = updates.length;
+  check("ยืนยันจองตรง: ปุ่มยืนยันปิดอยู่จนกว่าจะติ๊กว่าคุยกับแขกแล้ว", await gm.locator('[data-act="confirm-save"]').isDisabled());
+  await gm.locator("#cfAgree").check();
+  check("ติ๊กแล้วปุ่มยืนยันเปิด", !(await gm.locator('[data-act="confirm-save"]').isDisabled()));
+  await gm.locator('[data-act="confirm-save"]').click();
+  await gm.waitForTimeout(600);
+  const cu = updates.slice(nUp).find((u) => u.id === "WEB-2005");
+  check("ยืนยันแล้วยิงสถานะ ยืนยันแล้ว", !!cu && cu.fields && cu.fields.status === "ยืนยันแล้ว");
+  await gm.locator('[data-act="close-sheet"]').first().click();
+  await gm.waitForTimeout(300);
+  await gm.evaluate(() => openBooking("WEB-2005"));
+  await gm.waitForSelector('[data-act="unconfirm"]');
+  const nUp2 = updates.length;
+  await gm.locator('[data-act="unconfirm"]').click();
+  await gm.waitForTimeout(600);
+  const uu = updates.slice(nUp2).find((u) => u.id === "WEB-2005");
+  check("ยืนยันพลาด → กดกลับเป็นรอยืนยันได้", !!uu && uu.fields && uu.fields.status === "รอยืนยัน" && (await gm.locator("#g-pend").innerText()).includes("ธนากร"));
   check("คิวข้อความ: ไม่มี JavaScript error", pageErrors.length === 0);
   await gmCtx.close();
   DB.bookings = DB.bookings.filter((b) => b.id !== "WEB-2009");
