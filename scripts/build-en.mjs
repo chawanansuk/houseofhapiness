@@ -72,7 +72,7 @@ const EN_DESC = {
   "family-river-day.html": "A low-walking family day from Khlong San: a flat Sky Park you can push a stroller across, a short ฿5 ferry, then a cool mall for the hot afternoon.",
   "getting-around-bangkok.html": "Getting around Bangkok from Khlong San: the Gold Line two stops to the Silom Line, the ฿5 ferry to Chinatown, and when a Grab or taxi makes more sense.",
   "iconsiam-asiatique-boat.html": "A river afternoon from Khlong San: the Gold Line one stop to ICONSIAM, then free shuttles and express boats downriver to Asiatique for the evening.",
-  "loy-krathong.html": "Loy Krathong 2026 falls on Wednesday 25 November. Where to float a krathong on the Khlong San riverside near us, with lights on both banks of the river.",
+  "loy-krathong.html": "Loy Krathong 2026 falls on Tuesday 24 November. Where to float a krathong on the Khlong San riverside near us, with lights on both banks of the river.",
   "near-iconsiam.html": "Stay near ICONSIAM in Khlong San: about 2 km away, 5 minutes by car or one BTS Gold Line stop, with the Chao Phraya Sky Park a short walk from our door.",
   "rainy-day-indoor.html": "A rainy-day plan from Khlong San: the Gold Line to a cool riverside mall, a café while the rain is heaviest, and covered temple halls if it eases.",
   "room-deluxe.html": "Our biggest room in Khlong San: a double bed plus a sofa corner in one generous space, sleeps 2 (max 3), with balcony, fridge and private bathroom.",
