@@ -1927,7 +1927,7 @@ details.m-fold { background: none; border: 0; border-radius: 0; padding: 0; marg
 @media (max-width: 640px) { .ld-table th, .ld-table td { padding: .7rem .65rem; } .ld-cmp { font-size: .92rem; } }
 .ld-cmp { table-layout: fixed; }
 .ld-cmp thead th:first-child, .ld-cmp tbody th { width: 26%; }
-.ld-sec .ld-p a { color: var(--gold-dark); font-weight: 600; text-underline-offset: 3px; }
+.ld-sec .ld-p a, .ld-sec .ld-rows a, .ld-sec .ld-list a, .ld-sec .ld-steps a { color: var(--gold-dark); font-weight: 600; text-underline-offset: 3px; }
 
 /* หน้าจอง: ตัวเลือกห้องแบบกระชับ — ชื่อ + บรรทัดเดียว ไม่มีคอลัมน์ราคา */
 .room { gap: .75rem; align-items: center; padding: .7rem .95rem; margin-bottom: .55rem; border-width: 1.5px; }
