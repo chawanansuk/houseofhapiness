@@ -193,6 +193,12 @@ const I18N = {
   "rl.thonburi-riverside-evening.d": { th: "คาเฟ่ริมน้ำ สวนลอยฟ้า กุฎีจีน ครึ่งวันเย็น", en: "Riverside cafés, the Sky Park and Kudi Chin in one evening" },
   "rl.three-temples-boat.t": { th: "3 วัดครึ่งวันทางเรือ", en: "Three temples by boat" },
   "rl.three-temples-boat.d": { th: "วัดโพธิ์ วัดอรุณ วัดกัลยาณมิตร จากท่าเรือท้ายซอย", en: "Wat Pho, Wat Arun and Wat Kalayanamit from our pier" },
+  "rl.talat-noi.t": { th: "ตลาดน้อยครึ่งวัน", en: "Talat Noi in half a day" },
+  "rl.talat-noi.d": { th: "ศาลเจ้า บ้านฮกเกี้ยน ซอยอะไหล่ ข้ามเรือ 5 บาท", en: "Shrine, Hokkien mansion and parts lanes, one ฿5 ferry away" },
+  "rl.kudi-chin-walk.t": { th: "เดินกุฎีจีน สวนลอยฟ้า วัดกัลยาณมิตร", en: "Kudi Chin, Sky Park and Wat Kalayanamit on foot" },
+  "rl.kudi-chin-walk.d": { th: "ฝั่งธนฯ ไม่ข้ามแม่น้ำ เหมาะวันหยุด", en: "Our side of the river, no boat needed — ideal at weekends" },
+  "rl.grand-palace-by-boat.t": { th: "พระบรมมหาราชวังทางเรือ", en: "The Grand Palace by boat" },
+  "rl.grand-palace-by-boat.d": { th: "เรือ 5 บาทต่อเรือธงฟ้า ถึงประตูวัง 08:30", en: "฿5 ferry then the blue-flag boat, at the gate by 08:30" },
   "prov.team":       { th: "ภาพถ่ายโดยทีม House of Happiness", en: "Photo: House of Happiness team" },
   "ph.yaowaratgate": { th: "ซุ้มประตูเฉลิมพระเกียรติ หัวถนนเยาวราช กับยอดมณฑปวัดไตรมิตร", en: "Chinatown Gate at the head of Yaowarat Road, with Wat Traimit behind" },
   "ph.vegfest":      { th: "ป้ายผ้าเหลืองงานกินเจเยาวราช 9–18 ตุลาคม 2569 ขึงข้ามถนน ตุ๊กตุ๊กวิ่งผ่านหน้าร้านทอง", en: "Yellow Vegetarian Festival banners for 9–18 October 2026 strung across Yaowarat Road, with tuk-tuks passing the gold shops" },
@@ -438,6 +444,7 @@ const I18N = {
   "ph.goldline": { th: "รถไฟฟ้าสายสีทองเทียบชานชาลาสถานีกรุงธนบุรี", en: "A BTS Gold Line train at the Krung Thon Buri station platform" },
   "ph.bike": { th: "จักรยานเช่าจอดใต้ร่มไม้ในสวน (ภาพประกอบ ถ่ายที่บางกะเจ้า)", en: "Rental bicycles parked under trees in a park (illustration, taken at Bang Krachao)" },
   "ph.songnam": { th: "สรงน้ำพระช่วงสงกรานต์ที่วัดราชบพิธ กรุงเทพฯ (ภาพประกอบ)", en: "Bathing a Buddha image at Songkran, Wat Ratchabophit, Bangkok (illustration)" },
+  "ph.talatnoi": { th: "ศาลเจ้าโจวซือกง ตลาดน้อย ศาลเจ้าฮกเกี้ยนเก่าแก่ริมแม่น้ำเจ้าพระยา", en: "Chow Sue Kong Shrine in Talat Noi, an old Hokkien shrine beside the Chao Phraya" },
   "ph.kudichin": { th: "โบสถ์ซางตาครู้ส ย่านกุฎีจีน โดมสีแดงอมชมพูและผนังสีครีม", en: "Santa Cruz Church in Kudi Chin, with its cream walls and rose-red dome" },
   "ph.pakkhlong": { th: "กล้วยไม้สีม่วงมัดเป็นช่อวางขายที่ปากคลองตลาด", en: "Bundles of purple orchids for sale at Pak Khlong Talat flower market" },
 
@@ -451,14 +458,14 @@ const I18N = {
 
   /* ส่วนไกด์เที่ยวในหน้าแรก */
   "hg.title": { th: "ไกด์เที่ยวจากคนพื้นที่", en: "Local guides, written by us" },
-  "hg.lead": { th: "เราอยู่คลองสานมาทั้งชีวิต — 29 ไกด์ที่เราเขียนเอง ไม่ได้ลอกมาจากที่ไหน", en: "We have lived in Khlong San all our lives. All 29 guides are ours, not copied from anywhere." },
+  "hg.lead": { th: "เราอยู่คลองสานมาทั้งชีวิต — 32 ไกด์ที่เราเขียนเอง ไม่ได้ลอกมาจากที่ไหน", en: "We have lived in Khlong San all our lives. All 32 guides are ours, not copied from anywhere." },
   "hg.1t": { th: "เดินเที่ยวมรดกไชน่าทาวน์ ข้ามเรือ 5 บาท", en: "The Chinatown heritage walk, one ฿5 ferry away" },
   "hg.1d": { th: "ครึ่งวัน 8 จุด เริ่มที่ท่าเรือท้ายซอย", en: "Half a day, eight stops, starting at the pier down our lane" },
   "hg.2t": { th: "ถนนทรงวาด ย่านสร้างสรรค์ที่ใกล้เราที่สุด", en: "Song Wat Road, the creative district closest to us" },
   "hg.2d": { th: "ข้ามเรือ 5 บาท 3 นาที ขึ้นตรงหัวถนน", en: "A ฿5 ferry, three minutes, landing at the head of the road" },
   "hg.3t": { th: "เดินทางในกรุงเทพจากคลองสาน", en: "Getting around Bangkok from Khlong San" },
   "hg.3d": { th: "สายสีทอง เรือข้ามฟาก หรือเรียกรถ เลือกให้ถูกจังหวะ", en: "The Gold Line, the ferry or a car, and when each one wins" },
-  "hg.all": { th: "ดูไกด์ทั้งหมด 29 เรื่อง", en: "See all 29 guides" },
+  "hg.all": { th: "ดูไกด์ทั้งหมด 32 เรื่อง", en: "See all 32 guides" },
 
 
   /* บล็อกจุดบนแผนที่ · บรรทัดผู้เขียน/วันที่ · สารบัญ */
