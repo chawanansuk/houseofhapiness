@@ -468,3 +468,8 @@ does not have to live in a visible credits box on the page.)
 
 **Best realistic outcome:** 7 of 9 replaced with no-attribution photos, `kudichin` and
 `skypark` shot on your own phone on a walk, and `credits.json` emptied completely.
+
+
+## เพิ่มเติม 2026-10-16 — `talatnoi` (หน้า talat-noi.html)
+
+รูปหน้าปกตลาดน้อยมาจาก Wikimedia Commons (ศาลเจ้าโจวซือกง, Chainwit., CC BY-SA 4.0) ตัดแถวรถด้านล่างออกและลบ EXIF แล้ว — เครดิตใน `credits.json` ต้องคงไว้จนกว่าจะถ่ายเองแทน ถ้าเดินไปถ่ายเอง แนะนำมุมลานหน้าศาลเจ้าตอนเช้าไม่มีรถจอด หรือซอยวานิช 2 ที่เห็นเครื่องยนต์หน้าร้าน
