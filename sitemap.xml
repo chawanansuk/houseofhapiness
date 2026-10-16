@@ -73,6 +73,24 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/ayutthaya-day-trip.html"/>
   </url>
   <url>
+    <loc>https://houseofhappinessbangkok.com/bang-krachao-bike.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/bang-krachao-bike.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/bang-krachao-bike.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/bang-krachao-bike.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/en/bang-krachao-bike.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/bang-krachao-bike.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/bang-krachao-bike.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/bang-krachao-bike.html"/>
+  </url>
+  <url>
     <loc>https://houseofhappinessbangkok.com/booking.html</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>monthly</changefreq>
@@ -92,7 +110,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/chao-phraya-boat-guide.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/chao-phraya-boat-guide.html"/>
@@ -101,7 +119,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/chao-phraya-boat-guide.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/chao-phraya-boat-guide.html"/>
@@ -110,7 +128,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/chao-phraya-tourist-boat.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/chao-phraya-tourist-boat.html"/>
@@ -119,12 +137,30 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/chao-phraya-tourist-boat.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/chao-phraya-tourist-boat.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/chao-phraya-tourist-boat.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/chao-phraya-tourist-boat.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/chatuchak-weekend.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/chatuchak-weekend.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/chatuchak-weekend.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/chatuchak-weekend.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/en/chatuchak-weekend.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/chatuchak-weekend.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/chatuchak-weekend.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/chatuchak-weekend.html"/>
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/chinatown-festivals.html</loc>
@@ -236,7 +272,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/guides.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/guides.html"/>
@@ -245,7 +281,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/guides.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/guides.html"/>
@@ -254,7 +290,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/heritage-walk.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/heritage-walk.html"/>
@@ -263,7 +299,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/heritage-walk.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/heritage-walk.html"/>
@@ -290,7 +326,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/</loc>
-    <lastmod>2026-10-03</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/"/>
@@ -299,7 +335,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/index.html</loc>
-    <lastmod>2026-10-03</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/"/>
@@ -524,7 +560,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/sampeng-morning.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/sampeng-morning.html"/>
@@ -533,7 +569,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/sampeng-morning.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/sampeng-morning.html"/>
@@ -560,7 +596,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/song-wat-road.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/song-wat-road.html"/>
@@ -569,7 +605,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/song-wat-road.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/song-wat-road.html"/>
@@ -650,7 +686,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/thonburi-one-day.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/thonburi-one-day.html"/>
@@ -659,7 +695,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/thonburi-one-day.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/thonburi-one-day.html"/>
@@ -668,7 +704,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/thonburi-riverside-evening.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/thonburi-riverside-evening.html"/>
@@ -677,7 +713,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/thonburi-riverside-evening.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/thonburi-riverside-evening.html"/>
@@ -686,7 +722,7 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/three-temples-boat.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/three-temples-boat.html"/>
@@ -695,12 +731,48 @@
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/en/three-temples-boat.html</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/three-temples-boat.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/three-temples-boat.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/three-temples-boat.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/wang-lang-wat-rakhang.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/wang-lang-wat-rakhang.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/wang-lang-wat-rakhang.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/wang-lang-wat-rakhang.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/en/wang-lang-wat-rakhang.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/wang-lang-wat-rakhang.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/wang-lang-wat-rakhang.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/wang-lang-wat-rakhang.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/wat-paknam.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/wat-paknam.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/wat-paknam.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/wat-paknam.html"/>
+  </url>
+  <url>
+    <loc>https://houseofhappinessbangkok.com/en/wat-paknam.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="th" href="https://houseofhappinessbangkok.com/wat-paknam.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://houseofhappinessbangkok.com/en/wat-paknam.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://houseofhappinessbangkok.com/wat-paknam.html"/>
   </url>
   <url>
     <loc>https://houseofhappinessbangkok.com/yaowarat-night-walk.html</loc>

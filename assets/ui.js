@@ -158,6 +158,10 @@ var HOH_GUIDE_IMG = {
   "talat-noi":                  ["/images/attractions/talatnoi.jpg", "/images/attractions/talatnoi-800.webp 800w, /images/attractions/talatnoi.webp 1280w", 1280, 780],
   "kudi-chin-walk":             ["/images/attractions/kudichin.jpg", "/images/attractions/kudichin-800.webp 800w, /images/attractions/kudichin.webp 1280w", 1280, 959],
   "grand-palace-by-boat":       ["/images/attractions/grandpalace.jpg", "/images/attractions/grandpalace-800.webp 800w, /images/attractions/grandpalace.webp 960w", 960, 639],
+  "wat-paknam":                  ["/images/attractions/paknam.jpg", "/images/attractions/paknam-800.webp 800w, /images/attractions/paknam.webp 1280w", 1280, 852],
+  "wang-lang-wat-rakhang":       ["/images/attractions/tourist-boat.jpg", "/images/attractions/tourist-boat-800.webp 800w, /images/attractions/tourist-boat.webp 1280w", 1280, 960],
+  "chatuchak-weekend":           ["/images/attractions/goldline.jpg", "/images/attractions/goldline-800.webp 800w, /images/attractions/goldline.webp 1280w", 1280, 961],
+  "bang-krachao-bike":           ["/images/attractions/bike.jpg", "/images/attractions/bike-800.webp 800w, /images/attractions/bike.webp 1152w", 1152, 768],
   "songkran-riverside":         ["/images/attractions/songnam.jpg", "/images/attractions/songnam-800.webp 800w, /images/attractions/songnam.webp 1280w", 1280, 960]
 };
 function hohSeasonName(d) { var m = (d || new Date()).getMonth() + 1; return m >= 5 && m <= 10 ? "rainy" : (m >= 11 || m <= 2) ? "cool" : "hot"; }
