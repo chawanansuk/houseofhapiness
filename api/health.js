@@ -10,14 +10,19 @@ module.exports = async (req, res) => {
   if (req.method !== "GET") return res.status(405).json({ ok: false, error: "method-not-allowed" });
 
   const [sheet, ical, db] = await Promise.all([checkSheet(), checkIcal(), checkDb()]);
+  // ความปลอดภัยของฐานข้อมูล: ตารางใน schema public ต้องเปิด RLS และ role สาธารณะของ Supabase ต้องไม่มีสิทธิ์
+  // คืนแค่จำนวน/ชื่อตาราง ไม่มีข้อมูลแขก — เจ้าของเปิด /api/health ดูได้ว่าปิดประตูแล้วจริง
+  const dbSecurity = db === "ok" ? await checkDbSecurity() : undefined;
   // เมื่อใช้ฐานข้อมูลแล้ว ชีตเป็นแค่สำเนา — สุขภาพระบบตัดสินจากฐานข้อมูล
-  const ok = (dbEnabled() ? db === "ok" : sheet === "ok") && (ical === "ok" || ical === "not-configured");
+  const ok = (dbEnabled() ? db === "ok" : sheet === "ok") && (ical === "ok" || ical === "not-configured")
+    && (!dbSecurity || dbSecurity.status === "ok");
   const result = {
     ok,
     checkedAt: new Date().toISOString(),
     checks: { db, sheet, ical },
   };
-  const event = JSON.stringify({ event: "dependency_health", ok, db, sheet, ical });
+  if (dbSecurity) result.dbSecurity = dbSecurity;
+  const event = JSON.stringify({ event: "dependency_health", ok, db, sheet, ical, dbSecurity: dbSecurity && dbSecurity.status });
   if (ok) console.info(event); else console.error(event);
   return res.status(ok ? 200 : 503).json(result);
 };
@@ -33,6 +38,16 @@ async function checkDb() {
     if (code === "ENOTFOUND" || code === "EAI_AGAIN") return "host-not-found";
     if (code === "ETIMEDOUT" || /timeout/i.test(String(e && e.message))) return "timeout";
     return "unavailable";
+  }
+}
+
+async function checkDbSecurity() {
+  try {
+    const s = await getStore().securityStatus();
+    const bad = s.rlsOff.length || s.exposed.length;
+    return { status: bad ? "exposed" : "ok", tables: s.tables, rlsOff: s.rlsOff, publicAccess: s.exposed };
+  } catch (e) {
+    return { status: "unknown" };
   }
 }
 

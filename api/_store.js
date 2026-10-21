@@ -59,27 +59,87 @@ function dbConfigError() { const p = parseDbUrl(process.env.DATABASE_URL); retur
 
 function addDays(ymd, n) { const d = new Date(ymd + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
 
+// ── ปิดทางเข้าจาก REST API ของ Supabase (PostgREST) ──
+// Supabase เปิด schema public ให้ role anon/authenticated อ่าน-เขียนผ่าน URL โปรเจกต์ + anon key ที่ไม่ใช่ความลับ
+// ถ้าตารางไม่เปิด Row-Level Security = ใครก็อ่าน/แก้/ลบข้อมูลแขกได้ (Supabase แจ้ง rls_disabled_in_public)
+// แอปนี้ไม่ใช้ REST API เลย ต่อ Postgres ตรงด้วย role เจ้าของตาราง ซึ่ง Postgres ยกเว้น RLS ให้เจ้าของเสมอ
+// (เราไม่ใช้ FORCE ROW LEVEL SECURITY) → เปิด RLS แบบไม่มี policy + ถอนสิทธิ์ anon/authenticated = ปิดประตูนอกโดยแอปยังทำงานปกติ
+// เปิดเฉพาะตารางที่ role ปัจจุบันเป็นเจ้าของหรือมี BYPASSRLS เท่านั้น — กันพลาดเปิดแล้วล็อกตัวเองออกจากข้อมูล
+const PUBLIC_ROLES = ["anon", "authenticated"];
+const SECURITY_STATUS_SQL = `
+  SELECT c.relname AS name, c.relrowsecurity AS rls,
+         (pg_get_userbyid(c.relowner) = current_user OR (SELECT rolbypassrls FROM pg_roles WHERE rolname = current_user)) AS safe,
+         EXISTS (SELECT 1 FROM pg_roles r WHERE r.rolname = ANY($1::text[])
+                  AND (has_table_privilege(r.oid, c.oid, 'SELECT') OR has_table_privilege(r.oid, c.oid, 'INSERT')
+                       OR has_table_privilege(r.oid, c.oid, 'UPDATE') OR has_table_privilege(r.oid, c.oid, 'DELETE'))) AS exposed
+    FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE n.nspname = 'public' AND c.relkind IN ('r', 'p')
+   ORDER BY c.relname`;
+const qIdent = (s) => '"' + String(s).replace(/"/g, '""') + '"';
+
+async function securityStatus(query) {
+  const r = await query(SECURITY_STATUS_SQL, [PUBLIC_ROLES]);
+  const tables = r.rows.map((x) => ({ name: x.name, rls: x.rls === true || x.rls === "t", safe: x.safe === true || x.safe === "t", exposed: x.exposed === true || x.exposed === "t" }));
+  return { tables, rlsOff: tables.filter((t) => !t.rls).map((t) => t.name), exposed: tables.filter((t) => t.exposed).map((t) => t.name) };
+}
+
+async function hardenPublicSchema(query, status) {
+  const st = status || await securityStatus(query);
+  const out = { rlsEnabled: [], skipped: [], revoked: false };
+  for (const t of st.tables) {
+    if (t.rls) continue;
+    if (!t.safe) { out.skipped.push(t.name); continue; }
+    await query(`ALTER TABLE public.${qIdent(t.name)} ENABLE ROW LEVEL SECURITY`);
+    out.rlsEnabled.push(t.name);
+  }
+  const roles = (await query("SELECT rolname FROM pg_roles WHERE rolname = ANY($1::text[])", [PUBLIC_ROLES])).rows.map((x) => x.rolname);
+  if (roles.length && st.exposed.length) {
+    const who = roles.map(qIdent).join(", ");
+    await query(`REVOKE ALL ON ALL TABLES IN SCHEMA public FROM ${who}`);
+    await query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM ${who}`);
+    // ตารางที่ role นี้สร้างในอนาคตจะไม่ได้สิทธิ์ให้ anon/authenticated อัตโนมัติ
+    await query(`ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM ${who}`).catch(() => {});
+    await query(`ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM ${who}`).catch(() => {});
+    out.revoked = true;
+  }
+  if (out.rlsEnabled.length || out.revoked || out.skipped.length) console.info(JSON.stringify({ event: "db_public_schema_hardened", ...out }));
+  return out;
+}
+
 function createStore(query) {
   let schemaReady = null;
+  // เช็คทุกครั้งที่อินสแตนซ์เริ่ม (1 คำสั่ง) — ตารางที่ใครเพิ่มเองใน Supabase ภายหลังก็ถูกปิดด้วย
+  const ensureSecure = async () => {
+    try {
+      const st = await securityStatus(query);
+      if (st.rlsOff.length || st.exposed.length) await hardenPublicSchema(query, st);
+    } catch (e) {
+      console.error(JSON.stringify({ event: "db_harden_failed", reason: String((e && e.message) || e).slice(0, 160) }));
+    }
+  };
   const ensureSchema = () => {
     if (!schemaReady) {
       schemaReady = (async () => {
-        // ทางลัด 1 คำสั่ง: ถ้าตารางสุดท้ายในไฟล์ (audit_log) มีแล้ว = สร้างครบแล้ว ข้ามทั้งชุด
-        // (ไม่งั้นทุกอินสแตนซ์ใหม่ต้องยิง CREATE/seed ~16 ครั้ง ครั้งละหนึ่งรอบวิ่งไป-กลับฐานข้อมูล)
-        // ⚠ เพิ่มตารางใหม่ใน schema.sql ต้องมาแก้ชื่อตารางที่เช็คตรงนี้ด้วย
-        try {
-          const have = await query("SELECT to_regclass('public.audit_log') AS t");
-          if (have.rows[0] && have.rows[0].t) return;
-        } catch (_) { /* เช็คไม่ได้ก็สร้างตามปกติ */ }
-        // ตัดบรรทัดคอมเมนต์ก่อน แล้วแยกทีละคำสั่ง (ให้ error ชี้จุดได้)
-        const sql = fs.readFileSync(path.join(__dirname, "..", "db", "schema.sql"), "utf8").split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
-        for (const stmt of sql.split(/;\s*\n/).map((s) => s.trim()).filter(Boolean)) await query(stmt);
-        const r = await query("SELECT count(*)::int AS n FROM rooms");
-        if (r.rows[0].n === 0) for (let i = 0; i < REAL_ROOMS.length; i++) await query("INSERT INTO rooms (room, clean, note, sort) VALUES ($1, 'สะอาด', '', $2) ON CONFLICT (room) DO NOTHING", [REAL_ROOMS[i], i]);
-        for (const [k, v, d] of SITE_DEFAULTS) await query("INSERT INTO site_settings (key, value, description) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING", [k, v, d]);
+        await createSchema();
+        await ensureSecure();
       })().catch((e) => { schemaReady = null; throw e; });
     }
     return schemaReady;
+  };
+  const createSchema = async () => {
+    // ทางลัด 1 คำสั่ง: ถ้าตารางสุดท้ายในไฟล์ (audit_log) มีแล้ว = สร้างครบแล้ว ข้ามทั้งชุด
+    // (ไม่งั้นทุกอินสแตนซ์ใหม่ต้องยิง CREATE/seed ~16 ครั้ง ครั้งละหนึ่งรอบวิ่งไป-กลับฐานข้อมูล)
+    // ⚠ เพิ่มตารางใหม่ใน schema.sql ต้องมาแก้ชื่อตารางที่เช็คตรงนี้ด้วย
+    try {
+      const have = await query("SELECT to_regclass('public.audit_log') AS t");
+      if (have.rows[0] && have.rows[0].t) return;
+    } catch (_) { /* เช็คไม่ได้ก็สร้างตามปกติ */ }
+    // ตัดบรรทัดคอมเมนต์ก่อน แล้วแยกทีละคำสั่ง (ให้ error ชี้จุดได้)
+    const sql = fs.readFileSync(path.join(__dirname, "..", "db", "schema.sql"), "utf8").split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+    for (const stmt of sql.split(/;\s*\n/).map((s) => s.trim()).filter(Boolean)) await query(stmt);
+    const r = await query("SELECT count(*)::int AS n FROM rooms");
+    if (r.rows[0].n === 0) for (let i = 0; i < REAL_ROOMS.length; i++) await query("INSERT INTO rooms (room, clean, note, sort) VALUES ($1, 'สะอาด', '', $2) ON CONFLICT (room) DO NOTHING", [REAL_ROOMS[i], i]);
+    for (const [k, v, d] of SITE_DEFAULTS) await query("INSERT INTO site_settings (key, value, description) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING", [k, v, d]);
   };
 
   const audit = (actor, action, target, fields) =>
@@ -128,6 +188,8 @@ function createStore(query) {
   return {
     ensureSchema,
     async ping() { await query("SELECT 1"); return true; },
+    // สรุปความปลอดภัยของ schema public (ชื่อตารางเท่านั้น ไม่มีข้อมูลแขก) — /api/health ใช้รายงาน
+    async securityStatus() { await ensureSchema(); const st = await securityStatus(query); return { tables: st.tables.length, rlsOff: st.rlsOff, exposed: st.exposed }; },
 
     // ครั้งแรกที่ฐานข้อมูลยังว่างและมีชีตตั้งค่าอยู่ → ดึงทุกแท็บจากชีตมาให้เองอัตโนมัติ (ไม่ต้องกด /api/migrate)
     // พยายามครั้งเดียวต่ออินสแตนซ์ ถ้าชีตล่มจะลองใหม่ในอินสแตนซ์ถัดไป
@@ -434,4 +496,4 @@ function getStore() {
 // สำหรับเทส: ฉีด store ที่ต่อ PGlite แทน pool จริง (ต้องตั้ง DATABASE_URL เป็นค่าอะไรก็ได้ให้ dbEnabled() เป็นจริง)
 function __setStore(s) { pgStore = s; }
 
-module.exports = { dbEnabled, dbConfigError, parseDbUrl, getStore, createStore, __setStore, BOOKING_EDITABLE, ORDER_EDITABLE };
+module.exports = { dbEnabled, dbConfigError, parseDbUrl, getStore, createStore, __setStore, hardenPublicSchema, securityStatus, BOOKING_EDITABLE, ORDER_EDITABLE };

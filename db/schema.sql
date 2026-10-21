@@ -1,6 +1,9 @@
 -- House of Happiness — ฐานข้อมูลหลังบ้าน (Postgres / Supabase)
 -- คอลัมน์ตั้งใจให้ตรงกับชีตเดิมทุกตัว (เก็บเป็นข้อความ) เพื่อให้หน้า /admin และ Apps Script ใช้ต่อได้โดยไม่แก้รูปแบบ
 -- รันซ้ำได้ (CREATE ... IF NOT EXISTS) — api/_store.js เรียกให้เองตอนเชื่อมต่อครั้งแรก
+-- ความปลอดภัย: Supabase เปิด REST API ให้ schema public — api/_store.js (hardenPublicSchema) เปิด Row-Level Security
+-- ทุกตารางและถอนสิทธิ์ anon/authenticated ให้เองทุกครั้งที่อินสแตนซ์เริ่ม ไม่มี policy = REST API อ่าน/เขียนไม่ได้เลย
+-- แอปต่อ Postgres ตรงด้วย role เจ้าของตาราง จึงไม่โดน RLS · ตรวจสถานะได้ที่ /api/health → dbSecurity
 CREATE TABLE IF NOT EXISTS bookings (
   id         text PRIMARY KEY,
   source     text NOT NULL DEFAULT '',
