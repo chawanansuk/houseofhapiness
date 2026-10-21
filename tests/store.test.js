@@ -203,11 +203,40 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   assert.equal(sv.site.announcement_th, "", "ลบประกาศในชีตแล้วต้องหายจากเว็บ");
   assert.equal(sv.rates.length, 0);
 
+  // 15.5) Supabase แจ้ง rls_disabled_in_public: จำลอง role สาธารณะของ Supabase ที่ได้สิทธิ์เต็มและ RLS ปิด
+  //       อินสแตนซ์ใหม่ต้องเปิด RLS ทุกตาราง ถอนสิทธิ์ anon/authenticated และแอป (เจ้าของตาราง) ยังอ่าน-เขียนได้ตามเดิม
+  for (const role of ["anon", "authenticated"]) {
+    await query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${role}') THEN CREATE ROLE ${role} NOLOGIN; END IF; END $$`);
+    await query(`GRANT ALL ON ALL TABLES IN SCHEMA public TO ${role}`);
+    await query(`GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO ${role}`);
+  }
+  for (const t of ["bookings", "rooms", "expenses", "orders", "site_settings", "rates", "audit_log"]) await query(`ALTER TABLE public.${t} DISABLE ROW LEVEL SECURITY`);
+  const { securityStatus } = require("../api/_store.js");
+  let sec = await securityStatus(query);
+  assert.equal(sec.rlsOff.length, 7, "ก่อนแก้: RLS ปิดทั้ง 7 ตาราง (สภาพเดียวกับที่ Supabase แจ้ง)");
+  assert.ok(sec.exposed.includes("bookings"), "ก่อนแก้: anon มีสิทธิ์อ่านตารางการจอง");
+  const bookingsBefore = (await store.listAll()).bookings.length;
+  const fresh = createStore(query);
+  await fresh.ensureSchema();
+  sec = await securityStatus(query);
+  assert.deepEqual(sec.rlsOff, [], "หลังแก้: ทุกตารางใน public ต้องเปิด RLS");
+  assert.deepEqual(sec.exposed, [], "หลังแก้: anon/authenticated ต้องไม่มีสิทธิ์อ่าน-เขียนตารางใดเลย");
+  await query("SET ROLE anon");
+  let denied = false;
+  try { await query("SELECT id FROM bookings LIMIT 1"); } catch (e) { denied = /permission denied/i.test(String(e.message)); }
+  await query("RESET ROLE");
+  assert.ok(denied, "anon อ่านตารางการจองต้องโดนปฏิเสธ");
+  assert.equal((await fresh.listAll()).bookings.length, bookingsBefore, "แอปยังอ่านการจองได้ครบเท่าเดิม (เจ้าของตารางไม่โดน RLS)");
+  const idSec = await fresh.addBooking({ name: "หลังเปิด RLS", checkin: "2026-11-01", checkout: "2026-11-02" }, "web");
+  assert.equal((await fresh.updateBooking(idSec, { status: "ยืนยันแล้ว" }, "admin")).ok, true, "แอปยังเขียนได้หลังเปิด RLS");
+  const st2 = await fresh.securityStatus();
+  assert.equal(st2.tables, 7); assert.deepEqual(st2.rlsOff, []); assert.deepEqual(st2.exposed, []);
+
   // 16) cold start ต้องไม่ยิงคำสั่งสร้างตารางซ้ำ (ฐานข้อมูลอยู่คนละที่กับฟังก์ชัน ทุกคำสั่ง = 1 รอบวิ่ง)
   let counted = 0;
   const countingQuery = async (sql, params) => { counted++; return query(sql, params); };
   await createStore(countingQuery).ensureSchema();
-  assert.ok(counted <= 2, `อินสแตนซ์ใหม่ที่ตารางครบแล้วต้องเช็คไม่เกิน 2 คำสั่ง (ใช้ ${counted})`);
+  assert.ok(counted <= 2, `อินสแตนซ์ใหม่ที่ตารางครบและปิดประตูแล้วต้องเช็คไม่เกิน 2 คำสั่ง (ใช้ ${counted})`);
 
   console.log("STORE TESTS PASSED");
 })().catch((e) => { console.error(e); process.exit(1); });
