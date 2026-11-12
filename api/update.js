@@ -39,6 +39,11 @@ module.exports = async (req, res) => {
     }
   }
 
+  // สร้างการจองสถานะ "เข้าพักอยู่" ต้องมีห้อง — ไม่งั้นแขกถูกนับว่าพักแต่ไม่อยู่ในผังห้องใด
+  if (action === "add" && /เข้าพัก/.test(String(b.status || "")) && !String(b.room_no || "").trim()) {
+    return res.status(400).json({ ok: false, saved: false, error: "room-required" });
+  }
+
   if (demoMode) {
     return res.status(200).json({ ok: true, demo: true, saved: false });
   }

@@ -19,7 +19,7 @@
 // (ชีตอาจยังเป็นชื่อเก่า จนกว่าเจ้าของจะรัน applyRealRoomList — no-op เมื่อชีตอัปเดตแล้ว)
 const ROOM_RENAMES = { "707-สองเตียง": "707twin", "708-สองเตียง": "708twin", "715-สองเตียง": "715twin" };
 const ROOM_REMOVED = ["งิ้ว1", "งิ้ว4", "จั่ว1", "จั่ว4"];
-const { dbEnabled, getStore } = require("./_store.js");
+const { dbEnabled, getStore, INACTIVE_RE } = require("./_store.js");
 function normalizeRooms(rooms) {
   const seen = new Set();
   const out = [];
@@ -94,8 +94,12 @@ module.exports = async (req, res) => {
   }
 
   const total = rooms.length || 15;
-  const notCancelled = bookings.filter((b) => !/ยกเลิก|cancel/i.test(String(b.status || "")));
+  // ยกเลิก / ไม่มา (no-show) / เก็บถาวร = ไม่กันห้อง (กฎเดียวกับ api/_store.js INACTIVE_RE)
+  const notCancelled = bookings.filter((b) => !INACTIVE_RE.test(String(b.status || "")));
   const active = notCancelled.filter((b) => isYMD(b.checkin) && isYMD(b.checkout));
+  // เช็คเอาต์ก่อนกำหนด: ห้องว่างตั้งแต่วันนี้ ไม่ต้องรอวันออกเดิม (หลังบ้านใช้กฎเดียวกันใน coversNight)
+  const todayBkk = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+  const isOut = (b) => /เช็คเอาต์|checked.?out/i.test(String(b.status || ""));
   // การจองที่ยังไม่รู้วันที่ = กันห้องอยู่ที่ไหนสักวันแต่ระบุไม่ได้ — ห้ามการันตีเลขห้องว่าง
   const unknown = notCancelled.length - active.length;
   const isBdc = (b) => /booking\.com/i.test(String(b.source || ""));
@@ -106,7 +110,7 @@ module.exports = async (req, res) => {
   const countRooms = (entries) => entries.reduce((sum, booking) => sum + roomCount(booking), 0);
 
   const nightAvail = (d) => {
-    const stay = active.filter((b) => b.checkin <= d && d < b.checkout);
+    const stay = active.filter((b) => b.checkin <= d && d < b.checkout && !(isOut(b) && d >= todayBkk));
     const direct = countRooms(stay.filter((b) => !isBdc(b)));
     const bdcSheet = countRooms(stay.filter(isBdc));
     const bdcIcal = ical.filter((e) => e.start <= d && d < e.end).length;

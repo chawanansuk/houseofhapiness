@@ -64,6 +64,12 @@ function call(body = { action: "roomclean", room: "101", clean: true }) {
   assert.equal(result.code, 502);
   assert.equal(result.body.error, "update-storage-unavailable");
 
+  // สร้างการจอง "เข้าพักอยู่" โดยไม่ระบุห้อง → 400 และต้องไม่เขียนลงที่เก็บ
+  global.fetch = async () => { throw new Error("must not reach storage"); };
+  result = await call({ action: "add", name: "แขก", checkin: "2026-11-12", checkout: "2026-11-14", status: "เข้าพักอยู่", room_no: " " });
+  assert.equal(result.code, 400);
+  assert.equal(result.body.error, "room-required");
+
   process.env.SHEET_TOKEN = "";
   result = await call();
   assert.equal(result.code, 503);

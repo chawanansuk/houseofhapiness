@@ -190,6 +190,25 @@ async function launch() {
   await page.waitForSelector("#availBadge.ok");
   ok("ห้องเต็ม: เสนอวันใกล้เคียง กดแล้วเปลี่ยนวันและเช็คใหม่เป็นว่าง");
 
+  // ── โซนเวลาอเมริกา: new Date("YYYY-MM-DD") เป็น UTC → เคยได้วันก่อนหน้า 1 วัน (ชิป 3 คืนกลายเป็น 2) ──
+  const ny = await (await browser.newContext({ timezoneId: "America/New_York" })).newPage();
+  await ny.goto(`${BASE}/booking.html`, { waitUntil: "networkidle" });
+  await ny.fill("#checkin", ymd(10));
+  await ny.dispatchEvent("#checkin", "change");
+  assert.equal(await ny.locator("#checkout").getAttribute("min"), ymd(12), "นิวยอร์ก: เช็คเอาต์เร็วสุดต้อง +2 คืน");
+  await ny.click('.chip-btn[data-nights="3"]');
+  assert.equal(await ny.inputValue("#checkout"), ymd(13), "นิวยอร์ก: ชิป 3 คืนต้องได้ 3 คืน");
+  ok("โซนเวลา America/New_York: ขั้นต่ำ 2 คืน และชิป 3 คืนถูกต้อง");
+  // ── กลุ่มใหญ่: เลือกได้ถึง 10 ท่าน · ห้องพัก 2 ท่าน → ปรับเป็น 5 ห้องและบอกให้ทักแชท ──
+  await ny.check('input[name="room"][value="std"]');
+  await ny.selectOption("#guests", "10");
+  assert.equal(await ny.inputValue("#rooms"), "5", "10 ท่าน ห้องละ 2 → 5 ห้อง");
+  assert.ok(/10/.test(await ny.locator("#roomsHint").innerText()), "ต้องบอกแขกกลุ่มใหญ่ให้ทักแชท");
+  await ny.goto(`${BASE}/booking.html?guests=6`, { waitUntil: "networkidle" });
+  assert.equal(await ny.inputValue("#guests"), "6", "รับ guests=6 จากกล่องหน้าแรก");
+  await ny.close();
+  ok("กลุ่มใหญ่ 10 ท่าน → 5 ห้อง + ข้อความทักแชท · รับ guests จากหน้าแรก");
+
   await browser.close();
   server.close();
   console.log(`\nE2E BOOKING TESTS PASSED (${passed} checks)`);
