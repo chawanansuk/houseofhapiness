@@ -233,6 +233,28 @@ module.exports = (async () => {
   delete process.env.SAFETY_BUFFER;
   global.fetch = fetchFixture;
 
+  // ไม่มา / เก็บถาวร ไม่กันห้อง · เช็คเอาต์ก่อนกำหนด คืนห้องตั้งแต่วันนี้ (ส่วนคืนที่ผ่านมาแล้วยังนับ)
+  process.env.SAFETY_BUFFER = "0";
+  const ymd = (off) => new Date(Date.now() + 7 * 3600 * 1000 + off * 86400000).toISOString().slice(0, 10);
+  global.fetch = async () => ({
+    ok: true, status: 200, text: async () => "",
+    json: async () => ({
+      bookings: [
+        { id: "BDC-NS", source: "Booking.com", status: "ไม่มา", checkin: ymd(0), checkout: ymd(3), rooms: "1" },
+        { id: "BDC-AR", source: "Booking.com", status: "เก็บถาวร", checkin: "", checkout: "", rooms: "1" },
+        { id: "WEB-EO", source: "เว็บไซต์", status: "เช็คเอาต์แล้ว", checkin: ymd(-2), checkout: ymd(3), rooms: "1" },
+        { id: "WEB-IN", source: "เว็บไซต์", status: "เข้าพักอยู่", checkin: ymd(-1), checkout: ymd(3), rooms: "1" },
+      ],
+      rooms: [{ room: "701" }, { room: "702" }, { room: "703" }],
+    }),
+  });
+  r = await call(availability, { query: { checkin: ymd(0), checkout: ymd(2) } });
+  assert.equal(r.body.available, 2, "ไม่มา + เช็คเอาต์ก่อนกำหนด ต้องไม่กันห้อง เหลือแค่แขกที่พักอยู่ 1 ห้อง");
+  assert.equal(r.body.unknown, undefined, "รายการเก็บถาวรต้องไม่นับเป็นไม่มีวันที่");
+  assert.equal(r.body.warning, undefined);
+  delete process.env.SAFETY_BUFFER;
+  global.fetch = fetchFixture;
+
   console.log("ALL TESTS PASSED");
   return "ALL TESTS PASSED";
 })().catch((e) => {

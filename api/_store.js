@@ -24,6 +24,11 @@ const SITE_DEFAULTS = [
 ];
 const REAL_ROOMS = ["701", "702", "703", "704", "705", "706", "707twin", "708twin", "709", "710", "713", "714-จองตรง", "715twin", "716", "717", "718", "งิ้ว2", "งิ้ว3"];
 
+// สถานะที่ "ไม่กันห้อง" — ใช้ร่วมกันทุกที่ (กันห้องซ้อน · ห้องว่างบนเว็บ · หลังบ้าน)
+//   ยกเลิก · ไม่มา (no-show) · เก็บถาวร (รายการเก่าที่ไม่มีวันที่ เจ้าของสั่งเก็บจากหลังบ้าน)
+const INACTIVE_RE = /ยกเลิก|cancel|ไม่มา|no.?show|เก็บถาวร|archiv/i;
+const INACTIVE_SQL = "ยกเลิก|cancel|ไม่มา|no.?show|เก็บถาวร|archiv";
+const ARCHIVED_RE = /เก็บถาวร|archiv/i;
 const str = (v) => String(v == null ? "" : v).trim();
 const bkkNow = () => new Date(Date.now() + 7 * 3600 * 1000);
 const pad = (n) => String(n).padStart(2, "0");
@@ -155,7 +160,7 @@ function createStore(query) {
     const r = await query(
       `SELECT id, name, checkin, checkout, status FROM bookings
         WHERE room_no = $1 AND id <> $2
-          AND status !~* '(ยกเลิก|cancel|เช็คเอาต์|checked.?out)'
+          AND status !~* '(${INACTIVE_SQL}|เช็คเอาต์|checked.?out)'
           AND checkin ~ '^\\d{4}-\\d{2}-\\d{2}$' AND checkin < $4
           AND (CASE WHEN checkout ~ '^\\d{4}-\\d{2}-\\d{2}$' AND checkout > checkin THEN checkout ELSE to_char(to_date(checkin, 'YYYY-MM-DD') + 1, 'YYYY-MM-DD') END) > $3
         LIMIT 1`,
@@ -245,7 +250,7 @@ function createStore(query) {
     async addBooking(row, actor) {
       await ensureSchema();
       const rec = { ...row, nights: nightsOf(str(row.checkin), str(row.checkout)) || str(row.nights), created: str(row.created) || stamp(), rooms: str(row.rooms) || "1", status: str(row.status) || "รอยืนยัน" };
-      if (str(rec.room_no) && !/ยกเลิก|cancel/i.test(rec.status)) {
+      if (str(rec.room_no) && !INACTIVE_RE.test(rec.status)) {
         const c = await roomConflict(rec.room_no, rec.checkin, rec.checkout, "");
         if (c) { const e = new Error("room-taken"); e.code = "room-taken"; e.conflict = c; throw e; }
       }
@@ -267,7 +272,7 @@ function createStore(query) {
       // กันห้องซ้อน: เมื่อจัด/ย้ายห้อง หรือเลื่อนวันของรายการที่มีห้องแล้ว (ไม่เช็กตอนยกเลิก/เช็คเอาต์)
       const room = keys.includes("room_no") ? str(fields.room_no) : str(cur.rows[0].room_no);
       const nextStatus = keys.includes("status") ? str(fields.status) : str(cur.rows[0].status);
-      if (room && !/ยกเลิก|cancel|เช็คเอาต์|checked.?out/i.test(nextStatus) && (keys.includes("room_no") || keys.includes("checkin") || keys.includes("checkout"))) {
+      if (room && !INACTIVE_RE.test(nextStatus) && !/เช็คเอาต์|checked.?out/i.test(nextStatus) && (keys.includes("room_no") || keys.includes("checkin") || keys.includes("checkout"))) {
         const c = await roomConflict(room, ci, co, str(id));
         if (c) return { ok: false, error: "room-taken", conflict: { id: c.id, name: c.name, checkin: c.checkin, checkout: c.checkout } };
       }
@@ -350,13 +355,19 @@ function createStore(query) {
         const fields = {};
         for (const k of ["name", "checkin", "checkout", "guests", "rooms", "amount"]) if (!str(cur[k]) && str(b[k])) fields[k] = str(b[k]);
         if (/ยกเลิก|cancel/i.test(str(b.status)) && !/ยกเลิก|cancel/i.test(str(cur.status))) { fields.status = "ยกเลิก"; if (str(b.note) && str(b.note) !== str(cur.note)) fields.note = str(b.note); out.cancelled++; }
+        // รายการที่เจ้าของ "เก็บถาวร" เพราะไม่มีวันที่ แต่อีเมลสรุปเช็คอินเพิ่งเติมวันให้ = แขกมาจริง → ฟื้นกลับเป็นยืนยันแล้ว
+        // (อีเมลสรุปมาก่อนวันเข้า 1 วัน ห้องจึงกลับมากันไว้ทันเวลา)
+        else if (ARCHIVED_RE.test(str(cur.status)) && (fields.checkin || fields.checkout)
+          && /^\d{4}-\d{2}-\d{2}$/.test(fields.checkin || cur.checkin) && /^\d{4}-\d{2}-\d{2}$/.test(fields.checkout || cur.checkout)) {
+          fields.status = "ยืนยันแล้ว"; out.revived = (out.revived || 0) + 1;
+        }
         if (Object.keys(fields).length) {
           const keys = Object.keys(fields), vals = keys.map((k) => fields[k]);
           const ci = fields.checkin || cur.checkin, co = fields.checkout || cur.checkout;
           const sets = keys.map((k, i) => `${k} = $${i + 2}`);
           if (fields.checkin || fields.checkout) { sets.push(`nights = $${keys.length + 2}`); vals.push(nightsOf(ci, co)); }
           await query(`UPDATE bookings SET ${sets.join(", ")}, updated_at = now() WHERE id = $1`, [id, ...vals]);
-          if (!fields.status) out.backfilled++;
+          if (!fields.status || fields.status === "ยืนยันแล้ว") out.backfilled++;
           await audit("script", "sync", id, fields);
         }
       }
@@ -496,4 +507,4 @@ function getStore() {
 // สำหรับเทส: ฉีด store ที่ต่อ PGlite แทน pool จริง (ต้องตั้ง DATABASE_URL เป็นค่าอะไรก็ได้ให้ dbEnabled() เป็นจริง)
 function __setStore(s) { pgStore = s; }
 
-module.exports = { dbEnabled, dbConfigError, parseDbUrl, getStore, createStore, __setStore, hardenPublicSchema, securityStatus, BOOKING_EDITABLE, ORDER_EDITABLE };
+module.exports = { dbEnabled, dbConfigError, parseDbUrl, getStore, createStore, __setStore, hardenPublicSchema, securityStatus, BOOKING_EDITABLE, ORDER_EDITABLE, INACTIVE_RE };

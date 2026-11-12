@@ -137,13 +137,20 @@ function adopt(j){
 const relDay = ymd => { if(!isYMD(ymd)) return ''; const n = diffDays(TODAY, ymd); if(n===0) return 'วันนี้'; if(n===1) return 'พรุ่งนี้'; if(n===-1) return 'เมื่อวาน'; if(n>1) return `อีก ${n} วัน`; return `${-n} วันก่อน`; };
 
 /* ---------- ตัวจำแนกสถานะ (regex แบบเดิม — ทนสตริงที่พิมพ์เพี้ยนในชีต) ---------- */
-const isCancelled = b => /ยกเลิก|cancel/i.test(String(b.status||''));
+// "ไม่กันห้อง": ยกเลิก · ไม่มา (no-show) · เก็บถาวร (รายการเก่าไม่มีวันที่) — กฎเดียวกับ api/_store.js INACTIVE_RE
+const isCancelled = b => /ยกเลิก|cancel|ไม่มา|no.?show|เก็บถาวร|archiv/i.test(String(b.status||''));
+const isArchived = b => /เก็บถาวร|archiv/i.test(String(b.status||''));
+const isNoShow = b => /ไม่มา|no.?show/i.test(String(b.status||''));
+const createdYMD = b => { const s = String(b.created||'').trim().slice(0,10); return isYMD(s) ? s : ''; };
+const undated = b => !isCancelled(b) && (!isYMD(b.checkin) || !isYMD(b.checkout));
 const isCheckedOut = b => /เช็คเอาต์|checked.?out/i.test(String(b.status||''));
 const isInhouse = b => /เข้าพัก/.test(String(b.status||''));
 const needsFix = b => !isCancelled(b) && (!isYMD(b.checkin) || !isYMD(b.checkout) || !String(b.name||'').trim());
 const isPending = b => !isCancelled(b) && !isInhouse(b) && !isCheckedOut(b) && !needsFix(b) && /รอ|pending/i.test(String(b.status||''));
 const isConfirmedSt = b => !isCancelled(b) && !isInhouse(b) && !isCheckedOut(b) && !needsFix(b) && !isPending(b);
 const active = b => !isCancelled(b);
+// นับเป็นรายรับ/ค้างชำระ: ต้องยืนยันแล้ว — คำขอ "รอยืนยัน" ยังไม่ได้คุยกับแขก ไม่ใช่เงินจริง
+const isRevenue = b => active(b) && !isPending(b);
 const isDirect = b => !/booking\.com/i.test(String(b.source||''));
 const guestReqOf = b => { const m = String(b.note||'').match(/คำขอแขก:\s*([^|]*)/); return m ? m[1].trim() : ''; };
 const guestEmailOf = b => { const m = String(b.note||'').match(/อีเมล:\s*([^\s@|·]+@[^\s@|·]+\.[^\s@|·)]+)/); return m ? m[1] : ''; };
@@ -185,7 +192,9 @@ const ST_LABEL = { free:'ว่าง', occ:'เข้าพักอยู่',
 function statusPill(st){
   const s = String(st||'').trim();
   let cls = 'done', lbl = s || '—';
-  if (/ยกเลิก|cancel/i.test(s)) { cls='cancel'; lbl='ยกเลิก'; }
+  if (/ไม่มา|no.?show/i.test(s)) { cls='cancel'; lbl='ไม่มา'; }
+  else if (/เก็บถาวร|archiv/i.test(s)) { cls='cancel'; lbl='เก็บถาวร'; }
+  else if (/ยกเลิก|cancel/i.test(s)) { cls='cancel'; lbl='ยกเลิก'; }
   else if (/เข้าพัก/.test(s)) { cls='occ'; lbl='เข้าพักอยู่'; }
   else if (/เช็คเอาต์|checked.?out/i.test(s)) { cls='done'; lbl='เช็คเอาต์แล้ว'; }
   else if (/รอเติม/.test(s)) { cls='info'; lbl='รอเติมข้อมูล'; }
@@ -204,14 +213,22 @@ function todayQueue(){
   const unassigned = unassignedAll.filter(b => b.checkin !== TODAY);
   const dirty = ROOMS.filter(r => CLEAN[r.no]==='dirty');
   const overdue = BOOKINGS.filter(b => isInhouse(b) && effCheckout(b) && effCheckout(b) < TODAY);
-  return { arrivals, departures, pending, needsInfo, unassigned, unassignedAll, dirty, overdue };
+  // เลยวันเข้าแล้วแต่ยังไม่กดเช็คอิน (ย้อนหลัง 7 วัน) — ห้องยังถูกกันไว้ ต้องตัดสินว่าเช็คอิน / พักแล้ว / ไม่มา
+  const lateFrom = addDays(TODAY, -LATE_WINDOW);
+  const lateAll = BOOKINGS.filter(b => (isConfirmedSt(b) || isPending(b)) && isYMD(b.checkin) && b.checkin < TODAY);
+  const late = lateAll.filter(b => b.checkin >= lateFrom).sort((a,b) => a.checkin < b.checkin ? -1 : 1);
+  // รอเติมข้อมูล: ป้าย/ไทล์นับเฉพาะที่เพิ่งเข้ามา 7 วัน (รายการเก่าที่ค้างเป็นร้อยทำให้ป้ายแดงตลอดจนไม่มีความหมาย)
+  const infoFrom = addDays(TODAY, -NEEDS_INFO_WINDOW);
+  const needsInfoRecent = needsInfo.filter(b => createdYMD(b) >= infoFrom);
+  return { arrivals, departures, pending, needsInfo, needsInfoRecent, unassigned, unassignedAll, dirty, overdue, late, lateOlder: lateAll.length - late.length };
 }
+const LATE_WINDOW = 7, NEEDS_INFO_WINDOW = 7;
 function monthStats(ym){
   const dim = daysInMonth(ym), y = ym.slice(0,4), m = ym.slice(5,7);
   let nights = 0; const perDay = [];
   for(let d=1; d<=dim; d++){ const ymd = `${y}-${m}-${String(d).padStart(2,'0')}`; const n = occupiedOn(ymd); perDay.push(n); nights += n; }
   const count = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).length;
-  const income = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
+  const income = BOOKINGS.filter(b => isRevenue(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
   const totalRooms = ROOMS.length || 1;
   return { nights, occ: Math.round(nights/(totalRooms*dim)*100), count, perDay, income };
 }
@@ -396,7 +413,7 @@ const state = {
   assign:null, roomFilter:'all',
   calMonth: null, calDay: null,
   bkStatus:'all', bkSource:'', bkRange:'upcoming', bkCancel:false,
-  expMonth: null, hkFlag: false,
+  expMonth: null, hkFlag: false, archiveDays: 30,
 };
 const role = () => (DATA && DATA.role) || 'admin';
 const isStaff = () => role() === 'staff';
@@ -449,6 +466,22 @@ function applyPending(){
     }
   }
 }
+// รหัสข้อผิดพลาดจากเซิร์ฟเวอร์ → ข้อความไทยที่บอกว่าต้องทำอะไรต่อ (ไม่โชว์รหัสอังกฤษดิบให้พนักงาน)
+const ERR_TH = {
+  'unauthorized': 'รหัสผ่านถูกเปลี่ยนหรือหมดอายุ — เข้าสู่ระบบใหม่',
+  'too-many-attempts': 'ใส่รหัสผิดหลายครั้ง — รอ 10 นาทีแล้วลองใหม่',
+  'update-storage-failed': 'ระบบเก็บข้อมูลไม่รับการบันทึก — ลองใหม่อีกครั้ง',
+  'update-storage-timeout': 'ระบบเก็บข้อมูลตอบช้าเกินไป — ลองใหม่อีกครั้ง',
+  'update-storage-unavailable': 'เชื่อมต่อระบบเก็บข้อมูลไม่ได้ — ลองใหม่อีกครั้ง',
+  'update-service-not-configured': 'ระบบยังไม่ได้ตั้งค่าที่เก็บข้อมูล — แจ้งผู้ดูแล',
+  'staff-not-allowed': 'บัญชีพนักงานทำรายการนี้ไม่ได้',
+  'not-found': 'ไม่พบรายการนี้แล้ว — กดรีเฟรชแล้วลองใหม่',
+  'room-not-found': 'ไม่พบห้องนี้ในระบบ — กดรีเฟรชแล้วลองใหม่',
+  'unknown-action': 'คำสั่งไม่ถูกต้อง — รีเฟรชหน้าแล้วลองใหม่',
+  'missing-fields': 'ข้อมูลไม่ครบ — ตรวจช่องที่ต้องกรอก',
+  'room-required': 'สถานะ "เข้าพักอยู่" ต้องเลือกห้องก่อน',
+};
+const errTh = code => ERR_TH[code] || 'บันทึกไม่สำเร็จ — ลองใหม่อีกครั้ง';
 async function apiUpdate(body){
   const key = getKey();
   if (navigator.onLine === false) { toast('ออฟไลน์อยู่ — บันทึกไม่ได้ รอเน็ตกลับมาแล้วลองใหม่', true); return null; }
@@ -471,8 +504,10 @@ async function apiUpdate(body){
       reload();
       return null;
     }
-    if (r.status === 429) { toast('ใส่รหัสผิดหลายครั้ง — รอ 10 นาทีแล้วลองใหม่', true); return null; }
-    if (!r.ok || !j.ok) { toast(j.error || 'บันทึกไม่สำเร็จ', true); return null; }
+    if (r.status === 429) { toast(errTh('too-many-attempts'), true); return null; }
+    // รหัสถูกเปลี่ยน/หมดอายุระหว่างใช้งาน → อย่าปล่อยให้กดต่อแล้วบันทึกไม่ได้เงียบ ๆ
+    if (r.status === 401) { toast(errTh('unauthorized'), true); setTimeout(logout, 1800); return null; }
+    if (!r.ok || !j.ok) { toast(errTh(j.error), true); return null; }
     notePending(body);
     return j;
   } catch {
@@ -505,10 +540,10 @@ function renderNav(){
   document.querySelectorAll('.nav a, .tabbar button').forEach(a => a.classList.toggle('on', a.dataset.view===state.view));
   document.body.classList.toggle('staff-mode', isStaff());
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hide', isStaff()));
-  const tasks = q.arrivals.length + q.departures.length + q.pending.length + q.needsInfo.length + q.dirty.length + q.overdue.length;
+  const tasks = q.arrivals.length + q.departures.length + q.pending.length + q.needsInfoRecent.length + q.dirty.length + q.overdue.length + q.late.length;
   const set = (id, n, hot) => { const el = $(id); if(!el) return; el.textContent = n||''; el.classList.toggle('hot', !!hot && !!n); };
   set('navTodayCnt', tasks, true);
-  set('navBookCnt', q.pending.length + q.needsInfo.length, false);
+  set('navBookCnt', q.pending.length + q.needsInfoRecent.length, false);
   const freeN = ROOMS.length - Math.min(ROOMS.length, occupiedOn(TODAY));
   set('navRoomsCnt', `${freeN} ว่าง`, false);
   const tb = $('tabTodayB'); tb.textContent = tasks; tb.classList.toggle('hide', !tasks);
@@ -516,7 +551,7 @@ function renderNav(){
   set('navOrdCnt', todo.length, true);
   const nav = $('navOrdCnt'); if(nav) nav.classList.toggle('late', late && !!todo.length);
   const ob = $('tabOrdB'); if(ob){ ob.textContent = todo.length; ob.classList.toggle('hide', !todo.length); ob.classList.toggle('warn', !late); }
-  const cb = $('tabBookB'); if(cb){ const n = q.pending.length + q.needsInfo.length; cb.textContent = n; cb.classList.toggle('hide', !n); }
+  const cb = $('tabBookB'); if(cb){ const n = q.pending.length + q.needsInfoRecent.length; cb.textContent = n; cb.classList.toggle('hide', !n); }
   $('userRole').textContent = isStaff() ? 'พนักงาน · ไม่เห็นการเงิน' : 'เจ้าของ · เห็นทุกเมนู';
   $('userAvatar').textContent = isStaff() ? 'S' : 'H';
   const dark = document.documentElement.dataset.theme==='dark';
@@ -573,7 +608,7 @@ function renderToday(){
     ['arr','เช็คอินวันนี้', q.arrivals.length, q.arrivals.filter(b=>!String(b.room_no||'').trim()).length ? `${q.arrivals.filter(b=>!String(b.room_no||'').trim()).length} ยังไม่จัดห้อง` : (q.arrivals.length?'จัดห้องครบแล้ว':'ไม่มีแขกเข้า'), '#g-arr'],
     ['dep','เช็คเอาต์วันนี้', q.departures.length, q.departures.length ? 'ห้องจะเข้าคิวทำความสะอาด' : 'ไม่มีแขกออก', '#g-dep'],
     ['pend','จองตรงรอยืนยัน', q.pending.length, q.pending.length ? `ใกล้สุด ${relDay(q.pending.map(b=>b.checkin).filter(isYMD).sort()[0]) || '—'}` : 'ไม่มีค้าง', '#g-pend'],
-    ['info','รอเติมข้อมูล / รอจัดห้อง', q.needsInfo.length + q.unassigned.length, q.needsInfo.length ? `${q.needsInfo.length} รอเติมจาก Pulse` : (q.unassigned.length?`ใกล้สุด ${relDay(q.unassigned[0].checkin)}`:'ครบแล้ว'), q.needsInfo.length ? '#g-info' : '#g-un'],
+    ['info','รอเติมข้อมูล / รอจัดห้อง', q.needsInfoRecent.length + q.unassigned.length, q.needsInfoRecent.length ? `${q.needsInfoRecent.length} ใหม่ใน ${NEEDS_INFO_WINDOW} วัน · ค้างทั้งหมด ${q.needsInfo.length}` : (q.unassigned.length?`ใกล้สุด ${relDay(q.unassigned[0].checkin)}`:(q.needsInfo.length?`ค้างเก่า ${q.needsInfo.length} รายการ`:'ครบแล้ว')), q.needsInfoRecent.length || !q.unassigned.length ? '#g-info' : '#g-un'],
     ['dirty','รอทำความสะอาด', q.dirty.length, q.dirty.some(r=>roomState(r.no).arriving) ? 'มีห้องที่แขกจะเข้าวันนี้' : (q.dirty.length?'ยังไม่ด่วน':'สะอาดหมด'), '#g-dirty'],
     ...(isStaff() ? [] : [['pay','ค้างชำระ', unpaidList().length, unpaidList().length ? `รวม ฿${baht(unpaidList().reduce((s,b)=>s+Math.max(0,bahtNum(b.amount)-bahtNum(b.paid)),0))}` : 'รับครบทุกราย', 'unpaid']]),
   ];
@@ -588,8 +623,16 @@ function renderToday(){
   $('todayNotes').innerHTML = notes.join('');
 
   const groups = [];
-  const g = (id, title, items, empty) => groups.push(`<div class="q-group" id="${id}"><div class="q-head">${title}<span class="n">${items.length}</span></div>${items.length ? items.join('') : `<div class="q-empty">${ic('checkCircle')}${empty}</div>`}</div>`);
+  const g = (id, title, items, empty, n) => groups.push(`<div class="q-group" id="${id}"><div class="q-head">${title}<span class="n">${n == null ? items.length : n}</span></div>${items.length ? items.join('') : `<div class="q-empty">${ic('checkCircle')}${empty}</div>`}</div>`);
   if(q.overdue.length) g('g-over','เลยวันเช็คเอาต์ — ยังไม่ได้กดเช็คเอาต์', q.overdue.map(b => bookingRow(b, `<button class="btn sm primary" data-act="checkout" data-id="${esc(b.id)}">เช็คเอาต์</button>`)), '');
+  // เลยวันเข้าแล้ว ยังไม่เช็คอิน: ยังอยู่ในช่วงพัก → เช็คอิน/ไม่มา · พ้นวันออกแล้ว → พักแล้ว/ไม่มา
+  if(q.late.length) g('g-late',`เลยวันเข้า — ยังไม่กดเช็คอิน${q.lateOlder?` <span class="faint" style="font-weight:400">(เก่ากว่า ${LATE_WINDOW} วันอีก ${q.lateOlder} รายการ ดูในรายการจอง)</span>`:''}`, q.late.map(b => {
+    const still = effCheckout(b) > TODAY, hasRoom = String(b.room_no||'').trim();
+    const main = still
+      ? (hasRoom ? `<button class="btn sm primary" data-act="checkin" data-id="${esc(b.id)}">${ic('login')}เช็คอิน</button>` : `<button class="btn sm warn" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`)
+      : `<button class="btn sm" data-act="stayed" data-id="${esc(b.id)}" title="แขกมาพักจริงแต่ลืมกดเช็คอิน/เช็คเอาต์">${ic('check')}พักแล้ว</button>`;
+    return bookingRow(b, `<span class="pill pend plain">เข้า ${esc(relDay(b.checkin))}</span>${main}<button class="btn sm ghost" data-act="noshow" data-id="${esc(b.id)}" data-label="ไม่มา">ไม่มา</button>`, {note:true, pill:true});
+  }), '');
   g('g-arr','มาถึงวันนี้', q.arrivals.map(b => bookingRow(b, String(b.room_no||'').trim()
       ? (CLEAN[b.room_no]==='dirty' ? `<span class="pill dirty">ห้องยังไม่สะอาด</span><button class="btn sm" data-act="checkin" data-id="${esc(b.id)}">เช็คอิน</button>` : `<button class="btn sm primary" data-act="checkin" data-id="${esc(b.id)}">${ic('login')}เช็คอิน</button>`)
       : `<button class="btn sm warn" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`, {note:true})), 'ไม่มีแขกเข้าวันนี้');
@@ -597,7 +640,11 @@ function renderToday(){
   g('g-pend','จองตรงรอยืนยัน', q.pending.slice().sort((a,b)=>String(a.checkin)<String(b.checkin)?-1:1).map(b => bookingRow(b, `<button class="btn sm ghost" data-act="msg" data-id="${esc(b.id)}" aria-label="ข้อความยืนยัน">${ic('message')}</button><button class="btn sm good" data-act="confirm-open" data-id="${esc(b.id)}">${ic('check')}ยืนยัน</button>`, {amount:true, note:true})), 'ไม่มีรายการรอยืนยัน');
   g('g-msg','ข้อความถึงแขก (ก่อนวันเข้าพัก · ขอบคุณหลังเช็คเอาต์)', guestMsgQueue().map(({b, kind}) => { const sent = isMsgSent(b, kind); return bookingRow(b, `<span class="pill ${kind==='pre'?'arr':'done'} plain">${GUEST_MSG[kind].tag}</span><button class="btn sm ${sent?'ghost':'primary'}" data-act="guest-msg" data-kind="${kind}" data-id="${esc(b.id)}">${sent ? `${ic('check')}ส่งแล้ว` : `${ic('message')}เขียนข้อความ`}</button>`); }), 'ไม่มีข้อความที่ต้องส่งวันนี้');
   g('g-un','รอจัดห้อง (ยืนยันแล้ว · วันถัดไป)', q.unassigned.map(b => bookingRow(b, `<span class="faint" style="font-size:12px">${relDay(b.checkin)}</span><button class="btn sm" data-act="assign" data-id="${esc(b.id)}">${ic('move')}จัดห้อง</button>`)), 'จัดห้องครบทุกรายการ');
-  g('g-info','รอเติมข้อมูลจาก Pulse', q.needsInfo.map(b => bookingRow(b, `<button class="btn sm soft" data-act="edit" data-id="${esc(b.id)}">${ic('edit')}เติมข้อมูล</button>`, {note:true, pill:true})), 'ข้อมูลครบทุกรายการ');
+  // รอเติมข้อมูล: แสดงเฉพาะที่เข้ามาใน 7 วัน + แถวสรุปรายการเก่า (นำเข้าไฟล์ Extranet / เก็บถาวร)
+  const infoOld = q.needsInfo.length - q.needsInfoRecent.length;
+  const infoRows = q.needsInfoRecent.map(b => bookingRow(b, `<button class="btn sm soft" data-act="edit" data-id="${esc(b.id)}">${ic('edit')}เติมข้อมูล</button>`, {note:true, pill:true}));
+  if (infoOld) infoRows.push(`<div class="q-row info-old"><div class="q-room none">${infoOld}</div><div style="min-width:0"><div class="q-name"><span class="nm">รายการเก่าที่ยังไม่มีข้อมูลครบ ${infoOld} รายการ</span></div><div class="q-meta"><span>เว็บจะบอกแขกว่า "ขอเช็คห้องว่างก่อน" ทุกช่วงวันจนกว่าจะเคลียร์รายการไม่มีวันที่</span></div></div><div class="q-acts"><button class="btn sm" data-act="open-import">${ic('upload')}นำเข้าไฟล์ Booking</button>${isStaff() ? '' : `<button class="btn sm ghost" data-act="archive-open">เก็บรายการเก่า…</button>`}</div></div>`);
+  g('g-info',`รอเติมข้อมูลจาก Pulse${infoOld ? ` <span class="faint" style="font-weight:400">· ใหม่ใน ${NEEDS_INFO_WINDOW} วัน</span>` : ''}`, infoRows, 'ข้อมูลครบทุกรายการ', q.needsInfoRecent.length);
   $('queue').innerHTML = `<div class="card-h" style="padding-bottom:6px"><h2>คิวงานวันนี้</h2><span class="sub">เรียงตามความเร่งด่วน</span><span class="grow"></span><button class="btn ghost sm" data-act="summary" title="สรุปงานวันนี้เป็นข้อความ — คัดลอกไปวางในกลุ่ม LINE ทีมงาน">${ic('copy')}สรุปส่ง LINE</button></div>` + groups.join('');
 
   renderOrders();
@@ -784,7 +831,7 @@ function monthlySeries(){
   for(let i=5;i>=0;i--){ const d = new Date(y0, m0-1-i, 1); months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
   return months.map(m => ({
     m,
-    income: BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(m)).reduce((s,b)=>s+bahtNum(b.amount),0) + rsIncome(m),
+    income: BOOKINGS.filter(b => isRevenue(b) && String(b.checkin||'').startsWith(m)).reduce((s,b)=>s+bahtNum(b.amount),0) + rsIncome(m),
     expense: (DATA.expenses||[]).filter(e => String(e.date||'').startsWith(m)).reduce((s,e)=>s+bahtNum(e.amount),0),
   }));
 }
@@ -796,10 +843,10 @@ function renderMoney(){
   $('expMonthLbl').textContent = fmtMonth(ym);
   const exp = (DATA.expenses||[]).filter(e => String(e.date||'').startsWith(ym));
   const expSum = exp.reduce((s,e)=>s+bahtNum(e.amount),0);
-  const roomInc = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
+  const roomInc = BOOKINGS.filter(b => isRevenue(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
   const rsInc = rsIncome(ym), income = roomInc + rsInc;
   // เป้าหมายหลักของเจ้าของ: เพิ่มสัดส่วนจองตรง — นับจากรายการเดือนนี้ (ตามเดือนเช็คอิน) และคิดค่าคอมฯ ที่ไม่ต้องจ่าย
-  const monthBk = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym));
+  const monthBk = BOOKINGS.filter(b => isRevenue(b) && String(b.checkin||'').startsWith(ym));
   const direct = monthBk.filter(isDirect), directInc = direct.reduce((s,b)=>s+bahtNum(b.amount),0);
   const share = monthBk.length ? Math.round(direct.length / monthBk.length * 100) : 0;
   $('moneyTiles').innerHTML = [
@@ -872,6 +919,62 @@ async function doRestore(id){
   closeSheet();
   await afterAction(() => { b.status = 'ยืนยันแล้ว'; }, 'กู้คืนการจองแล้ว');
 }
+// แขกไม่มา (no-show): ห้องกลับมาว่างให้จองบนเว็บทันที · กู้คืนได้จากแผงการจอง
+async function doNoShow(id){
+  const b = bookingById(id); if(!b) return;
+  const r1 = await apiUpdate({ action: 'update', id: b.id, fields: { status: 'ไม่มา' } });
+  if(!r1) return;
+  closeSheet();
+  await afterAction(() => { b.status = 'ไม่มา'; }, `${displayName(b)} — บันทึกว่าไม่มาแล้ว ห้องว่างให้จองได้`);
+}
+// เลยวันออกไปแล้วแต่ไม่เคยกดเช็คอิน: แขกมาพักจริง → ปิดเป็นเช็คเอาต์แล้ว (นับเป็นประวัติการเข้าพัก)
+async function doStayed(id){
+  const b = bookingById(id); if(!b) return;
+  const r1 = await apiUpdate({ action: 'update', id: b.id, fields: { status: 'เช็คเอาต์แล้ว' } });
+  if(!r1) return;
+  closeSheet();
+  await afterAction(() => { b.status = 'เช็คเอาต์แล้ว'; }, `${displayName(b)} — บันทึกว่าพักแล้วและเช็คเอาต์แล้ว`);
+}
+
+/* ---------- เก็บถาวรรายการเก่าที่ไม่มีวันที่ ----------
+   อีเมล Booking.com บางฉบับไม่บอกวันเข้าพัก รายการพวกนี้ทำให้เว็บตอบแขกว่า "ขอเช็คห้องว่างก่อน" ทุกช่วงวัน
+   เก็บถาวร = ไม่ลบ · ไม่กันห้อง · กู้คืนได้ · ถ้าอีเมลสรุปเช็คอินเติมวันให้ทีหลัง เซิร์ฟเวอร์ฟื้นเป็นยืนยันแล้วเอง */
+const ARCHIVE_DAYS = [14, 30, 60, 90];
+const archiveCandidates = days => { const cut = addDays(TODAY, -days); return BOOKINGS.filter(b => undated(b) && createdYMD(b) && createdYMD(b) < cut); };
+function paintArchive(){
+  const days = state.archiveDays, list = archiveCandidates(days), all = BOOKINGS.filter(undated);
+  document.querySelectorAll('[data-act="archive-days"]').forEach(x => x.classList.toggle('on', Number(x.dataset.d) === days));
+  const s = $('archiveSummary'); if (s) s.innerHTML = `จะเก็บ <b>${list.length}</b> จาก ${all.length} รายการที่ไม่มีวันที่ (สร้างก่อน ${fmtDY(addDays(TODAY, -days))})${list.length ? `<div class="faint" style="font-size:12px;margin-top:6px">${list.slice(0, 6).map(b => esc(`#${b.id} ${String(b.name||'').trim() || 'ไม่มีชื่อ'} · สร้าง ${fmtD(createdYMD(b))}`)).join('<br>')}${list.length > 6 ? `<br>และอีก ${list.length - 6} รายการ` : ''}</div>` : ''}`;
+  const btn = $('archiveRun'); if (btn) { btn.disabled = !list.length; delete btn.dataset.armed; btn.textContent = list.length ? `เก็บ ${list.length} รายการ` : 'ไม่มีรายการให้เก็บ'; }
+}
+function openArchive(){
+  if (isStaff()) return;
+  state.archiveDays = state.archiveDays || 30;
+  const all = BOOKINGS.filter(undated), li = localStorage.getItem(LAST_IMPORT);
+  openSheet({ title: 'เก็บรายการเก่าที่ไม่มีวันที่', sub: `<span class="faint">${all.length} รายการยังไม่มีวันเข้า-ออก</span>`,
+    body: `<div class="timeline-log" style="margin-top:0"><div><b>ทำไมต้องเก็บ</b> เว็บไม่รู้ว่ารายการพวกนี้กันห้องวันไหน จึงตอบแขกที่จองตรงว่า "ขอเช็คห้องว่างก่อน" ทุกช่วงวัน</div><div><b>ไม่ได้ลบ</b> รายการยังอยู่ กู้คืนได้จากรายการจอง (เปิด "แสดงที่ยกเลิก")</div><div><b>ฟื้นเอง</b> ถ้าอีเมลสรุปเช็คอินของ Booking.com เติมวันให้ภายหลัง ระบบดึงกลับเป็นยืนยันแล้วอัตโนมัติ</div></div>
+      ${isYMD(li) && diffDays(li, TODAY) <= 7 ? '' : `<div class="notebox2 plain" style="margin-top:12px">แนะนำนำเข้าไฟล์จาก Extranet ก่อน รายการที่ยังจะมาพักจะได้วันที่ครบและไม่ถูกเก็บ <button data-act="open-import">นำเข้าไฟล์</button></div>`}
+      <h4 style="font-size:12px;letter-spacing:.06em;color:var(--ink-3);margin:16px 0 6px">เก็บรายการที่สร้างนานกว่า</h4>
+      <div class="seg" role="group" aria-label="อายุรายการ">${ARCHIVE_DAYS.map(d => `<button data-act="archive-days" data-d="${d}">${d} วัน</button>`).join('')}</div>
+      <div class="notebox" id="archiveSummary" style="margin-top:12px"></div>
+      <div class="import-progress" id="archiveProgress"></div>`,
+    foot: `<button class="btn primary" data-act="archive-run" id="archiveRun">เก็บ</button><button class="btn" data-act="close-sheet">ปิด</button>` });
+  paintArchive();
+}
+async function runArchive(){
+  const list = archiveCandidates(state.archiveDays);
+  if (!list.length) return;
+  const p = $('archiveProgress'), btn = $('archiveRun');
+  if (btn) btn.disabled = true;
+  let done = 0, fail = 0;
+  for (const b of list) {
+    const r1 = await apiUpdate({ action: 'update', id: b.id, fields: { status: 'เก็บถาวร' } });
+    if (r1) { done++; b.status = 'เก็บถาวร'; } else fail++;
+    if (p) p.innerHTML = `<div class="notebox2 plain">กำลังเก็บ… ${done + fail}/${list.length}</div>`;
+  }
+  closeSheet();
+  await afterAction(() => {}, `เก็บถาวรแล้ว ${done} รายการ` + (fail ? ` · ไม่สำเร็จ ${fail}` : ''));
+}
 async function doExtend(id){
   const b = bookingById(id); if(!b) return;
   const nco = addDays(effCheckout(b), 1);
@@ -933,7 +1036,7 @@ function openBooking(id){
   const acts = [];
   const A = (act, label, cls='', icon='') => acts.push(`<button class="btn ${cls}" data-act="${act}" data-id="${esc(b.id)}" data-label="${esc(label)}">${icon?ic(icon):''}${label}</button>`);
   const k = stKey(b);
-  if(k==='confirmed'){ if(b.checkin<=TODAY) A('checkin','เช็คอิน','primary','login'); A('assign', String(b.room_no||'').trim()?'ย้ายห้อง':'จัดห้อง', String(b.room_no||'').trim()?'':'warn','move'); A('msg','ข้อความยืนยัน','','message'); A('edit','แก้ไข','','edit'); if(isDirect(b)) A('unconfirm','กลับเป็นรอยืนยัน','soft'); A('cancel','ยกเลิกการจอง','danger'); }
+  if(k==='confirmed'){ if(b.checkin<=TODAY) A('checkin','เช็คอิน','primary','login'); if(isYMD(b.checkin) && b.checkin<=TODAY) A('noshow','ไม่มา','ghost'); if(isYMD(b.checkin) && b.checkin<TODAY && effCheckout(b)<=TODAY) A('stayed','พักแล้ว (ลืมกดเช็คอิน)','','check'); A('assign', String(b.room_no||'').trim()?'ย้ายห้อง':'จัดห้อง', String(b.room_no||'').trim()?'':'warn','move'); A('msg','ข้อความยืนยัน','','message'); A('edit','แก้ไข','','edit'); if(isDirect(b)) A('unconfirm','กลับเป็นรอยืนยัน','soft'); A('cancel','ยกเลิกการจอง','danger'); }
   else if(k==='inhouse'){ A('checkout','เช็คเอาต์','primary','logout'); A('extend','ต่ออีก 1 คืน','','plus'); A('assign','ย้ายห้อง','','move'); A('thanks','ข้อความขอบคุณ + ขอรีวิว','','message'); A('edit','แก้ไข','','edit'); }
   else if(k==='pending'){ A('confirm-open','ยืนยันการจอง','good','check'); A('msg','ส่งข้อความ','','message'); A('edit','แก้ไข','','edit'); A('cancel','ปฏิเสธ/ยกเลิก','danger'); }
   else if(k==='needsinfo'){ A('edit','เติมข้อมูลจาก Pulse','primary','edit'); A('cancel','ยกเลิกการจอง','danger'); }
@@ -1034,12 +1137,15 @@ function openNew(no, d){
   openSheet({ title:'จองใหม่ (จองตรง)', sub:`<span class="faint">สำหรับ walk-in / LINE / โทรจอง — การจองจาก Booking.com ให้ใช้ "นำเข้าไฟล์"</span>`,
     body: `<div class="f-grid" style="margin-bottom:12px"><div class="f"><label for="fSrc">ช่องทาง</label><select id="fSrc"><option>จองตรง</option><option>Walk-in</option><option>โทรจอง</option><option>เว็บไซต์ (จองตรง)</option><option>Booking.com</option><option>Agoda</option></select></div><div class="f"><label for="fStatus">สถานะ</label><select id="fStatus"><option>ยืนยันแล้ว</option><option>รอยืนยัน</option><option>เข้าพักอยู่</option></select></div></div>` + formHTML(b),
     foot:`<button class="btn primary" data-act="save-new">สร้างการจอง</button><button class="btn" data-act="close-sheet">ยกเลิก</button>` });
-  if((d||TODAY) === TODAY) $('fStatus').value = 'เข้าพักอยู่'; // แตะช่องวันนี้ = มักเป็น walk-in
+  // แตะช่องวันนี้ในห้องที่เลือกไว้ = มักเป็น walk-in · ยังไม่มีห้อง (ปุ่มจองใหม่) → ยืนยันแล้ว เพราะ "เข้าพักอยู่" ต้องมีห้อง
+  if((d||TODAY) === TODAY && no) $('fStatus').value = 'เข้าพักอยู่';
 }
 async function saveNew(){
   const f = readForm();
   if(!f.name){ toast('กรุณาใส่ชื่อผู้เข้าพัก', true); return; }
   if(!f.checkout){ toast('กรุณาใส่วันเช็คเอาต์', true); return; }
+  if(/เข้าพัก/.test($('fStatus').value) && !f.room_no){ toast(errTh('room-required'), true); $('fRoom').focus(); return; }
+  if(/เข้าพัก/.test($('fStatus').value) && f.room_no && CLEAN[f.room_no]==='dirty'){ toast(`ห้อง ${roomLabel(f.room_no)} ยังรอทำความสะอาด — กดสะอาดแล้วก่อน หรือเลือกสถานะยืนยันแล้ว`, true); return; }
   const err = validateForm(f); if(err){ toast(err, true); return; }
   const body = { action: 'add', name: f.name, checkin: f.checkin, checkout: f.checkout, room_no: f.room_no,
     phone: f.phone, guests: f.guests, source: $('fSrc').value, status: $('fStatus').value,
@@ -1324,7 +1430,7 @@ function exportExpensesCSV(){
 }
 function exportSummaryCSV(){
   const ym = state.expMonth || TODAY.slice(0,7);
-  const bookings = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym));
+  const bookings = BOOKINGS.filter(b => isRevenue(b) && String(b.checkin||'').startsWith(ym));
   const exps = (DATA.expenses||[]).filter(x => String(x.date||'').startsWith(ym));
   const revenue = bookings.reduce((s,b)=>s+bahtNum(b.amount),0);
   const expenseTotal = exps.reduce((s,x)=>s+bahtNum(x.amount),0);
@@ -1387,8 +1493,15 @@ function findImportCols(header){
     price:    find(/^price|total.?(price|amount)|ราคา|ยอดรวม/),
     // คอลัมน์สถานะการชำระ (Payment status / Paid) — ถ้าแขกจ่ายผ่าน Booking.com แล้ว จะได้ไม่ค้างอยู่ใน "ค้างชำระ"
     pay:      find(/payment.?status|^paid|สถานะการชำระ|การชำระเงิน|ชำระเงิน/),
+    // ใช้ตอนสร้างรายการใหม่ที่ไม่อยู่ในระบบ (อีเมลตกหล่น) — ไม่มีคอลัมน์ก็ข้ามได้
+    rooms:    find(/^rooms?$|จำนวนห้อง/),
+    persons:  find(/^persons?$|^people$|^adults?$|จำนวนผู้เข้าพัก|^ผู้เข้าพัก$/),
+    unit:     find(/unit.?type|room.?type|ประเภทห้อง|ประเภทที่พัก/),
+    phone:    find(/phone|โทรศัพท์|เบอร์/),
   };
 }
+const IMPORT_CANCEL_RE = /cancel|ยกเลิก/i, IMPORT_NOSHOW_RE = /no.?show|ไม่มา/i;
+const importPaid = pv => /paid|fully|ชำระแล้ว|จ่ายแล้ว|virtual.?card|payments? by booking/i.test(pv) && !/not.?paid|unpaid|ยังไม่|pay.?at/i.test(pv);
 let _xlsxPromise = null;
 function loadXLSX(){
   if (window.XLSX) return Promise.resolve(window.XLSX);
@@ -1413,8 +1526,9 @@ function openImport(){
   openSheet({ title:'นำเข้าไฟล์ Booking.com', sub:`<span class="faint">Extranet → Reservations → Download (.xlsx / .csv)</span>`,
     body:`<button class="dropzone" data-act="pick-file" style="width:100%">${ic('file')}<div style="margin-top:6px;font-weight:500;color:var(--ink)">แตะเพื่อเลือกไฟล์ หรือลากมาวาง</div><div style="font-size:12px;margin-top:2px">รองรับ .xlsx และ .csv</div></button>
     <h4 style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 6px">ระบบจะทำอะไรบ้าง</h4>
-    <div class="timeline-log" style="margin-top:0"><div><b>จับคู่เลขจอง</b> รายการที่มีอยู่แล้วจะอัปเดตชื่อ/วัน/ยอด ไม่สร้างซ้ำ</div><div><b>เติมข้อมูลที่ขาด</b> รายการ "รอเติมชื่อจาก Pulse" ที่เลขตรงกันจะถูกเติมให้อัตโนมัติ</div><div><b>รายงานก่อนบันทึก</b> แสดงจำนวนที่จะอัปเดตให้ตรวจก่อนกดยืนยัน</div></div>
+    <div class="timeline-log" style="margin-top:0"><div><b>จับคู่เลขจอง</b> รายการที่มีอยู่แล้วจะอัปเดตชื่อ/วัน/ยอด ไม่สร้างซ้ำ</div><div><b>เติมข้อมูลที่ขาด</b> รายการ "รอเติมชื่อจาก Pulse" ที่เลขตรงกันจะถูกเติมให้อัตโนมัติ</div><div><b>เพิ่มรายการที่อีเมลตกหล่น</b> เลขจองที่ยังไม่อยู่ในระบบจะถูกสร้างใหม่ (ข้ามรายการที่ยกเลิก)</div><div><b>รายงานก่อนบันทึก</b> แสดงจำนวนที่จะอัปเดตและเพิ่มใหม่ให้ตรวจก่อนกดยืนยัน</div></div>
     <div class="notebox" style="margin-top:14px">นำเข้าครั้งล่าสุด: ${isYMD(li) ? fmtDY(li) + (relDay(li)?` (${relDay(li)})`:'') : 'ยังไม่เคยนำเข้า'}</div>
+    ${(() => { const n = BOOKINGS.filter(undated).length; return n && !isStaff() ? `<div class="notebox2 plain" style="margin-top:10px">ยังมี ${n} รายการที่ไม่มีวันที่ — นำเข้าไฟล์ก่อน แล้วรายการเก่าที่เหลือ <button data-act="archive-open">เก็บถาวร…</button></div>` : ''; })()}
     <div class="import-progress" id="importProgress"></div>`,
     foot:`<button class="btn primary" data-act="pick-file">เลือกไฟล์…</button><button class="btn" data-act="close-sheet">ปิด</button>` });
 }
@@ -1432,58 +1546,84 @@ async function handleImportFile(file){
   if (cols.resno < 0 || cols.checkin < 0 || cols.checkout < 0) { toast('ไม่รู้จักหัวตารางของไฟล์นี้ — ส่งไฟล์ให้ผู้ดูแลระบบปรับตัวอ่านได้', true); return; }
   const byDigits = {};
   BOOKINGS.forEach(b => { const d = digitsOf(b.id); if (d.length >= 6) byDigits[d] = b; });
-  const jobs = [];
-  let unmatched = 0;
+  const cell = (r, k) => cols[k] >= 0 ? String(r[cols[k]] == null ? '' : r[cols[k]]).trim() : '';
+  // รายการในไฟล์ที่จะมาพัก/พักแล้ว: ออกแล้ว = เช็คเอาต์แล้ว (เป็นประวัติ) · ยังไม่ออก = ยืนยันแล้ว (พนักงานเช็คอินตามปกติ)
+  const stayStatus = co => co <= TODAY ? 'เช็คเอาต์แล้ว' : 'ยืนยันแล้ว';
+  const jobs = [], seen = new Set();
+  let updates = 0, creates = 0, skipCancel = 0, skipNoDates = 0;
   for (const r of rows.slice(1)) {
     const resno = digitsOf(r[cols.resno]);
-    if (resno.length < 6) continue;
-    const b = byDigits[resno];
-    if (!b) { unmatched++; continue; }
-    const fields = {};
+    if (resno.length < 6 || seen.has(resno)) continue;
+    seen.add(resno);
     const ci = normDate(r[cols.checkin]), co = normDate(r[cols.checkout]);
+    const st = cell(r, 'status'), cancelled = IMPORT_CANCEL_RE.test(st), noShow = IMPORT_NOSHOW_RE.test(st);
+    const b = byDigits[resno];
+    if (!b) {
+      // อีเมลจองตกหล่น → สร้างรายการใหม่ด้วยเลขแบบเดียวกับ Apps Script (BDC-เลขจอง) อีเมลมาทีหลังก็ไม่ซ้ำ
+      if (cancelled || noShow) { skipCancel++; continue; }
+      if (!ci || !co || co <= ci) { skipNoDates++; continue; }
+      const unit = cell(r, 'unit'), amt = cell(r, 'price').replace(/[^\d.]/g, ''), persons = digitsOf(cell(r, 'persons')), nRooms = digitsOf(cell(r, 'rooms'));
+      const body = { action: 'add', id: 'BDC-' + resno, source: 'Booking.com', name: cell(r, 'name'), checkin: ci, checkout: co,
+        status: stayStatus(co), guests: persons, rooms: nRooms && Number(nRooms) > 0 ? nRooms : '1', phone: cell(r, 'phone'), room_no: '',
+        note: [unit ? `ประเภทห้อง: ${unit}` : '', `นำเข้าจากไฟล์ Extranet ${TODAY}`].filter(Boolean).join(' | ') };
+      if (!isStaff()) { if (amt) body.amount = Math.round(Number(amt)).toLocaleString(); if (cols.pay >= 0 && importPaid(cell(r, 'pay'))) body.pay_status = 'จ่ายผ่าน Booking'; }
+      jobs.push({ create: true, id: body.id, body });
+      creates++;
+      continue;
+    }
+    const fields = {};
     if (ci && b.checkin !== ci) fields.checkin = ci;
     if (co && b.checkout !== co) fields.checkout = co;
-    if (cols.name >= 0) { const nm = String(r[cols.name]||'').trim(); if (nm && !String(b.name||'').trim()) fields.name = nm; }
+    if (cols.name >= 0) { const nm = cell(r, 'name'); if (nm && !String(b.name||'').trim()) fields.name = nm; }
     if (cols.price >= 0 && !isStaff()) {
-      const amt = String(r[cols.price]||'').replace(/[^\d.]/g, '');
+      const amt = cell(r, 'price').replace(/[^\d.]/g, '');
       if (amt && !String(b.amount||'').trim()) fields.amount = Math.round(Number(amt)).toLocaleString();
     }
-    if (cols.status >= 0 && /cancel|ยกเลิก/i.test(String(r[cols.status]||'')) && !isCancelled(b)) fields.status = 'ยกเลิก';
+    if (cols.persons >= 0) { const g = digitsOf(cell(r, 'persons')); if (g && !String(b.guests||'').trim()) fields.guests = g; }
+    if (cols.phone >= 0) { const ph = cell(r, 'phone'); if (ph && !String(b.phone||'').trim()) fields.phone = ph; }
+    const willCi = fields.checkin || b.checkin, willCo = fields.checkout || b.checkout;
+    const willHaveDates = isYMD(willCi) && isYMD(willCo);
+    if (cancelled && !/ยกเลิก|cancel/i.test(String(b.status||''))) fields.status = 'ยกเลิก';
+    else if (noShow && !isCancelled(b) && !isInhouse(b) && !isCheckedOut(b)) fields.status = 'ไม่มา';
+    // เก็บถาวรไว้เพราะไม่มีวันที่ แต่ไฟล์บอกวันแล้ว = การจองจริง → ฟื้นกลับ
+    else if (!cancelled && willHaveDates && isArchived(b)) fields.status = stayStatus(willCo);
+    // "รอเติมชื่อจาก Pulse" ที่ไฟล์เติมครบแล้ว → ยืนยันแล้ว (หรือเช็คเอาต์แล้วถ้าพ้นวันออก)
+    else if (!cancelled && willHaveDates && /รอเติม/.test(String(b.status||'')) && (fields.name || String(b.name||'').trim())) fields.status = stayStatus(willCo);
     // แขก Booking.com ที่ไฟล์บอกว่าจ่ายแล้ว (Payments by Booking / virtual card / fully paid) → ตั้ง "จ่ายผ่าน Booking" ให้เอง (เฉพาะที่ยังไม่มีสถานะชำระ)
     if (cols.pay >= 0 && !isStaff() && !isDirect(b)) {
-      const pv = String(r[cols.pay]||'');
-      if (/paid|fully|ชำระแล้ว|จ่ายแล้ว|virtual.?card|payments? by booking/i.test(pv) && !/not.?paid|unpaid|ยังไม่|pay.?at/i.test(pv) && ['unpaid','none'].includes(payState(b)) && !String(b.pay_status||'').trim()) fields.pay_status = 'จ่ายผ่าน Booking';
+      if (importPaid(cell(r, 'pay')) && ['unpaid','none'].includes(payState(b)) && !String(b.pay_status||'').trim()) fields.pay_status = 'จ่ายผ่าน Booking';
     }
-    const willHaveDates = (fields.checkin || b.checkin) && (fields.checkout || b.checkout);
     if (willHaveDates && /อ่านวันที่จากอีเมลไม่ได้/.test(String(b.note||''))) fields.note = '';
-    if (Object.keys(fields).length) jobs.push({ id: b.id, fields });
+    if (Object.keys(fields).length) { jobs.push({ id: b.id, fields }); updates++; }
   }
+  const skipped = [skipCancel ? `ยกเลิก/ไม่มา ${skipCancel}` : '', skipNoDates ? `ไม่มีวันที่ ${skipNoDates}` : ''].filter(Boolean).join(' · ');
   if (!jobs.length) {
     localStorage.setItem(LAST_IMPORT, TODAY);
     render();
-    toast(unmatched ? `ข้อมูลตรงกันหมดแล้ว (ในไฟล์มี ${unmatched} รายการที่ไม่อยู่ในระบบ)` : 'ข้อมูลตรงกันหมดแล้ว ไม่มีอะไรต้องอัปเดต');
+    toast(`ข้อมูลตรงกันหมดแล้ว ไม่มีอะไรต้องอัปเดต${skipped ? ` (ข้ามรายการใหม่: ${skipped})` : ''}`);
     return;
   }
   importJobs = jobs;
   const p = $('importProgress');
-  if (p) p.innerHTML = `<div class="notebox2">พบข้อมูลที่จะอัปเดต <b>${jobs.length}</b> รายการ${unmatched?` (ข้าม ${unmatched} รายการที่ไม่อยู่ในระบบ)`:''} · ใช้เวลาประมาณ ${Math.ceil(jobs.length*1.5)} วินาที<div style="margin-top:8px"><button class="btn primary sm" data-act="run-import">เริ่มนำเข้า ${jobs.length} รายการ</button></div></div>`;
-  else toast(`พบ ${jobs.length} รายการที่จะอัปเดต — เปิดหน้านำเข้าเพื่อยืนยัน`, true);
+  const what = [updates ? `อัปเดต <b>${updates}</b>` : '', creates ? `เพิ่มใหม่ <b>${creates}</b>` : ''].filter(Boolean).join(' · ');
+  if (p) p.innerHTML = `<div class="notebox2">พบ ${what} รายการ${skipped ? ` (ข้ามรายการใหม่: ${skipped})` : ''} · ใช้เวลาประมาณ ${Math.ceil(jobs.length*1.5)} วินาที<div style="margin-top:8px"><button class="btn primary sm" data-act="run-import">เริ่มนำเข้า ${jobs.length} รายการ</button></div></div>`;
+  else toast(`พบ ${jobs.length} รายการที่จะนำเข้า — เปิดหน้านำเข้าเพื่อยืนยัน`, true);
 }
 async function runImport(){
   const jobs = importJobs || [];
   if (!jobs.length) return;
   importJobs = null;
   const p = $('importProgress');
-  let done = 0, fail = 0;
+  let upd = 0, add = 0, fail = 0;
   for (const j of jobs) {
-    const r1 = await apiUpdate({ action: 'update', id: j.id, fields: j.fields });
-    r1 ? done++ : fail++;
-    if (p) p.innerHTML = `<div class="notebox2 plain">กำลังนำเข้า… ${done+fail}/${jobs.length}</div>`;
+    const r1 = j.create ? await apiUpdate(j.body) : await apiUpdate({ action: 'update', id: j.id, fields: j.fields });
+    if (!r1) fail++; else if (j.create) add++; else upd++;
+    if (p) p.innerHTML = `<div class="notebox2 plain">กำลังนำเข้า… ${upd+add+fail}/${jobs.length}</div>`;
   }
-  if (done) localStorage.setItem(LAST_IMPORT, TODAY);
+  if (upd + add) localStorage.setItem(LAST_IMPORT, TODAY);
   closeSheet();
   await reload();
-  toast(`นำเข้าเสร็จ: อัปเดต ${done} รายการ` + (fail ? ` · ล้มเหลว ${fail}` : ''));
+  toast(`นำเข้าเสร็จ: อัปเดต ${upd} · เพิ่มใหม่ ${add} รายการ` + (fail ? ` · ล้มเหลว ${fail}` : ''));
 }
 
 /* ---------- ลากแถบบนไทม์ไลน์ (desktop): ขึ้น-ลง = ย้ายห้อง · ขอบขวา = เลื่อนวันออก ---------- */
@@ -1581,6 +1721,11 @@ document.addEventListener('click', e => {
   else if(act==='confirm-save') saveConfirm(id);
   else if(act==='cancel'){ if(el.dataset.armed){ doCancel(id); } else { el.dataset.armed='1'; el.textContent='แตะอีกครั้งเพื่อยืนยันการยกเลิก'; el.classList.add('primary'); setTimeout(()=>{ if(el.isConnected){ delete el.dataset.armed; el.textContent = el.dataset.label || 'ยกเลิกการจอง'; el.classList.remove('primary'); } }, 4000); } }
   else if(act==='restore') doRestore(id);
+  else if(act==='stayed'){ e.stopPropagation(); doStayed(id); }
+  else if(act==='noshow'){ e.stopPropagation(); if(el.dataset.armed){ doNoShow(id); } else { el.dataset.armed='1'; el.textContent='แตะอีกครั้ง = ไม่มา'; el.classList.add('warn'); setTimeout(()=>{ if(el.isConnected){ delete el.dataset.armed; el.textContent = el.dataset.label || 'ไม่มา'; el.classList.remove('warn'); } }, 4000); } }
+  else if(act==='archive-open'){ e.stopPropagation(); openArchive(); }
+  else if(act==='archive-days'){ state.archiveDays = Number(el.dataset.d) || 30; paintArchive(); }
+  else if(act==='archive-run'){ if(el.disabled) return; if(el.dataset.armed){ runArchive(); } else { el.dataset.armed='1'; el.textContent = `แตะอีกครั้งเพื่อยืนยัน — ${archiveCandidates(state.archiveDays).length} รายการ`; setTimeout(()=>{ if(el.isConnected && el.dataset.armed){ delete el.dataset.armed; paintArchive(); } }, 4000); } }
   else if(act==='unconfirm') doUnconfirm(id);
   else if(act==='cf-agree'){ const btn = document.querySelector('[data-act="confirm-save"]'); if(btn) btn.disabled = !el.checked; }
   else if(act==='extend') doExtend(id);
@@ -1754,12 +1899,13 @@ async function tryLogin(key, silent){
       return true;
     }
     if (j && j.demo) $('demoHint').classList.add('show');
-    if (!silent) $('loginErr').textContent = r.status === 401 ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
+    if (!silent) $('loginErr').textContent = r.status === 401 ? 'รหัสผ่านไม่ถูกต้อง' : r.status === 429 ? errTh('too-many-attempts') : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
   } catch(_) {
     if (!silent) $('loginErr').textContent = 'เชื่อมต่อไม่ได้ — ลองรีเฟรชหน้า';
   }
   return false;
 }
+// คืนผล: 'ok' | 'auth' (รหัสหมดอายุ ออกจากระบบแล้ว) | 'fail' (เน็ต/เซิร์ฟเวอร์) — ให้ปุ่มรีเฟรชบอกผลจริง
 async function reload(){
   const key = getKey();
   try {
@@ -1769,12 +1915,19 @@ async function reload(){
       adopt(j);
       try { sessionStorage.setItem(DATA_CACHE, JSON.stringify(j)); } catch(_){}
       render();
-    } else if (r.status === 401) {
-      logout(); // รหัสหมดอายุ/ถูกเปลี่ยน — อย่าปล่อยให้ดูข้อมูลค้าง
+      return 'ok';
     }
-  } catch(_){}
+    if (r.status === 401) { logout(); return 'auth'; } // รหัสหมดอายุ/ถูกเปลี่ยน — อย่าปล่อยให้ดูข้อมูลค้าง
+    return 'fail';
+  } catch(_){ return 'fail'; }
 }
-async function doRefresh(){ toast('กำลังรีเฟรช…'); await reload(); toast('อัปเดตแล้ว'); }
+async function doRefresh(){
+  if (navigator.onLine === false) { toast('ออฟไลน์อยู่ — แสดงข้อมูลล่าสุดที่โหลดไว้ รอเน็ตกลับมาแล้วลองใหม่', true); return; }
+  toast('กำลังรีเฟรช…');
+  const r = await reload();
+  if (r === 'ok') toast('อัปเดตแล้ว');
+  else if (r === 'fail') toast(`รีเฟรชไม่สำเร็จ — ข้อมูลที่เห็นเป็นของเวลา ${SYNC_AT || '—'} ตรวจอินเทอร์เน็ตแล้วลองใหม่`, true);
+}
 function logout(){
   clearKey();
   sessionStorage.removeItem(DATA_CACHE);

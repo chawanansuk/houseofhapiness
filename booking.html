@@ -101,6 +101,13 @@
             <option value="1">1</option>
             <option value="2" selected>2</option>
             <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
           </select>
         </div>
         <div>
@@ -109,6 +116,8 @@
             <option value="1" selected>1</option>
             <option value="2">2</option>
             <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
           </select>
         </div>
       </div>
@@ -259,6 +268,8 @@ function renderRooms() {
 const MIN_NIGHTS = 2; // ที่พักรับจองขั้นต่ำ 2 คืน
 const toYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const today = toYMD(new Date());
+// "2026-11-20" → วันที่เที่ยงคืนตามเวลาเครื่อง (new Date("YYYY-MM-DD") = UTC → เครื่องโซนอเมริกาได้วันก่อนหน้า 1 วัน)
+const parseYMD = (s) => { const [y, m, d] = String(s).split("-").map(Number); return new Date(y, m - 1, d); };
 $("checkin").min = today;
 $("checkout").min = today;
 
@@ -266,7 +277,7 @@ $("checkin").addEventListener("change", () => {
   const ci = $("checkin").value;
   if (!ci) return;
   // เช็คเอาท์ต้องห่างจากเช็คอินอย่างน้อย MIN_NIGHTS คืน
-  const next = new Date(ci);
+  const next = parseYMD(ci);
   next.setDate(next.getDate() + MIN_NIGHTS);
   $("checkout").min = toYMD(next);
   if ($("checkout").value && $("checkout").value < $("checkout").min) {
@@ -279,7 +290,7 @@ document.querySelectorAll(".chip-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const n = Math.max(MIN_NIGHTS, +btn.dataset.nights);
     if (!$("checkin").value) $("checkin").value = today;
-    const base = new Date($("checkin").value);
+    const base = parseYMD($("checkin").value);
     const minD = new Date(base);
     minD.setDate(minD.getDate() + MIN_NIGHTS);
     $("checkout").min = toYMD(minD);
@@ -299,7 +310,7 @@ function getState() {
   const roomId = document.querySelector('input[name="room"]:checked')?.value;
   const room = CONFIG.rooms.find((r) => r.id === roomId);
   const ci = $("checkin").value, co = $("checkout").value;
-  const nights = ci && co ? Math.round((new Date(co) - new Date(ci)) / 86400000) : 0;
+  const nights = ci && co ? Math.round((parseYMD(co) - parseYMD(ci)) / 86400000) : 0;
   const numRooms = +$("rooms").value;
   return {
     room, ci, co, nights, numRooms,
@@ -329,7 +340,7 @@ $("arrival").addEventListener("change", renderArrival);
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 
 const fmtDate = (d) =>
-  new Date(d).toLocaleDateString(lang() === "th" ? "th-TH" : "en-GB",
+  parseYMD(d).toLocaleDateString(lang() === "th" ? "th-TH" : "en-GB",
     { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 
 // วันที่ในข้อความจอง: เขียนให้คนอ่านออก ไม่ใช่ 2026-09-15
@@ -366,6 +377,7 @@ function fitRooms() {
       roomsAutoNote = t("bk.roomsneed").replace("{cap}", room.sleeps).replace("{g}", guests).replace("{n}", need);
     }
   }
+  if (+$("guests").value >= 10) roomsAutoNote = (roomsAutoNote ? roomsAutoNote + " · " : "") + t("bk.biggroup");
   hint.textContent = roomsAutoNote;
   hint.hidden = !roomsAutoNote;
 }
@@ -676,13 +688,13 @@ function prefillFromQuery() {
   const ci = qp.get("checkin"), co = qp.get("checkout"), g = qp.get("guests");
   if (isYMD(ci) && ci >= today) {
     $("checkin").value = ci;
-    const next = new Date(ci);
+    const next = parseYMD(ci);
     next.setDate(next.getDate() + MIN_NIGHTS);
     $("checkout").min = toYMD(next);
   }
   // รับค่าเช็คเอาท์เฉพาะที่เข้าพักครบขั้นต่ำ 2 คืน
   if (isYMD(co) && co >= $("checkout").min) $("checkout").value = co;
-  if (["1", "2", "3"].includes(g)) $("guests").value = g;
+  if (/^(10|[1-9])$/.test(String(g || ""))) $("guests").value = g;
 }
 
 document.addEventListener("input", update);

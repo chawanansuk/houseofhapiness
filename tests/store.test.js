@@ -59,6 +59,19 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   await store.updateBooking(id, { status: "เข้าพักอยู่" }, "admin");
   // เพิ่มรายการใหม่พร้อมห้องที่ชน → โยน error code room-taken
   await assert.rejects(store.addBooking({ name: "คนที่สี่", checkin: "2026-10-04", checkout: "2026-10-05", room_no: "704", status: "ยืนยันแล้ว" }, "admin"), (e) => e.code === "room-taken");
+  // ไม่มา / เก็บถาวร ไม่บล็อกห้อง · นำเข้าจากไฟล์ด้วย id BDC-เลขจอง ซ้ำได้โดยไม่เกิดรายการใหม่
+  const nsId = await store.addBooking({ id: "BDC-7000000001", source: "Booking.com", name: "No Show", checkin: "2026-10-20", checkout: "2026-10-22", room_no: "709", status: "ยืนยันแล้ว" }, "admin");
+  assert.equal(nsId, "BDC-7000000001", "id ที่ระบุมาเองต้องใช้ตามนั้น");
+  assert.equal(await store.addBooking({ id: "BDC-7000000001", name: "ซ้ำ", checkin: "2026-10-20", checkout: "2026-10-22" }, "admin"), "BDC-7000000001");
+  assert.equal((await store.listAll()).bookings.filter((x) => x.id.startsWith("BDC-7000000001")).length, 1, "นำเข้าซ้ำต้องไม่เพิ่มแถว");
+  await store.updateBooking(nsId, { status: "ไม่มา" }, "staff");
+  const walkIn = await store.addBooking({ name: "Walk-in", checkin: "2026-10-20", checkout: "2026-10-21", room_no: "709", status: "เข้าพักอยู่" }, "staff");
+  assert.ok(walkIn, "ห้องของแขกที่ไม่มาต้องขายต่อได้");
+  await store.updateBooking(walkIn, { status: "เก็บถาวร" }, "admin");
+  r = await store.updateBooking(nsId, { status: "ยืนยันแล้ว" }, "admin");
+  assert.equal(r.ok, true);
+  r = await store.updateBooking(nsId, { checkin: "2026-10-19" }, "admin");
+  assert.equal(r.ok, true, "รายการที่เก็บถาวรต้องไม่บล็อกห้อง");
   // listAudit: มีประวัติของ id3 ครบและเรียงล่าสุดก่อน
   const au = await store.listAudit(50);
   assert.ok(au.length >= 5, "audit log ต้องมีรายการ");
@@ -167,6 +180,12 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   assert.equal(cancelled.status, "ยกเลิก"); assert.equal(cancelled.room_no, "704"); assert.notEqual(cancelled.name, "ชื่อจากชีต", "ชื่อที่มีอยู่ไม่ถูกทับ");
   assert.equal(all.rooms.find((x) => x.room === "701").clean, "สะอาด", "สถานะห้องจากชีตไม่ทับ (หลังบ้านเป็นตัวจริง)");
   assert.ok(all.orders.find((x) => x.id === "RS-SHEET"));
+  // รายการที่เก็บถาวรเพราะไม่มีวันที่ → อีเมลสรุปรายวันเติมวันให้ทีหลัง = ฟื้นกลับเป็นยืนยันแล้ว
+  await store.updateBooking("BDC-NEW", { status: "เก็บถาวร" }, "admin");
+  const sy2 = await store.syncFromSheet({ bookings: [{ id: "BDC-NEW", source: "Booking.com", name: "Late Mail", checkin: "2026-12-01", checkout: "2026-12-03", status: "ยืนยันแล้ว" }], rooms: [], expenses: [], orders: [] });
+  assert.equal(sy2.revived, 1);
+  const revived = (await store.listAll()).bookings.find((x) => x.id === "BDC-NEW");
+  assert.equal(revived.status, "ยืนยันแล้ว"); assert.equal(revived.checkin, "2026-12-01"); assert.equal(revived.name, "Late Mail");
   let syncCalls = 0;
   const syncFetch = async (u) => { syncCalls++; return { ok: true, json: async () => (String(u).includes("action=site") ? { site: { announcement_th: "" }, rates: [] } : syncList) }; };
   await store.syncFromSheetIfStale({ url: "https://sheet.fixture/exec", token: "t", fetchImpl: syncFetch, minIntervalMs: 0 });

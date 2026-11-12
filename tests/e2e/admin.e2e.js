@@ -61,11 +61,11 @@ const server = http.createServer((req, res) => {
       updates.push(j);
       if (j.action === "update") { const b = DB.bookings.find((x) => x.id === j.id); if (b && j.fields) { if ("room_no" in j.fields) staleNext = { id: b.id, room_no: b.room_no }; Object.assign(b, j.fields); } }
       if (j.action === "roomclean") { const r = DB.rooms.find((x) => x.room === j.room); if (r) { r.clean = j.clean; if (j.note !== undefined) r.note = j.note; } }
-      if (j.action === "add") DB.bookings.push({ ...j, id: "WEB-E2E-NEW", rooms: 1 });
+      if (j.action === "add") DB.bookings.push({ ...j, id: j.id || "WEB-E2E-NEW", rooms: j.rooms || 1 });
       if (j.action === "expadd") DB.expenses.push({ ...j, id: "EXP-E2E-1" });
       if (j.action === "orderupdate") { const o = DB.orders.find((x) => x.id === j.id); if (o && j.fields) Object.assign(o, j.fields); }
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ ok: true, saved: true, id: "WEB-E2E-NEW" }));
+      res.end(JSON.stringify({ ok: true, saved: true, id: j.id || "WEB-E2E-NEW" }));
     });
     return;
   }
@@ -462,6 +462,75 @@ const server = http.createServer((req, res) => {
   }
   check("มือถือ: ไม่มี horizontal scroll ทุกหน้า", overflow === 0);
   await mob.close();
+
+  /* ── เลยวันเข้า · ไม่มา · เก็บรายการเก่า · นำเข้าไฟล์ Extranet สร้างรายการที่อีเมลตกหล่น ── */
+  resetDB();
+  DB.bookings.push(
+    mkB("BDC-3001", "Late Lucy", -1, 2, "Booking.com", "ยืนยันแล้ว", { room_no: "705" }),
+    mkB("BDC-3002", "Forgot Fred", -4, -2, "Booking.com", "ยืนยันแล้ว", { room_no: "706" }),
+    mkB("BDC-3003", "", null, null, "Booking.com", "รอเติมชื่อจาก Pulse", { amount: "", created: d(-60) + " 10:00" }),
+    mkB("BDC-5550003004", "", null, null, "Booking.com", "รอเติมชื่อจาก Pulse", { amount: "", created: d(-1) + " 10:00" }),
+  );
+  const lt = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "th-TH" })).newPage();
+  const ltErr = []; lt.on("pageerror", (e) => ltErr.push(String(e)));
+  await login(lt, "x");
+  const lateTxt = await lt.locator("#g-late").innerText().catch(() => "");
+  check("กลุ่ม 'เลยวันเข้า' แสดงแขกที่ยังไม่กดเช็คอิน (Lucy + Fred)", lateTxt.includes("Late Lucy") && lateTxt.includes("Forgot Fred"));
+  check("ยังอยู่ในช่วงพัก → ปุ่มเช็คอิน · พ้นวันออกแล้ว → ปุ่มพักแล้ว", await lt.locator('#g-late [data-act="checkin"][data-id="BDC-3001"]').count() === 1 && await lt.locator('#g-late [data-act="stayed"][data-id="BDC-3002"]').count() === 1);
+  const infoTxt = await lt.locator("#g-info").innerText();
+  check("รอเติมข้อมูล: นับเฉพาะรายการใหม่ใน 7 วัน + แถวสรุปรายการเก่า", (await lt.locator("#g-info .q-head .n").innerText()).trim() === "1" && infoTxt.includes("รายการเก่าที่ยังไม่มีข้อมูลครบ 2 รายการ"));
+  let nb = updates.length;
+  await lt.locator('#g-late [data-act="noshow"][data-id="BDC-3001"]').click();
+  await lt.waitForTimeout(200);
+  check("กดไม่มาครั้งแรก = ยังไม่ยิง API (arm สองจังหวะ)", updates.length === nb);
+  await lt.locator('#g-late [data-act="noshow"][data-id="BDC-3001"]').click();
+  await lt.waitForTimeout(700);
+  const ns = updates.slice(nb).find((u) => u.id === "BDC-3001");
+  check("กดครั้งที่สอง → {action:'update', fields:{status:'ไม่มา'}}", !!ns && ns.fields.status === "ไม่มา");
+  nb = updates.length;
+  await lt.locator('#g-late [data-act="stayed"][data-id="BDC-3002"]').click();
+  await lt.waitForTimeout(700);
+  const st = updates.slice(nb).find((u) => u.id === "BDC-3002");
+  check("พักแล้ว → status เช็คเอาต์แล้ว และกลุ่มเลยวันเข้าหายไป", !!st && st.fields.status === "เช็คเอาต์แล้ว" && await lt.locator("#g-late").count() === 0);
+  await lt.locator('#g-info [data-act="archive-open"]').click();
+  await lt.waitForTimeout(300);
+  await lt.locator('[data-act="archive-days"][data-d="30"]').click();
+  check("เก็บรายการเก่า 30 วัน: เลือกเฉพาะรายการที่สร้างก่อน 30 วัน (1 รายการ)", (await lt.locator("#archiveRun").innerText()).includes("เก็บ 1 รายการ"));
+  nb = updates.length;
+  await lt.locator("#archiveRun").click();
+  await lt.waitForTimeout(200);
+  check("ปุ่มเก็บกดครั้งแรก = ยังไม่ยิง API", updates.length === nb);
+  await lt.locator("#archiveRun").click();
+  await lt.waitForTimeout(1200);
+  const arc = updates.slice(nb);
+  check("เก็บถาวร → update status 'เก็บถาวร' เฉพาะ BDC-3003", arc.length === 1 && arc[0].id === "BDC-3003" && arc[0].fields.status === "เก็บถาวร");
+  // ไฟล์ Extranet: 1 รายการเก่าที่เติมวันได้ · 1 รายการใหม่ที่อีเมลตกหล่น · 1 รายการยกเลิกที่ไม่อยู่ในระบบ (ข้าม)
+  const csv = [
+    "Book number,Guest name(s),Check-in,Check-out,Status,Price,Persons,Unit type,Payment status",
+    `5550003004,Nadia Rahman,${d(5)},${d(7)},ok,"2,100 THB",2,Standard Double,Fully paid`,
+    `9876543210,Lukas Becker,${d(10)},${d(13)},ok,"3,000 THB",3,Deluxe Double Room,`,
+    `9876543211,Cancel Carl,${d(10)},${d(12)},cancelled_by_guest,0,2,Standard,`,
+  ].join("\n");
+  await lt.locator('#g-info [data-act="open-import"]').click();
+  await lt.waitForTimeout(400);
+  check("เปิดหน้านำเข้า: บอกว่าจะเพิ่มรายการที่อีเมลตกหล่น", (await lt.locator("#sheetBody").innerText()).includes("เพิ่มรายการที่อีเมลตกหล่น"));
+  nb = updates.length;
+  await lt.setInputFiles("#importFile", { name: "extranet.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
+  await lt.waitForTimeout(500);
+  const impTxt = await lt.locator("#importProgress").innerText().catch(() => "") || await lt.locator("#toast").innerText();
+  if (!/เพิ่มใหม่ 1/.test(impTxt)) console.log("import summary:", impTxt);
+  check("สรุปก่อนนำเข้า: อัปเดต 1 · เพิ่มใหม่ 1 · ข้ามยกเลิก 1", /อัปเดต 1/.test(impTxt) && /เพิ่มใหม่ 1/.test(impTxt) && /ยกเลิก\/ไม่มา 1/.test(impTxt));
+  await lt.locator('[data-act="run-import"]').click();
+  await lt.waitForTimeout(1500);
+  const imp = updates.slice(nb);
+  const upd = imp.find((u) => u.action === "update" && u.id === "BDC-5550003004"), cre = imp.find((u) => u.action === "add");
+  check("รายการที่มีอยู่: เติมชื่อ/วัน + รอเติม → ยืนยันแล้ว + จ่ายผ่าน Booking", !!upd && upd.fields.name === "Nadia Rahman" && upd.fields.checkin === d(5) && upd.fields.status === "ยืนยันแล้ว" && upd.fields.pay_status === "จ่ายผ่าน Booking");
+  check("รายการที่ไม่อยู่ในระบบ → {action:'add', id:'BDC-9876543210', source:'Booking.com', ...}", !!cre && cre.id === "BDC-9876543210" && cre.source === "Booking.com" && cre.name === "Lukas Becker" && cre.checkin === d(10) && cre.checkout === d(13) && cre.status === "ยืนยันแล้ว" && cre.guests === "3" && /ประเภทห้อง: Deluxe Double Room/.test(cre.note));
+  check("รายการยกเลิกที่ไม่อยู่ในระบบไม่ถูกสร้าง", !imp.some((u) => u.id === "BDC-9876543211"));
+  check("หลังนำเข้า รายการใหม่โผล่ในรายการจอง", (await lt.locator("#bkList").innerText()).includes("Lukas Becker"));
+  check("ไม่มี JavaScript error ใน flow เลยวันเข้า/เก็บถาวร/นำเข้า", ltErr.length === 0);
+  if (ltErr.length) console.log(ltErr.join("\n"));
+  await lt.close();
 
   await dt.close();
   await browser.close();
