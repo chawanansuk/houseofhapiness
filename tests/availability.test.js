@@ -255,6 +255,18 @@ module.exports = (async () => {
   delete process.env.SAFETY_BUFFER;
   global.fetch = fetchFixture;
 
+  // ผังมี 18 ช่อง แต่ขายจริง 15 → ยอดรวมที่บอกแขกต้องไม่เกิน 15
+  process.env.SAFETY_BUFFER = "0";
+  global.fetch = async () => ({ ok: true, status: 200, text: async () => "", json: async () => ({
+    bookings: [{ id: "WEB-S", source: "เว็บไซต์", status: "ยืนยันแล้ว", checkin: "2027-05-01", checkout: "2027-05-03", rooms: "2" }],
+    rooms: Array.from({ length: 18 }, (_, i) => ({ room: String(701 + i) })),
+  }) });
+  r = await call(availability, { query: { checkin: "2027-05-01", checkout: "2027-05-03" } });
+  assert.equal(r.body.total, 15, "ห้องขายจริง 15 แม้ผังมี 18 ช่อง");
+  assert.equal(r.body.available, 13);
+  delete process.env.SAFETY_BUFFER;
+  global.fetch = fetchFixture;
+
   console.log("ALL TESTS PASSED");
   return "ALL TESTS PASSED";
 })().catch((e) => {

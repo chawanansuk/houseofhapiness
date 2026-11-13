@@ -81,9 +81,9 @@ const d = (off) => new Date(Date.now() + off * 86400000).toISOString().slice(0, 
   r = await call(data, { headers: { "x-admin-key": "wrong" } });
   assert.equal(r.code, 401);
 
-  // 6) ห้องว่างสาธารณะคำนวณจากฐานข้อมูล (2 ห้องถูกใช้ช่วง d(5)-d(7): webId ห้อง 704 เท่านั้น → 18-1-buffer1 = 16)
+  // 6) ห้องว่างสาธารณะคำนวณจากฐานข้อมูล: ผัง 18 ช่อง แต่ขายจริง 15 · webId ห้อง 704 ใช้ช่วง d(5)-d(7) → 15-1-buffer1 = 13
   r = await call(availability, { query: { checkin: d(5), checkout: d(7) } });
-  assert.equal(r.code, 200); assert.equal(r.body.total, 18); assert.equal(r.body.available, 16);
+  assert.equal(r.code, 200); assert.equal(r.body.total, 15); assert.equal(r.body.available, 13);
 
   // 7) /api/site จากฐานข้อมูล
   r = await call(site);

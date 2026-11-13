@@ -93,7 +93,9 @@ module.exports = async (req, res) => {
     }
   }
 
-  const total = rooms.length || 15;
+  // ผังหลังบ้านมี 18 ช่อง แต่ขายจริง 15 ยูนิต (เจ้าของยืนยัน พ.ย. 2569) → เว็บไม่บอกแขกว่าว่างเกิน 15
+  const sellable = Number(process.env.SELLABLE_ROOMS) > 0 ? Number(process.env.SELLABLE_ROOMS) : 15;
+  const total = Math.min(rooms.length || sellable, sellable);
   // ยกเลิก / ไม่มา (no-show) / เก็บถาวร = ไม่กันห้อง (กฎเดียวกับ api/_store.js INACTIVE_RE)
   const notCancelled = bookings.filter((b) => !INACTIVE_RE.test(String(b.status || "")));
   const active = notCancelled.filter((b) => isYMD(b.checkin) && isYMD(b.checkout));
