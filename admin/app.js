@@ -139,6 +139,9 @@ const relDay = ymd => { if(!isYMD(ymd)) return ''; const n = diffDays(TODAY, ymd
 /* ---------- ตัวจำแนกสถานะ (regex แบบเดิม — ทนสตริงที่พิมพ์เพี้ยนในชีต) ---------- */
 // "ไม่กันห้อง": ยกเลิก · ไม่มา (no-show) · เก็บถาวร (รายการเก่าไม่มีวันที่) — กฎเดียวกับ api/_store.js INACTIVE_RE
 const isCancelled = b => /ยกเลิก|cancel|ไม่มา|no.?show|เก็บถาวร|archiv/i.test(String(b.status||''));
+// ผังห้องมี 18 ช่อง แต่ขายจริง 15 ยูนิต (เจ้าของยืนยัน พ.ย. 2569) — อัตราเข้าพักหารด้วยยูนิตที่ขายได้
+const SELLABLE_ROOMS = 15;
+const sellableRooms = () => Math.min(ROOMS.length || SELLABLE_ROOMS, SELLABLE_ROOMS) || 1;
 const isArchived = b => /เก็บถาวร|archiv/i.test(String(b.status||''));
 const isNoShow = b => /ไม่มา|no.?show/i.test(String(b.status||''));
 const createdYMD = b => { const s = String(b.created||'').trim().slice(0,10); return isYMD(s) ? s : ''; };
@@ -229,8 +232,8 @@ function monthStats(ym){
   for(let d=1; d<=dim; d++){ const ymd = `${y}-${m}-${String(d).padStart(2,'0')}`; const n = occupiedOn(ymd); perDay.push(n); nights += n; }
   const count = BOOKINGS.filter(b => active(b) && String(b.checkin||'').startsWith(ym)).length;
   const income = BOOKINGS.filter(b => isRevenue(b) && String(b.checkin||'').startsWith(ym)).reduce((s,b)=>s+bahtNum(b.amount),0);
-  const totalRooms = ROOMS.length || 1;
-  return { nights, occ: Math.round(nights/(totalRooms*dim)*100), count, perDay, income };
+  const totalRooms = sellableRooms();
+  return { nights, occ: Math.min(100, Math.round(nights/(totalRooms*dim)*100)), count, perDay, income };
 }
 
 /* ---------- การชำระเงิน (paid = รับแล้ว · pay_status = ค้างชำระ/มัดจำแล้ว/จ่ายครบ/จ่ายผ่าน Booking) ---------- */
@@ -755,7 +758,7 @@ function renderCalendar(){
   $('calTitle').textContent = fmtMonth(ym);
   const cells = ['อา','จ','อ','พ','พฤ','ศ','ส'].map(d => `<div class="dow">${d}</div>`);
   for(let i=0;i<first;i++) cells.push('<div class="day pad"></div>');
-  const totalRooms = ROOMS.length || 1;
+  const totalRooms = sellableRooms();
   for(let d=1; d<=dim; d++){
     const ymd = `${ym}-${String(d).padStart(2,'0')}`; const oc = occupiedOn(ymd);
     const ins = BOOKINGS.filter(b => active(b) && b.checkin===ymd).length, outs = BOOKINGS.filter(b => active(b) && effCheckout(b)===ymd).length;
