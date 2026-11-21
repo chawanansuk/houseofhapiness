@@ -745,3 +745,22 @@ body.offline .sync-chip i,body.offline .sync i{background:var(--dirty);box-shado
 .od-row.late{box-shadow:inset 3px 0 0 var(--dirty);background:var(--dirty-bg)}
 .od-row.late:hover{background:var(--dirty-bg)}
 #view-orders .card-h .sub b{color:var(--ink);font-weight:600}
+
+/* การใช้งานของทีม (เจ้าของเท่านั้น) */
+.team-days{display:grid;gap:2px;margin-top:6px}
+.team-day{display:grid;grid-template-columns:72px minmax(0,1fr) 44px 44px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line-soft);font-size:var(--fs-sm)}
+.team-day.head{color:var(--ink-3);font-size:12px;border-bottom-color:var(--line)}
+.team-day.today{background:var(--brand-tint)}
+.team-day .tbar{display:block;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.team-day .tbar i{display:block;height:100%;background:var(--brand)}
+.team-day .kinds{grid-column:2 / -1;color:var(--ink-3);font-size:12px;line-height:1.5}
+.team-day .n{text-align:right;font-variant-numeric:tabular-nums}
+.team-day .n.zero{color:var(--ink-4)}
+.team-kinds{width:100%;border-collapse:collapse;font-size:var(--fs-sm);margin-top:6px}
+.team-kinds th,.team-kinds td{padding:6px 4px;border-bottom:1px solid var(--line-soft);text-align:right;font-variant-numeric:tabular-nums}
+.team-kinds th:first-child,.team-kinds td:first-child{text-align:left}
+.team-kinds th{color:var(--ink-3);font-weight:500;font-size:12px}
+.team-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.team-stats>div{padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line-soft);display:flex;flex-direction:column;gap:4px;min-width:0}
+.team-stats b{font-size:20px;font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums}
+.team-stats span{font-size:12px;color:var(--ink-3);line-height:1.4}

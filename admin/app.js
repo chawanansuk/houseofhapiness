@@ -623,6 +623,7 @@ function renderToday(){
   const li = localStorage.getItem(LAST_IMPORT);
   if (!DATA.demo && (!isYMD(li) || diffDays(li, TODAY) >= 7)) notes.push(`<div class="notebox2 plain">📄 ${esc(lastImportLabel())} — แนะนำนำเข้าไฟล์จาก Booking.com Extranet สัปดาห์ละครั้ง เพื่อเติมชื่อ/วันที่/ยอดที่อีเมลไม่บอก <button data-act="open-import">นำเข้าเลย</button></div>`);
   if (DATA.sources && DATA.sources.sheet === false && !DATA.sources.db) notes.push(`<div class="notebox2">เชื่อมต่อชีตไม่ได้ (${esc(DATA.sources.sheetError||'')}) — ข้อมูลที่เห็นอาจไม่ใช่ล่าสุด</div>`);
+  const tn = teamNote(); if (tn) notes.push(tn);
   $('todayNotes').innerHTML = notes.join('');
 
   const groups = [];
@@ -1396,7 +1397,63 @@ async function deleteExpense(id){
 }
 function openMore(){
   const items = [['timeline','ไทม์ไลน์','timeline'],['calendar','ปฏิทิน','calendar'],['bookings','รายการจอง','list']].concat(isStaff()?[]:[['money','รายรับ-รายจ่าย','wallet']]);
-  openSheet({ title:'เพิ่มเติม', body:`<div class="more-menu" style="display:block">${items.map(([v,l,i]) => `<button class="item" data-act="go" data-v="${v}">${ic(i)}${l}${ic('chevR')}</button>`).join('')}<button class="item" data-act="summary">${ic('copy')}สรุปงานวันนี้ (ส่ง LINE)</button><button class="item" data-act="theme">${ic('moon')}สลับโหมดสว่าง/มืด</button><button class="item" data-act="refresh">${ic('refresh')}รีเฟรชข้อมูล</button><button class="item" data-act="logout">${ic('logout')}ออกจากระบบ</button></div>` });
+  openSheet({ title:'เพิ่มเติม', body:`<div class="more-menu" style="display:block">${items.map(([v,l,i]) => `<button class="item" data-act="go" data-v="${v}">${ic(i)}${l}${ic('chevR')}</button>`).join('')}<button class="item" data-act="summary">${ic('copy')}สรุปงานวันนี้ (ส่ง LINE)</button>${isStaff() ? '' : `<button class="item" data-act="team">${ic('list')}การใช้งานของทีม</button>`}<button class="item" data-act="theme">${ic('moon')}สลับโหมดสว่าง/มืด</button><button class="item" data-act="refresh">${ic('refresh')}รีเฟรชข้อมูล</button><button class="item" data-act="logout">${ic('logout')}ออกจากระบบ</button></div>` });
+}
+
+/* ---------- การใช้งานของทีม (เจ้าของเท่านั้น) — นับจากการกดบันทึกใน audit_log ไม่นับการเปิดดู ---------- */
+const TEAM_KIND = { checkin:'เช็คอิน', checkout:'เช็คเอาต์', assign:'จัด/ย้ายห้อง', clean:'แม่บ้าน', order:'รูมเซอร์วิส', add:'จองใหม่', noshow:'ไม่มา', pay:'รับเงิน', expense:'รายจ่าย', edit:'แก้ข้อมูล' };
+function teamStats(){
+  const a = DATA && DATA.activity;
+  if (isStaff() || !a || !Array.isArray(a.rows)) return null;
+  const rows = a.rows, sum = f => rows.filter(f).reduce((n,x) => n + (Number(x.n)||0), 0);
+  const from7 = addDays(TODAY, -6), from14 = addDays(TODAY, -13);
+  const staffRows = rows.filter(x => x.actor === 'staff');
+  return {
+    a, rows,
+    staff7: sum(x => x.actor === 'staff' && x.day >= from7),
+    staff30: sum(x => x.actor === 'staff'),
+    owner30: sum(x => x.actor === 'admin'),
+    staffLast: staffRows.map(x => x.last).filter(Boolean).sort().pop() || '',
+    staffDays14: new Set(staffRows.filter(x => x.day >= from14).map(x => x.day)).size,
+  };
+}
+function teamNote(){
+  const t = teamStats(); if (!t) return '';
+  const btn = `<button data-act="team">ดูการใช้งานทีม</button>`;
+  if (!t.staffLast) return `<div class="notebox2">👥 ยังไม่พบงานที่พนักงานกดบันทึกในหลังบ้าน ${t.a.days} วันล่าสุด ${btn}</div>`;
+  const ago = Math.floor((Date.now() - new Date(t.staffLast).getTime()) / 86400000);
+  return `<div class="notebox2 ${ago >= 2 ? '' : 'plain'}">👥 พนักงานบันทึกงานล่าสุด ${esc(fmtAt(t.staffLast))}${ago >= 2 ? ` (${ago} วันก่อน)` : ''} · 7 วัน ${t.staff7} ครั้ง ${btn}</div>`;
+}
+function openTeam(){
+  const t = teamStats();
+  if (!t) { toast('ยังไม่มีข้อมูลการใช้งาน (ต้องใช้ฐานข้อมูล และเข้าด้วยรหัสเจ้าของ)', true); return; }
+  const byDay = {};
+  t.rows.forEach(x => { const d = byDay[x.day] || (byDay[x.day] = { staff:0, admin:0, kinds:{} }); d[x.actor] = (d[x.actor]||0) + x.n; if (x.actor === 'staff') d.kinds[x.kind] = (d.kinds[x.kind]||0) + x.n; });
+  const days = Array.from({ length: 14 }, (_, i) => addDays(TODAY, -i));
+  const max = Math.max(1, ...days.map(d => (byDay[d] || {}).staff || 0));
+  const dayRows = days.map(d => {
+    const v = byDay[d] || { staff:0, admin:0, kinds:{} };
+    const kinds = Object.entries(v.kinds).sort((a,b) => b[1]-a[1]).map(([k,n]) => `${TEAM_KIND[k]||k} ${n}`).join(' · ');
+    return `<div class="team-day ${d===TODAY?'today':''}"><span>${TH_DOW_AB[dow(d)]} ${fmtD(d)}</span><span class="tbar" aria-hidden="true"><i style="width:${Math.round((v.staff||0)/max*100)}%"></i></span><span class="n ${v.staff?'':'zero'}">${v.staff||0}</span><span class="n ${v.admin?'':'zero'}">${v.admin||0}</span>${kinds ? `<span class="kinds">${esc(kinds)}</span>` : ''}</div>`;
+  }).join('');
+  const kindTot = {};
+  t.rows.forEach(x => { const k = kindTot[x.kind] || (kindTot[x.kind] = { staff:0, admin:0 }); k[x.actor] = (k[x.actor]||0) + x.n; });
+  const kindRows = Object.keys(TEAM_KIND).filter(k => kindTot[k]).map(k => `<tr><td>${TEAM_KIND[k]}</td><td>${kindTot[k].staff||0}</td><td>${kindTot[k].admin||0}</td></tr>`).join('');
+  const q = todayQueue();
+  const dirtyOld = q.dirty.length;
+  const gaps = [
+    q.late.length ? `เลยวันเข้าแต่ยังไม่กดเช็คอิน ${q.late.length} รายการ` : '',
+    q.overdue.length ? `เลยวันออกแต่ยังไม่กดเช็คเอาต์ ${q.overdue.length} รายการ` : '',
+    dirtyOld ? `ห้องรอทำความสะอาด ${dirtyOld} ห้อง` : '',
+  ].filter(Boolean);
+  openSheet({ title:'การใช้งานของทีม', sub:`${t.a.days} วันล่าสุด · นับเฉพาะการกดบันทึก`, body:`
+    <div class="team-stats"><div><b>${t.staff7}</b><span>งานที่พนักงานบันทึก 7 วัน</span></div><div><b>${t.staffDays14}/14</b><span>วันที่พนักงานใช้ระบบ</span></div><div><b>${t.staffLast ? esc(fmtAt(t.staffLast)) : '—'}</b><span>พนักงานบันทึกล่าสุด</span></div></div>
+    <h3 style="margin:18px 0 0;font-size:var(--fs-sm)">14 วันล่าสุด</h3>
+    <div class="team-days"><div class="team-day head"><span>วัน</span><span></span><span class="n">พนักงาน</span><span class="n">เจ้าของ</span></div>${dayRows}</div>
+    <h3 style="margin:18px 0 0;font-size:var(--fs-sm)">ประเภทงาน (${t.a.days} วัน)</h3>
+    ${kindRows ? `<table class="team-kinds"><thead><tr><th>งาน</th><th>พนักงาน</th><th>เจ้าของ</th></tr></thead><tbody>${kindRows}</tbody></table>` : `<div class="faint" style="margin-top:6px">ยังไม่มีงานที่บันทึก</div>`}
+    <div class="notebox2 ${gaps.length ? '' : 'plain'}" style="margin-top:16px">${gaps.length ? `<b>งานที่ยังค้างในระบบตอนนี้</b><br>${gaps.map(esc).join('<br>')}<br><span class="faint">ถ้าแขกเข้า-ออกจริงแล้ว แปลว่าพนักงานยังไม่ได้กดในหลังบ้าน</span>` : 'ไม่มีงานค้างในระบบตอนนี้'}</div>
+    <p class="faint" style="font-size:12px;margin-top:12px">นับทุกครั้งที่กดบันทึก เช่น เช็คอิน จัดห้อง แม่บ้าน รูมเซอร์วิส ไม่นับการเปิดดูเฉย ๆ${t.a.since ? ` · ประวัติเริ่มเก็บ ${esc(fmtAt(t.a.since))}` : ''}</p>` });
 }
 
 /* ---------- Export CSV (มี BOM เปิดใน Excel ภาษาไทยไม่เพี้ยน + กัน formula injection) ---------- */
@@ -1749,6 +1806,7 @@ document.addEventListener('click', e => {
   else if(act==='copy-msg'){ const t = $('msgBox').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>{ toast('คัดลอกแล้ว — ไปวางในแชทลูกค้าได้เลย'); noteGuestMsgSent(); }).catch(()=>{ try { $('msgBox').select(); document.execCommand('copy'); toast('คัดลอกแล้ว'); } catch(_) { toast('คัดลอกไม่ได้ — เลือกข้อความแล้วคัดลอกเอง', true); } }); }
   else if(act==='close-sheet') closeSheet();
   else if(act==='summary'){ e.stopPropagation(); openSummary(); }
+  else if(act==='team'){ e.stopPropagation(); openTeam(); }
   else if(act==='open-order'){ e.stopPropagation(); openOrder(id); }
   else if(act==='orders-all'){ e.stopPropagation(); openOrdersAll(); }
   else if(act==='order-confirm'){ e.stopPropagation(); setOrder(id, { status:'ยืนยันแล้ว' }, 'ยืนยันออเดอร์แล้ว — อย่าลืมตอบแขกในแชท'); }

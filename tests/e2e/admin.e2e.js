@@ -32,6 +32,12 @@ function resetDB(){
       mkB("BDC-2008", "", 4, null, "Booking.com", "รอเติมชื่อจาก Pulse", { amount: "" }),
     ],
     expenses: [],
+    activity: { days: 30, since: d(-40) + "T02:00:00.000Z", rows: [
+      { day: d(-1), actor: "staff", kind: "checkin", n: 3, last: d(-1) + "T09:15:00.000Z" },
+      { day: d(-1), actor: "staff", kind: "clean", n: 5, last: d(-1) + "T08:00:00.000Z" },
+      { day: d(-3), actor: "staff", kind: "assign", n: 2, last: d(-3) + "T07:00:00.000Z" },
+      { day: d(-2), actor: "admin", kind: "pay", n: 4, last: d(-2) + "T12:00:00.000Z" },
+    ] },
     orders: [
       { id: "RS-1", created: today + " 08:00", name: "Mei-Lin Chao", room: "703", date: today, time: "09:30", items: "ผัดไทย (กุ้ง) × 2 — ฿200; ชาไทย × 1 — ฿40", total: "240", note: "", status: "ยืนยันแล้ว", paid: "", lang: "en", channel: "line" },
       { id: "RS-2", created: today + " 19:00", name: "Somchai Nobody", room: "709", date: d(1), time: "10:00", items: "มัสมั่น (ไก่) × 1 — ฿100", total: "100", note: "ไม่เผ็ด", status: "รอยืนยัน", paid: "", lang: "th", channel: "whatsapp" },
@@ -52,7 +58,7 @@ const server = http.createServer((req, res) => {
     const role = key === "staffpass" ? "staff" : "admin";
     let bookings = DB.bookings.map((b) => role === "staff" ? { ...b, amount: "" } : b);
     if (staleNext) { bookings = bookings.map((b) => b.id === staleNext.id ? { ...b, room_no: staleNext.room_no } : b); staleNext = null; }
-    return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, orders: DB.orders, audit: role === "admin" ? [{ at: today + "T07:30:00.000Z", actor: "staff", action: "update", target: "BDC-2001", fields: { room_no: "716" } }, { at: today + "T01:00:00.000Z", actor: "script", action: "add", target: "BDC-2001", fields: { source: "Booking.com" } }] : [], sources: { sheet: true, ical: false } }));
+    return res.end(JSON.stringify({ ok: true, demo: false, today, role, bookings, rooms: DB.rooms, ical: [], expenses: role === "staff" ? [] : DB.expenses, orders: DB.orders, audit: role === "admin" ? [{ at: today + "T07:30:00.000Z", actor: "staff", action: "update", target: "BDC-2001", fields: { room_no: "716" } }, { at: today + "T01:00:00.000Z", actor: "script", action: "add", target: "BDC-2001", fields: { source: "Booking.com" } }] : [], sources: { sheet: true, ical: false }, ...(role === "admin" ? { activity: DB.activity } : {}) }));
   }
   if (url === "/api/update") {
     let body = ""; req.on("data", (c) => body += c);
@@ -462,6 +468,26 @@ const server = http.createServer((req, res) => {
   }
   check("มือถือ: ไม่มี horizontal scroll ทุกหน้า", overflow === 0);
   await mob.close();
+
+  /* ── การใช้งานของทีม (เจ้าของเท่านั้น) ── */
+  {
+    const tm = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "th-TH" })).newPage();
+    const tmErr = []; tm.on("pageerror", (e) => tmErr.push(String(e)));
+    resetDB();
+    await login(tm, "x");
+    const note = await tm.locator("#todayNotes").innerText();
+    check("หน้าวันนี้ (เจ้าของ) บอกพนักงานบันทึกล่าสุด + 7 วัน 10 ครั้ง", note.includes("พนักงานบันทึกงานล่าสุด") && note.includes("7 วัน 10 ครั้ง"));
+    await tm.locator('#todayNotes [data-act="team"]').click();
+    await tm.waitForTimeout(300);
+    const tb = await tm.locator("#sheetBody").innerText();
+    check("แผงการใช้งานของทีม: วันที่ใช้ 2/14 + แยกประเภท เช็คอิน/แม่บ้าน/จัดห้อง/รับเงิน", (await tm.locator("#sheetTitle").innerText()).includes("การใช้งานของทีม") && tb.includes("2/14") && /เช็คอิน 3/.test(tb) && /แม่บ้าน 5/.test(tb) && tb.includes("จัด/ย้ายห้อง") && tb.includes("รับเงิน"));
+    check("แผงการใช้งานของทีมไม่มี JavaScript error", tmErr.length === 0);
+    await tm.close();
+    const sf = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "th-TH" })).newPage();
+    await login(sf, "staffpass");
+    check("พนักงานไม่เห็นสรุปการใช้งานของทีม", !(await sf.locator("#todayNotes").innerText()).includes("พนักงานบันทึก") && await sf.locator('[data-act="team"]').count() === 0);
+    await sf.close();
+  }
 
   /* ── เลยวันเข้า · ไม่มา · เก็บรายการเก่า · นำเข้าไฟล์ Extranet สร้างรายการที่อีเมลตกหล่น ── */
   resetDB();

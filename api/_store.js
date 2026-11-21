@@ -247,6 +247,30 @@ function createStore(query) {
       return r.rows.map((x) => ({ at: x.at instanceof Date ? x.at.toISOString() : String(x.at || ""), actor: x.actor, action: x.action, target: x.target, fields: typeof x.fields === "string" ? (() => { try { return JSON.parse(x.fields); } catch { return null; } })() : x.fields }));
     },
 
+    // สรุปการใช้งานของทีม (เจ้าของ/พนักงาน) รายวัน แยกประเภทงาน — ไม่มีข้อมูลแขก มีแค่จำนวนครั้ง
+    async teamActivity(days = 30) {
+      await ensureSchema();
+      const d = Math.max(1, Math.min(120, Number(days) || 30));
+      const r = await query(`SELECT to_char(at AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD') AS day, actor,
+          CASE
+            WHEN action = 'roomclean' THEN 'clean'
+            WHEN action = 'orderupdate' THEN 'order'
+            WHEN action = 'add' THEN 'add'
+            WHEN action IN ('expadd', 'expdel') THEN 'expense'
+            WHEN action = 'update' AND fields->>'status' ~ 'เข้าพัก' THEN 'checkin'
+            WHEN action = 'update' AND fields->>'status' ~ 'เช็คเอาต์' THEN 'checkout'
+            WHEN action = 'update' AND fields->>'status' ~ 'ไม่มา' THEN 'noshow'
+            WHEN action = 'update' AND fields ? 'room_no' THEN 'assign'
+            WHEN action = 'update' AND (fields ? 'paid' OR fields ? 'pay_status') THEN 'pay'
+            ELSE 'edit' END AS kind,
+          count(*)::int AS n, max(at) AS last
+        FROM audit_log WHERE actor IN ('staff', 'admin') AND at > now() - make_interval(days => $1::int)
+        GROUP BY 1, 2, 3 ORDER BY 1`, [d]);
+      const since = await query("SELECT min(at) AS first FROM audit_log");
+      const iso = (v) => (v instanceof Date ? v.toISOString() : (v ? String(v) : ""));
+      return { days: d, since: iso(since.rows[0] && since.rows[0].first), rows: r.rows.map((x) => ({ day: x.day, actor: x.actor, kind: x.kind, n: x.n, last: iso(x.last) })) };
+    },
+
     async addBooking(row, actor) {
       await ensureSchema();
       const rec = { ...row, nights: nightsOf(str(row.checkin), str(row.checkout)) || str(row.nights), created: str(row.created) || stamp(), rooms: str(row.rooms) || "1", status: str(row.status) || "รอยืนยัน" };
