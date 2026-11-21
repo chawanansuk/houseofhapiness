@@ -75,7 +75,11 @@ module.exports = async (req, res) => {
       await getStore().bootstrapFromSheet(); // ครั้งแรกเท่านั้น (ฐานข้อมูลว่าง) — ดึงข้อมูลเดิมจากชีตมาให้เอง
       // ซิงก์ชีตทำเบื้องหลัง ไม่ await — ไม่งั้นคำขอที่โชคร้ายทุก 2 นาทีจะช้าเท่าชีต (1-3 วิ) ซึ่งเป็นสิ่งที่เราย้ายมาเพื่อหนี
       getStore().syncFromSheetIfStale().catch(() => {});
-      const [d, audit] = await Promise.all([getStore().listAll(), role === "admin" ? getStore().listAudit(400).catch(() => []) : Promise.resolve([])]);
+      const [d, audit, activity] = await Promise.all([
+        getStore().listAll(),
+        role === "admin" ? getStore().listAudit(400).catch(() => []) : Promise.resolve([]),
+        role === "admin" ? getStore().teamActivity(30).catch(() => null) : Promise.resolve(null),
+      ]);
       return res.status(200).json({
         ok: true, demo: false, today, role,
         bookings: forRole(d.bookings.map((b) => ({ ...b, room_no: roomName(b.room_no) }))),
@@ -85,6 +89,8 @@ module.exports = async (req, res) => {
         orders: d.orders,
         // ประวัติการแก้ (ใครทำอะไรเมื่อไหร่) — เจ้าของเท่านั้น
         audit,
+        // การใช้งานของทีมรายวัน (จำนวนครั้งต่อประเภทงาน) — เจ้าของเท่านั้น
+        ...(activity ? { activity } : {}),
         sources: { db: true, sheet: true, ical: false },
       });
     } catch (e) {

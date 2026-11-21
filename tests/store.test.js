@@ -72,6 +72,14 @@ const { createStore, parseDbUrl } = require("../api/_store.js");
   assert.equal(r.ok, true);
   r = await store.updateBooking(nsId, { checkin: "2026-10-19" }, "admin");
   assert.equal(r.ok, true, "รายการที่เก็บถาวรต้องไม่บล็อกห้อง");
+  // teamActivity: นับงานของพนักงาน/เจ้าของรายวัน แยกประเภท (เช็คอิน/จัดห้อง/ไม่มา) — ไม่นับแขกเว็บ/ระบบ
+  const ta = await store.teamActivity(30);
+  const tsum = (actor, kind) => ta.rows.filter((x) => x.actor === actor && x.kind === kind).reduce((n, x) => n + x.n, 0);
+  assert.ok(tsum("staff", "checkin") >= 1, "พนักงานเช็คอินต้องนับเป็น checkin");
+  assert.ok(tsum("staff", "assign") >= 1, "พนักงานจัดห้องต้องนับเป็น assign");
+  assert.ok(tsum("staff", "noshow") >= 1, "พนักงานกดไม่มาต้องนับเป็น noshow");
+  assert.ok(!ta.rows.some((x) => x.actor === "web" || x.actor === "script"), "ไม่รวมแขกเว็บ/ระบบ");
+  assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(ta.rows[0].day) && ta.since, "มีวันที่ตามเวลาไทย และวันเริ่มเก็บประวัติ");
   // listAudit: มีประวัติของ id3 ครบและเรียงล่าสุดก่อน
   const au = await store.listAudit(50);
   assert.ok(au.length >= 5, "audit log ต้องมีรายการ");

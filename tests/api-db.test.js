@@ -76,7 +76,9 @@ const d = (off) => new Date(Date.now() + off * 86400000).toISOString().slice(0, 
   assert.match(b.note, /^มาถึง: 18:00–20:00 · อีเมล: guest@example\.com \(ตอบทางอีเมล\) · ประเภทห้อง: Standard · มาถึง 15:00$/, "เวลามาถึงและอีเมลแขกต้องอยู่ต้นหมายเหตุ");
   assert.equal(r.body.orders[0].status, "ส่งแล้ว");
   assert.equal(r.body.expenses.length, 1);
+  assert.ok(r.body.activity && Array.isArray(r.body.activity.rows) && r.body.activity.rows.some((x) => x.actor === "staff"), "เจ้าของเห็นสรุปการใช้งานของพนักงาน");
   r = await call(data, { headers: staff });
+  assert.equal(r.body.activity, undefined, "พนักงานไม่เห็นสรุปการใช้งานของทีม");
   assert.equal(r.body.bookings.find((x) => x.id === webId).amount, ""); assert.deepEqual(r.body.expenses, []); assert.equal(r.body.orders.length, 1, "พนักงานต้องเห็นออเดอร์อาหาร");
   r = await call(data, { headers: { "x-admin-key": "wrong" } });
   assert.equal(r.code, 401);
